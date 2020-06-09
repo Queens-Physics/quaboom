@@ -1,5 +1,9 @@
 import numpy as np
-class Person:
+
+class Person(object):
+    # How long the infection will last
+    MIN_DAYS = 10
+    MAX_DAYS = 20
     
     # Initalize a person - Can set properties but only needed one is index
     def __init__(self, index, infected=False, recovered=False, infected_day=None, recovered_day=None, 
@@ -16,17 +20,11 @@ class Person:
         
     # Return True if infected, False if not
     def is_infected(self):
-        if self.infected:
-            return True
-        else:
-            return False
+        return self.infected:
     
     # Return True if recovered, False if not
     def is_recovered(self):
-        if self.recovered:
-            return True
-        else:
-            return False
+        return self.recovered
     
     # Return index of person
     def get_index(self):
@@ -49,7 +47,7 @@ class Person:
             self.infected_day = day
             # If cure days not specified then choose random number inbetween 10 and 20
             if cure_days is None:
-                self.cure_days = np.random.randint(10, 20)
+                self.cure_days = np.random.randint(MIN_DAYS, MAX_DAYS)
                 
             return True
         
@@ -81,7 +79,8 @@ class Person:
             
         # Choose the ranom indices from the population to have infectious contacts with
         infect_indexs = np.random.choice(len(pop_list), num_to_infect, replace=False)
-        actual_infections = []
+        self.recent_infections = []
+        infectCount = 0 
         for index in infect_indexs:
             # If the contact was not susceptable, nothing happens
             if index not in suscept_pop:
@@ -97,12 +96,9 @@ class Person:
             # Update others infected list
             self.others_infected.append(person_index)
             # Update who was actually infected
-            actual_infections.append(person_index)
+            self.recent_infections.append(person_index)
             
-        # Update 
-        self.recent_infections = actual_infections
-
-        return len(actual_infections)
+        return len(self.recent_infections)
     
     
     
