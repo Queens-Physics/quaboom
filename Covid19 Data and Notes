@@ -1,0 +1,72 @@
+Data that we need as inputs - Tianai, Erin, Ry
+ 
+	I think some numbered points have a higher “impact level” than the others, so you can choose the ones that you think would influence the model more to work with first.
+
+ Things we need to know about a 'person':
+
+1. 	Age distribution --> Obtain data on distribution of ages in the population
+ 
+-   https://www12.statcan.gc.ca/census-recensement/2016/dp-pd/prof/details/page.cfm?Lang=E&Geo1=POPC&Code1=0415&Geo2=PR&Code2=35&Data=Count&SearchText=Kingston&SearchType=Begins&SearchPR=01&B1=All
+ 
+-   	https://www.cityofkingston.ca/documents/10180/94869/Planning_2016CensusBulletin_Kingston_AgeSexCounts.pdf/c1dcb290-cb3a-4cfd-895b-2b66d224fcb3?t=1498157758000
+ 
+-  https://www.cityofkingston.ca/documents/10180/31619068/Projects_Planning_PopulationHousingEmploymentForecast_Final-Report_March2019.pdf/d39310e1-e11c-4f05-b1fb-2695b9a9ea71
+(ctrl-F to find keywords, e.g. age, in the document)
+ 
+2. 	Whether is admitted to hospital --> Look data on how sick you get as function of age and whether that leads to hospitalization, and ICU and ventilation. 
+ 
+-   	https://www.kflaph.ca/en/healthy-living/status-of-cases-in-kfla.aspx
+-   	https://www.kingstonist.com/covid-19/
+-   	 
+ 
+3. 	Add some sort of geography to include the fact that you're more likely to be infected in a particular location (long term care, hospital, grocery store, etc.)
+-   	https://www.kflaph.ca/en/healthy-living/status-of-cases-in-kfla.aspx
+-   	 
+ 
+4. 	Add some mechanism to be infected through a surface, rather than contact from a person
+-   	Shopping carts, door handles, bus handles… (though these are also the surfaces that are being disinfected the most, so need to look into this, hopefully find credible research/papers on this matter)
+-   	 
+ 
+5. 	Whether the person uses public transit (look up data on public transit use), include infection mechanism through air/surface in public transit (and grocery stores, etc)
+ 
+6. 	Whether a person is more/less likely to spread because they use (or not) PPE, perhaps look at how that changes with time
+ https://www.acpjournals.org/doi/10.7326/M20-2567
+https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7177146/
+https://www.scmp.com/news/hong-kong/health-environment/article/3084779/coronavirus-hamster-research-proof-effectiveness
+https://www.publichealthontario.ca/-/media/documents/ncov/covid-wwksf/what-we-know-public-masks-apr-7-2020.pdf?la=en
+ 
+7. 	Has symptoms? --> include in the model that someone with symptoms likely has less contacts
+ 
+8. 	Job -> Take into account if person is essential worker in terms of how many contacts they may have, look up data on number of essential workers
+https://www.researchgate.net/publication/341563681_Estimating_Coronavirus_Disease_2019_Infection_Risk_in_Health_Care_Workers
+
+
+9. 	Possibility/probability of being reinfected --> Look up data on duration of infection, infection with no symptoms https://www.albertahealthservices.ca/assets/info/ppih/if-ppih-covid-19-reinfection-rapid-review.pdf
+It is expected that those who had covid-19 won’t be able to get it a second time although it has not been experimentally proven. 
+10.	How susceptible an individual might be to get sick, contagious, etc (pre-existing conditions)
+ 
+11.	How symptomatic a person might be (e.g. younger people less symptomatic, spread it more)
+ 
+12.  Ability to quarantine people away from the population if they (tested positive, had symptoms, travelled)
+13.	Distribution of people that travel
+14.	Add testing (probability of being tested likely depends on your symptoms, which depends on your age). The more people are tested, likely the more people are quarantined --> Look up data on who is getting tested
+15.	Include aspects of testing inaccuracies --> Look up data on testing accuracy
+https://www.scientificamerican.com/article/what-covid-19-antibody-tests-can-and-cannot-tell-us/
+
+16.	Include PPE measures for health care workers
+17.	Effects of public health measures (working from home, limited gathering, impositions on personal freedom)
+https://www.canada.ca/content/dam/phac-aspc/documents/services/diseases/2019-novel-coronavirus-infection/surv-covid19-epi-update-eng.pdf
+https://www.canada.ca/en/public-health/services/publications/diseases-conditions/covid-19-using-data-modelling-inform-public-health-action.html
+Quarantine has reduced interactions from an average of 2 people per to 1. 
+ 
+Properties of the virus:
+SARS-COV-2 has very similar properties to SARS-COv - any information about properties of virus that is still unknown could be approximated by information about SARS-COV?
+
+1.   	Look up incubation period, when you become infectious, whether you’re infectious with/without symptoms
+https://www.ncbi.nlm.nih.gov/books/NBK554776/
+ 
+2.   	Contagion based on viral load --> Is there data on viral load distribution, does it make you more contagious?
+3.   	Lethality, etc
+https://jamanetwork.com/journals/jama/fullarticle/2762130
+https://www.bmj.com/content/369/bmj.m1607/rr-1
+https://www.thelancet.com/journals/laninf/article/PIIS1473-3099(20)30195-X/fulltext
