@@ -4,14 +4,12 @@ import random
 class Population:
     '''creates a population of people based on the total population
      uses and age distrubution to weight the assignment of ages'''
-    def __init__(self,nPop,n0,ageDistrubution):
+    def __init__(self,nPop):
         self.list = [] #The list of all people
         self.infected = []
         self.pop = nPop
-        for i in range (self.pop):
-            Age = ['1'] * ageDistrubution[0] + ['30'] * ageDistrubution[1] + ['80'] * ageDistrubution[2]
-            age = int((random.choice(Age))) #chooses a weighted random age from above and converts the string to int
-            NewPerson = Person(i+1,False,False,None,None,None,None,None,age)
+        for i in range (self.pop)
+            NewPerson = Person(i+1,False,False,None,None,None,None,None)
             self.list.append(NewPerson)  #adds new person to list
         for i in range(n0):
             self.list[i].infect(day=0)
