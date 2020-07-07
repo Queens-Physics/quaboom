@@ -55,7 +55,7 @@ class Population:
 
             #creates a new person
             NewPerson = Person(index=i, infected=False, recovered=False,infected_day=None, recovered_day=None,
-                        others_infected=None, cure_days=None, recent_infections=None, age, Job, house_index=0,isolation_tendencies)
+                        others_infected=None, cure_days=None, recent_infections=None, age=age, job=Job, house_index=0,isolation_tendencies=isolation_tendencies)
             self.people.append(NewPerson)  # adds new person to list
 
             # Creation of the households
@@ -125,7 +125,7 @@ class Population:
 
     #returns a list of all people recovered
     def check_recovered(self):
-        for i in range (len(self.infected):
+        for i in range(len(self.infected)):
             if (obj.is_infected == False for obj in self.infected):
                 self.recovered.append(self.suceptible[i])
                 self.infected.pop(i)
@@ -139,4 +139,3 @@ class Population:
     # returns all people in a specific house
     def get_house(self, house_index):
         return self.household[house_index]
-
