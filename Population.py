@@ -55,7 +55,7 @@ class Population:
 
             #creates a new person
             NewPerson = Person(index=i, infected=False, recovered=False,infected_day=None, recovered_day=None,
-                        others_infected=None, cure_days=None, recent_infections=None, age, Job, House_index=0,isolation_tendencies)
+                        others_infected=None, cure_days=None, recent_infections=None, age, Job, house_index=0,isolation_tendencies)
             self.people.append(NewPerson)  # adds new person to list
 
             # Creation of the households
@@ -133,11 +133,10 @@ class Population:
 
     #returns the total number of houses
     def check_num_house(self):
-        Set = set(obj.household for obj in self.people)
-        sum = len(Set)
-        return sum
+        house_sum = len(set(obj.household for obj in self.people))
+        return house_sum
 
     # returns all people in a specific house
-    def get_house(self, index):
-        return self.household[index]
+    def get_house(self, house_index):
+        return self.household[house_index]
 
