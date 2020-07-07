@@ -1,12 +1,14 @@
 import numpy as np
+
+# How long the infection will last
+MIN_DAYS = 10
+MAX_DAYS = 20
+
 class Person(object):
-    # How long the infection will last
-    MIN_DAYS = 10
-    MAX_DAYS = 20
 
     # Initalize a person - Can set properties but only needed one is index
     def __init__(self, index, infected=False, recovered=False, infected_day=None, recovered_day=None,
-                 others_infected=None, cure_days=None, recent_infections=None,age=None,job=None,HouseIndex=0,isolation_tendencies=None):
+                 others_infected=None, cure_days=None, recent_infections=None,age=None,job=None,house_index=0,isolation_tendencies=None):
 
         self.infected = infected
         self.recovered = recovered
@@ -18,7 +20,7 @@ class Person(object):
         self.index = index
         self.age = age
         self.job = job
-        self.household = HouseIndex
+        self.household = house_index
         self.isolation_tendencies = isolation_tendencies
     # Return True if infected, False if not
     def is_infected(self):
@@ -49,7 +51,7 @@ class Person(object):
             self.infected_day = day
             # If cure days not specified then choose random number inbetween 10 and 20
             if cure_days is None:
-                self.cure_days = np.random.randint(10, 20)
+                self.cure_days = np.random.randint(MIN_DAYS, MAX_DAYS)
 
             return True
 
