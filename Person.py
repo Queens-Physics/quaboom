@@ -20,7 +20,7 @@ class Person(object):
         
     # Return True if infected, False if not
     def is_infected(self):
-        return self.infected:
+        return self.infected
     
     # Return True if recovered, False if not
     def is_recovered(self):
