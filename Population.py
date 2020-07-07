@@ -13,7 +13,7 @@ class Population:
         self.infected = []  # list of all infected people
         self.recovered = [] # list of recovered people
         self.household = [] #list of all houses (list that contains all lists of the people in the house)
-        self.pop = nPop #list of the population
+        self.pop = nPop #total population 
 
         for i in range(0, self.pop):
 
@@ -55,30 +55,27 @@ class Population:
 
             #creates a new person
             NewPerson = Person(index=i, infected=False, recovered=False,infected_day=None, recovered_day=None,
-            others_infected=None, cure_days=None, recent_infections=None, age, Job, HouseIndex=0,isolation_tendencies)
+                        others_infected=None, cure_days=None, recent_infections=None, age, Job, HouseIndex=0,isolation_tendencies)
             self.people.append(NewPerson)  # adds new person to list
 
             # Creation of the households
-            n = 0 # the number of houses is 0
-            tempList = len(self.people)  # creates a temporary list
+            house_number = 0 # the number of houses is 0
+            temporaryPopulationList = len(self.people)  # creates a temporary list
             for i in range(0, len(self.people)):
                 houseList = [] # creates a list of all people in a house
-                if (tempList > 0):
+                if (temporaryPopulationList > 0):
                     HousePopProb = (['1'] * householdDistribution[0] + ['2'] * householdDistribution[1]
                                     + ['3'] * householdDistribution[2] + ['4'] * householdDistribution[3] + ['5'] *
-                                    householdDistribution[4]
-                                    + ['6'] * householdDistribution[5])
+                                    householdDistribution[4]+ ['6'] * householdDistribution[5])
                     HousePop = int(random.choice(HousePopProb)) # calculates the number of people in the house
 
                     for f in range(0, HousePop):
-                        if (tempList > 0):
-                            self.people[i].set_house(n) #sets person i into house n
+                        if (temporaryPopulationList > 0):
+                            self.people[i].set_house(house_number) #sets person i into house n
                             houseList.append(self.people[i]) #adds person to that house list
-                            tempList = tempList - 1  #removes them from the temporary list length
+                            temporaryPopulationList = temporaryPopulationList - 1  #removes them from the temporary list length
                             self.household.append(houseList)  # adds the house to the total list of all houses
-                    n = n + 1
-
-
+                    house_number = house_number + 1
 
         # infects the initial people
         self.suceptible = self.people
@@ -86,6 +83,7 @@ class Population:
             self.people[i].infect(day=0)
             self.infected.append(self.people[i])
             self.suceptible.pop(i)
+    
     #returns the population
     def get_population(self):
         return self.nPop
