@@ -55,7 +55,7 @@ class Population:
 
             #creates a new person
             NewPerson = Person(index=i, infected=False, recovered=False,infected_day=None, recovered_day=None,
-                        others_infected=None, cure_days=None, recent_infections=None, age, Job, HouseIndex=0,isolation_tendencies)
+                        others_infected=None, cure_days=None, recent_infections=None, age, Job, House_index=0,isolation_tendencies)
             self.people.append(NewPerson)  # adds new person to list
 
             # Creation of the households
