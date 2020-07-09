@@ -52,6 +52,8 @@ class Person(object):
             # If cure days not specified then choose random number inbetween 10 and 20
             if cure_days is None:
                 self.cure_days = np.random.randint(MIN_DAYS, MAX_DAYS)
+            else:
+                self.cure_days = cure_days
 
             return True
 
