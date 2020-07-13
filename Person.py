@@ -52,8 +52,6 @@ class Person(object):
             # If cure days not specified then choose random number inbetween 10 and 20
             if cure_days is None:
                 self.cure_days = np.random.randint(MIN_DAYS, MAX_DAYS)
-            else:
-                self.cure_days = cure_days
 
             return True
 
@@ -72,6 +70,8 @@ class Person(object):
                 self.infected = False
                 self.recovered = True
                 self.recovered_day = day
+            else:
+                self.cure_days = cure_days
 
                 return True
         return False
@@ -83,8 +83,10 @@ class Person(object):
         if len(suscept_pop) == 0:
             return 0
 
-        # Choose the ranom indices from the population to have infectious contacts with
-        infect_indexs = np.random.choice(len(pop_list), num_to_infect, replace=False)
+        # Choose the random indices from the population to have infectious contacts with
+        contact_options = list(range(len(pop_list)))
+        contact_options.remove(self.index)       # Make it so that it can not select itself as a contact
+        infect_indexs = np.random.choice(contact_options, num_to_infect, replace=False)
         self.recent_infections = []
         infectCount = 0
         for index in infect_indexs:
