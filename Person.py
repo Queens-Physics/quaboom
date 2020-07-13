@@ -70,6 +70,8 @@ class Person(object):
                 self.infected = False
                 self.recovered = True
                 self.recovered_day = day
+            else:
+                self.cure_days = cure_days
 
                 return True
         return False
