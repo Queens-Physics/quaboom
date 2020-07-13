@@ -42,10 +42,10 @@ def RunEpidemic(nPop, n0, nDays, contacts_mean, contacts_std, prob_infection):
     for day in range(nDays):
         
         #Tally the counts from the previous day (so all these values are at the beginning of the day)
-        nInfected = len(InfectedIndices)#number of infected people (end of yesterday or patients zero).
+        nInfected = len(InfectedIndices) #number of infected people (end of yesterday or patients zero).
         infected[day] = nInfected
         
-        new_infected[day] = nInfected_new#number of new infections (end of yesterday)
+        new_infected[day] = nInfected_new #number of new infections (end of yesterday)
         
         if day >= 1: #nobody has recovered on day 0, otherwise, add those that recovered yesterday to the total
             nRecovered = recovered[day-1] + nRecovered_new
@@ -75,17 +75,16 @@ def RunEpidemic(nPop, n0, nDays, contacts_mean, contacts_std, prob_infection):
             #Randomly draw a number of contacts that this person will have
             ncontacts = abs(round(np.random.normal(contacts_mean,contacts_std)))
             #Factor in the probability that they will infect those contacts:
-            ncontacts = round(ncontacts*prob_infection)
-            new_infections = ncontacts
+            contagious_interactions = round(ncontacts*prob_infection)
             
-            if new_infections > 0:
+            if contagious_interactions > 0:
                 #Infect those people 
                 actual_new_infections = per.infect_others(pop_list=Population,suscept_pop=SusceptIndices, 
-                                                          day=day, num_to_infect=new_infections)
+                                                          day=day, num_to_infect=contagious_interactions)
                 # If there were suscept people to infect:
                 if actual_new_infections>0:
                     # Add actual number of infected
-                    nInfected += actual_new_infections
+                    nInfected_new += actual_new_infections
                     recent_infections = per.get_recent_infections()
                     # Add indices of those infected
                     InfectedIndices.extend(recent_infections)
@@ -108,7 +107,7 @@ def RunEpidemic(nPop, n0, nDays, contacts_mean, contacts_std, prob_infection):
             
         contagionRate[day] = meanContagions
         
-        print("Day: {}, infected: {}, recovered: {}, mean contagions per infected person: {}".format(day, nInfected, nRecovered, meanContagions))
+        print("Day: {}, infected: {}, recovered: {}, mean contagions per infected person: {}".format(day, nInfected, nRecovered,meanContagions))
     print("At the end, ",susceptible[-1],"never got it")
     print(np.max(infected),"had it at the peak")
     
