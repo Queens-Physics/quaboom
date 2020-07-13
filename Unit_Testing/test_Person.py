@@ -8,6 +8,7 @@ import Person
 
 class TestPerson(unittest.TestCase):
     
+    
     def setUp(self):       # Code that will be run before every test function is executed
         pass
     
@@ -69,39 +70,7 @@ class TestPerson(unittest.TestCase):
         person5 = Person.Person(5, infected=False, recovered=False)
         person5.infect(day=infected_day)
         self.assertIsNotNone(person4.cure_days)            # Make sure that cure days is set even though no parameter passed
-        
-    def test_infect_others(self):
-        # No suscept and try to infect
-        Pop = [Person.Person(i) for i in range(15)]
-        InfectedIndices = []
-        for i in range(len(Pop)):
-            Pop[i].infect(day=0)
-            InfectedIndices.append(i)
-        SusceptIndices = [i for i in range(len(Pop)) if i not in InfectedIndices]
-        
-        self.assertEqual(0, Pop[0].infect_others(Pop, SusceptIndices, day=5, num_to_infect=1))
-        
-        # Less than the number trying to infect are suscept
-        for _ in range(100): # Loop lots of times due to random nature of infection
-            Pop = [Person.Person(i) for i in range(15)]
-            InfectedIndices = []
-            for i in range(len(Pop)-2):
-                Pop[i].infect(day=0)
-                InfectedIndices.append(i)
-            SusceptIndices = [i for i in range(len(Pop)) if i not in InfectedIndices]
-            # Should never infect more than 2
-            self.assertTrue(Pop[0].infect_others(Pop, SusceptIndices, day=5, num_to_infect=5) <=2 )
-            
-        # Should never try to infect itself
-        for _ in range(100):
-            Pop = [Person.Person(i) for i in range(15)]
-            InfectedIndices = []
-            for i in range(0):
-                Pop[i].infect(day=0)
-                InfectedIndices.append(i)
-            SusceptIndices = [i for i in range(len(Pop)) if i not in InfectedIndices]
-            # Should never infect more than 2
-            self.assertNotEqual(len(Pop), Pop[0].infect_others(Pop, SusceptIndices, day=5, num_to_infect=len(Pop)))
+
     
 if __name__ == '__main__':
     unittest.main()
