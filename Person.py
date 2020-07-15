@@ -50,8 +50,7 @@ class Person(object):
             self.infected = True
             self.infected_day = day
             # If cure days not specified then choose random number inbetween 10 and 20
-            if cure_days is None:
-                self.cure_days = np.random.randint(MIN_DAYS, MAX_DAYS)
+            self.cure_days = np.random.randint(MIN_DAYS, MAX_DAYS) if cure_days is None else cure_days
 
             return True
 
@@ -70,8 +69,6 @@ class Person(object):
                 self.infected = False
                 self.recovered = True
                 self.recovered_day = day
-            else:
-                self.cure_days = cure_days
 
                 return True
         return False
