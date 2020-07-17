@@ -76,6 +76,9 @@ class Population:
         return self.nPop
 
     # Properly return the actual indices of each bin of people
+    def get_population(self):
+        return copy.deepcopy(self.population)
+    
     def get_suceptible(self):
         return copy.deepcopy(self.suceptible[self.suceptible > 0])
     
