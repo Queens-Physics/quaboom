@@ -102,13 +102,21 @@ class Population:
     def get_person(self, index):
         return self.population[index]
     
-    # Infect a certain individual
+    # Infect a person
     def infect(self, index, day):
         didWork = self.population[i].infect(day=day)
         if didWork:
-            self.infected[i] = i
-            self.suceptible[i] = -1
+            self.infected[index] = index
+            self.suceptible[index] = -1
         
+        return didWork
+    
+    # Cure a person
+    def cure(self, index, day):
+        didWork = self.population[i].check_cured(day)
+        if didWork:
+            self.infected[index] = -1
+            self.recovered[index] = index
         return didWork
     
     # returns the list of suceptible  individuals
