@@ -24,7 +24,7 @@ class Population:
 
     def __init__(self, nPop, n0):
 
-        self.people = [0]*nPop  # The list of all people
+        self.population = [0]*nPop  # The list of all people
         self.household = [0]*nPop #list of all houses (list that contains all lists of the people in the house)
         self.pop = nPop #total population 
         
@@ -43,7 +43,7 @@ class Population:
                                job=job, house_index=0,isolation_tendencies=isolation_tendencies)
             
             # ADD A PERSON
-            self.people[i] = newPerson
+            self.population[i] = newPerson
             
             # Increment house info
             houseSize -= 1
@@ -66,7 +66,7 @@ class Population:
         
         # Infect first n0 people
         for i in range(n0):
-            self.people[i].infect(day=0)
+            self.population[i].infect(day=0)
             self.infected[i] = i
             self.suceptible[i] = -1
     
@@ -96,8 +96,17 @@ class Population:
 
     #returns an individual based on their index
     def get_individual(self, index):
-        return self.people[index]
-
+        return self.population[index]
+    
+    # Infect a certain individual
+    def infect(self, index, day):
+        didWork = self.population[i].infect(day=day)
+        if didWork:
+            self.infected[i] = i
+            self.suceptible[i] = -1
+        
+        return didWork
+    
     # returns the list of suceptible  individuals
     def check_suceptible(self):
         for i in range(len(self.suceptible)):
