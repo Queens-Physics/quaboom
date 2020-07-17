@@ -15,14 +15,16 @@ ISOLATION_WEIGHTS = np.ones(len(ISOLATION_OPTIONS))
 
 class Population:
     '''creates a population of people based on the total population
-     uses and age distrubution to weight the assignment of ages'''
+     uses and age distrubution to weight the assignment of ages
+     
+     suscept list has negative values for infected, and positive indicies for susept
+     infected list has negative values for healthy, and positive indicies for infected
+     recovered list has negative values for not recovered, and postitive indicies for recovered
+     '''
 
     def __init__(self, nPop, n0):
 
-        self.people = []  # The list of all people
-        self.suceptible = [0]*nPop #list of all suceptible individuals
-        self.infected = []  # list of all infected people
-        self.recovered = [] # list of recovered people
+        self.people = [0]*nPop  # The list of all people
         self.household = [0]*nPop #list of all houses (list that contains all lists of the people in the house)
         self.pop = nPop #total population 
         
@@ -57,24 +59,43 @@ class Population:
         # Slice household list to the right size
         self.household = self.household[:houseIndex]
         
-        # infects the initial people
-        self.suceptible = self.people
+        # Create person status arrays
+        self.suceptible = np.array(range(nPop)) #list of all suceptible individuals
+        self.infected = np.zeros(nPop) - 1  # list of all infected people (all healthy (negative) to start)
+        self.recovered = np.zeros(nPop) - 1 # list of recovered people (all not recovered (negative) to start)
+        
+        # Infect first n0 people
         for i in range(n0):
             self.people[i].infect(day=0)
-            self.infected.append(self.people[i])
-            self.suceptible.pop(i)
+            self.infected[i] = i
+            self.suceptible[i] = -1
     
     #returns the population
-    def get_population(self):
+    def get_population_size(self):
         return self.nPop
 
-    # counts the total number of suceptible individuals
+    # Properly return the actual indices of each bin of people
+    def get_suceptible(self):
+        return self.suceptible[self.suceptible > 0]
+    
+    def get_infected(self):
+        return self.infected[self.infected > 0]
+    
+    def get_recovered(self):
+        return self.recovered[self.recovered > 0]
+    
+    # Count the number of people in each bin
     def count_suceptible(self):
-        suceptiple_population = len(self.suceptible)
-        return suceptiple_population
+        return len(self.get_susceptible)
+    
+    def count_infected(self):
+        return len(self.get_infected)
+    
+    def count_recovered(self):
+        return len(self.get_recovered)
 
     #returns an individual based on their index
-    def check_individual(self, index):
+    def get_individual(self, index):
         return self.people[index]
 
     # returns the list of suceptible  individuals
@@ -119,3 +140,6 @@ class Population:
     # returns all people in a specific house
     def get_house(self, house_index):
         return self.household[house_index]
+
+    
+    1543 Ultrabar Marryville
