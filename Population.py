@@ -13,6 +13,12 @@ JOB_WEIGHTS = np.ones(len(JOB_OPTIONS))
 HOUSE_WEIGHTS = np.ones(len(HOUSE_OPTIONS))
 ISOLATION_WEIGHTS = np.ones(len(ISOLATION_OPTIONS))
 
+# Normalize the probabilities
+AGE_WEIGHTS /= float(sum(AGE_WEIGHTS))
+JOB_WEIGHTS /= float(sum(JOB_WEIGHTS))
+HOUSE_WEIGHTS /= float(sum(HOUSE_WEIGHTS))
+ISOLATION_WEIGHTS /= float(sum(ISOLATION_WEIGHTS))
+
 
 class Population:
     '''creates a population of people based on the total population
@@ -36,12 +42,12 @@ class Population:
         for i in range(0, self.pop):
             # MAKE A PERSON
             age = np.random.choice(a=AGE_OPTIONS, p=AGE_WEIGHTS)
-            job = np.random.choice(a=jobOptions, p=jobWeights)
+            job = np.random.choice(a=JOB_OPTIONS, p=JOB_WEIGHTS)
             isolation_tend = np.random.choice(a=ISOLATION_OPTIONS, p=ISOLATION_WEIGHTS)
 
-            newPerson = Person(index=i, infected=False, recovered=False, infected_day=None, recovered_day=None, 
+            newPerson = Person.Person(index=i, infected=False, recovered=False, infected_day=None, recovered_day=None, 
                                others_infected=None, cure_days=None, recent_infections=None, age=age, 
-                               job=job, house_index=0,isolation_tendencies=isolation_tendencies)
+                               job=job, house_index=0,isolation_tendencies=isolation_tend)
             
             # ADD A PERSON
             self.population[i] = newPerson
@@ -61,9 +67,9 @@ class Population:
         self.household = self.household[:houseIndex]
         
         # Create person status arrays
-        self.suceptible = np.array(range(nPop)) #list of all suceptible individuals
-        self.infected = np.zeros(nPop) - 1  # list of all infected people (all healthy (negative) to start)
-        self.recovered = np.zeros(nPop) - 1 # list of recovered people (all not recovered (negative) to start)
+        self.suceptible = np.array(range(nPop), dtype=int) #list of all suceptible individuals
+        self.infected = np.zeros(nPop, dtype=int) - 1  # list of all infected people (all healthy (negative) to start)
+        self.recovered = np.zeros(nPop, dtype=int) - 1 # list of recovered people (all not recovered (negative) to start)
         
         # Infect first n0 people
         for i in range(n0):
@@ -90,13 +96,13 @@ class Population:
     
     # Count the number of people in each bin
     def count_suceptible(self):
-        return len(self.get_susceptible)
+        return len(self.get_suceptible())
     
     def count_infected(self):
-        return len(self.get_infected)
+        return len(self.get_infected())
     
     def count_recovered(self):
-        return len(self.get_recovered)
+        return len(self.get_recovered())
 
     #returns an individual based on their index
     def get_person(self, index):
@@ -104,7 +110,7 @@ class Population:
     
     # Infect a person
     def infect(self, index, day):
-        didWork = self.population[i].infect(day=day)
+        didWork = self.population[index].infect(day=day)
         if didWork:
             self.infected[index] = index
             self.suceptible[index] = -1
@@ -118,49 +124,3 @@ class Population:
             self.infected[index] = -1
             self.recovered[index] = index
         return didWork
-    
-    # returns the list of suceptible  individuals
-    def check_suceptible(self):
-        for i in range(len(self.suceptible)):
-            if (obj.is_infected == True for obj in self.suceptible):
-                self.infected.append(self.suceptible[i])
-                self.suceptible.pop(i)
-        return self.suceptible
-
-    # counts the total number of infected individuals
-    def count_infected(self):
-        infected_population = len(self.infected)
-        return infected_population
-
-    # returns the list of infected individuals
-    def check_infected(self):
-        for i in range(len(self.suceptible)):
-            if (obj.is_infected == True for obj in self.suceptible):
-                self.infected.append(self.suceptible[i])
-                self.suceptible.pop(i)
-        return self.infected
-
-    # counts the total number of recovered individuals
-    def count_recovered(self):
-        recovered_population = len(self.recovered)
-        return recovered_population
-
-    #returns a list of all people recovered
-    def check_recovered(self):
-        for i in range(len(self.infected)):
-            if (obj.is_infected == False for obj in self.infected):
-                self.recovered.append(self.suceptible[i])
-                self.infected.pop(i)
-        return self.recovered
-
-    #returns the total number of houses
-    def check_num_house(self):
-        house_sum = len(set(obj.household for obj in self.people))
-        return house_sum
-
-    # returns all people in a specific house
-    def get_house(self, house_index):
-        return self.household[house_index]
-
-    
-    1543 Ultrabar Marryville
