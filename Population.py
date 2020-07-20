@@ -83,13 +83,16 @@ class Population:
 
     # Properly return the actual indices of each bin of people
     def get_population(self):
-        return copy.deepcopy(self.population)
+        #return copy.deepcopy(self.population)
+        return self.population
     
     def get_suceptible(self):
-        return copy.deepcopy(self.suceptible[self.suceptible > 0])
+        #return copy.deepcopy(self.suceptible[self.suceptible > 0])
+        return self.suceptible[self.suceptible > 0]
     
     def get_infected(self):
-        return copy.deepcopy(self.infected[self.infected > 0])
+        #return copy.deepcopy(self.infected[self.infected > 0])
+        return self.infected[self.infected > 0]
     
     def get_recovered(self):
         return copy.deepcopy(self.recovered[self.recovered > 0])
@@ -117,10 +120,33 @@ class Population:
         
         return didWork
     
+    # Update lists for already infected people
+    def update_infected(self, index):
+        
+        if self.infected[index] == index or self.suceptible[index]==-1 or self.population[index].is_infected()==False:
+            # Already infected, or cant be infected
+            return False
+        self.infected[index] = index
+        self.suceptible[index] = -1
+        return True
+    
     # Cure a person
     def cure(self, index, day):
-        didWork = self.population[i].check_cured(day)
+        didWork = self.population[index].check_cured(day)
         if didWork:
             self.infected[index] = -1
             self.recovered[index] = index
         return didWork
+    
+    # Updates lists for already cured people
+    def update_cured(self, index):
+        if self.recovered[index]==index or self.population[index].is_recovered()==False:
+            # Already cured
+            return False
+        self.infected[index] = -1
+        self.recovered[index] = index
+        return True
+        
+        
+        
+        
