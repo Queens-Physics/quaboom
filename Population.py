@@ -65,7 +65,7 @@ class Population:
         self.household = self.household[:houseIndex]
         
         # Create person status arrays
-        self.suceptible = np.array(range(nPop), dtype=int) #list of all suceptible individuals
+        self.susceptible = np.array(range(nPop), dtype=int) #list of all suceptible individuals
         self.infected = np.zeros(nPop, dtype=int) - 1  # list of all infected people (all healthy (negative) to start)
         self.recovered = np.zeros(nPop, dtype=int) - 1 # list of recovered people (all not recovered (negative) to start)
         
@@ -73,7 +73,7 @@ class Population:
         for i in range(n0):
             self.population[i].infect(day=0)
             self.infected[i] = i
-            self.suceptible[i] = -1
+            self.susceptible[i] = -1
     
     #returns the population
     def get_population_size(self):
@@ -84,7 +84,7 @@ class Population:
     
     # Properly return the actual indices of each bin of people
     def get_susceptible(self):
-        return self.suceptible[self.suceptible > 0]
+        return self.susceptible[self.susceptible > 0]
     
     def get_infected(self):
         return self.infected[self.infected > 0]
@@ -118,11 +118,11 @@ class Population:
     # Update lists for already infected people
     def update_infected(self, index):
         
-        if self.infected[index] == index or self.suceptible[index]==-1 or self.population[index].is_infected()==False:
+        if self.infected[index] == index or self.susceptible[index]==-1 or self.population[index].is_infected()==False:
             # Already infected, or cant be infected
             return False
         self.infected[index] = index
-        self.suceptible[index] = -1
+        self.susceptible[index] = -1
         return True
     
     # Cure a person
