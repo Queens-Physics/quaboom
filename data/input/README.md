@@ -14,6 +14,33 @@ This is a file with the population of Kingston divided into five year age groupi
 This data is from the 2016 census recorded by Statistics Canada.
 http://www12.statcan.gc.ca/census-recensement/2016/dp-pd/prof/index.cfm?Lang=E
 
+## Case Data
+This folder contains data that has to do with covid cases, such as case severity, time periods for incubation, recovery, etc.
+
+###### covid_cases_by_severity.csv
+This file contains a distribution of covid cases by severity (hospitalized, ICU, death). The severity of the case also impacts the period of transmission - more severe cases remain infectious for longer.
+
+This data is from the paper titled: Enhanced Epidemiological Summary COVID-19 and Severe Outcomes in Ontario.
+https://www.publichealthontario.ca/-/media/documents/ncov/epi/covid-19-severe-outcomes-ontario-epi-summary.pdf?la=en
+
+###### TimePeriods.csv
+This file contains time period for different characteristics of covid cases, such as:
+
+Incubation period - the time between contracting the virus and showing symptoms 
+(Sources: 
+Early Transmission Dynamics in Wuhan, China, of Novel Coronavirus–Infected Pneumonia https://www.nejm.org/doi/10.1056/NEJMoa2001316 
+Coronavirus disease (COVID-19): Summary of assumptions https://www.canada.ca/en/public-health/services/diseases/2019-novel-coronavirus-infection/health-professionals/assumptions.html#a2 )
+
+Recovery period - the time from onset to recovery from disease (not necessarily the same as infectious period, since symptoms typically outlast infectiousness)
+(Source: Report of the WHO-China Joint Mission on Coronavirus Disease 2019 (COVID-19)  https://www.who.int/docs/default-source/coronaviruse/who-china-joint-mission-on-covid-19-final-report.pdf )
+
+Infectious period - the maximum number of days that transmission is possible (viral RNA is still able to replicate - viral RNA is still present in patients long after they have recovered, but after the infectious period, it is no longer able to repliacte and can therefore not be transmitted to another person). The infectious period is different depending on the severity of the case.
+(Sources:
+Duration of Isolation and Precautions for Adults with COVID-19 https://www.cdc.gov/coronavirus/2019-ncov/hcp/duration-isolation.html?CDC_AA_refVal=https%3A%2F%2Fwww.cdc.gov%2Fcoronavirus%2F2019-ncov%2Fcommunity%2Fstrategy-discontinue-isolation.html
+Virological assessment of hospitalized patients with COVID-2019 https://www.nature.com/articles/s41586-020-2196-x )
+
+Immunity period - not yet added, but hopefully will be as more data is gathered - currently, only an estimate of 90 days is availible, which is based on related endemic human betacoronavirus. Currently, no reinfection has been definitively confirmed in any recovered persons.
+
 
 ## Epidemiological Characteristics
 
