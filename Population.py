@@ -1,7 +1,6 @@
 import numpy as np
 import random
 import Person
-import copy as copy
 
 AGE_OPTIONS = ['0-9', '10-19', '20-29', '30-39', '40-49', '50-59', '60-69', '70-79', '80-89', '90+']
 JOB_OPTIONS = ['Essential', 'Commercial']
@@ -80,32 +79,29 @@ class Population:
     #returns the population
     def get_population_size(self):
         return self.nPop
-
-    # Properly return the actual indices of each bin of people
+    
     def get_population(self):
-        #return copy.deepcopy(self.population)
         return self.population
     
-    def get_suceptible(self):
-        #return copy.deepcopy(self.suceptible[self.suceptible > 0])
+    # Properly return the actual indices of each bin of people
+    def get_susceptible(self):
         return self.suceptible[self.suceptible > 0]
     
     def get_infected(self):
-        #return copy.deepcopy(self.infected[self.infected > 0])
         return self.infected[self.infected > 0]
     
     def get_recovered(self):
-        return copy.deepcopy(self.recovered[self.recovered > 0])
+        return self.recovered[self.recovered > 0]
     
     # Count the number of people in each bin
-    def count_suceptible(self):
-        return len(self.get_suceptible())
+    def count_susceptible(self):
+        return np.count_nonzero(self.susceptible > 0)
     
     def count_infected(self):
-        return len(self.get_infected())
+        return np.count_nonzero(self.infected > 0)
     
     def count_recovered(self):
-        return len(self.get_recovered())
+        return np.count_nonzero(self.recovered > 0)
 
     #returns an individual based on their index
     def get_person(self, index):
