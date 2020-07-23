@@ -1,6 +1,4 @@
 import numpy as np
-import matplotlib.pyplot as plt
-import copy as copy
 import Person
 import Population
 
@@ -48,9 +46,8 @@ def RunEpidemic(nPop, n0, nDays, contacts_mean, contacts_std, prob_infection):
                     
             #Check if this person has been sick for long enough to be cured (if yes, cure them!)
             is_cured = infected_person.check_cured(day) # method will check and cure them 
-            if is_cured:
-                if pop.update_cured(index=infected_person.get_index()) == False:
-                    print("Did not cure correctly")
+            if is_cured or pop.update_cured(index=infected_person.get_index()) == False:
+                print("Did not cure correctly")
 
         print("Day: {}, infected: {}, recovered: {}, suceptible: {}".format(day, track_infected[day], track_recovered[day],
                                                                             track_suceptible[day]))
