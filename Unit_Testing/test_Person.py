@@ -90,7 +90,7 @@ class TestPerson(unittest.TestCase):
                 InfectedIndices.append(i)
             SusceptIndices = [i for i in range(len(Pop)) if i not in InfectedIndices]
             # Should never infect more than 2
-            self.assertTrue(Pop[0].infect_others(Pop, SusceptIndices, day=5, num_to_infect=5) <=2)
+            self.assertTrue(Pop[0].infect_others(Pop, SusceptIndices, day=5, num_to_infect=5) <=2 )
             
         # Should never try to infect itself
         for _ in range(100):
@@ -100,8 +100,8 @@ class TestPerson(unittest.TestCase):
                 Pop[i].infect(day=0)
                 InfectedIndices.append(i)
             SusceptIndices = [i for i in range(len(Pop)) if i not in InfectedIndices]
-            Pop[0].infect_others(Pop, SusceptIndices, day=5, num_to_infect=len(Pop)-1)
-            self.assertFalse(Pop[0].index in Pop[0].recent_infections)
+            # Should never infect more than 2
+            self.assertNotEqual(len(Pop), Pop[0].infect_others(Pop, SusceptIndices, day=5, num_to_infect=len(Pop)))
     
 if __name__ == '__main__':
     unittest.main()
