@@ -65,12 +65,12 @@ class Population:
         self.household = self.household[:houseIndex]
         
         # Create person status arrays
-        self.susceptible = np.array(range(nPop), dtype=int) #list of all suceptible individuals
-        self.infected = np.zeros(nPop, dtype=int) - 1  # list of all infected people (all healthy (negative) to start)
-        self.recovered = np.zeros(nPop, dtype=int) - 1 # list of recovered people (all not recovered (negative) to start)
+        self.susceptible = np.array(range(nPop+1), dtype=int) #list of all suceptible individuals
+        self.infected = np.zeros(nPop+1, dtype=int) - 1  # list of all infected people (all healthy (negative) to start)
+        self.recovered = np.zeros(nPop+1, dtype=int) - 1 # list of recovered people (all not recovered (negative) to start)
         
         # Infect first n0 people
-        for i in range(n0):
+        for i in range(1, n0+1):
             self.population[i].infect(day=0)
             self.infected[i] = i
             self.susceptible[i] = -1
