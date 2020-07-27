@@ -93,7 +93,6 @@ class TestPerson(unittest.TestCase):
             self.assertTrue(Pop[0].infect_others(Pop, SusceptIndices, day=5, num_to_infect=5) <=2)
             
         # Should never try to infect itself
-        
         for _ in range(100):
             Pop = [Person.Person(i) for i in range(15)]
             InfectedIndices = []
