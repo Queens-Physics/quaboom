@@ -31,13 +31,13 @@ class Population:
 
         self.population = [0]*nPop  # The list of all people
         self.household = [0]*nPop #list of all houses (list that contains all lists of the people in the house)
-        self.pop = nPop #total population 
+        self.nPop = nPop #total population 
         
         houseSize = np.random.choice(a=HOUSE_OPTIONS, p=HOUSE_WEIGHTS)
         houseIndex = 0
         self.household[houseIndex] = houseSize
 
-        for i in range(0, self.pop):
+        for i in range(0, nPop):
             # MAKE A PERSON
             age = np.random.choice(a=AGE_OPTIONS, p=AGE_WEIGHTS)
             job = np.random.choice(a=JOB_OPTIONS, p=JOB_WEIGHTS)
