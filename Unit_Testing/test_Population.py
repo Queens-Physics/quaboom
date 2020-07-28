@@ -56,6 +56,37 @@ class TestPerson(unittest.TestCase):
         self.assertEqual(round(sum(Population.HOUSE_WEIGHTS), roundLevel), 1)
         self.assertEqual(round(sum(Population.ISOLATION_WEIGHTS), roundLevel), 1)
         
+    def test_infect(self):
+        nPop, n0 = 1000, 20
+        pop = Population.Population(nPop=nPop, n0=n0)
+        
+        # Infect a susceptible person
+        index = pop.get_susceptible()[0]
+        self.assertTrue(pop.infect(index=index, day=0))
+        
+        # Check that they are infected
+        self.assertTrue(pop.get_person(index=index).is_infected())
+        # Check that they are not recovered
+        self.assertFalse(pop.get_person(index=index).is_recovered())
+        
+        # Infected list should not be updated yet
+        self.assertFalse(index in pop.get_infected())
+        
+        # Update the indices
+        self.assertTrue(pop.update_infected(index=index))
+        self.assertTrue(index in pop.get_infected())
+        
+        # Try to infect an infected person now
+        nPop, n0 = 1000, 20
+        pop = Population.Population(nPop=nPop, n0=n0)
+        
+        index = pop.get_infected()[0]
+        self.assertFalse(pop.infect(index=index, day=0))
+        
+        # Now try to falsly update the infected list
+        self.assertFalse(pop.update_infected(index=index))
+        
+        
 if __name__ == '__main__':
     unittest.main()
     
