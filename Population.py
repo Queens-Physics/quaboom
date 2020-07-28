@@ -43,8 +43,6 @@ for ihouse in range (len(HOUSE_WEIGHTS)):
         
 json_file.close()
 
-# these all might need their own loop and i can't think of a more efficient way to do this given the format of the json file #
-
 class Population:
     '''creates a population of people based on the total population
      uses and age distrubution to weight the assignment of ages
