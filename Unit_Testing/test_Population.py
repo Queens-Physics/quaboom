@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import numpy as np
 import unittest
 # Code to import Person.py from parent directory
 import os, sys
@@ -23,7 +24,22 @@ class TestPerson(unittest.TestCase):
         self.assertEqual(pop.count_recovered(), 0)
         self.assertEqual(pop.count_susceptible(), nPop-n0)
         
-        pass
+    def test_get_count_functions(self):
+        nPop, n0 = 1000, 20
+        pop = Population.Population(nPop=nPop, n0=n0)
+        
+        # Make sure that get and count functions return the same info
+        self.assertEqual(pop.count_infected(), len(pop.get_infected()))
+        self.assertEqual(pop.count_recovered(), len(pop.get_recovered()))
+        self.assertEqual(pop.count_susceptible(), len(pop.get_susceptible()))
+        
+        # Make sure get pop returns entire population
+        self.assertEqual(len(pop.get_population()), nPop)
+        self.assertEqual(pop.get_population_size(), nPop)
+        
+        # Make sure the get person works
+        i = np.random.choice(nPop)
+        self.assertEqual(pop.get_person(index=i).get_index(), i)
 
     def test_globals(self): 
         
