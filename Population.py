@@ -1,9 +1,14 @@
 import numpy as np
 import Person
+import json
+
+json_file = open('data.json')
+data = json.load(json_file)
+
 
 AGE_OPTIONS = ['0-9', '10-19', '20-29', '30-39', '40-49', '50-59', '60-69', '70-79', '80-89', '90+']
-JOB_OPTIONS = ['Essential', 'Commercial']
-HOUSE_OPTIONS = [1,2,3,4,5,6]
+JOB_OPTIONS = ['Health', 'Sales', 'Neither']
+HOUSE_OPTIONS = [1,2,3,4,5]
 ISOLATION_OPTIONS = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
 
 AGE_WEIGHTS = np.ones(len(AGE_OPTIONS))
@@ -12,11 +17,33 @@ HOUSE_WEIGHTS = np.ones(len(HOUSE_OPTIONS))
 ISOLATION_WEIGHTS = np.ones(len(ISOLATION_OPTIONS))
 
 # Normalize the probabilities
-AGE_WEIGHTS /= float(sum(AGE_WEIGHTS))
+#AGE_WEIGHTS /= float(sum(AGE_WEIGHTS))
 JOB_WEIGHTS /= float(sum(JOB_WEIGHTS))
-HOUSE_WEIGHTS /= float(sum(HOUSE_WEIGHTS))
-ISOLATION_WEIGHTS /= float(sum(ISOLATION_WEIGHTS))
+#HOUSE_WEIGHTS /= float(sum(HOUSE_WEIGHTS))
+ISOLATION_WEIGHTS /= float(sum(ISOLATION_WEIGHTS)) #this is the one we don't have data on yet
 
+# PULL DATA FROM THE JSON FILE #
+# age #
+for iage in range (len(AGE_WEIGHTS)):
+    string = str(iage*10)+'-'+str(iage*10+9)
+    for p in data['age_weights']:
+        AGE_WEIGHTS[iage]= p[string]
+        
+# job #
+for ijob in range (len(JOB_WEIGHTS)):
+    string = JOB_OPTIONS[ijob].upper()
+    for p in data['job_weights']:
+        AGE_WEIGHTS[ijob]= p[string]
+
+# house# 
+for ihouse in range (len(HOUSE_WEIGHTS)):
+    string = str(ihouse+1)
+    for p in data['house_weights']:
+        HOUSE_WEIGHTS[ihouse]= p[string]
+        
+json_file.close()
+
+# these all might need their own loop and i can't think of a more efficient way to do this given the format of the json file #
 
 class Population:
     '''creates a population of people based on the total population

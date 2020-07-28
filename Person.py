@@ -1,8 +1,19 @@
 import numpy as np
+import json
 
 # How long the infection will last
-MIN_DAYS = 10
-MAX_DAYS = 20
+json_file = open('data.json')
+data = json.load(json_file)
+
+for p in data['recovery']:
+    MIN_DAYS= p['MIN']
+    MAX_DAYS= p['MAX']
+# there's also 'AVG', which is the midpoint between severe and mild cases
+# to go with case_severity for when that can be incorporated into the code
+
+# also 'incubation' (incubation period in days) in data can be incorporated
+ 
+json_file.close()
 
 class Person(object):
 
