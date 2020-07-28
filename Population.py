@@ -18,7 +18,7 @@ ISOLATION_WEIGHTS = np.ones(len(ISOLATION_OPTIONS))
 
 # Normalize the probabilities
 #AGE_WEIGHTS /= float(sum(AGE_WEIGHTS))
-JOB_WEIGHTS /= float(sum(JOB_WEIGHTS))
+#JOB_WEIGHTS /= float(sum(JOB_WEIGHTS))
 #HOUSE_WEIGHTS /= float(sum(HOUSE_WEIGHTS))
 ISOLATION_WEIGHTS /= float(sum(ISOLATION_WEIGHTS)) #this is the one we don't have data on yet
 
