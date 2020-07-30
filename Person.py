@@ -5,13 +5,19 @@ import json
 json_file = open('data.json')
 disease_params = json.load(json_file)
 
+# recovery
 MIN_DAYS= disease_params['recovery'][0]['MIN']
 MAX_DAYS= disease_params['recovery'][0]['MAX']
-# there's also 'AVG', which is the midpoint between severe and mild cases
-# to go with case_severity for when that can be incorporated into the code
+# 'AVG' contains midpoint between recovery time of mild and severe cases
+# also maximum infectious days associated with the case severity
 
-# also 'incubation' (incubation period in days) in data can be incorporated
- 
+# code to incorporate the case severity:          
+#SEVERITY_OPTIONS = ['Mild', 'Hospitalization', 'ICU', 'Death']
+#SEVERITY_WEIGHTS = np.zeros(len(SEVERITY_OPTIONS))
+#for iseverity in range (len(SEVERITY_WEIGHTS)):
+#    string = SEVERITY_OPTIONS[iseverity]
+#    SEVERITY_WEIGHTS[iseverity]= disease_params['case_severity'][0][string]
+
 json_file.close()
 
 class Person(object):
