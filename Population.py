@@ -1,22 +1,41 @@
 import numpy as np
 import Person
+import json
+
+json_file = open('data.json')
+disease_params = json.load(json_file)
+
 
 AGE_OPTIONS = ['0-9', '10-19', '20-29', '30-39', '40-49', '50-59', '60-69', '70-79', '80-89', '90+']
-JOB_OPTIONS = ['Essential', 'Commercial']
-HOUSE_OPTIONS = [1,2,3,4,5,6]
+JOB_OPTIONS = ['Health', 'Sales', 'Neither']
+HOUSE_OPTIONS = [1,2,3,4,5]
 ISOLATION_OPTIONS = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
 
-AGE_WEIGHTS = np.ones(len(AGE_OPTIONS))
-JOB_WEIGHTS = np.ones(len(JOB_OPTIONS))
-HOUSE_WEIGHTS = np.ones(len(HOUSE_OPTIONS))
+# isolation #
 ISOLATION_WEIGHTS = np.ones(len(ISOLATION_OPTIONS))
+# Normalize the probability
+ISOLATION_WEIGHTS /= float(sum(ISOLATION_WEIGHTS)) #this is the one we don't have data on yet
 
-# Normalize the probabilities
-AGE_WEIGHTS /= float(sum(AGE_WEIGHTS))
-JOB_WEIGHTS /= float(sum(JOB_WEIGHTS))
-HOUSE_WEIGHTS /= float(sum(HOUSE_WEIGHTS))
-ISOLATION_WEIGHTS /= float(sum(ISOLATION_WEIGHTS))
+# PULL DATA FROM THE JSON FILE #
+# age #
+AGE_WEIGHTS = np.zeros(len(AGE_OPTIONS))
+for iage in range (len(AGE_WEIGHTS)):
+    string = str(iage*10)+'-'+str(iage*10+9)
+    AGE_WEIGHTS[iage]= disease_params['age_weights'][0][string]
+        
+# job #
+JOB_WEIGHTS = np.zeros(len(JOB_OPTIONS))
+for ijob in range (len(JOB_WEIGHTS)):
+    string = JOB_OPTIONS[ijob].upper()
+    JOB_WEIGHTS[ijob]= disease_params['job_weights'][0][string]
 
+# house# 
+HOUSE_WEIGHTS = np.zeros(len(HOUSE_OPTIONS))
+for ihouse in range (len(HOUSE_WEIGHTS)):
+    string = str(ihouse+1)
+    HOUSE_WEIGHTS[ihouse]= disease_params['house_weights'][0][string]
+        
+json_file.close()
 
 class Population:
     '''creates a population of people based on the total population
