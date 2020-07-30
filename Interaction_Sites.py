@@ -6,12 +6,12 @@ import numpy as np
 
 class Interaction_Sites:
 
-    def __init__(self, population, hpn,day,nDays):
+    def __init__(self, population, houses_per_neighbourhood,nDays):
 
         self.population = population  # list of all people
         self.house_list = self.population.household  # list of all households
         house_number = len(self.house_list) # number of houses
-        neighbourhood_number = int(house_number / hpn) # number of neighbourhoods
+        neighbourhood_number = int(house_number / houses_per_neighbourhood) # number of neighbourhoods
         self.neighbourhoods = [] # list of all houses's neighbourhood index
         self.nDays = nDays #number of days past
 
@@ -20,7 +20,7 @@ class Interaction_Sites:
             neighbourhood_index = random.randint(0, neighbourhood_number) #creates a neighbourhood index for each house
             self.neighbourhoods.append(neighbourhood_index) #adds the neighbourhoods index to the neighbourhood list
 
-    # creates work enviroments
+    # creates workplaces
     def work_init (self,job_type,avg_office_size,office_size_distrubution):
         self.industry = [] #all people in a specific industry
         self.office_sizes = [] # list of the sizes of each office
@@ -29,9 +29,9 @@ class Interaction_Sites:
         # adds all people of the same job to an office place
         for i in range (population_size):
             if (obj.get_job == job_type for obj in self.population[i]):
-                self.industry.append(self.population[i])
-                nOffices = int(population_size/avg_office_size)
-                self.office_places.append(random.randint(1, nOffices))
+                self.industry.append(self.population[i]) #adds each person to a list of all people at the industry
+                nOffices = int(population_size/avg_office_size) #creates a number of offices
+                self.office_places.append(random.randint(1, nOffices)) #chooses a random office for each person to go to
 
     #goes through a work space and generates a list of all people there
     def work (self,job_type,workplace_index):
@@ -47,11 +47,13 @@ class Interaction_Sites:
         local_people = []
         rand_list_people = []
         public_pop = 0
+        #creates a list of people from the neighbourhoods in the range given
         for p in range (len(neighbourhood_range)):
             public_pop += neighbourhood_range[p]
         for q in range (self.neighbourhoods):
             if self.neighbourhoods[q] <= neighbourhood_range[1] or self.neighbourhoods[q] >= neighbourhood_range[0]:
                 rand_list_people.append(random.randint(0,int(public_pop/population_size)))
+        #choose random people from the neibourhood to interact with
         for i in range (self.neighbourhoods):
             if self.neighbourhoods[i] <= neighbourhood_range[1] or self.neighbourhoods[i] >= neighbourhood_range[0]:
                 if rand_list_people[i] == population_size:
@@ -82,22 +84,25 @@ class Interaction_Sites:
 
     def grocery_store(self, grocery_store_index):
 
-        grocery_store_population = []
+        grocery_store_population = [] # list of people at the grocery store
 
         for i in range(0, self.number_grocery_stores):
+            # goes through everyone who has the grocery store as their index and adds them to a list
             if self.which_grocery_store[i] == grocery_store_index:
                 grocery_store_population.append(self.grocery_stores_list_of_people[i])
         return grocery_store_population
 
     # home
     def home (self,house_index):
-        resident_list =  self.population.household(house_index)
+        resident_list =  self.population.household(house_index) #list of residents in a house
         resident_list_index = []
         infected_house = False
         for i in range (len(resident_list)):
-            resident_list_index.append(resident_list[i].get_index())
+            resident_list_index.append(resident_list[i].get_index()) #gets the index of each person in the house
+            #if anyone in the house is infected the house is infected
             if (obj.is_infected() == True for obj in resident_list[i]):
                 infected_house = True
+        #infect everyone in the house
         if (infected_house == True):
             for i in range (len(resident_list)):
                 if (obj.is_infected() == False for obj in resident_list[i]):
@@ -118,24 +123,24 @@ class Interaction_Sites:
             interaction_list.append(interaction_number)
         return interaction_list
 
-    # who will interact function
+    # determines who will interact with who
     def who_will_interact(self, interaction_list, local_population):
-        interactions = []
+        interactions = [] # list of all interaction
         for i in range (len(local_population)):
-            person_interactions = []
+            person_interactions = [] # list of each person's index person i interacts with
             interaction_number = interaction_list[i]
             for j in range (interaction_number):
-                interaction_index = random.randint(0,len(local_population))
+                interaction_index = random.randint(0,len(local_population)) #chooses a random person in the list to interact with
                 if (interaction_list[interaction_index] > 0):
-                    interaction_list[interaction_index] -= 1
-                    person_interactions.append(interaction_index)
+                    interaction_list[interaction_index] -= 1 #removes an interaction from that persons possible interactions
+                    person_interactions.append(interaction_index) #adds that person to their interaction
                 else:
                     #potential infinite loop
                     j-= 1
                 interactions.append(person_interactions)
         return interactions
 
-    # probability of spread
+    # probability of the virus spreading based on the interactions in the who will interact function
     def prob_of_spread(self,local_population, who_will_interact):
 
         for i in range (len(local_population)):
@@ -145,9 +150,11 @@ class Interaction_Sites:
                 index = interactions[j] # person j's index
                 person = local_population[index] #gets person j
                 if (person.is_infected() == True):
+                    #gathers data from person
                     prob_of_infection = 0.1 # using info from person
-                    infection_probability.append(prob_of_infection)
-            prob = sum(infection_probability)
+                    infection_probability.append(prob_of_infection) #adds the probability of infection to a list
+            prob = sum(infection_probability) #sums all the infection probabilities
+            #produces a random number which if within the probability bounds infects the person
             if random.random()  <= prob:
-                local_population[i].infect(self.nDays)
+                local_population[i].infect(self.nDays) #infects the person
                 self.population.update_infected(i)  # update the list of suceptiple and infected people
