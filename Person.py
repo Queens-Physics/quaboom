@@ -5,20 +5,21 @@ import json
 json_file = open('data.json')
 disease_params = json.load(json_file)
 
-MIN_DAYS= disease_params['recovery'][0]['MIN']
-MAX_DAYS= disease_params['recovery'][0]['MAX']
-# there's also 'AVG', which is the midpoint between severe and mild cases
-# to go with case_severity for when that can be incorporated into the code
+# recovery
+MIN_MILD= disease_params['recovery'][0]['MIN_MILD']
+MAX_MILD= disease_params['recovery'][0]['MAX_MILD']
+MIN_SEVERE= disease_params['recovery'][0]['MIN_SEVERE']
+MAX_SEVERE= disease_params['recovery'][0]['MAX_SEVERE']
+MIN_ICU= disease_params['recovery'][0]['MIN_ICU']
+MAX_ICU= disease_params['recovery'][0]['MAX_ICU']
 
-# also 'incubation' (incubation period in days) in data can be incorporated
- 
 json_file.close()
 
 class Person(object):
 
     # Initalize a person - Can set properties but only needed one is index
     def __init__(self, index, infected=False, recovered=False, infected_day=None, recovered_day=None,
-                 others_infected=None, cure_days=None, recent_infections=None,age=None,job=None,house_index=0,isolation_tendencies=None):
+                 others_infected=None, cure_days=None, recent_infections=None,age=None,job=None,house_index=0,isolation_tendencies=None,case_severity=None):
 
         self.infected = infected
         self.recovered = recovered
@@ -32,6 +33,7 @@ class Person(object):
         self.job = job
         self.household = house_index
         self.isolation_tendencies = isolation_tendencies
+        self.case_severity = case_severity
     # Return True if infected, False if not
     def is_infected(self):
         return self.infected
@@ -59,8 +61,14 @@ class Person(object):
         if not self.recovered and not self.infected:
             self.infected = True
             self.infected_day = day
-            # If cure days not specified then choose random number inbetween 10 and 20
-            self.cure_days = np.random.randint(MIN_DAYS, MAX_DAYS) if cure_days is None else cure_days
+            # If cure days not specified then choose random number inbetween min and max
+            if self.case_severity == 'Mild':
+                self.cure_days = np.random.randint(MIN_MILD, MAX_MILD) if cure_days is None else cure_days
+            elif self.case_severity == 'Hospitalization':
+                self.cure_days = np.random.randint(MIN_SEVERE, MAX_SEVERE) if cure_days is None else cure_days
+            elif self.case_severity == 'ICU' or self.case_severity == 'Death':
+                self.cure_days = np.random.randint(MIN_ICU, MAX_ICU) if cure_days is None else cure_days
+            #one more severity level (death) but they wouldn't have a recovery time
 
             return True
 

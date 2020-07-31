@@ -10,6 +10,7 @@ AGE_OPTIONS = ['0-9', '10-19', '20-29', '30-39', '40-49', '50-59', '60-69', '70-
 JOB_OPTIONS = ['Health', 'Sales', 'Neither']
 HOUSE_OPTIONS = [1,2,3,4,5]
 ISOLATION_OPTIONS = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
+SEVERITY_OPTIONS = ['Mild', 'Hospitalization', 'ICU', 'Death']
 
 # isolation #
 ISOLATION_WEIGHTS = np.ones(len(ISOLATION_OPTIONS))
@@ -34,6 +35,12 @@ HOUSE_WEIGHTS = np.zeros(len(HOUSE_OPTIONS))
 for ihouse in range (len(HOUSE_WEIGHTS)):
     string = str(ihouse+1)
     HOUSE_WEIGHTS[ihouse]= disease_params['house_weights'][0][string]
+    
+# case severity #          
+SEVERITY_WEIGHTS = np.zeros(len(SEVERITY_OPTIONS))
+for iseverity in range (len(SEVERITY_WEIGHTS)):
+    string = SEVERITY_OPTIONS[iseverity]
+    SEVERITY_WEIGHTS[iseverity]= disease_params['case_severity'][0][string]
         
 json_file.close()
 
@@ -61,10 +68,11 @@ class Population:
             age = np.random.choice(a=AGE_OPTIONS, p=AGE_WEIGHTS)
             job = np.random.choice(a=JOB_OPTIONS, p=JOB_WEIGHTS)
             isolation_tend = np.random.choice(a=ISOLATION_OPTIONS, p=ISOLATION_WEIGHTS)
+            case_severity = np.random.choice(a=SEVERITY_OPTIONS, p=SEVERITY_WEIGHTS)
 
             newPerson = Person.Person(index=i, infected=False, recovered=False, infected_day=None, recovered_day=None, 
                                others_infected=None, cure_days=None, recent_infections=None, age=age, 
-                               job=job, house_index=0,isolation_tendencies=isolation_tend)
+                               job=job, house_index=0,isolation_tendencies=isolation_tend,case_severity=case_severity)
             
             # ADD A PERSON
             self.population[i] = newPerson
