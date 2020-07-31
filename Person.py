@@ -6,9 +6,12 @@ json_file = open('data.json')
 disease_params = json.load(json_file)
 
 # recovery
-MIN_DAYS= disease_params['recovery'][0]['MIN']
-MAX_DAYS= disease_params['recovery'][0]['MAX']
-MID_DAYS= disease_params['recovery'][0]['AVG'] # the midpoint between mild and severe cases
+MIN_MILD= disease_params['recovery'][0]['MIN_MILD']
+MAX_MILD= disease_params['recovery'][0]['MAX_MILD']
+MIN_SEVERE= disease_params['recovery'][0]['MIN_SEVERE']
+MAX_SEVERE= disease_params['recovery'][0]['MAX_SEVERE']
+MIN_ICU= disease_params['recovery'][0]['MIN_ICU']
+MAX_ICU= disease_params['recovery'][0]['MAX_ICU']
 
 json_file.close()
 
@@ -59,10 +62,13 @@ class Person(object):
             self.infected = True
             self.infected_day = day
             # If cure days not specified then choose random number inbetween min and max
-            if self.case_severity == 'Mild': # cure days is between the min and the midpoint
-                self.cure_days = np.random.randint(MIN_DAYS, MID_DAYS) if cure_days is None else cure_days
-            else: # cure days is between the midpoint and the max with a sever case
-                self.cure_days = np.random.randint(MID_DAYS, MAX_DAYS) if cure_days is None else cure_days
+            if self.case_severity == 'Mild':
+                self.cure_days = np.random.randint(MIN_MILD, MAX_MILD) if cure_days is None else cure_days
+            elif self.case_severity == 'Hospitalization':
+                self.cure_days = np.random.randint(MIN_SEVERE, MAX_SEVERE) if cure_days is None else cure_days
+            elif self.case_severity == 'ICU' or self.case_severity == 'Death':
+                self.cure_days = np.random.randint(MIN_ICU, MAX_ICU) if cure_days is None else cure_days
+            #one more severity level (death) but they wouldn't have a recovery time
 
             return True
 
