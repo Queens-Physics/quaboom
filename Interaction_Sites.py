@@ -35,7 +35,6 @@ class Interaction_Sites:
         self.grade_B_sites = np.array(self.init_grade(pop_obj, GRADE_B_PER_POP, B_LOYALTY_MEAN, B_LOYALTY_STD))
         self.grade_C_sites = np.array(self.init_grade(pop_obj, GRADE_C_PER_POP, C_LOYALTY_MEAN, C_LOYALTY_STD))
         self.house_sites = np.array(pop_obj.household).copy()
-        print(self.house_sites)
         
         
     def init_grade(self, pop_obj, grade_pop_size, loyalty_mean, loyalty_std):
@@ -129,22 +128,27 @@ class Interaction_Sites:
             return True if random.random()<prob_of_spread==1 else False
     
     
-    def house_interact(self, pop_obj):
+    def house_interact(self, pop_obj, day):
         # It is assumed that if people go to the same home they will interact with eachother
-        for house in self.house_sites:
-            print(house)
+        house_count = 0
+        for i in range(len(self.house_sites)):
+            # Get ppl in house
+            house_size = self.house_sites[i]
+            housemembers = pop_obj.get_population()[house_count:house_count+house_size]
+            house_count += house_size
+            
             # Check if anyone in the house is infected
-            infected_housemembers = [i for i in range(house) if house[i].is_infected() == True]
+            infected_housemembers = [i for i in range(house_size) if housemembers[i].is_infected() == True]
             
             if len(infected_housemembers)>0:
-                healthy_housemembers = [i for i in range(house) if house[i].is_infected() == False]
+                healthy_housemembers = [i for i in range(house_size) if housemembers[i].is_infected() == False]
                 
-                for person in healthy_housemember:
+                for person in healthy_housemembers:
                     # This should be more complicated and depend on len(infectpplinhouse)
                     infection_chance = HOUSE_SPREAD_PROB 
                     caught_infection = random.random()<infection_chance
                     if caught_infection:
-                        pop_obj.infect(index=house[person].get_index())
+                        pop_obj.infect(index=housemembers[person].get_index(), day=day)
 
                         
     def get_grade_A_sites(self):
