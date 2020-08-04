@@ -8,16 +8,15 @@ GRADE_A_PER_POP = 1./500
 GRADE_B_PER_POP = 1./500
 GRADE_C_PER_POP = 1./500
 
-A_LOYALTY_MEAN, A_LOYALTY_STD = 6, 2
-B_LOYALTY_MEAN, B_LOYALTY_STD = 3, 1
+A_LOYALTY_MEAN, A_LOYALTY_STD = 4, 2
+B_LOYALTY_MEAN, B_LOYALTY_STD = 1, 1
 C_LOYALTY_MEAN, C_LOYALTY_STD = 1, .5
 
 # Infection spread parameters
-INFECTION_SPREAD_MEAN = 0.3
-INFECTION_SPREAD_STD = 0.1
+INFECTION_SPREAD_PROB = 0.3
 
-# House parameters
-HOUSE_SPREAD_PROB = 0.5
+# House spread parameters
+HOUSE_SPREAD_PROB = 0.2
 
 class Interaction_Sites:
     
@@ -73,10 +72,16 @@ class Interaction_Sites:
     
     
     def site_interaction(self, pop_obj, will_go_array, site_array, day):
-        # Find out how many interactions each person has at the site
-        # Loop can be made more efficent if only interactions where someone is infected is looped through and append is removed
-        new_infections = []
+        # Find out how many interactions each person has at the site - FUNCTION IS PRETTY SLOW RN
+        new_infections = np.zeros(pop_obj.get_population_size(), dtype=int)
+        new_infections_count = 0
         for ppl_going in will_go_array:
+            
+            infected_persons = [index for index in ppl_going if pop_obj.get_person(index).is_infected()==True]
+            recovered_persons = [index for index in ppl_going if pop_obj.get_person(index).is_recovered()==True]
+            
+            if len(infected_persons)==0 or len(infected_persons)+len(recovered_persons)==len(ppl_going):
+                continue # No ppl to infect here or no one already infected
             
             # Generate a list of how many interactions ppl have at the site
             num_interactions = np.array([self.calc_interactions(pop_obj, person_index, len(ppl_going)) 
@@ -88,11 +93,17 @@ class Interaction_Sites:
                 # find a random interactor for them to pair with (that is not them)
                 new_options = [i for i in range(len(num_interactions)) if num_interactions[i] > 0 and i != person_1]
                 person_2 = np.random.choice(new_options)
+                    
+                # Get the actual people at these indexes
+                person_1_index = ppl_going[person_1]
+                person_2_index = ppl_going[person_2]
                 
                 # Have an interaction between those people
-                did_infect = self.interact(pop_obj, person_1, person_2)
+                did_infect = self.interact(pop_obj, person_1_index, person_2_index)
                 if did_infect:
-                    new_infections.append(person_2 if pop_obj.get_person(person_1).is_infected() else person_1)
+                    person_1_infected = pop_obj.get_person(person_1_index).is_infected()
+                    new_infections[new_infections_count] = person_2_index if person_1_infected else person_1_index
+                    new_infections_count += 1
                 
                 # Lower the interaction count for those people
                 num_interactions[person_1] -= 1
@@ -100,14 +111,14 @@ class Interaction_Sites:
                 
             
         # Update people who get infected only at the end (if i get CV19 at work, prolly wont spread at the store that night ?)
-        for new_infection in new_infections:
+        for new_infection in new_infections[:new_infections_count]:
             pop_obj.infect(index=new_infection, day=day)
            
         
     def calc_interactions(self, pop_obj, person_index, how_busy):
         # This will be some function that returns how many interactions for this person
-        upper_interaction_bound = 20
-        lower_interaction_bound = 5  # Random numbers at the moment
+        upper_interaction_bound = 10
+        lower_interaction_bound = 0  # Random numbers at the moment
         
         return np.random.randint(lower_interaction_bound, upper_interaction_bound)
          
@@ -118,14 +129,10 @@ class Interaction_Sites:
         # Make sure at least and only one is infected for this to happen
         if pop_obj.get_person(person_1).is_infected() == pop_obj.get_person(person_2).is_infected():
             return False
-
-        prob_of_spread = np.random.normal(INFECTION_SPREAD_MEAN, INFECTION_SPREAD_STD)
-        if prob_of_spread <= 0: 
-            return False
-        elif prob_of_spread >= 1:
+        elif random.random() < INFECTION_SPREAD_PROB:
             return True
         else:
-            return True if random.random()<prob_of_spread==1 else False
+            return False
     
     
     def house_interact(self, pop_obj, day):

@@ -4,7 +4,7 @@ import Population
 import Interaction_Sites
 
 # will_go_to_site parameters (prob person will go somewhere each day) 
-A_WILL_GO_PROB = .1
+A_WILL_GO_PROB = .05
 B_WILL_GO_PROB = .4
 C_WILL_GO_PROB = .8
 
@@ -32,20 +32,17 @@ def RunEpidemic(nPop, n0, nDays):
             new_recovered = track_recovered[day] - track_recovered[day-1]
             track_new_infected[day] = track_infected[day] - track_infected[day-1] + new_recovered
             
-        print("Find visits")
         # Find grade A, B, C site visits
         will_visit_A = inter_sites.will_visit_site(inter_sites.get_grade_A_sites(), A_WILL_GO_PROB)
         will_visit_B = inter_sites.will_visit_site(inter_sites.get_grade_B_sites(), B_WILL_GO_PROB)
         will_visit_C = inter_sites.will_visit_site(inter_sites.get_grade_C_sites(), C_WILL_GO_PROB)
         
-        print("Find interactions")
         # Do site interactions based on who is going to sites - INFECTION SPREAD OCCURS HERE
         inter_sites.site_interaction(pop, will_visit_A, inter_sites.get_grade_A_sites(), day)
-        inter_sites.site_interaction(pop, will_visit_B, inter_sites.get_grade_B_sites(), day)
-        inter_sites.site_interaction(pop, will_visit_C, inter_sites.get_grade_C_sites(), day)
+        #inter_sites.site_interaction(pop, will_visit_B, inter_sites.get_grade_B_sites(), day)
+        #inter_sites.site_interaction(pop, will_visit_C, inter_sites.get_grade_C_sites(), day)
         
         # Manage at home interactions
-        print("Home interactions")
         inter_sites.house_interact(pop, day)  
         
         # See who needs to be cured
