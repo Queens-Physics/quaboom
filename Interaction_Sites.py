@@ -75,6 +75,7 @@ class Interaction_Sites:
         # Find out how many interactions each person has at the site - FUNCTION IS PRETTY SLOW RN
         new_infections = np.zeros(pop_obj.get_population_size(), dtype=int)
         new_infections_count = 0
+        
         for ppl_going in will_go_array:
             
             infected_persons = [index for index in ppl_going if pop_obj.get_person(index).is_infected()==True]
