@@ -73,6 +73,7 @@ class Interaction_Sites:
     
     def site_interaction(self, pop_obj, will_go_array, site_array, day):
         # Find out how many interactions each person has at the site - FUNCTION IS PRETTY SLOW RN
+        # Should deal with case where one person is left with more than one interaction
         new_infections = np.zeros(pop_obj.get_population_size(), dtype=int)
         new_infections_count = 0
         
