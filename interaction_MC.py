@@ -40,13 +40,13 @@ def RunEpidemic(nPop, n0, nDays):
         
         print("Find interactions")
         # Do site interactions based on who is going to sites - INFECTION SPREAD OCCURS HERE
-        #inter_sites.site_interaction(pop, will_visit_A, inter_sites.get_grade_A_sites(), day)
-        #inter_sites.site_interaction(pop, will_visit_B, inter_sites.get_grade_B_sites(), day)
-        #inter_sites.site_interaction(pop, will_visit_C, inter_sites.get_grade_C_sites(), day)
+        inter_sites.site_interaction(pop, will_visit_A, inter_sites.get_grade_A_sites(), day)
+        inter_sites.site_interaction(pop, will_visit_B, inter_sites.get_grade_B_sites(), day)
+        inter_sites.site_interaction(pop, will_visit_C, inter_sites.get_grade_C_sites(), day)
         
         # Manage at home interactions
         print("Home interactions")
-        inter_sites.house_interact(pop)  
+        inter_sites.house_interact(pop, day)  
         
         # See who needs to be cured
         infected_people = pop.get_infected()
