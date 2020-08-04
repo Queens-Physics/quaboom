@@ -64,7 +64,7 @@ class Population:
 
             newPerson = Person.Person(index=i, infected=False, recovered=False, infected_day=None, recovered_day=None, 
                                others_infected=None, cure_days=None, recent_infections=None, age=age, 
-                               job=job, house_index=0,isolation_tendencies=isolation_tend)
+                               job=job, house_index=houseIndex, isolation_tendencies=isolation_tend)
             
             # ADD A PERSON
             self.population[i] = newPerson
