@@ -3,6 +3,6 @@
  "house_weights": [{"Note": "Weights of number of people in each house in Kingston. 5 is actually 5+ this is just for easier looping", "1": 0.293, "2": 0.376, "3": 0.149, "4": 0.123, "5": 0.059}],
  "max_infectious": [{"Note": "max number of days that a person with this level of infection stays sick for", "MILD": 10, "SEVERE": 20}],
  "case_severity": [{"Note": "distribution of severity of the case; those in None would be considered mild", "Mild": 0.761, "Death": 0.083, "Hospitalization": 0.127, "ICU": 0.029}],
- "recovery": [{"Note": "mild cases last ~14, severe 21 to 42", "MAX_SEVERE": 42, "MIN_SEVERE": 21, "MAX_MILD": 20, "MIN_MILD": 12, "MAX_ICU": 59, "MIN_ICU": 43}],
+ "recovery": [{"Note": "mild cases last ~14, severe 21 to 42", "MAX_SEVERE": 42, "MIN_SEVERE": 21, "MAX_MILD": 20, "MIN_MILD": 12, "MAX_ICU": 59, "MIN_ICU": 43, "MAX_DIE": 30, "MIN_DIE": 14}],
  "incubation": [{"Note": "just a guess that its poisson", "MAX": 14, "AVG": 5, "MIN": 1, "Dist": "poisson"}]
 }
