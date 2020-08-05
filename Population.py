@@ -70,7 +70,7 @@ class Population:
             isolation_tend = np.random.choice(a=ISOLATION_OPTIONS, p=ISOLATION_WEIGHTS)
             case_severity = np.random.choice(a=SEVERITY_OPTIONS, p=SEVERITY_WEIGHTS)
 
-            newPerson = Person.Person(index=i, infected=False, recovered=False, infected_day=None, recovered_day=None, 
+            newPerson = Person.Person(index=i, infected=False, recovered=False, dead=False, infected_day=None, recovered_day=None, death_day=None,
                                others_infected=None, cure_days=None, recent_infections=None, age=age, 
                                job=job, house_index=0,isolation_tendencies=isolation_tend,case_severity=case_severity)
             
@@ -95,6 +95,7 @@ class Population:
         self.susceptible = np.array(range(nPop+1), dtype=int) #list of all susceptible individuals
         self.infected = np.zeros(nPop+1, dtype=int) - 1  # list of all infected people (all healthy (negative) to start)
         self.recovered = np.zeros(nPop+1, dtype=int) - 1 # list of recovered people (all not recovered (negative) to start)
+        self.dead = np.zeros(nPop+1, dtype=int) - 1 # list of recovered people 
         
         # Infect first n0 people
         for i in range(1, n0+1):
@@ -119,6 +120,9 @@ class Population:
     def get_recovered(self):
         return self.recovered[self.recovered > 0]
     
+    def get_dead(self):
+        return self.dead[self.dead > 0]
+    
     # Count the number of people in each bin
     def count_susceptible(self):
         return np.count_nonzero(self.susceptible > 0)
@@ -129,6 +133,9 @@ class Population:
     def count_recovered(self):
         return np.count_nonzero(self.recovered > 0)
 
+    def count_dead(self):
+        return np.count_nonzero(self.dead > 0)
+    
     #returns an individual based on their index
     def get_person(self, index):
         return self.population[index]
@@ -169,6 +176,21 @@ class Population:
         self.recovered[index] = index
         return True
         
-        
+    def die(self, index, day):
+        didWork = self.population[index].check_dead(day)
+        if didWork:
+            self.infected[index] = -1
+            self.recovered[index] = -1
+            self.dead[index] = index
+        return didWork
+            
+    def update_dead(self, index):
+        if self.dead[index]==index or self.population[index].is_dead()==False:
+            return False
+        self.infected[index] = -1
+        self.recovered[index] = -1
+        self.dead[index] = index
+        return True
+            
         
         

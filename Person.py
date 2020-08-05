@@ -12,19 +12,24 @@ MIN_SEVERE= disease_params['recovery'][0]['MIN_SEVERE']
 MAX_SEVERE= disease_params['recovery'][0]['MAX_SEVERE']
 MIN_ICU= disease_params['recovery'][0]['MIN_ICU']
 MAX_ICU= disease_params['recovery'][0]['MAX_ICU']
+MIN_DIE= disease_params['recovery'][0]['MIN_DIE']
+MAX_DIE= disease_params['recovery'][0]['MAX_DIE']
+
 
 json_file.close()
 
 class Person(object):
 
     # Initalize a person - Can set properties but only needed one is index
-    def __init__(self, index, infected=False, recovered=False, infected_day=None, recovered_day=None,
+    def __init__(self, index, infected=False, recovered=False, dead=False, infected_day=None, recovered_day=None, death_day=None,
                  others_infected=None, cure_days=None, recent_infections=None,age=None,job=None,house_index=0,isolation_tendencies=None,case_severity=None):
 
         self.infected = infected
         self.recovered = recovered
+        self.dead = dead
         self.infected_day = infected_day
         self.recovered_day = recovered_day
+        self.death_day = death_day
         self.others_infected = [] if others_infected is None else others_infected
         self.cure_days = cure_days
         self.recent_infections = recent_infections
@@ -41,7 +46,10 @@ class Person(object):
     # Return True if recovered, False if not
     def is_recovered(self):
         return self.recovered
-
+    
+    def is_dead(self):
+        return self.dead
+    
     # Return index of person
     def get_index(self):
         return self.index
@@ -58,7 +66,7 @@ class Person(object):
     def infect(self, day, cure_days=None):
 
         # Check that they are suseptable (maybe should have that as property?)
-        if not self.recovered and not self.infected:
+        if not self.recovered and not self.infected and not self.dead:
             self.infected = True
             self.infected_day = day
             # If cure days not specified then choose random number inbetween min and max
@@ -66,9 +74,10 @@ class Person(object):
                 self.cure_days = np.random.randint(MIN_MILD, MAX_MILD) if cure_days is None else cure_days
             elif self.case_severity == 'Hospitalization':
                 self.cure_days = np.random.randint(MIN_SEVERE, MAX_SEVERE) if cure_days is None else cure_days
-            elif self.case_severity == 'ICU' or self.case_severity == 'Death':
+            elif self.case_severity == 'ICU':
                 self.cure_days = np.random.randint(MIN_ICU, MAX_ICU) if cure_days is None else cure_days
-            #one more severity level (death) but they wouldn't have a recovery time
+            elif self.case_severity == 'Death':
+                self.cure_days = np.random.randint(MIN_DIE, MAX_DIE) if cure_days is None else cure_days
 
             return True
 
@@ -87,6 +96,20 @@ class Person(object):
                 self.infected = False
                 self.recovered = True
                 self.recovered_day = day
+
+                return True
+        return False
+    
+    def check_dead(self, day):
+
+        if self.infected:
+
+            days_since_infected = day - self.infected_day
+            # Checks death timeline
+            if days_since_infected >= self.cure_days:
+                self.infected = False
+                self.dead = True
+                self.death_day = day
 
                 return True
         return False
