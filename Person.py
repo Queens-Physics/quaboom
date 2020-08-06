@@ -61,6 +61,9 @@ class Person(object):
     # Get list of recent infections (from the last time they infected people)
     def get_recent_infections(self):
         return self.recent_infections
+    
+    def get_case_severity(self):
+        return self.case_severity
 
     # Method to infect a person
     def infect(self, day, cure_days=None):
@@ -100,7 +103,7 @@ class Person(object):
                 return True
         return False
     
-    def check_dead(self, day):
+    def check_dead(self, day): # checking that case_severity==death outside of the loop
 
         if self.infected:
 
