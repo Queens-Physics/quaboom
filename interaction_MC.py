@@ -20,6 +20,7 @@ def RunEpidemic(nPop, n0, nDays):
     track_infected = np.zeros(nDays, dtype=int) # currently infected 
     track_susceptible = np.zeros(nDays, dtype=int) # never been exposed
     track_recovered = np.zeros(nDays, dtype=int) #total recovered
+    track_dead = np.zeros(nDays, dtype=int) #total deaths
     
     # Loop over the number of days
     for day in range(nDays):
@@ -28,6 +29,7 @@ def RunEpidemic(nPop, n0, nDays):
         track_infected[day] = pop.count_infected()
         track_susceptible[day] = pop.count_susceptible()
         track_recovered[day] = pop.count_recovered()
+        track_dead[day] = pop.count_dead()
         if day != 0:
             new_recovered = track_recovered[day] - track_recovered[day-1]
             track_new_infected[day] = track_infected[day] - track_infected[day-1] + new_recovered
@@ -43,21 +45,30 @@ def RunEpidemic(nPop, n0, nDays):
         #inter_sites.site_interaction(pop, will_visit_C, inter_sites.get_grade_C_sites(), day)
         
         # Manage at home interactions
-        inter_sites.house_interact(pop, day)  
+        inter_sites.house_interact(pop, day)
         
-        # See who needs to be cured
+        # See who needs to be cured or die
         infected_people = pop.get_infected()
         for index in infected_people: 
             infected_person = pop.get_person(index=index) 
-            is_cured = infected_person.check_cured(day) # method will check and cure them if needed
-            if is_cured and pop.update_cured(index=infected_person.get_index()) == False:
-                print("Did not cure correctly")
+            
+            if infected_person.get_case_severity() == "Death":
+                is_dead = infected_person.check_dead(day)
+                if is_dead and pop.update_dead(index=infected_person.get_index()) == False:
+                    print("Did not die correctly")
+                    
+            else:     
+                is_cured = infected_person.check_cured(day) # method will check and cure them if needed ALWAYS IS FALSE??
+                if is_cured and pop.update_cured(index=infected_person.get_index()) == False:
+                    print("Did not cure correctly")
 
-
-        print("Day: {}, infected: {}, recovered: {}, suceptible: {}".format(day, track_infected[day], track_recovered[day],
-                                                                            track_susceptible[day]))
+        print("Day: {}, infected: {}, recovered: {}, suceptible: {}, dead: {}".format(day, track_infected[day], 
+                                                                                      track_recovered[day],
+                                                                                      track_susceptible[day], 
+                                                                                      track_dead[day]))
     print("At the end, ", track_susceptible[-1], "never got it")
+    print(track_dead[-1], "died")
     print(np.max(track_infected), "had it at the peak")
     
-    return track_infected, track_new_infected, track_recovered, track_susceptible, Population
+    return track_infected, track_new_infected, track_recovered, track_susceptible, track_dead, Population
 

@@ -164,13 +164,15 @@ class Population:
         didWork = self.population[index].check_cured(day)
         if didWork:
             self.infected[index] = -1
+            print(self.recovered[index])
             self.recovered[index] = index
+            print(self.recovered[index])
         return didWork
     
     # Updates lists for already cured people
     def update_cured(self, index):
         if self.recovered[index]==index or self.population[index].is_recovered()==False:
-            # Already cured
+            # Already recovered in pop obj or person obj is not actually recovered
             return False
         self.infected[index] = -1
         self.recovered[index] = index
