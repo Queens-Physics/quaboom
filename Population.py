@@ -164,9 +164,7 @@ class Population:
         didWork = self.population[index].check_cured(day)
         if didWork:
             self.infected[index] = -1
-            print(self.recovered[index])
             self.recovered[index] = index
-            print(self.recovered[index])
         return didWork
     
     # Updates lists for already cured people
