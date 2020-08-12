@@ -67,3 +67,8 @@ This data is from the 2016 Census Profile for Kingston (Statistics Canada).
 This file contains the population of Kingston divided by type of house/dwelling as well as the number of people in each household.
 
 This data is from the 2016 Census Profile for Kingston (Statistics Canada).
+
+
+
+## Census Data for Ontario and Kingston
+Master sheet with census data for both Ontario and Kingston, includes categories above.
