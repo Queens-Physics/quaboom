@@ -32,7 +32,8 @@ def RunEpidemic(nPop, n0, nDays):
         track_dead[day] = pop.count_dead()
         if day != 0:
             new_recovered = track_recovered[day] - track_recovered[day-1]
-            track_new_infected[day] = track_infected[day] - track_infected[day-1] + new_recovered
+            new_dead = track_dead[day] - track_dead[day-1]
+            track_new_infected[day] = track_infected[day] - track_infected[day-1] + new_recovered + new_dead
             
         # Find grade A, B, C site visits
         will_visit_A = inter_sites.will_visit_site(inter_sites.get_grade_A_sites(), A_WILL_GO_PROB)
