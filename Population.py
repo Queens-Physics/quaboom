@@ -2,7 +2,7 @@ import numpy as np
 import Person
 import json
 
-json_file = open('data.json')
+json_file = open('dataK.json')
 disease_params = json.load(json_file)
 
 

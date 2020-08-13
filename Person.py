@@ -2,7 +2,7 @@ import numpy as np
 import json
 
 # How long the infection will last
-json_file = open('data.json')
+json_file = open('dataK.json')
 disease_params = json.load(json_file)
 
 # recovery
