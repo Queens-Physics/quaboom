@@ -15,7 +15,7 @@ SEVERITY_OPTIONS = ['Mild', 'Hospitalization', 'ICU', 'Death']
 # isolation #
 ISOLATION_WEIGHTS = np.ones(len(ISOLATION_OPTIONS))
 # Normalize the probability
-ISOLATION_WEIGHTS = float(sum(ISOLATION_WEIGHTS)) #this is the one we don't have data on yet
+ISOLATION_WEIGHTS /= float(sum(ISOLATION_WEIGHTS)) #this is the one we don't have data on yet
 
 # PULL DATA FROM THE JSON FILE #
 # age #
