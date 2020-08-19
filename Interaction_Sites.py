@@ -43,7 +43,7 @@ class Interaction_Sites:
         
         for person in pop_obj.get_population():
             # Assign people to this specific site
-            num_diff_sites = round(np.random.normal(loyalty_mean, loyalty_std))
+            num_diff_sites = abs(round(np.random.normal(loyalty_mean, loyalty_std)))
             
             # Get a list of len num_diff_sites for this person to be associated with now
             person_sites = np.random.choice(num_sites, num_diff_sites, replace=False)
