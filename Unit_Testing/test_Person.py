@@ -68,7 +68,7 @@ class TestPerson(unittest.TestCase):
         
         person5 = Person.Person(5, infected=False, recovered=False)
         person5.infect(day=infected_day)
-        self.assertIsNotNone(person4.cure_days)            # Make sure that cure days is set even though no parameter passed
+        self.assertIsNotNone(person5.cure_days)            # Make sure that cure days is set even though no parameter passed
         
     def test_infect_others(self):
         # No suscept and try to infect
