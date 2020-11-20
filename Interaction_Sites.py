@@ -127,7 +127,6 @@ class Interaction_Sites:
     def interact(self, pop_obj, person_1, person_2):
         # Function that models the interaction between two people, and will return if interaction spread
         # Create two temp variables until we have person.mask implemented
-        randNum = random.random()
         p1Mask = True # pop_obj.get_person(person_1).has_mask()
         p2Mask = False # pop_obj.get_person(person_2).has_mask()
         
