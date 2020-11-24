@@ -13,7 +13,7 @@ B_LOYALTY_MEAN, B_LOYALTY_STD = 1, 1
 C_LOYALTY_MEAN, C_LOYALTY_STD = 1, .5
 
 # Infection spread parameters
-INFECTION_SPREAD_PROB = 0.05
+INFECTION_SPREAD_PROB = 0.3
 
 # House spread parameters
 HOUSE_SPREAD_PROB = 0.2
