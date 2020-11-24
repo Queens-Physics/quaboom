@@ -1,6 +1,8 @@
 import numpy as np
 import json
 
+TIME_QUARANTINE = 14 #days people have to quarantine
+
 # How long the infection will last
 json_file = open('dataK.json')
 disease_params = json.load(json_file)
@@ -21,12 +23,15 @@ json_file.close()
 class Person(object):
 
     # Initalize a person - Can set properties but only needed one is index
-    def __init__(self, index, infected=False, recovered=False, dead=False, infected_day=None, recovered_day=None, death_day=None,
-                 others_infected=None, cure_days=None, recent_infections=None,age=None,job=None,house_index=0,isolation_tendencies=None,case_severity=None):
+    def __init__(self, index, infected=False, recovered=False, dead=False, quarantined=False, quarantined_day=None, infected_day=None, 
+                 recovered_day=None, death_day=None, others_infected=None, cure_days=None, 
+                 recent_infections=None,age=None,job=None,house_index=0,isolation_tendencies=None,case_severity=None):
 
         self.infected = infected
         self.recovered = recovered
         self.dead = dead
+        self.quarantined = quarantined
+        self.quarantined_day = quarantined_day
         self.infected_day = infected_day
         self.recovered_day = recovered_day
         self.death_day = death_day
@@ -47,8 +52,16 @@ class Person(object):
     def is_recovered(self):
         return self.recovered
     
+    #return True if dead, False if not
     def is_dead(self):
         return self.dead
+    
+    #return True if quarantined, False if not
+    def is_quarantined(self):
+        return self.quarantined
+    
+    def get_quarantine_day(self):
+        return self.quarantined_day
     
     # Return index of person
     def get_index(self):
@@ -86,6 +99,29 @@ class Person(object):
 
         return False
 
+    # check if someone is quarantined, and if they can come out
+    # (if they've quarantined for 14 days)
+    def check_quarantine(self, day):
+        if self.quarantined:
+            days_since_quarantined = day - self.quarantined_day
+            if days_since_quarantined >= TIME_QUARANTINE:
+                self.quarantined = False
+                
+                return False
+            return True
+        
+        else: # if not self quarantined
+            # if they aren't in quarantine, check if they know they're infected
+            ##   then put them into quarantine
+            if self.case_severity != "Mild":
+                # if their symtoms are not mild, quarantine if they're infected
+                # assume people in the hospital aren't spreading it either
+                self.quarantined_day = day
+                self.quarantined = True
+                
+                return True
+            return False
+    
     # Method that checks if a person is past their cure time and will cure them
     # Returns True if they were cured, False if not
     def check_cured(self, day):

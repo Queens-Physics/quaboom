@@ -30,15 +30,16 @@ def RunEpidemic(nPop, n0, nDays):
         track_susceptible[day] = pop.count_susceptible()
         track_recovered[day] = pop.count_recovered()
         track_dead[day] = pop.count_dead()
+        #track the days someone has been infected?
         if day != 0:
             new_recovered = track_recovered[day] - track_recovered[day-1]
             new_dead = track_dead[day] - track_dead[day-1]
             track_new_infected[day] = track_infected[day] - track_infected[day-1] + new_recovered + new_dead
             
         # Find grade A, B, C site visits
-        will_visit_A = inter_sites.will_visit_site(inter_sites.get_grade_A_sites(), A_WILL_GO_PROB)
-        will_visit_B = inter_sites.will_visit_site(inter_sites.get_grade_B_sites(), B_WILL_GO_PROB)
-        will_visit_C = inter_sites.will_visit_site(inter_sites.get_grade_C_sites(), C_WILL_GO_PROB)
+        will_visit_A = inter_sites.will_visit_site(inter_sites.get_grade_A_sites(), A_WILL_GO_PROB, pop)
+        will_visit_B = inter_sites.will_visit_site(inter_sites.get_grade_B_sites(), B_WILL_GO_PROB, pop)
+        will_visit_C = inter_sites.will_visit_site(inter_sites.get_grade_C_sites(), C_WILL_GO_PROB, pop)
         
         # Do site interactions based on who is going to sites - INFECTION SPREAD OCCURS HERE
         inter_sites.site_interaction(pop, will_visit_A, inter_sites.get_grade_A_sites(), day)
@@ -62,6 +63,10 @@ def RunEpidemic(nPop, n0, nDays):
                 is_cured = infected_person.check_cured(day) # method will check and cure them if needed ALWAYS IS FALSE??
                 if is_cured and pop.update_cured(index=infected_person.get_index()) == False:
                     print("Did not cure correctly")
+                    
+                # maybe it should be checked for all people
+                # although maybe it doesn't matter if the person isn't infected?
+                is_quarantined = infected_person.check_quarantine(day)
 
         print("Day: {}, infected: {}, recovered: {}, suceptible: {}, dead: {}".format(day, track_infected[day], 
                                                                                       track_recovered[day],
