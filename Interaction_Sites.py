@@ -13,10 +13,9 @@ B_LOYALTY_MEAN, B_LOYALTY_STD = 1, 1
 C_LOYALTY_MEAN, C_LOYALTY_STD = 1, .5
 
 # Infection spread parameters
-INFECTION_SPREAD_PROB = 0.3
-
-# House spread parameters
-HOUSE_SPREAD_PROB = 0.2
+MASK_REDUCTION = 0.6
+BASE_INFECTION_SPREAD_PROB = 0.15
+HOUSE_INFECTION_SPREAD_PROB = BASE_INFECTION_SPREAD_PROB*(1.25)
 
 class Interaction_Sites:
     
@@ -127,14 +126,15 @@ class Interaction_Sites:
         
     def interact(self, pop_obj, person_1, person_2):
         # Function that models the interaction between two people, and will return if interaction spread
+        # Create two temp variables until we have person.mask implemented
+        p1Mask = True # pop_obj.get_person(person_1).has_mask()
+        p2Mask = False # pop_obj.get_person(person_2).has_mask()
         
-        # Make sure at least and only one is infected for this to happen
-        if pop_obj.get_person(person_1).is_infected() == pop_obj.get_person(person_2).is_infected():
-            return False
-        elif random.random() < INFECTION_SPREAD_PROB:
-            return True
-        else:
-            return False
+        if p1Mask and p2Mask: spread_prob = BASE_INFECTION_SPREAD_PROB*MASK_REDUCTION**2
+        elif p1Mask or p2Mask: spread_prob = BASE_INFECTION_SPREAD_PROB*MASK_REDUCTION
+        else: spread_prob = BASE_INFECTION_SPREAD_RATE
+        
+        return random.random() < spread_prob
     
     
     def house_interact(self, pop_obj, day):
@@ -154,7 +154,7 @@ class Interaction_Sites:
                 
                 for person in healthy_housemembers:
                     # This should be more complicated and depend on len(infectpplinhouse)
-                    infection_chance = HOUSE_SPREAD_PROB 
+                    infection_chance = HOUSE_INFECTION_SPREAD_PROB 
                     caught_infection = random.random()<infection_chance
                     if caught_infection:
                         pop_obj.infect(index=housemembers[person].get_index(), day=day)
