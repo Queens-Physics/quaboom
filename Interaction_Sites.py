@@ -13,7 +13,7 @@ B_LOYALTY_MEAN, B_LOYALTY_STD = 1, 1
 C_LOYALTY_MEAN, C_LOYALTY_STD = 1, .5
 
 # Infection spread parameters
-INFECTION_SPREAD_PROB = 0.3
+INFECTION_SPREAD_PROB = 0.05
 
 # House spread parameters
 HOUSE_SPREAD_PROB = 0.2
@@ -76,11 +76,6 @@ class Interaction_Sites:
             for j, person in enumerate(site):
                 if (pop_obj.get_person(person).is_quarantined == True):
                     prob_attendance[j] = Q_GO_PROB
-            
-            #if (pop_obj.get_person(i).is_quarantined == True):
-            #    site_attendance = np.array([q_go_prob for person in site])
-            #else:
-            #    site_attendance = np.array([random.random()<will_go_prob for person in site])
             
             site_attendance = np.array([random.random()<=prob_attendance[i] for i in range(len(site))])
             

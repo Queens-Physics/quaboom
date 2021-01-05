@@ -64,8 +64,6 @@ def RunEpidemic(nPop, n0, nDays):
                 if is_cured and pop.update_cured(index=infected_person.get_index()) == False:
                     print("Did not cure correctly")
                     
-                # maybe it should be checked for all people
-                # although maybe it doesn't matter if the person isn't infected?
                 is_quarantined = infected_person.check_quarantine(day)
 
         print("Day: {}, infected: {}, recovered: {}, suceptible: {}, dead: {}".format(day, track_infected[day], 
