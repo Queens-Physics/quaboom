@@ -2,9 +2,6 @@
 
 import numpy as np
 import unittest
-# Code to import Person.py from parent directory
-import os, sys
-sys.path.append("../")
 import Population
 
 class TestPerson(unittest.TestCase):
