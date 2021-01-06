@@ -70,7 +70,8 @@ class Population:
             isolation_tend = np.random.choice(a=ISOLATION_OPTIONS, p=ISOLATION_WEIGHTS)
             case_severity = np.random.choice(a=SEVERITY_OPTIONS, p=SEVERITY_WEIGHTS)
 
-            newPerson = Person.Person(index=i, infected=False, recovered=False, dead=False, infected_day=None, recovered_day=None, death_day=None,
+            newPerson = Person.Person(index=i, infected=False, recovered=False, dead=False, quarantined=False, quarantined_day=None, 
+                               infected_day=None, recovered_day=None, death_day=None,
                                others_infected=None, cure_days=None, recent_infections=None, age=age, 
                                job=job, house_index=0,isolation_tendencies=isolation_tend,case_severity=case_severity)
             

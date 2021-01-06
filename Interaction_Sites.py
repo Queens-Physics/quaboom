@@ -12,10 +12,17 @@ A_LOYALTY_MEAN, A_LOYALTY_STD = 4, 2
 B_LOYALTY_MEAN, B_LOYALTY_STD = 1, 1
 C_LOYALTY_MEAN, C_LOYALTY_STD = 1, .5
 
-# Infection spread parameters
+# Infection spread parameter
+INFECTION_SPREAD_PROB = 0.05
+# House spread parameters
+HOUSE_SPREAD_PROB = 0.2
+
 MASK_REDUCTION = 0.6
 BASE_INFECTION_SPREAD_PROB = 0.15
 HOUSE_INFECTION_SPREAD_PROB = BASE_INFECTION_SPREAD_PROB*(1.25)
+
+# probability of someone going out when they're quarantined
+Q_GO_PROB = 0
 
 class Interaction_Sites:
     
@@ -57,14 +64,24 @@ class Interaction_Sites:
         return grade_sites
                 
         
-    def will_visit_site(self, site_array, will_go_prob):
+    def will_visit_site(self, site_array, will_go_prob, pop_obj):
         # Function that finds how many people will go to each site of a grade in a given day
         # Returns a list of true or false of size(self.grade_X_sites) that has true for ppl going that day
         
+        # to prevent quarantined people from going, their will_go_prob will be Q_GO_PROB (0)
+       
         # Could add something here that limits how many sites one person can visit (not real to visit 11 sites a day)
         will_visit_grade = [[] for i in range(len(site_array))]
         for i, site in enumerate(site_array):
-            site_attendance = np.array([random.random()<will_go_prob for person in site])
+            
+            prob_attendance = [will_go_prob for j in range(len(site))] 
+            
+            for j, person in enumerate(site):
+                if (pop_obj.get_person(person).is_quarantined == True):
+                    prob_attendance[j] = Q_GO_PROB
+            
+            site_attendance = np.array([random.random()<=prob_attendance[i] for i in range(len(site))])
+            
             will_visit_grade[i] = site[site_attendance==True]
 
         return will_visit_grade
