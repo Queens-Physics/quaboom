@@ -86,7 +86,7 @@ class Person(object):
             self.infected = True
             self.infected_day = day
             # If cure days not specified then choose random number inbetween min and max
-            if self.case_severity == 'Mild':
+            if self.case_severity == 'Mild' or self.case_severity == None: # If severity not specified, choose Mild
                 self.cure_days = np.random.randint(MIN_MILD, MAX_MILD) if cure_days is None else cure_days
             elif self.case_severity == 'Hospitalization':
                 self.cure_days = np.random.randint(MIN_SEVERE, MAX_SEVERE) if cure_days is None else cure_days
