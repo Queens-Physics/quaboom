@@ -72,7 +72,7 @@ class Population:
 
             newPerson = Person.Person(index=i, infected=False, recovered=False, dead=False, infected_day=None, recovered_day=None, death_day=None,
                                others_infected=None, cure_days=None, recent_infections=None, age=age, 
-                               job=job, house_index=0,isolation_tendencies=isolation_tend,case_severity=case_severity)
+                               job=job, house_index=0,isolation_tendencies=isolation_tend,case_severity=case_severity, has_mask=False)
             
             # ADD A PERSON
             self.population[i] = newPerson
@@ -135,6 +135,9 @@ class Population:
 
     def count_dead(self):
         return np.count_nonzero(self.dead > 0)
+    
+    def count_masks(self):
+        return np.count_nonzero(self.has_mask > 0)
     
     #returns an individual based on their index
     def get_person(self, index):
