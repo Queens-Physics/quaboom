@@ -1,4 +1,5 @@
 import numpy as np
+import random
 import json
 
 TIME_QUARANTINE = 14 #days people have to quarantine
@@ -17,14 +18,18 @@ MAX_ICU= disease_params['recovery'][0]['MAX_ICU']
 MIN_DIE= disease_params['recovery'][0]['MIN_DIE']
 MAX_DIE= disease_params['recovery'][0]['MAX_DIE']
 
+#Symptom data
+MIN_DAY_BEFORE_SYMPTOM = 1
+MAX_DAY_BEFORE_SYMPTOM = 14
+MILD_SYMPTOM_PROB = .8
 
 json_file.close()
 
 class Person(object):
 
     # Initalize a person - Can set properties but only needed one is index
-    def __init__(self, index, infected=False, recovered=False, dead=False, quarantined=False, quarantined_day=None, infected_day=None, 
-                 recovered_day=None, death_day=None, others_infected=None, cure_days=None, 
+    def __init__(self, index, infected=False, recovered=False, dead=False, quarantined=False, quarantined_day=None, infected_day=None,
+                 recovered_day=None, death_day=None, others_infected=None, cure_days=None,
                  recent_infections=None,age=None,job=None,house_index=0,isolation_tendencies=None,case_severity=None):
 
         self.infected = infected
@@ -44,6 +49,11 @@ class Person(object):
         self.household = house_index
         self.isolation_tendencies = isolation_tendencies
         self.case_severity = case_severity
+        self.show_symptoms = False
+        self.day_symptoms_start = None
+        self.knows_infected = False
+        self.will_get_symptoms = False
+
     # Return True if infected, False if not
     def is_infected(self):
         return self.infected
@@ -51,18 +61,27 @@ class Person(object):
     # Return True if recovered, False if not
     def is_recovered(self):
         return self.recovered
-    
+
     #return True if dead, False if not
     def is_dead(self):
         return self.dead
-    
+
     #return True if quarantined, False if not
     def is_quarantined(self):
         return self.quarantined
-    
+
     def get_quarantine_day(self):
         return self.quarantined_day
-    
+
+    #checks to see if person shows symptoms on teh current day
+    def check_symptoms (self,day):
+        if (self.will_get_symptoms == True and (day - self.infected_day) >= self.day_symptoms_start
+            and self.infected == True):
+            self.show_symptoms = True
+        elif(self.infected == False):
+            self.show_symptoms = False
+        return self.show_symptoms
+
     # Return index of person
     def get_index(self):
         return self.index
@@ -74,7 +93,7 @@ class Person(object):
     # Get list of recent infections (from the last time they infected people)
     def get_recent_infections(self):
         return self.recent_infections
-    
+
     def get_case_severity(self):
         return self.case_severity
 
@@ -87,12 +106,26 @@ class Person(object):
             self.infected_day = day
             # If cure days not specified then choose random number inbetween min and max
             if self.case_severity == 'Mild' or self.case_severity == None: # If severity not specified, choose Mild
+                prob_of_symptom = random.random()
+
+                if (prob_of_symptom < MILD_SYMPTOM_PROB): #probability that the person has mild symtoms
+                    # choose number of days after infection when symptoms show
+                    self.will_get_symptoms = True
+                    self.day_symptoms_start = np.random.randint(MIN_DAY_BEFORE_SYMPTOM,MAX_DAY_BEFORE_SYMPTOM)
+
                 self.cure_days = np.random.randint(MIN_MILD, MAX_MILD) if cure_days is None else cure_days
+            #Assuming that all hospitalization or worse cases will show symptoms
             elif self.case_severity == 'Hospitalization':
+                self.will_get_symptoms = True
+                self.day_symptoms_start = np.random.randint(MIN_DAY_BEFORE_SYMPTOM,MAX_DAY_BEFORE_SYMPTOM)
                 self.cure_days = np.random.randint(MIN_SEVERE, MAX_SEVERE) if cure_days is None else cure_days
             elif self.case_severity == 'ICU':
+                self.will_get_symptoms = True
+                self.day_symptoms_start = np.random.randint(MIN_DAY_BEFORE_SYMPTOM,MAX_DAY_BEFORE_SYMPTOM)
                 self.cure_days = np.random.randint(MIN_ICU, MAX_ICU) if cure_days is None else cure_days
             elif self.case_severity == 'Death':
+                self.will_get_symptoms = True
+                self.day_symptoms_start = np.random.randint(MIN_DAY_BEFORE_SYMPTOM,MAX_DAY_BEFORE_SYMPTOM)
                 self.cure_days = np.random.randint(MIN_DIE, MAX_DIE) if cure_days is None else cure_days
 
             return True
@@ -106,10 +139,10 @@ class Person(object):
             days_since_quarantined = day - self.quarantined_day
             if days_since_quarantined >= TIME_QUARANTINE:
                 self.quarantined = False
-                
+
                 return False
             return True
-        
+
         else: # if not self quarantined
             # if they aren't in quarantine, check if they know they're infected
             ##   then put them into quarantine
@@ -118,10 +151,10 @@ class Person(object):
                 # assume people in the hospital aren't spreading it either
                 self.quarantined_day = day
                 self.quarantined = True
-                
+
                 return True
             return False
-    
+
     # Method that checks if a person is past their cure time and will cure them
     # Returns True if they were cured, False if not
     def check_cured(self, day):
@@ -138,7 +171,7 @@ class Person(object):
 
                 return True
         return False
-    
+
     def check_dead(self, day): # checking that case_severity==death outside of the loop
 
         if self.infected:
@@ -184,5 +217,3 @@ class Person(object):
             self.recent_infections.append(person_index)
 
         return len(self.recent_infections)
-
-
