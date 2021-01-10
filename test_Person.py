@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 
 import unittest
-# Code to import Person.py from parent directory
-import os, sys
-sys.path.append("../")
 import Person
 
 class TestPerson(unittest.TestCase):
