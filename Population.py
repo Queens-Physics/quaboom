@@ -30,7 +30,7 @@ for ijob in range (len(JOB_WEIGHTS)):
     string = JOB_OPTIONS[ijob].upper()
     JOB_WEIGHTS[ijob]= disease_params['job_weights'][0][string]
 
-# house# 
+# house # 
 HOUSE_WEIGHTS = np.zeros(len(HOUSE_OPTIONS))
 for ihouse in range (len(HOUSE_WEIGHTS)):
     string = str(ihouse+1)
@@ -85,7 +85,7 @@ class Population:
                 houseIndex += 1
                 self.household[houseIndex] = houseSize
                 
-        # Make sure last household number is right (when it runs out of people to fill
+        # Make sure last household number is right (when it runs out of people to fill)
         if houseSize != self.household[houseIndex]:
             self.household[houseIndex] = houseSize
             
@@ -100,7 +100,7 @@ class Population:
         
         # Infect first n0 people
         for i in range(1, n0+1):
-            self.population[i].infect(day=0)
+            self.population[i-1].infect(day=0)
             self.infected[i] = i
             self.susceptible[i] = -1
     
