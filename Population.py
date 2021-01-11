@@ -44,6 +44,9 @@ for iseverity in range (len(SEVERITY_WEIGHTS)):
         
 json_file.close()
 
+NULL_ID = -1 # This value means that the person index at this location is not susceptible/infected/dead/...
+             # All arrays are intialized to this (except healthy, as everyone is healthy)
+
 class Population:
     '''creates a population of people based on the total population
      uses and age distrubution to weight the assignment of ages
@@ -93,16 +96,16 @@ class Population:
         self.household = self.household[:houseIndex]
         
         # Create person status arrays
-        self.susceptible = np.array(range(nPop+1), dtype=int) #list of all susceptible individuals
-        self.infected = np.zeros(nPop+1, dtype=int) - 1  # list of all infected people (all healthy (negative) to start)
-        self.recovered = np.zeros(nPop+1, dtype=int) - 1 # list of recovered people (all not recovered (negative) to start)
-        self.dead = np.zeros(nPop+1, dtype=int) - 1 # list of recovered people 
+        self.susceptible = np.array(range(nPop), dtype=int) #list of all susceptible individuals
+        self.infected = np.zeros(nPop, dtype=int) + NULL_ID  # list of all infected people
+        self.recovered = np.zeros(nPop, dtype=int) + NULL_ID # list of recovered people 
+        self.dead = np.zeros(nPop, dtype=int) + NULL_ID # list of recovered people 
         
         # Infect first n0 people
-        for i in range(1, n0+1):
-            self.population[i-1].infect(day=0)
+        for i in range(n0):
+            self.population[i].infect(day=0)
             self.infected[i] = i
-            self.susceptible[i] = -1
+            self.susceptible[i] = NULL_ID
     
     #returns the population
     def get_population_size(self):
@@ -113,29 +116,29 @@ class Population:
     
     # Properly return the actual indices of each bin of people
     def get_susceptible(self):
-        return self.susceptible[self.susceptible > 0]
+        return self.susceptible[self.susceptible != NULL_ID]
     
     def get_infected(self):
-        return self.infected[self.infected > 0]
+        return self.infected[self.infected != NULL_ID]
     
     def get_recovered(self):
-        return self.recovered[self.recovered > 0]
+        return self.recovered[self.recovered != NULL_ID]
     
     def get_dead(self):
-        return self.dead[self.dead > 0]
+        return self.dead[self.dead != NULL_ID]
     
     # Count the number of people in each bin
     def count_susceptible(self):
-        return np.count_nonzero(self.susceptible > 0)
+        return np.count_nonzero(self.susceptible != NULL_ID)
     
     def count_infected(self):
-        return np.count_nonzero(self.infected > 0)
+        return np.count_nonzero(self.infected != NULL_ID)
     
     def count_recovered(self):
-        return np.count_nonzero(self.recovered > 0)
+        return np.count_nonzero(self.recovered != NULL_ID)
 
     def count_dead(self):
-        return np.count_nonzero(self.dead > 0)
+        return np.count_nonzero(self.dead != NULL_ID)
     
     #returns an individual based on their index
     def get_person(self, index):
