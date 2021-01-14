@@ -80,6 +80,9 @@ class Person(object):
     
     def get_case_severity(self):
         return self.case_severity
+    
+    def get_mask(self):
+        return self.has_mask
 
     # Method to infect a person
     def infect(self, day, cure_days=None):
@@ -156,7 +159,7 @@ class Person(object):
                 return True
         return False
 
-    def has_mask(self): #Determines and returns if person is wearing mask
+    def wear_mask(self): #Determines and returns if person is wearing mask
         mask_options = np.random.uniform()
         
         if self.has_mask:
