@@ -9,13 +9,21 @@ A_WILL_GO_PROB = .05
 B_WILL_GO_PROB = .4
 C_WILL_GO_PROB = .8
 
-# Initalize some mask variables
-initial_mask_mandate = False
+# Testing parameters
+TESTS_PER_DAY = 100
+
+# Polciy variables
+initial_mask_mandate, initial_lockdown_mandate = False, False
+lockdown_trigger, lockdown_day_trigger = None, 25
+mask_trigger, mask_day_trigger = None, 25
 
 def RunEpidemic(nPop, n0, nDays):
     # Initalize the policy class
-    policy = Policy.Policy(initial_mask_mandate=initial_mask_mandate)
+    policy = Policy.Policy(initial_mask_mandate=initial_mask_mandate, initial_lockdown_mandate=initial_lockdown_mandate, 
+                           mask_trigger=mask_trigger, mask_day_trigger=mask_day_trigger, 
+                           lockdown_trigger=lockdown_trigger, lockdown_day_trigger=lockdown_day_trigger)
     old_mask_mandate = initial_mask_mandate
+    old_lockdown_mandate = initial_lockdown_mandate
     
     # Initialize the population
     pop = Population.Population(nPop, n0, policy=policy)
@@ -27,11 +35,15 @@ def RunEpidemic(nPop, n0, nDays):
     policy.set_simulation(population=pop, interaction_sites=inter_sites)
     
     # Arrays to store the values during the simulation                   
-    track_new_infected = np.zeros(nDays, dtype=int) #new infections 
-    track_infected = np.zeros(nDays, dtype=int) # currently infected 
-    track_susceptible = np.zeros(nDays, dtype=int) # never been exposed
-    track_recovered = np.zeros(nDays, dtype=int) #total recovered
-    track_dead = np.zeros(nDays, dtype=int) #total deaths
+    track_new_infected = np.zeros(nDays, dtype=int) # new infections 
+    track_infected = np.zeros(nDays, dtype=int)     # currently infected 
+    track_susceptible = np.zeros(nDays, dtype=int)  # never been exposed
+    track_recovered = np.zeros(nDays, dtype=int)    # total recovered
+    track_dead = np.zeros(nDays, dtype=int)         # total deaths
+    track_tested = np.zeros(nDays, dtype=int)       # total tested individuals
+    track_quarantined = np.zeros(nDays, dtype=int)  # population currently in quarantine ACTUALLY DOES TOTAL QUARINTIED 
+    track_masks = np.zeros(nDays, dtype=int)
+    track_lockdown = np.zeros(nDays, dtype=int)
     
     # Loop over the number of days
     for day in range(nDays):
@@ -43,6 +55,11 @@ def RunEpidemic(nPop, n0, nDays):
         track_susceptible[day] = pop.count_susceptible()
         track_recovered[day] = pop.count_recovered()
         track_dead[day] = pop.count_dead()
+        track_tested[day] = pop.count_tested()
+        track_quarantined[day] = pop.count_quarantined()
+        track_masks[day] = old_mask_mandate
+        track_lockdown[day] = old_lockdown_mandate
+        
         #track the days someone has been infected?
         if day != 0:
             new_recovered = track_recovered[day] - track_recovered[day-1]
@@ -55,21 +72,30 @@ def RunEpidemic(nPop, n0, nDays):
         if mask_mandate != old_mask_mandate:
             print("Day: {}, Mask Mandate: {}".format(day, mask_mandate))
         old_mask_mandate = mask_mandate
+        
+        lockdown_mandate = policy.update_lockdown_mandate(day=day)
+        if lockdown_mandate != old_lockdown_mandate:
+            print("Day: {}, Lockdown Mandate: {}".format(day, mask_mandate))
+        old_lockdown_mandate = lockdown_mandate
+            
             
         ############### INTERACTION SITES STUFF ###############
-        # Find grade A, B, C site visits
-        will_visit_A = inter_sites.will_visit_site(inter_sites.get_grade_A_sites(), A_WILL_GO_PROB, pop)
-        will_visit_B = inter_sites.will_visit_site(inter_sites.get_grade_B_sites(), B_WILL_GO_PROB, pop)
-        will_visit_C = inter_sites.will_visit_site(inter_sites.get_grade_C_sites(), C_WILL_GO_PROB, pop)
-        
-        # Do site interactions based on who is going to sites - INFECTION SPREAD OCCURS HERE
-        inter_sites.site_interaction(pop, will_visit_A, inter_sites.get_grade_A_sites(), day)
-        #inter_sites.site_interaction(pop, will_visit_B, inter_sites.get_grade_B_sites(), day)
-        #inter_sites.site_interaction(pop, will_visit_C, inter_sites.get_grade_C_sites(), day)
+        will_visit_A = inter_sites.will_visit_site(inter_sites.get_grade_A_sites(), A_WILL_GO_PROB)
+        inter_sites.site_interaction(will_visit_A, inter_sites.get_grade_A_sites(), day)
+        if not lockdown_mandate:
+            will_visit_B = inter_sites.will_visit_site(inter_sites.get_grade_B_sites(), B_WILL_GO_PROB)
+            inter_sites.site_interaction(will_visit_B, inter_sites.get_grade_B_sites(), day)
+            will_visit_C = inter_sites.will_visit_site(inter_sites.get_grade_C_sites(), C_WILL_GO_PROB)
+            inter_sites.site_interaction(will_visit_C, inter_sites.get_grade_C_sites(), day)
         
         # Manage at home interactions
-        inter_sites.house_interact(pop, day)
+        inter_sites.house_interact(day)
         
+        # Manage testing sites
+        inter_sites.testing_site(TESTS_PER_DAY,day)
+        
+        # Manage Quarantine
+        pop.update_quarantine(day)
         
         ############### UPDATE POPULATION ###############
         # See who needs to be cured or die
@@ -89,13 +115,17 @@ def RunEpidemic(nPop, n0, nDays):
                     
                 is_quarantined = infected_person.check_quarantine(day)
 
-        print("Day: {}, infected: {}, recovered: {}, suceptible: {}, dead: {}".format(day, track_infected[day], 
+        print("Day: {}, infected: {}, recovered: {}, suceptible: {}, dead: {}, tested: {} total quarantined: {}".format(day, 
+                                                                                      track_infected[day],
                                                                                       track_recovered[day],
-                                                                                      track_susceptible[day], 
-                                                                                      track_dead[day]))
+                                                                                      track_susceptible[day],
+                                                                                      track_dead[day],
+                                                                                      track_tested[day],
+                                                                                      track_quarantined[day]))
     print("At the end, ", track_susceptible[-1], "never got it")
     print(track_dead[-1], "died")
     print(np.max(track_infected), "had it at the peak")
+    print(track_tested[day], "have been tested")
+    print (np.max(track_quarantined), "were in quarantine at the peak")
     
-    return track_infected, track_new_infected, track_recovered, track_susceptible, track_dead, Population
-
+    return track_infected, track_new_infected, track_recovered, track_susceptible, track_dead, track_tested, track_quarantined, track_masks, track_lockdown, Population
