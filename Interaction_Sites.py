@@ -21,6 +21,9 @@ MASK_REDUCTION = 0.6
 BASE_INFECTION_SPREAD_PROB = 0.15
 HOUSE_INFECTION_SPREAD_PROB = BASE_INFECTION_SPREAD_PROB*(1.25)
 
+#Probability of always wearing/ not wearing a mask each day based on being a mask wearing person or not
+DAILY_MASK_PROB = 0.9
+
 # probability of someone going out when they're quarantined
 Q_GO_PROB = 0
 
@@ -139,21 +142,52 @@ class Interaction_Sites:
         lower_interaction_bound = 0  # Random numbers at the moment
         
         return np.random.randint(lower_interaction_bound, upper_interaction_bound)
-         
+    
+    def daily_mask_odds(self, pop_obj, person_1, person_2):
+        p1 = pop_obj.get_person(person_1).get_mask()
+        p2 = pop_obj.get_person(person_2).get_mask()
         
+        daily_mask_odds_p1 = np.random.uniform()
+        daily_mask_odds_p2 = np.random.uniform()
+
+        #If person1 is a mask wearing person they have a 90% cahnge of wearing a mask that day
+        if p1 == True and daily_mask_odds_p1 <= DAILY_MASK_PROB:
+            return True
+        #If person1 is not a mask wearing person they have a 90% chance of not wearing a mask that day
+        elif p1 == False and daily_mask_odds_p1 <= DAILY_MASK_PROB:
+            return False
+        #If person1 is a mask wearing person they have a 10% chance of not wearing a mask that that
+        elif p1 == True and daily_mask_odds_p1 > DAILY_MASK_PROB:
+            return False
+        #If person1 is not a mask wearing person they have a 10% chance of wearing a mask each day
+        else:
+            return True
+        
+        #If person2 is a mask wearing person they have a 90% cahnge of wearing a mask that day
+        if p2 == True and daily_mask_odds_p2 <= DAILY_MASK_PROB:
+            return True
+        #If person2 is not a mask wearing person they have a 90% chance of not wearing a mask that day
+        elif p2 == False and daily_mask_odds_p2 <= DAILY_MASK_PROB:
+            return False
+        #If person2 is a mask wearing person they have a 10% chance of not wearing a mask that that
+        elif p2 == True and daily_mask_odds_p2 > DAILY_MASK_PROB:
+            return False
+        #If person2 is not a mask wearing person they have a 10% chance of wearing a mask each day
+        else:
+            return True
+         
     def interact(self, pop_obj, person_1, person_2):
         # Function that models the interaction between two people, and will return if interaction spread
         # Create two temp variables until we have person.mask implemented
-        p1Mask = True # pop_obj.get_person(person_1).has_mask()
-        p2Mask = False # pop_obj.get_person(person_2).has_mask()
+        p1Mask = pop_obj.get_person(person_1).get_mask()
+        p2Mask = pop_obj.get_person(person_2).get_mask()
         
         if p1Mask and p2Mask: spread_prob = BASE_INFECTION_SPREAD_PROB*MASK_REDUCTION**2
         elif p1Mask or p2Mask: spread_prob = BASE_INFECTION_SPREAD_PROB*MASK_REDUCTION
-        else: spread_prob = BASE_INFECTION_SPREAD_RATE
+        else: spread_prob = BASE_INFECTION_SPREAD_PROB
         
         return random.random() < spread_prob
-    
-    
+   
     def house_interact(self, pop_obj, day):
         # It is assumed that if people go to the same home they will interact with eachother
         house_count = 0
