@@ -17,7 +17,7 @@ INFECTION_SPREAD_PROB = 0.05
 # House spread parameters
 HOUSE_SPREAD_PROB = 0.2
 
-MASK_REDUCTION = 0.4
+MASK_REDUCTION = 0.6
 BASE_INFECTION_SPREAD_PROB = 0.15
 HOUSE_INFECTION_SPREAD_PROB = BASE_INFECTION_SPREAD_PROB*(1.25)
 
@@ -142,9 +142,8 @@ class Interaction_Sites:
          
     def interact(self, pop_obj, person_1, person_2):
         # Function that models the interaction between two people, and will return if interaction spread
-        # Create two temp variables until we have person.mask implemented
-        p1Mask = pop_obj.get_person(person_1).get_mask()
-        p2Mask = pop_obj.get_person(person_2).get_mask()
+        p1Mask = pop_obj.get_person(person_1).wear_mask()
+        p2Mask = pop_obj.get_person(person_2).wear_mask()
         
         if p1Mask and p2Mask: spread_prob = BASE_INFECTION_SPREAD_PROB*MASK_REDUCTION**2
         elif p1Mask or p2Mask: spread_prob = BASE_INFECTION_SPREAD_PROB*MASK_REDUCTION
