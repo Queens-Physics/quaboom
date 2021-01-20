@@ -167,6 +167,7 @@ class Person(object):
                 return False #False = not wearing a mask
             else:
                 return True #True = wearing a mask
+        else:
             return False
     
     # Method to infect a random subset of the susceptable population. Returns how many people infected
