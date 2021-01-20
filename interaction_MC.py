@@ -8,8 +8,6 @@ A_WILL_GO_PROB = .05
 B_WILL_GO_PROB = .4
 C_WILL_GO_PROB = .8
 
-TESTSPERDAY = 100
-
 def RunEpidemic(nPop, n0, nDays):
     # Initialize the population
     pop = Population.Population(nPop, n0)
@@ -22,8 +20,9 @@ def RunEpidemic(nPop, n0, nDays):
     track_infected = np.zeros(nDays, dtype=int) # currently infected
     track_susceptible = np.zeros(nDays, dtype=int) # never been exposed
     track_recovered = np.zeros(nDays, dtype=int) #total recovered
-    track_dead = np.zeros(nDays, dtype=int) #total deaths
-    track_tested = np.zeros(nDays, dtype=int) #total tested individuals
+    track_dead = np.zeros(nDays, dtype=int) # total deaths
+    track_tested = np.zeros(nDays, dtype=int) # total tested individuals
+    track_quarantined = np.zeros(nDays, dtype=int) # population currently in quarantine
 
     # Loop over the number of days
     for day in range(nDays):
@@ -34,7 +33,7 @@ def RunEpidemic(nPop, n0, nDays):
         track_recovered[day] = pop.count_recovered()
         track_dead[day] = pop.count_dead()
         track_tested[day] = pop.count_tested()
-
+        track_quarantined[day] = pop.count_quarantined()
         #track the days someone has been infected?
         if day != 0:
             new_recovered = track_recovered[day] - track_recovered[day-1]
@@ -55,7 +54,7 @@ def RunEpidemic(nPop, n0, nDays):
         inter_sites.house_interact(pop, day)
 
         #Manage testing sites
-        inter_sites.testing_site(100,pop,day)
+        inter_sites.testing_site(TESTS_PER_DAY,pop,day)
 
         # See who needs to be cured or die
         infected_people = pop.get_infected()
@@ -74,14 +73,16 @@ def RunEpidemic(nPop, n0, nDays):
 
                 is_quarantined = infected_person.check_quarantine(day)
 
-        print("Day: {}, infected: {}, recovered: {}, suceptible: {}, dead: {}, tested: {}".format(day, track_infected[day],
+        print("Day: {}, infected: {}, recovered: {}, suceptible: {}, dead: {}, tested: {} quarantine: {}".format(day, track_infected[day],
                                                                                       track_recovered[day],
                                                                                       track_susceptible[day],
                                                                                       track_dead[day],
-                                                                                      track_tested[day]))
+                                                                                      track_tested[day],
+                                                                                      track_quarantined[day]))
     print("At the end, ", track_susceptible[-1], "never got it")
     print(track_dead[-1], "died")
     print(np.max(track_infected), "had it at the peak")
     print(track_tested[day], "have been tested")
+    print (np.max(track_quarantined), "were in quarantine at the peak")
 
-    return track_infected, track_new_infected, track_recovered, track_susceptible, track_dead, track_tested, Population
+    return track_infected, track_new_infected, track_recovered, track_susceptible, track_dead, track_tested, track_quarantined, Population

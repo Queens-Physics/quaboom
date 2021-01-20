@@ -179,8 +179,8 @@ class Interaction_Sites:
     # Function thats tests the symtomatic individuals as well as brining them in and out of quarentine
     def testing_site (self,tests_per_day,pop_obj,day): #tests per day is number of postive tests per day as we ignore negative tests
         pop_obj.update_symptomatic(day)
-        pop_obj.update_quarentine(day)
         pop_obj.get_tested(tests_per_day,day)
+        pop_obj.update_quarantine(day)
 
     def get_grade_A_sites(self):
         return self.grade_A_sites.copy()
