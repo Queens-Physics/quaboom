@@ -139,21 +139,18 @@ class Interaction_Sites:
         lower_interaction_bound = 0  # Random numbers at the moment
 
         return np.random.randint(lower_interaction_bound, upper_interaction_bound)
-
-
+         
     def interact(self, pop_obj, person_1, person_2):
         # Function that models the interaction between two people, and will return if interaction spread
-        # Create two temp variables until we have person.mask implemented
-        p1Mask = True # pop_obj.get_person(person_1).has_mask()
-        p2Mask = False # pop_obj.get_person(person_2).has_mask()
-
+        p1Mask = pop_obj.get_person(person_1).wear_mask()
+        p2Mask = pop_obj.get_person(person_2).wear_mask()
+        
         if p1Mask and p2Mask: spread_prob = BASE_INFECTION_SPREAD_PROB*MASK_REDUCTION**2
         elif p1Mask or p2Mask: spread_prob = BASE_INFECTION_SPREAD_PROB*MASK_REDUCTION
-        else: spread_prob = BASE_INFECTION_SPREAD_RATE
-
+        else: spread_prob = BASE_INFECTION_SPREAD_PROB
+        
         return random.random() < spread_prob
-
-
+   
     def house_interact(self, pop_obj, day):
         # It is assumed that if people go to the same home they will interact with eachother
         house_count = 0
@@ -190,3 +187,4 @@ class Interaction_Sites:
 
     def get_grade_C_sites(self):
         return self.grade_C_sites.copy()
+

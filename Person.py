@@ -17,15 +17,17 @@ MAX_ICU= disease_params['recovery'][0]['MAX_ICU']
 MIN_DIE= disease_params['recovery'][0]['MIN_DIE']
 MAX_DIE= disease_params['recovery'][0]['MAX_DIE']
 
+MASKPROB = 0.8 #Probability of wearing a mask properly
 
 json_file.close()
 
 class Person(object):
 
-    # Initalize a person - Can set properties but only needed one is index
-    def __init__(self, index, infected=False, recovered=False, dead=False, quarantined=False, quarantined_day=None, infected_day=None,
-                 recovered_day=None, death_day=None, others_infected=None, cure_days=None,
-                 recent_infections=None,age=None,job=None,house_index=0,isolation_tendencies=None,case_severity=None):
+    # Initalize a person - Can set properties but only needed one is inde
+    def __init__(self, index, infected=False, recovered=False, dead=False, quarantined=False, quarantined_day=None, 
+                 infected_day=None, recovered_day=None, death_day=None, others_infected=None, cure_days=None, 
+                 recent_infections=None, age=None, job=None, house_index=0,isolation_tendencies=None,case_severity=None, 
+                 has_mask=True):
 
         self.infected = infected
         self.recovered = recovered
@@ -48,7 +50,8 @@ class Person(object):
         self.days_until_symptoms = None
         self.knows_infected = False
         self.will_get_symptoms = False
-
+        self.has_mask = has_mask
+        
     # Return True if infected, False if not
     def is_infected(self):
         return self.infected
@@ -103,6 +106,9 @@ class Person(object):
 
     def get_case_severity(self):
         return self.case_severity
+    
+    def get_mask(self):
+        return self.has_mask
 
     # Method to infect a person
     def infect(self, day, cure_days=None):
@@ -195,6 +201,17 @@ class Person(object):
                 return True
         return False
 
+    def wear_mask(self): #Determines and returns if person is wearing mask
+        mask_options = np.random.uniform()
+        
+        if self.has_mask:
+            if mask_options > MASKPROB:
+                return False #False = not wearing a mask
+            else:
+                return True #True = wearing a mask
+        else:
+            return False
+    
     # Method to infect a random subset of the susceptable population. Returns how many people infected
     def infect_others(self, pop_list, suscept_pop, day, num_to_infect=1):
 
