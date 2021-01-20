@@ -7,7 +7,7 @@ import Interaction_Sites
 A_WILL_GO_PROB = .05
 B_WILL_GO_PROB = .4
 C_WILL_GO_PROB = .8
-
+TESTS_PER_DAY = 100
 def RunEpidemic(nPop, n0, nDays):
     # Initialize the population
     pop = Population.Population(nPop, n0)
