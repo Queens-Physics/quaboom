@@ -41,6 +41,9 @@ SEVERITY_WEIGHTS = np.zeros(len(SEVERITY_OPTIONS))
 for iseverity in range (len(SEVERITY_WEIGHTS)):
     string = SEVERITY_OPTIONS[iseverity]
     SEVERITY_WEIGHTS[iseverity]= disease_params['case_severity'][0][string]
+    
+# mask
+PROB_HAS_MASK = 0.8
         
 json_file.close()
 
@@ -72,11 +75,12 @@ class Population:
             job = np.random.choice(a=JOB_OPTIONS, p=JOB_WEIGHTS)
             isolation_tend = np.random.choice(a=ISOLATION_OPTIONS, p=ISOLATION_WEIGHTS)
             case_severity = np.random.choice(a=SEVERITY_OPTIONS, p=SEVERITY_WEIGHTS)
+            has_mask = np.random.random() < PROB_HAS_MASK
 
             newPerson = Person.Person(index=i, infected=False, recovered=False, dead=False, quarantined=False, quarantined_day=None, 
                                infected_day=None, recovered_day=None, death_day=None,
                                others_infected=None, cure_days=None, recent_infections=None, age=age, 
-                               job=job, house_index=0,isolation_tendencies=isolation_tend,case_severity=case_severity)
+                               job=job, house_index=0,isolation_tendencies=isolation_tend,case_severity=case_severity, has_mask=has_mask)
             
             # ADD A PERSON
             self.population[i] = newPerson
@@ -139,6 +143,9 @@ class Population:
 
     def count_dead(self):
         return np.count_nonzero(self.dead != NULL_ID)
+    
+    def count_masks(self):
+        return np.count_nonzero(self.has_mask > 0)
     
     #returns an individual based on their index
     def get_person(self, index):
