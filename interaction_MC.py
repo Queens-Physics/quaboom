@@ -34,7 +34,7 @@ def RunEpidemic(nPop, n0, nDays):
         track_dead[day] = pop.count_dead()
         track_tested[day] = pop.count_tested()
         track_quarantined[day] = pop.count_quarantined()
-        print(pop.count_quarantined())
+
         #track the days someone has been infected?
         if day != 0:
             new_recovered = track_recovered[day] - track_recovered[day-1]
