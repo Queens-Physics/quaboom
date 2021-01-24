@@ -1,6 +1,7 @@
 import numpy as np
 import Person
 import json
+import random
 
 json_file = open('dataK.json')
 disease_params = json.load(json_file)
@@ -42,7 +43,8 @@ SEVERITY_WEIGHTS = np.zeros(len(SEVERITY_OPTIONS))
 for iseverity in range (len(SEVERITY_WEIGHTS)):
     string = SEVERITY_OPTIONS[iseverity]
     SEVERITY_WEIGHTS[iseverity]= disease_params['case_severity'][0][string]
-  
+    
+    
 # mask
 PROB_HAS_MASK = 0.8
 

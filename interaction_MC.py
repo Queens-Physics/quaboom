@@ -16,13 +16,13 @@ def RunEpidemic(nPop, n0, nDays):
     inter_sites = Interaction_Sites.Interaction_Sites(pop_obj=pop)
 
     # Arrays to store the values during the simulation
-    track_new_infected = np.zeros(nDays, dtype=int) #new infections
-    track_infected = np.zeros(nDays, dtype=int) # currently infected
-    track_susceptible = np.zeros(nDays, dtype=int) # never been exposed
-    track_recovered = np.zeros(nDays, dtype=int) #total recovered
-    track_dead = np.zeros(nDays, dtype=int) # total deaths
-    track_tested = np.zeros(nDays, dtype=int) # total tested individuals
-    track_quarantined = np.zeros(nDays, dtype=int) # population currently in quarantine
+    track_new_infected = np.zeros(nDays, dtype=int) # new infections
+    track_infected = np.zeros(nDays, dtype=int)     # currently infected
+    track_susceptible = np.zeros(nDays, dtype=int)  # never been exposed
+    track_recovered = np.zeros(nDays, dtype=int)    # total recovered
+    track_dead = np.zeros(nDays, dtype=int)         # total deaths
+    track_tested = np.zeros(nDays, dtype=int)       # total tested individuals
+    track_quarantined = np.zeros(nDays, dtype=int)  # population currently in quarantine ACTUALLY DOES TOTAL QUARINTIED 
 
     # Loop over the number of days
     for day in range(nDays):
@@ -34,6 +34,7 @@ def RunEpidemic(nPop, n0, nDays):
         track_dead[day] = pop.count_dead()
         track_tested[day] = pop.count_tested()
         track_quarantined[day] = pop.count_quarantined()
+        print(pop.count_quarantined())
         #track the days someone has been infected?
         if day != 0:
             new_recovered = track_recovered[day] - track_recovered[day-1]
@@ -73,7 +74,7 @@ def RunEpidemic(nPop, n0, nDays):
 
                 is_quarantined = infected_person.check_quarantine(day)
 
-        print("Day: {}, infected: {}, recovered: {}, suceptible: {}, dead: {}, tested: {} quarantine: {}".format(day, track_infected[day],
+        print("Day: {}, infected: {}, recovered: {}, suceptible: {}, dead: {}, tested: {} total quarantined: {}".format(day, track_infected[day],
                                                                                       track_recovered[day],
                                                                                       track_susceptible[day],
                                                                                       track_dead[day],

@@ -1,4 +1,5 @@
 import numpy as np
+import random
 import json
 
 TIME_QUARANTINE = 14 #days people have to quarantine
@@ -18,6 +19,8 @@ MIN_DIE= disease_params['recovery'][0]['MIN_DIE']
 MAX_DIE= disease_params['recovery'][0]['MAX_DIE']
 
 MASKPROB = 0.8 #Probability of wearing a mask properly
+MILD_SYMPTOM_PROB = 0.8 # Probability of mild symptoms
+MIN_DAY_BEFORE_SYMPTOM, MAX_DAY_BEFORE_SYMPTOM = 1, 10
 
 json_file.close()
 
@@ -117,28 +120,24 @@ class Person(object):
         if not self.recovered and not self.infected and not self.dead:
             self.infected = True
             self.infected_day = day
+            self.will_get_symptoms = True
+            self.days_until_symptoms  = np.random.randint(MIN_DAY_BEFORE_SYMPTOM,MAX_DAY_BEFORE_SYMPTOM)
+            
             # If cure days not specified then choose random number inbetween min and max
             if self.case_severity == 'Mild' or self.case_severity == None: # If severity not specified, choose Mild
                 prob_of_symptom = random.random()
-
-                if (prob_of_symptom < MILD_SYMPTOM_PROB): #probability that the person has mild symtoms
+                if (prob_of_symptom > MILD_SYMPTOM_PROB): #probability that the person has mild symtoms
                     # choose number of days after infection when symptoms show
-                    self.will_get_symptoms = True
-                    self.days_until_symptoms  = np.random.randint(MIN_DAY_BEFORE_SYMPTOM,MAX_DAY_BEFORE_SYMPTOM)
+                    self.will_get_symptoms = False
+                    self.days_until_symptoms = None
 
                 self.cure_days = np.random.randint(MIN_MILD, MAX_MILD) if cure_days is None else cure_days
             #Assuming that all hospitalization or worse cases will show symptoms
             elif self.case_severity == 'Hospitalization':
-                self.will_get_symptoms = True
-                self.days_until_symptoms = np.random.randint(MIN_DAY_BEFORE_SYMPTOM,MAX_DAY_BEFORE_SYMPTOM)
                 self.cure_days = np.random.randint(MIN_SEVERE, MAX_SEVERE) if cure_days is None else cure_days
             elif self.case_severity == 'ICU':
-                self.will_get_symptoms = True
-                self.days_until_symptoms = np.random.randint(MIN_DAY_BEFORE_SYMPTOM,MAX_DAY_BEFORE_SYMPTOM)
                 self.cure_days = np.random.randint(MIN_ICU, MAX_ICU) if cure_days is None else cure_days
             elif self.case_severity == 'Death':
-                self.will_get_symptoms = True
-                self.days_until_symptoms = np.random.randint(MIN_DAY_BEFORE_SYMPTOM,MAX_DAY_BEFORE_SYMPTOM)
                 self.cure_days = np.random.randint(MIN_DIE, MAX_DIE) if cure_days is None else cure_days
 
             return True
