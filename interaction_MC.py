@@ -65,15 +65,9 @@ def RunEpidemic(nPop, n0, nDays):
 
         # Do site interactions based on who is going to sites - INFECTION SPREAD OCCURS HERE
         inter_sites.site_interaction(pop, will_visit_A, inter_sites.get_grade_A_sites(), day, visitors)
-<<<<<<< HEAD
         #inter_sites.site_interaction(pop, will_visit_B, inter_sites.get_grade_B_sites(), day, visitors)
         #inter_sites.site_interaction(pop, will_visit_C, inter_sites.get_grade_C_sites(), day, visitors)
-        
-=======
-        #inter_sites.site_interaction(pop, will_visit_B, inter_sites.get_grade_B_sites(), day)  ## gotta add it here too
-        #inter_sites.site_interaction(pop, will_visit_C, inter_sites.get_grade_C_sites(), day)
 
->>>>>>> 12c731b961192612c5d1703d25fcad142a95429b
         # Manage at home interactions
         inter_sites.house_interact(pop, day)
 
