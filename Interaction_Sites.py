@@ -174,8 +174,14 @@ class Interaction_Sites:
     def interact_vis(self, pop_obj, visitors, person_1, visitor_i):
         # Function that models the interaction between two people, and will return if interaction spread
         # Create two temp variables until we have person.mask implemented
+        p1Mask = True # pop_obj.get_person(person_1).has_mask()
+        P2Mask = False # visitors.get_person(visitor_i).has_mask() except will this work if it's not in the population...
         
-        #make a function like the other one but to interact with a visitor
+        if p1Mask and p2Mask: spread_prob = BASE_INFECTION_SPREAD_PROB*MASK_REDUCTION**2
+        elif p1Mask or p2Mask: spread_prob = BASE_INFECTION_SPREAD_PROB*MASK_REDUCTION
+        else: spread_prob = BASE_INFECTION_SPREAD_RATE
+        
+        return random.random() < spread_prob
     
     def house_interact(self, pop_obj, day):
         # It is assumed that if people go to the same home they will interact with eachother
