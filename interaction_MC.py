@@ -26,6 +26,21 @@ def RunEpidemic(nPop, n0, nDays):
 
     # Loop over the number of days
     for day in range(nDays):
+        
+        # number of people who will visit the region, range proportionate to the population size
+        num_visitors = abs(np.random.poisson(1)) #random.randint(0,5)
+        print("Number of visitors:",num_visitors)
+        
+        visitors = [0]*num_visitors
+        
+        for i in range(0, num_visitors):
+            newPerson = Person.Person(index=i+len(pop.population), infected=True, recovered=False, dead=False,
+                               quarantined=False, quarantined_day=None, 
+                               infected_day=None, recovered_day=None, death_day=None,
+                               others_infected=None, cure_days=None, recent_infections=None, age=30, 
+                               job=None, house_index=None,isolation_tendencies=0.2,case_severity='Mild')
+            
+            visitors[i] = newPerson
 
         #Count all the different states of people
         track_infected[day] = pop.count_infected()
@@ -47,8 +62,8 @@ def RunEpidemic(nPop, n0, nDays):
         will_visit_C = inter_sites.will_visit_site(inter_sites.get_grade_C_sites(), C_WILL_GO_PROB, pop)
 
         # Do site interactions based on who is going to sites - INFECTION SPREAD OCCURS HERE
-        inter_sites.site_interaction(pop, will_visit_A, inter_sites.get_grade_A_sites(), day)
-        #inter_sites.site_interaction(pop, will_visit_B, inter_sites.get_grade_B_sites(), day)
+        inter_sites.site_interaction(pop, will_visit_A, inter_sites.get_grade_A_sites(), day, visitors)
+        #inter_sites.site_interaction(pop, will_visit_B, inter_sites.get_grade_B_sites(), day)  ## gotta add it here too
         #inter_sites.site_interaction(pop, will_visit_C, inter_sites.get_grade_C_sites(), day)
 
         # Manage at home interactions

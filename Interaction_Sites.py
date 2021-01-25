@@ -86,8 +86,9 @@ class Interaction_Sites:
 
         return will_visit_grade
 
-
-    def site_interaction(self, pop_obj, will_go_array, site_array, day):
+    
+    
+    def site_interaction(self, pop_obj, will_go_array, site_array, day, visitors):
         # Find out how many interactions each person has at the site - FUNCTION IS PRETTY SLOW RN
         # Should deal with case where one person is left with more than one interaction
         new_infections = np.zeros(pop_obj.get_population_size(), dtype=int)
@@ -96,6 +97,8 @@ class Interaction_Sites:
         for ppl_going in will_go_array:
 
             infected_persons = [index for index in ppl_going if pop_obj.get_person(index).is_infected()==True]
+            #### INFECTED PERSONS ALSO INCLUDE VISITORS ####
+            infected_persons.append([index+pop_obj.get_population_size() for index in visitors]) # make it index + population size?
             recovered_persons = [index for index in ppl_going if pop_obj.get_person(index).is_recovered()==True]
 
             if len(infected_persons)==0 or len(infected_persons)+len(recovered_persons)==len(ppl_going):
@@ -110,24 +113,41 @@ class Interaction_Sites:
                 person_1 = np.argmax(num_interactions)
                 # find a random interactor for them to pair with (that is not them)
                 new_options = [i for i in range(len(num_interactions)) if num_interactions[i] > 0 and i != person_1]
+                #### INCLUDE VISITORS ####
+                new_options.append([i+pop_obj.get_population_size() for i in visitors])
                 person_2 = np.random.choice(new_options)
 
                 # Get the actual people at these indexes
                 person_1_index = ppl_going[person_1]
-                person_2_index = ppl_going[person_2]
 
-                # Have an interaction between those people
-                did_infect = self.interact(pop_obj, person_1_index, person_2_index)
-                if did_infect:
-                    person_1_infected = pop_obj.get_person(person_1_index).is_infected()
-                    new_infections[new_infections_count] = person_2_index if person_1_infected else person_1_index
-                    new_infections_count += 1
+                
+                if (person_2 < len(ppl_going)):
+                    person_2_index = ppl_going[person_2]
+                
+                    # Have an interaction between those people
+                    did_infect = self.interact(pop_obj, person_1_index, person_2_index)
+                    if did_infect:
+                        person_1_infected = pop_obj.get_person(person_1_index).is_infected()
+                        new_infections[new_infections_count] = person_2_index if person_1_infected else person_1_index
+                        new_infections_count += 1
 
-                # Lower the interaction count for those people
-                num_interactions[person_1] -= 1
-                num_interactions[person_2] -= 1
-
-
+                    # Lower the interaction count for those people
+                    num_interactions[person_1] -= 1
+                    num_interactions[person_2] -= 1
+                    
+                else: #one of the interactions is a visitor
+                    person_2_index = person_2 - len(ppl_going)
+                    
+                    # have an interaction between the visitor and the resident
+                    did_infect = self.interact_vis(pop_obj, visitors, person_1_index, person_2_index)
+                    if did_infect:
+                        person_1_infected = pop_obj.get_person(person_1_index).is_infected()
+                        new_infections[new_infections_count] = person_1_index if not person_1_infected
+                        new_infections_count += 1
+                    
+                    # lower the interaction for the person
+                    num_interactions[person_1] -= 1
+            
         # Update people who get infected only at the end (if i get CV19 at work, prolly wont spread at the store that night ?)
         for new_infection in new_infections[:new_infections_count]:
             pop_obj.infect(index=new_infection, day=day)
@@ -150,7 +170,14 @@ class Interaction_Sites:
         else: spread_prob = BASE_INFECTION_SPREAD_PROB
         
         return random.random() < spread_prob
-   
+
+    
+    def interact_vis(self, pop_obj, visitors, person_1, visitor_i):
+        # Function that models the interaction between two people, and will return if interaction spread
+        # Create two temp variables until we have person.mask implemented
+        
+        #make a function like the other one but to interact with a visitor
+    
     def house_interact(self, pop_obj, day):
         # It is assumed that if people go to the same home they will interact with eachother
         house_count = 0
