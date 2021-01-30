@@ -97,8 +97,6 @@ class Interaction_Sites:
         for ppl_going in will_go_array:
 
             infected_persons = [index for index in ppl_going if pop_obj.get_person(index).is_infected()==True]
-            #### INFECTED PERSONS ALSO INCLUDE VISITORS ####
-            infected_persons.append([index+pop_obj.get_population_size() for index in visitors]) # make it index + population size?
             recovered_persons = [index for index in ppl_going if pop_obj.get_person(index).is_recovered()==True]
 
             if len(infected_persons)==0 or len(infected_persons)+len(recovered_persons)==len(ppl_going):
@@ -114,7 +112,7 @@ class Interaction_Sites:
                 # find a random interactor for them to pair with (that is not them)
                 new_options = [i for i in range(len(num_interactions)) if num_interactions[i] > 0 and i != person_1]
                 #### INCLUDE VISITORS ####
-                new_options.append([i+pop_obj.get_population_size() for i in visitors])
+                new_options.extend([i+pop_obj.get_population_size() for i in range(len(visitors))])
                 person_2 = np.random.choice(new_options)
 
                 # Get the actual people at these indexes
@@ -142,8 +140,10 @@ class Interaction_Sites:
                     did_infect = self.interact_vis(pop_obj, visitors, person_1_index, person_2_index)
                     if did_infect:
                         person_1_infected = pop_obj.get_person(person_1_index).is_infected()
-                        new_infections[new_infections_count] = person_1_index if not person_1_infected
-                        new_infections_count += 1
+                        if not person_1_infected:
+                            ## like above?
+                            new_infections[new_infections_count] = person_1_index
+                            new_infections_count += 1
                     
                     # lower the interaction for the person
                     num_interactions[person_1] -= 1
@@ -175,12 +175,12 @@ class Interaction_Sites:
     def interact_vis(self, pop_obj, visitors, person_1, visitor_i):
         # Function that models the interaction between two people, and will return if interaction spread
         # Create two temp variables until we have person.mask implemented
-        p1Mask = True # pop_obj.get_person(person_1).has_mask()
-        P2Mask = False # visitors.get_person(visitor_i).has_mask() except will this work if it's not in the population...
+        p1Mask = pop_obj.get_person(person_1).wear_mask()
+        p2Mask = pop_obj.get_person(visitor_i).wear_mask() # this won't be for the right person because the visitors aren't part of the population - maybe should just set it to random between true or false
         
         if p1Mask and p2Mask: spread_prob = BASE_INFECTION_SPREAD_PROB*MASK_REDUCTION**2
         elif p1Mask or p2Mask: spread_prob = BASE_INFECTION_SPREAD_PROB*MASK_REDUCTION
-        else: spread_prob = BASE_INFECTION_SPREAD_RATE
+        else: spread_prob = BASE_INFECTION_SPREAD_PROB
         
         return random.random() < spread_prob
     

@@ -2,6 +2,7 @@ import numpy as np
 import Person
 import Population
 import Interaction_Sites
+import random
 
 # will_go_to_site parameters (prob person will go somewhere each day)
 A_WILL_GO_PROB = .05
@@ -27,19 +28,18 @@ def RunEpidemic(nPop, n0, nDays):
     # Loop over the number of days
     for day in range(nDays):
         
-        # number of people who will visit the region, range proportionate to the population size
-        num_visitors = random.randint(0,4) #make it proportionate to the population
-        print("Number of visitors:",num_visitors)
+        # number of people who will visit the region, range proportionate to the population size (this is arbitrary)
+        num_visitors = random.randint(0,3) if (nPop < 20e4) else random.randint(0,int(0.00002*nPop))
         
         visitors = [0]*num_visitors
         
         for i in range(0, num_visitors):
-            #vis_age = random number between 16 and 60
+            vis_age = random.randint(16,50)
             
             newPerson = Person.Person(index=i+len(pop.population), infected=True, recovered=False, dead=False,
                                quarantined=False, quarantined_day=None, 
                                infected_day=None, recovered_day=None, death_day=None,
-                               others_infected=None, cure_days=None, recent_infections=None, age=30, 
+                               others_infected=None, cure_days=None, recent_infections=None, age=vis_age, 
                                job=None, house_index=None,isolation_tendencies=0.2,case_severity='Mild')
             
             visitors[i] = newPerson
