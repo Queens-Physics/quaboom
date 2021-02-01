@@ -126,7 +126,6 @@ class Interaction_Sites:
                     # Have an interaction between those people
                     did_infect = self.interact(person_1_index, person_2_index)
                     if did_infect:
-                        person_1_infected = self.pop.get_person(person_1_index).is_infected()
                         new_infections[new_infections_count] = person_2_index if person_1_infected else person_1_index
                         new_infections_count += 1
 

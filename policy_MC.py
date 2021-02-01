@@ -22,8 +22,7 @@ def RunEpidemic(nPop, n0, nDays):
     policy = Policy.Policy(initial_mask_mandate=initial_mask_mandate, initial_lockdown_mandate=initial_lockdown_mandate, 
                            mask_trigger=mask_trigger, mask_day_trigger=mask_day_trigger, 
                            lockdown_trigger=lockdown_trigger, lockdown_day_trigger=lockdown_day_trigger)
-    old_mask_mandate = initial_mask_mandate
-    old_lockdown_mandate = initial_lockdown_mandate
+    old_mask_mandate, old_lockdown_mandate = initial_mask_mandate, initial_lockdown_mandate
     
     # Initialize the population
     pop = Population.Population(nPop, n0, policy=policy)
@@ -73,11 +72,10 @@ def RunEpidemic(nPop, n0, nDays):
             print("Day: {}, Mask Mandate: {}".format(day, mask_mandate))
         old_mask_mandate = mask_mandate
         
-        lockdown_mandate = policy.update_lockdown_mandate(day=day)
-        if lockdown_mandate != old_lockdown_mandate:
-            print("Day: {}, Lockdown Mandate: {}".format(day, mask_mandate))
-        old_lockdown_mandate = lockdown_mandate
-            
+        lockdown = policy.update_lockdown(day=day)
+        if lockdown != old_lockdown:
+            print("Day: {}, Lockdown: {}".format(day, lockdown))
+        old_lockdown = lockdown
             
         ############### INTERACTION SITES STUFF ###############
         will_visit_A = inter_sites.will_visit_site(inter_sites.get_grade_A_sites(), A_WILL_GO_PROB)

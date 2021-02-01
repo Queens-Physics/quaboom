@@ -30,7 +30,6 @@ class Policy:
         self.pop_size = population.get_population_size()
         
     def update_mask_mandate(self, day):
-        
         # Change the policy based on conditions
         if self.mask_day_trigger is not None and day >= self.mask_day_trigger:
             mask_mandate = True
@@ -45,8 +44,8 @@ class Policy:
             
     def get_mask_mandate(self):
         return self.mask_mandate
-
-    def update_lockdown_mandate(self, day):
+    
+    def update_lockdown(self, day):
         
         # Change the policy based on conditions
         if self.lockdown_day_trigger is not None and day >= self.lockdown_day_trigger:
