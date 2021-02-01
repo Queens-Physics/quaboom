@@ -27,8 +27,9 @@ Q_GO_PROB = 0
 class Interaction_Sites:
 
     ###### NEW CLASS ######
-    def __init__(self, pop_obj):
-
+    def __init__(self, pop_obj, policy):
+        
+        self.policy = policy 
         # Grade A means ones you go to different ones of (resturants, gas station, retail stores)
         # Grade B means usually the same one, but sometimes not (gym, grocery store)
         # Grade C means almost always go to the same one (office, school)
@@ -142,12 +143,15 @@ class Interaction_Sites:
          
     def interact(self, pop_obj, person_1, person_2):
         # Function that models the interaction between two people, and will return if interaction spread
-        p1Mask = pop_obj.get_person(person_1).wear_mask()
-        p2Mask = pop_obj.get_person(person_2).wear_mask()
-        
-        if p1Mask and p2Mask: spread_prob = BASE_INFECTION_SPREAD_PROB*MASK_REDUCTION**2
-        elif p1Mask or p2Mask: spread_prob = BASE_INFECTION_SPREAD_PROB*MASK_REDUCTION
-        else: spread_prob = BASE_INFECTION_SPREAD_PROB
+        if self.policy.get_mask_mandate==False:
+            spread_prob = BASE_INFECTION_SPREAD_PROB
+        else:
+            p1Mask = pop_obj.get_person(person_1).wear_mask()
+            p2Mask = pop_obj.get_person(person_2).wear_mask()
+
+            if p1Mask and p2Mask: spread_prob = BASE_INFECTION_SPREAD_PROB*MASK_REDUCTION**2
+            elif p1Mask or p2Mask: spread_prob = BASE_INFECTION_SPREAD_PROB*MASK_REDUCTION
+            else: spread_prob = BASE_INFECTION_SPREAD_PROB
         
         return random.random() < spread_prob
    

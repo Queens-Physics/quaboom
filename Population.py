@@ -65,7 +65,9 @@ class Population:
      recovered list has negative values for not recovered, and postitive indicies for recovered
      '''
 
-    def __init__(self, nPop, n0):
+    def __init__(self, nPop, n0, policy):
+        
+        self.policy = policy
 
         self.population = [0]*nPop  # The list of all people
         self.household = [0]*nPop #list of all houses (list that contains all lists of the people in the house)
