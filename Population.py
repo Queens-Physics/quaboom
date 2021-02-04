@@ -116,7 +116,6 @@ class Population:
         self.quarantined = np.zeros(nPop,dtype=int) + NULL_ID #list of people who are currently in quarantine
 
         self.test_sum = 0 # total number of tests that have been run
-        self.quarantined_sum = 0 #total number of people in quarantine (created as the list was having indexing issues)
 
         # Infect first n0 people
         for i in range(n0):
@@ -219,11 +218,10 @@ class Population:
     def update_quarantine(self, day):
         for i in range (len(self.population)):
             if self.population[i].leave_quarantine(day) == True:
-                self.quarantined[i] = 0
-                self.quarantined_sum += -1
+                self.quarantined[i] = -1
 
     def count_quarantined(self):
-        return self.quarantined_sum #np.count_nonzero(self.quarantined != NULL_ID) (was having a indexing issue while counting so it was switched to a integer)
+        return np.count_nonzero(self.quarantined != NULL_ID) 
 
     def count_tested(self):
         return self.test_sum
@@ -264,7 +262,6 @@ class Population:
                 person.set_quarantine(day)
                 self.quarantined[person_index] = 1
                 self.have_been_tested[person_index] = 1
-                self.quarantined_sum += 1
 
             elif (person.infected == False):
                 person.knows_infected = False
