@@ -1,0 +1,5 @@
+﻿Time periods,Min days,Max days,Average days
+Incubation period (period before symptoms show),1,14,5
+Recovery period (how long infection lasts),14,42,21
+,Max days (mild case),Max days (severe case),
+Infectiousness (days after symptoms show until no longer infectious),8,20,
