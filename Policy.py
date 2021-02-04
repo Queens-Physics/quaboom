@@ -10,8 +10,8 @@ class Policy:
     '''
     
     
-    def __init__(self, initial_mask_mandate=False, mask_trigger=0.4, mask_day_trigger=None, 
-                 initial_lockdown_mandate=False, lockdown_trigger=0.4, lockdown_day_trigger=None):
+    def __init__(self, initial_mask_mandate=False, mask_trigger=None, mask_day_trigger=None, 
+                 initial_lockdown_mandate=False, lockdown_trigger=None, lockdown_day_trigger=None):
         
         # Set the triggers and mandates
         self.mask_mandate = initial_mask_mandate          # Start with no mask requirement

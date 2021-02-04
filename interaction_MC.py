@@ -2,18 +2,35 @@ import numpy as np
 import Person
 import Population
 import Interaction_Sites
+import Policy
 
 # will_go_to_site parameters (prob person will go somewhere each day)
 A_WILL_GO_PROB = .05
 B_WILL_GO_PROB = .4
 C_WILL_GO_PROB = .8
 TESTS_PER_DAY = 100
-def RunEpidemic(nPop, n0, nDays):
-    # Initialize the population
-    pop = Population.Population(nPop, n0)
 
+# Polciy variables
+initial_mask_mandate, initial_lockdown_mandate = False, False
+lockdown_trigger, lockdown_day_trigger = None, 25
+mask_trigger, mask_day_trigger = None, 25
+
+def RunEpidemic(nPop, n0, nDays):
+    # Initalize the policy class
+    policy = Policy.Policy(initial_mask_mandate=initial_mask_mandate, initial_lockdown_mandate=initial_lockdown_mandate, 
+                           mask_trigger=mask_trigger, mask_day_trigger=mask_day_trigger, 
+                           lockdown_trigger=lockdown_trigger, lockdown_day_trigger=lockdown_day_trigger)
+    
+    old_mask_mandate, old_lockdown = initial_mask_mandate, initial_lockdown_mandate
+    
+    # Initialize the population
+    pop = Population.Population(nPop, n0, policy=policy)
+    
     # Initalize the interaction sites
-    inter_sites = Interaction_Sites.Interaction_Sites(pop_obj=pop)
+    inter_sites = Interaction_Sites.Interaction_Sites(pop_obj=pop, policy=policy)
+    
+    # Link the pop and inter_sites to the policy class
+    policy.set_simulation(population=pop, interaction_sites=inter_sites)
 
     # Arrays to store the values during the simulation
     track_new_infected = np.zeros(nDays, dtype=int) # new infections
@@ -42,20 +59,20 @@ def RunEpidemic(nPop, n0, nDays):
             track_new_infected[day] = track_infected[day] - track_infected[day-1] + new_recovered + new_dead
 
         # Find grade A, B, C site visits
-        will_visit_A = inter_sites.will_visit_site(inter_sites.get_grade_A_sites(), A_WILL_GO_PROB, pop)
-        will_visit_B = inter_sites.will_visit_site(inter_sites.get_grade_B_sites(), B_WILL_GO_PROB, pop)
-        will_visit_C = inter_sites.will_visit_site(inter_sites.get_grade_C_sites(), C_WILL_GO_PROB, pop)
+        will_visit_A = inter_sites.will_visit_site(inter_sites.get_grade_A_sites(), A_WILL_GO_PROB)
+        will_visit_B = inter_sites.will_visit_site(inter_sites.get_grade_B_sites(), B_WILL_GO_PROB)
+        will_visit_C = inter_sites.will_visit_site(inter_sites.get_grade_C_sites(), C_WILL_GO_PROB)
 
         # Do site interactions based on who is going to sites - INFECTION SPREAD OCCURS HERE
-        inter_sites.site_interaction(pop, will_visit_A, inter_sites.get_grade_A_sites(), day)
-        #inter_sites.site_interaction(pop, will_visit_B, inter_sites.get_grade_B_sites(), day)
-        #inter_sites.site_interaction(pop, will_visit_C, inter_sites.get_grade_C_sites(), day)
+        inter_sites.site_interaction(will_visit_A, inter_sites.get_grade_A_sites(), day)
+        #inter_sites.site_interaction(will_visit_B, inter_sites.get_grade_B_sites(), day)
+        #inter_sites.site_interaction(will_visit_C, inter_sites.get_grade_C_sites(), day)
 
         # Manage at home interactions
-        inter_sites.house_interact(pop, day)
+        inter_sites.house_interact(day)
 
         #Manage testing sites
-        inter_sites.testing_site(TESTS_PER_DAY,pop,day)
+        inter_sites.testing_site(TESTS_PER_DAY, day)
 
         # See who needs to be cured or die
         infected_people = pop.get_infected()
