@@ -22,7 +22,8 @@ def RunEpidemic(nPop, n0, nDays):
     policy = Policy.Policy(initial_mask_mandate=initial_mask_mandate, initial_lockdown_mandate=initial_lockdown_mandate, 
                            mask_trigger=mask_trigger, mask_day_trigger=mask_day_trigger, 
                            lockdown_trigger=lockdown_trigger, lockdown_day_trigger=lockdown_day_trigger)
-    old_mask_mandate, old_lockdown_mandate = initial_mask_mandate, initial_lockdown_mandate
+    
+    old_mask_mandate, old_lockdown = initial_mask_mandate, initial_lockdown_mandate
     
     # Initialize the population
     pop = Population.Population(nPop, n0, policy=policy)
@@ -57,7 +58,7 @@ def RunEpidemic(nPop, n0, nDays):
         track_tested[day] = pop.count_tested()
         track_quarantined[day] = pop.count_quarantined()
         track_masks[day] = old_mask_mandate
-        track_lockdown[day] = old_lockdown_mandate
+        track_lockdown[day] = old_lockdown
         
         #track the days someone has been infected?
         if day != 0:
@@ -80,7 +81,7 @@ def RunEpidemic(nPop, n0, nDays):
         ############### INTERACTION SITES STUFF ###############
         will_visit_A = inter_sites.will_visit_site(inter_sites.get_grade_A_sites(), A_WILL_GO_PROB)
         inter_sites.site_interaction(will_visit_A, inter_sites.get_grade_A_sites(), day)
-        if not lockdown_mandate:
+        if not lockdown:
             will_visit_B = inter_sites.will_visit_site(inter_sites.get_grade_B_sites(), B_WILL_GO_PROB)
             inter_sites.site_interaction(will_visit_B, inter_sites.get_grade_B_sites(), day)
             will_visit_C = inter_sites.will_visit_site(inter_sites.get_grade_C_sites(), C_WILL_GO_PROB)
