@@ -137,11 +137,11 @@ class Interaction_Sites:
                     person_2_index = person_2 - len(ppl_going)
                     
                     # have an interaction between the visitor and the resident
-                    did_infect = self.interact_vis(pop_obj, visitors, person_1_index, person_2_index)
+                    did_infect = self.interact(pop_obj, person_1_index, person_2_index)
                     if did_infect:
                         person_1_infected = pop_obj.get_person(person_1_index).is_infected()
                         if not person_1_infected:
-                            ## like above?
+                            ## like above
                             new_infections[new_infections_count] = person_1_index
                             new_infections_count += 1
                     
@@ -164,19 +164,6 @@ class Interaction_Sites:
         # Function that models the interaction between two people, and will return if interaction spread
         p1Mask = pop_obj.get_person(person_1).wear_mask()
         p2Mask = pop_obj.get_person(person_2).wear_mask()
-        
-        if p1Mask and p2Mask: spread_prob = BASE_INFECTION_SPREAD_PROB*MASK_REDUCTION**2
-        elif p1Mask or p2Mask: spread_prob = BASE_INFECTION_SPREAD_PROB*MASK_REDUCTION
-        else: spread_prob = BASE_INFECTION_SPREAD_PROB
-        
-        return random.random() < spread_prob
-
-    
-    def interact_vis(self, pop_obj, visitors, person_1, visitor_i):
-        # Function that models the interaction between two people, and will return if interaction spread
-        # Create two temp variables until we have person.mask implemented
-        p1Mask = pop_obj.get_person(person_1).wear_mask()
-        p2Mask = pop_obj.get_person(visitor_i).wear_mask() # this won't be for the right person because the visitors aren't part of the population - maybe should just set it to random between true or false
         
         if p1Mask and p2Mask: spread_prob = BASE_INFECTION_SPREAD_PROB*MASK_REDUCTION**2
         elif p1Mask or p2Mask: spread_prob = BASE_INFECTION_SPREAD_PROB*MASK_REDUCTION
