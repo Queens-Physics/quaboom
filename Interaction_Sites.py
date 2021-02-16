@@ -17,7 +17,8 @@ INFECTION_SPREAD_PROB = 0.05
 # House spread parameters
 HOUSE_SPREAD_PROB = 0.2
 
-MASK_REDUCTION = 0.6
+MASK_OUTWARD_EFFICIENCY = 0.6
+MASK_INWARD_EFFICIENCY = 0.5
 BASE_INFECTION_SPREAD_PROB = 0.15
 HOUSE_INFECTION_SPREAD_PROB = BASE_INFECTION_SPREAD_PROB*(1.25)
 
@@ -145,8 +146,8 @@ class Interaction_Sites:
         p1Mask = pop_obj.get_person(person_1).wear_mask()
         p2Mask = pop_obj.get_person(person_2).wear_mask()
         
-        if p1Mask and p2Mask: spread_prob = BASE_INFECTION_SPREAD_PROB*MASK_REDUCTION**2
-        elif p1Mask or p2Mask: spread_prob = BASE_INFECTION_SPREAD_PROB*MASK_REDUCTION
+        if p1Mask and p2Mask: spread_prob = BASE_INFECTION_SPREAD_PROB*MASK_OUTWARD_EFFICIENCY*MASK_INWARD_EFFICIENCY
+        elif p1Mask or p2Mask: spread_prob = BASE_INFECTION_SPREAD_PROB*MASK_OUTWARD_EFFICIENCY
         else: spread_prob = BASE_INFECTION_SPREAD_PROB
         
         return random.random() < spread_prob
