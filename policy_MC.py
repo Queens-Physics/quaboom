@@ -29,7 +29,7 @@ def RunEpidemic(nPop, n0, nDays):
     pop = Population.Population(nPop, n0, policy=policy)
     
     # Initalize the interaction sites
-    inter_sites = Interaction_Sites.Interaction_Sites(pop_obj=pop, policy=policy)
+    inter_sites = Interaction_Sites.Interaction_Sites(pop_obj=pop)
     
     # Link the pop and inter_sites to the policy class
     policy.set_simulation(population=pop, interaction_sites=inter_sites)

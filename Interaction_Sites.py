@@ -27,10 +27,10 @@ Q_GO_PROB = 0
 class Interaction_Sites:
 
     ###### NEW CLASS ######
-    def __init__(self, pop_obj, policy):
+    def __init__(self, pop_obj):
         
-        self.policy = policy 
         self.pop = pop_obj
+        self.policy = pop_obj.policy 
         # Grade A means ones you go to different ones of (resturants, gas station, retail stores)
         # Grade B means usually the same one, but sometimes not (gym, grocery store)
         # Grade C means almost always go to the same one (office, school)
