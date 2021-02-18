@@ -147,7 +147,10 @@ class Interaction_Sites:
         p2Mask = pop_obj.get_person(person_2).wear_mask()
         
         if p1Mask and p2Mask: spread_prob = BASE_INFECTION_SPREAD_PROB*MASK_OUTWARD_EFFICIENCY*MASK_INWARD_EFFICIENCY
-        elif p1Mask or p2Mask: spread_prob = BASE_INFECTION_SPREAD_PROB*MASK_OUTWARD_EFFICIENCY
+        elif p1Mask=True and person_1_infected=True: spread_prob = BASE_INFECTION_SPREAD_PROB*MASK_OUTWARD_EFFICIENCY
+        elif p1Mask=True and person_2_infected=True: spread_prob = BASE_INFECTION_SPREAD_PROB*IN_OUTWARD_EFFICIENCY
+        elif p2Mask=True and person_2_infected=True: spread_prob = BASE_INFECTION_SPREAD_PROB*MASK_OUTWARD_EFFICIENCY
+        elif p2Mask=True and person_1_infected=True: spread_prob = BASE_INFECTION_SPREAD_PROB*IN_OUTWARD_EFFICIENCY
         else: spread_prob = BASE_INFECTION_SPREAD_PROB
         
         return random.random() < spread_prob
