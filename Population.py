@@ -230,6 +230,9 @@ class Population:
             if self.population[i].leave_quarantine(day) == True:
                 self.quarantined[i] = NULL_ID
 
+    def count_quarantined(self):
+        return np.count_nonzero(self.quarantined != NULL_ID) 
+
     def count_tested(self):
         return self.test_sum
 
@@ -266,6 +269,7 @@ class Population:
                 person.set_quarantine(day)
                 self.quarantined[person_index] = person_index
                 self.have_been_tested[person_index] = person_index
+
 
             else:
                 person.knows_infected = False

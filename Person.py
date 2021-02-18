@@ -21,7 +21,7 @@ MAX_DIE= disease_params['recovery'][0]['MAX_DIE']
 MASKPROB = 0.8 #Probability of wearing a mask properly
 MILD_SYMPTOM_PROB = 0.8 # Probability of mild symptoms
 MIN_DAY_BEFORE_SYMPTOM, MAX_DAY_BEFORE_SYMPTOM = 1, 10
-
+QUARANTINE_TIME = 14
 json_file.close()
 
 class Person(object):
@@ -77,8 +77,10 @@ class Person(object):
         self.quarantined = True
 
     #Allows recovered individuals to leave quarantine
-    def leave_quarantine(self,day):
-        if self.recovered == True or self.dead == True:
+    def leave_quarantine(self, day):
+        if self.quarantined_day == None: 
+            self.quarantined_day = 0
+        if self.recovered == True or self.dead == True or (day - self.quarantined_day) >= QUARANTINE_TIME:
             self.quarantined = False
             return True
         return False
