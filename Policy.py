@@ -62,20 +62,3 @@ class Policy:
     def get_lockdown_mandate(self):
         return self.mask_mandate
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
