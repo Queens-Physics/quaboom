@@ -65,7 +65,9 @@ class Population:
      recovered list has negative values for not recovered, and postitive indicies for recovered
      '''
 
-    def __init__(self, nPop, n0):
+    def __init__(self, nPop, n0, policy):
+        
+        self.policy = policy
 
         self.population = [0]*nPop  # The list of all people
         self.household = [0]*nPop #list of all houses (list that contains all lists of the people in the house)
@@ -111,12 +113,12 @@ class Population:
         self.recovered = np.zeros(nPop, dtype=int) + NULL_ID # list of recovered people
         self.dead = np.zeros(nPop, dtype=int) + NULL_ID # list of recovered people
         self.testing = []# list of people waiting to be others_infected
-        self.have_been_tested = np.zeros(nPop,dtype=int) + NULL_ID # list of people who have been tested
-        self.knows_infected = np.zeros(nPop,dtype=int) + NULL_ID # list of people who have a positive test and are still infected
-        self.quarantined = np.zeros(nPop,dtype=int) + NULL_ID #list of people who are currently in quarantine
+        self.have_been_tested = np.zeros(nPop, dtype=int) + NULL_ID # list of people who have been tested
+        self.knows_infected = np.zeros(nPop, dtype=int) + NULL_ID # list of people who have a positive test and are still infected
+        self.quarantined = np.zeros(nPop, dtype=int) + NULL_ID #list of people who are currently in quarantine
 
         self.test_sum = 0 # total number of tests that have been run
-        self.quarantined_sum = 0 #total number of people in quarantine (created as the list was having indexing issues)
+        self.quarantined_sum = 0 # total number of people in quarantine (created as the list was having indexing issues)
 
         # Infect first n0 people
         for i in range(n0):
@@ -144,6 +146,9 @@ class Population:
     def get_dead(self):
         return self.dead[self.dead != NULL_ID]
     
+    def get_quarantined(self):
+        return self.quarantined[self.quarantined != NULL_ID]
+    
     # Count the number of people in each bin
     def count_susceptible(self):
         return np.count_nonzero(self.susceptible != NULL_ID)
@@ -157,6 +162,9 @@ class Population:
     def count_dead(self):
         return np.count_nonzero(self.dead != NULL_ID)
     
+    def count_quarantined(self):
+        return np.count_nonzero(self.quarantined != NULL_ID)
+    
     def count_masks(self):
         return np.count_nonzero(self.has_mask > 0)
     
@@ -169,25 +177,24 @@ class Population:
         didWork = self.population[index].infect(day=day)
         if didWork:
             self.infected[index] = index
-            self.susceptible[index] = -1
+            self.susceptible[index] = NULL_ID
 
         return didWork
 
     # Update lists for already infected people
     def update_infected(self, index):
-
         if self.infected[index] == index or self.susceptible[index]==-1 or self.population[index].is_infected()==False:
             # Already infected, or cant be infected
             return False
         self.infected[index] = index
-        self.susceptible[index] = -1
+        self.susceptible[index] = NULL_ID
         return True
 
     # Cure a person
     def cure(self, index, day):
         didWork = self.population[index].check_cured(day)
         if didWork:
-            self.infected[index] = -1
+            self.infected[index] = NULL_ID
             self.recovered[index] = index
         return didWork
 
@@ -196,75 +203,73 @@ class Population:
         if self.recovered[index]==index or self.population[index].is_recovered()==False:
             # Already recovered in pop obj or person obj is not actually recovered
             return False
-        self.infected[index] = -1
+        self.infected[index] = NULL_ID
         self.recovered[index] = index
         return True
 
     def die(self, index, day):
         didWork = self.population[index].check_dead(day)
         if didWork:
-            self.infected[index] = -1
-            self.recovered[index] = -1
+            self.infected[index] = NULL_ID
+            self.recovered[index] = NULL_ID
             self.dead[index] = index
         return didWork
 
     def update_dead(self, index):
         if self.dead[index]==index or self.population[index].is_dead()==False:
             return False
-        self.infected[index] = -1
-        self.recovered[index] = -1
+        self.infected[index] = NULL_ID
+        self.recovered[index] = NULL_ID
         self.dead[index] = index
         return True
 
     def update_quarantine(self, day):
-        for i in range (len(self.population)):
+        # Release everyone who has done their quarantine - DOES NOT ADD NEW PPL TO LIST
+        for i in self.get_quarantined():
+            # Check their status
             if self.population[i].leave_quarantine(day) == True:
-                self.quarantined[i] = 0
-                self.quarantined_sum += -1
+                self.quarantined[i] = NULL_ID
 
     def count_quarantined(self):
-        return self.quarantined_sum #np.count_nonzero(self.quarantined != NULL_ID) (was having a indexing issue while counting so it was switched to a integer)
+        return np.count_nonzero(self.quarantined != NULL_ID) 
 
     def count_tested(self):
         return self.test_sum
 
     # updates the list of symptomatic people and adds the people who are symtomatic to the testing array
-    def update_symptomatic (self,day):
+    def update_symptomatic(self, day):
 
         #updates everyone's symptoms
         for i in range (len(self.infected)):
-            if (self.population[i].check_symptoms(day) == True):
+            if self.population[i].check_symptoms(day)==True:
 
-                if (i not in self.testing and self.have_been_tested[i] != 1): # if person is not already in testing function
+                if i not in self.testing and self.have_been_tested[i]!=1: # if person is not already in testing function
                     if random.random() < PROB_OF_TEST:
                         infected_person = self.population[i] #gets the infected person from the population list
 
-                        if infected_person.show_symptoms == True and infected_person.knows_infected == False:
+                        if infected_person.show_symptoms==True and infected_person.knows_infected==False:
                             self.testing.append(i)#adds the person to the testing list
                             self.population[i].knows_infected = True
 
-
-
-
-    def get_tested (self,tests_per_day,day):
+    def get_tested(self, tests_per_day, day):
 
         #if less people are in the list than testing capacity test everyone in the list
         if len(self.testing) < tests_per_day:
             tests_per_day = len(self.testing)
         self.test_sum += tests_per_day #add the daily tests to the total number of tests
-        for i in range (tests_per_day):
-
+        
+        for i in range(tests_per_day):
             person_index = self.testing[0] #gets first person waiting for test
             self.testing.pop(0) # removes first person waiting for test
             person = self.population[person_index]
 
-            if (person.infected == True):
+            if person.infected==True:
                 person.knows_infected = True
                 #quarantines the person
                 person.set_quarantine(day)
-                self.quarantined[person_index] = 1
-                self.have_been_tested[person_index] = 1
-                self.quarantined_sum += 1
+                self.quarantined[person_index] = person_index
+                self.have_been_tested[person_index] = person_index
 
-            elif (person.infected == False):
+
+            else:
                 person.knows_infected = False
