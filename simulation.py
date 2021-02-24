@@ -1,4 +1,5 @@
 import numpy as np
+import random
 import Person
 import Population
 import Interaction_Sites
@@ -94,6 +95,19 @@ def RunEpidemic(nPop, n0, nDays):
         if testing_ON != old_testing: 
             print("Day: {}, Testing: {}".format(day, testing_ON))
         old_testing = testing_ON
+
+        ############### VISITOR STUFF ###############
+        #add a random number of visitors to the population
+        num_vis = random.randint(0,3) if (nPop < 20e4) else random.randint(0,int(0.00002*nPop))
+        
+        for i in range(0, num_vis):
+            vis_age = random.randint(16,50)
+            
+            newPerson = Person.Person(index=i+nPop, infected=True, recovered=False, dead=False, quarantined=False, 
+                               quarantined_day=None, infected_day=None, recovered_day=None, death_day=None,
+                               others_infected=None, cure_days=None, recent_infections=None, age=vis_age, job=None,
+                               house_index=None, isolation_tendencies=0.2, case_severity='Mild', has_mask=True)
+            pop.population.append(newPerson)
         
         ############### INTERACTION SITES STUFF ###############
         will_visit_A = inter_sites.will_visit_site(inter_sites.get_grade_A_sites(), A_WILL_GO_PROB)
@@ -117,6 +131,9 @@ def RunEpidemic(nPop, n0, nDays):
         pop.update_quarantine(day)
         
         ############### UPDATE POPULATION ###############
+        # remove the guest visitors
+        pop.population = pop.population[:-num_vis]
+        
         # See who needs to be cured or die
         infected_people = pop.get_infected()
         for index in infected_people: 

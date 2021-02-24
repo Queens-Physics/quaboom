@@ -131,9 +131,9 @@ class Interaction_Sites:
                 # grab the highest interactor
                 person_1 = np.argmax(num_interactions)
                 # find a random interactor for them to pair with (that is not them)
-                person_2 = np.random.randint(num_interactions.shape[0])
-                while person_2 == person_1 or num_interactions[person_2] <= 0:
-                    person_2 = np.random.randint(num_interactions.shape[0])
+                new_options = [i for i in range(len(num_interactions)) if num_interactions[i] > 0 and i != person_1]
+                person_2 = np.random.choice(new_options)
+
                 # Get the actual people at these indexes
                 person_1_index = ppl_going[person_1]
                 person_2_index = ppl_going[person_2]
@@ -161,33 +161,6 @@ class Interaction_Sites:
                 # Get the actual people at these indexes
                 person_1_index = ppl_going[person_1]
                 
-                if (person_2 < len(ppl_going)):
-                    person_2_index = ppl_going[person_2]
-                
-                    # Have an interaction between those people
-                    did_infect = self.interact(pop_obj, person_1_index, person_2_index)
-                    if did_infect:
-                        person_1_infected = pop_obj.get_person(person_1_index).is_infected()
-                        new_infections[new_infections_count] = person_2_index if person_1_infected else person_1_index
-                        new_infections_count += 1
-
-                    # Lower the interaction count for those people
-                    num_interactions[person_1] -= 1
-                    num_interactions[person_2] -= 1
-                    
-                else: #one of the interactions is a visitor
-                    person_2_index = person_2 - len(ppl_going)
-                    
-                    # have an interaction between the visitor and the resident
-                    did_infect = self.interact_vis(pop_obj, visitors, person_1_index, person_2_index)
-                    if did_infect:
-                        person_1_infected = pop_obj.get_person(person_1_index).is_infected()
-                        new_infections[new_infections_count] = person_1_index if not person_1_infected
-                        new_infections_count += 1
-                    
-                    # lower the interaction for the person
-                    num_interactions[person_1] -= 1
-
         # Update people who get infected only at the end (if i get CV19 at work, prolly wont spread at the store that night ?)
         new_infection_indexes = np.where(new_infections)[0]
         for new_infection in new_infection_indexes:
