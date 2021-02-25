@@ -27,7 +27,7 @@ def RunEpidemic(nPop, n0, nDays):
     pop = Population.Population(nPop, n0, policy=policy)
     
     # Initalize the interaction sites
-    inter_sites = Interaction_Sites.Interaction_Sites(pop_obj=pop, policy=policy)
+    inter_sites = Interaction_Sites.Interaction_Sites(pop_obj=pop)
     
     # Link the pop and inter_sites to the policy class
     policy.set_simulation(population=pop, interaction_sites=inter_sites)
@@ -64,7 +64,7 @@ def RunEpidemic(nPop, n0, nDays):
         will_visit_C = inter_sites.will_visit_site(inter_sites.get_grade_C_sites(), C_WILL_GO_PROB)
 
         # Do site interactions based on who is going to sites - INFECTION SPREAD OCCURS HERE
-        inter_sites.site_interaction(will_visit_A, inter_sites.get_grade_A_sites(), day)
+        inter_sites.site_interaction(will_visit_A, day)
         #inter_sites.site_interaction(will_visit_B, inter_sites.get_grade_B_sites(), day)
         #inter_sites.site_interaction(will_visit_C, inter_sites.get_grade_C_sites(), day)
 
