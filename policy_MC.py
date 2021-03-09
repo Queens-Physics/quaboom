@@ -13,17 +13,18 @@ C_WILL_GO_PROB = .8
 TESTS_PER_DAY = 100
 
 # Polciy variables
-initial_mask_mandate, initial_lockdown_mandate = False, False
-lockdown_trigger, lockdown_day_trigger = None, 25
+initial_mask_mandate, initial_lockdown_mandate, initial_testing = False, False, False
+lockdown_trigger, lockdown_day_trigger = None, 1
 mask_trigger, mask_day_trigger = None, 25
-
+testing_trigger, testing_day_trigger = None, 5
 def RunEpidemic(nPop, n0, nDays):
     # Initalize the policy class
     policy = Policy.Policy(initial_mask_mandate=initial_mask_mandate, initial_lockdown_mandate=initial_lockdown_mandate, 
                            mask_trigger=mask_trigger, mask_day_trigger=mask_day_trigger, 
-                           lockdown_trigger=lockdown_trigger, lockdown_day_trigger=lockdown_day_trigger)
+                           lockdown_trigger=lockdown_trigger, lockdown_day_trigger=lockdown_day_trigger, tests_per_day=TESTS_PER_DAY,
+                           testing_trigger=testing_trigger,testing_day_trigger=testing_day_trigger,initial_testing=initial_testing)
     
-    old_mask_mandate, old_lockdown = initial_mask_mandate, initial_lockdown_mandate
+    old_mask_mandate, old_lockdown, old_testing = initial_mask_mandate, initial_lockdown_mandate, initial_testing
     
     # Initialize the population
     pop = Population.Population(nPop, n0, policy=policy)
@@ -44,7 +45,7 @@ def RunEpidemic(nPop, n0, nDays):
     track_quarantined = np.zeros(nDays, dtype=int)  # population currently in quarantine ACTUALLY DOES TOTAL QUARINTIED 
     track_masks = np.zeros(nDays, dtype=int)
     track_lockdown = np.zeros(nDays, dtype=int)
-    
+    track_testing_wait_list = np.zeros(nDays, dtype=int) # counts the number of people waiting to get tests each day
     # Loop over the number of days
     for day in range(nDays):
 
@@ -59,13 +60,16 @@ def RunEpidemic(nPop, n0, nDays):
         track_quarantined[day] = pop.count_quarantined()
         track_masks[day] = old_mask_mandate
         track_lockdown[day] = old_lockdown
+        track_testing_wait_list[day] = pop.get_testing_wait_list()
+        
+        new_tests = 0
         
         #track the days someone has been infected?
         if day != 0:
             new_recovered = track_recovered[day] - track_recovered[day-1]
             new_dead = track_dead[day] - track_dead[day-1]
             track_new_infected[day] = track_infected[day] - track_infected[day-1] + new_recovered + new_dead
-            
+            new_tests = track_testing_wait_list[day]-track_testing_wait_list[day-1]
             
         ############### POLICY STUFF ###############
         mask_mandate = policy.update_mask_mandate(day=day)
@@ -77,7 +81,12 @@ def RunEpidemic(nPop, n0, nDays):
         if lockdown != old_lockdown:
             print("Day: {}, Lockdown: {}".format(day, lockdown))
         old_lockdown = lockdown
-            
+        
+        testing_ON = policy.update_testing(day)   
+        if testing_ON != old_testing: 
+            print("Day: {}, Testing: {}".format(day, testing_ON))
+        old_testing = testing_ON
+        
         ############### INTERACTION SITES STUFF ###############
         will_visit_A = inter_sites.will_visit_site(inter_sites.get_grade_A_sites(), A_WILL_GO_PROB)
         inter_sites.site_interaction(will_visit_A, inter_sites.get_grade_A_sites(), day)
@@ -90,8 +99,10 @@ def RunEpidemic(nPop, n0, nDays):
         # Manage at home interactions
         inter_sites.house_interact(day)
         
-        # Manage testing sites
-        inter_sites.testing_site(TESTS_PER_DAY,day)
+        # Manage testing sites        
+        if (testing_ON == True): 
+            tests = policy.get_num_tests(new_tests)
+            inter_sites.testing_site(tests,day)
         
         # Manage Quarantine
         pop.update_quarantine(day)

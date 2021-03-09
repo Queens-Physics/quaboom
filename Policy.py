@@ -11,7 +11,7 @@ class Policy:
     
     
     def __init__(self, initial_mask_mandate=False, mask_trigger=None, mask_day_trigger=None, 
-                 initial_lockdown_mandate=False, lockdown_trigger=None, lockdown_day_trigger=None):
+                 initial_lockdown_mandate=False, lockdown_trigger=None, lockdown_day_trigger=None, tests_per_day=0,testing_trigger=None,testing_day_trigger=None, initial_testing=False):
         
         # Set the triggers and mandates
         self.mask_mandate = initial_mask_mandate          # Start with no mask requirement
@@ -20,7 +20,10 @@ class Policy:
         self.lockdown_mandate = initial_lockdown_mandate  # Start with no lockdown requirement
         self.lockdown_trigger = lockdown_trigger          # Percent infected to start lockdown
         self.lockdown_day_trigger = lockdown_day_trigger  # A specific day to start lockdown
-
+        self.tests_per_day = tests_per_day                # Number of tests run per day
+        self.testing_trigger = testing_trigger            # Percent infected to start lockdown
+        self.testing_day_trigger = testing_day_trigger   # A specific day to start testing
+        self.initial_testing = initial_testing
         
     def set_simulation(self, population, interaction_sites):
         # These should act like pointers and change with the classes
@@ -61,4 +64,21 @@ class Policy:
             
     def get_lockdown_mandate(self):
         return self.mask_mandate
-
+    
+    def update_testing(self,day):
+        if self.testing_day_trigger is not None and day >= self.testing_day_trigger: 
+            testing = True
+        elif self.testing_trigger is not None and self.pop.count_infected()/self.pop_size > self.testing_trigger: 
+            testing = True
+        else:
+            testing = False
+        return testing
+    
+    def get_num_tests(self, delta_wait_list): 
+        if delta_wait_list > 0: 
+            self.tests_per_day += int(self.tests_per_day*0.1)
+        elif delta_wait_list < 0: 
+            self.tests_per_day -= int(self.tests_per_day*0.1)
+        elif self.tests_per_day < 0: 
+            self.tests_per_day = 0
+        return self.tests_per_day

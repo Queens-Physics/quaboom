@@ -250,7 +250,10 @@ class Population:
                         if infected_person.show_symptoms==True and infected_person.knows_infected==False:
                             self.testing.append(i)#adds the person to the testing list
                             self.population[i].knows_infected = True
-
+    
+    def get_testing_wait_list(self): 
+        return len(self.testing)
+    
     def get_tested(self, tests_per_day, day):
 
         #if less people are in the list than testing capacity test everyone in the list
