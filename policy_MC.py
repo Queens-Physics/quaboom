@@ -80,12 +80,12 @@ def RunEpidemic(nPop, n0, nDays):
             
         ############### INTERACTION SITES STUFF ###############
         will_visit_A = inter_sites.will_visit_site(inter_sites.get_grade_A_sites(), A_WILL_GO_PROB)
-        inter_sites.site_interaction(will_visit_A, inter_sites.get_grade_A_sites(), day)
+        inter_sites.site_interaction(will_visit_A, day)
         if not lockdown:
             will_visit_B = inter_sites.will_visit_site(inter_sites.get_grade_B_sites(), B_WILL_GO_PROB)
-            inter_sites.site_interaction(will_visit_B, inter_sites.get_grade_B_sites(), day)
+            inter_sites.site_interaction(will_visit_B, day)
             will_visit_C = inter_sites.will_visit_site(inter_sites.get_grade_C_sites(), C_WILL_GO_PROB)
-            inter_sites.site_interaction(will_visit_C, inter_sites.get_grade_C_sites(), day)
+            inter_sites.site_interaction(will_visit_C, day)
         
         # Manage at home interactions
         inter_sites.house_interact(day)
