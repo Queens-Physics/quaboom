@@ -1,6 +1,5 @@
 import numpy as np
 
-
 class Policy:
     '''
     Handles all of the metrics that would be dealt with by policy, including mask mandates, quarantines, testing, 
@@ -11,7 +10,8 @@ class Policy:
     
     
     def __init__(self, initial_mask_mandate=False, mask_trigger=None, mask_day_trigger=None, 
-                 initial_lockdown_mandate=False, lockdown_trigger=None, lockdown_day_trigger=None, tests_per_day=0,testing_trigger=None,testing_day_trigger=None, initial_testing=False):
+                 initial_lockdown_mandate=False, lockdown_trigger=None, lockdown_day_trigger=None,
+                 testing_rate=None,testing_trigger=None,testing_day_trigger=None, initial_testing=False):
         
         # Set the triggers and mandates
         self.mask_mandate = initial_mask_mandate          # Start with no mask requirement
@@ -20,7 +20,7 @@ class Policy:
         self.lockdown_mandate = initial_lockdown_mandate  # Start with no lockdown requirement
         self.lockdown_trigger = lockdown_trigger          # Percent infected to start lockdown
         self.lockdown_day_trigger = lockdown_day_trigger  # A specific day to start lockdown
-        self.tests_per_day = tests_per_day                # Number of tests run per day
+        self.testing_rate = testing_rate                # Number of tests run per day
         self.testing_trigger = testing_trigger            # Percent infected to start lockdown
         self.testing_day_trigger = testing_day_trigger   # A specific day to start testing
         self.initial_testing = initial_testing
@@ -74,11 +74,13 @@ class Policy:
             testing = False
         return testing
     
-    def get_num_tests(self, delta_wait_list): 
-        if delta_wait_list > 0: 
-            self.tests_per_day += int(self.tests_per_day*0.1)
-        elif delta_wait_list < 0: 
-            self.tests_per_day -= int(self.tests_per_day*0.1)
-        elif self.tests_per_day < 0: 
-            self.tests_per_day = 0
-        return self.tests_per_day
+    def get_num_tests(self, delta_wait_list):  
+        rate = self.testing_rate
+        tests = int(rate*self.pop.count_infected())
+        if (tests == 0 and delta_wait_list > 0): 
+            tests = 10 #since the number infected indivals in this case will be less than 100
+        return tests
+    
+            
+    
+    

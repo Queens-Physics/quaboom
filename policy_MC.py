@@ -10,7 +10,7 @@ B_WILL_GO_PROB = .4
 C_WILL_GO_PROB = .8
 
 # Testing parameters
-TESTS_PER_DAY = 100
+TESTING_RATE = .8 #rate at which people get positive tests (testing rate/infected person)
 
 # Polciy variables
 initial_mask_mandate, initial_lockdown_mandate, initial_testing = False, False, False
@@ -21,7 +21,7 @@ def RunEpidemic(nPop, n0, nDays):
     # Initalize the policy class
     policy = Policy.Policy(initial_mask_mandate=initial_mask_mandate, initial_lockdown_mandate=initial_lockdown_mandate, 
                            mask_trigger=mask_trigger, mask_day_trigger=mask_day_trigger, 
-                           lockdown_trigger=lockdown_trigger, lockdown_day_trigger=lockdown_day_trigger, tests_per_day=TESTS_PER_DAY,
+                           lockdown_trigger=lockdown_trigger, lockdown_day_trigger=lockdown_day_trigger, testing_rate=TESTING_RATE,
                            testing_trigger=testing_trigger,testing_day_trigger=testing_day_trigger,initial_testing=initial_testing)
     
     old_mask_mandate, old_lockdown, old_testing = initial_mask_mandate, initial_lockdown_mandate, initial_testing
