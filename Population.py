@@ -12,6 +12,7 @@ JOB_OPTIONS = ['Health', 'Sales', 'Neither']
 HOUSE_OPTIONS = [1,2,3,4,5]
 ISOLATION_OPTIONS = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
 SEVERITY_OPTIONS = ['Mild', 'Hospitalization', 'ICU', 'Death']
+MASK_OPTIONS = ['Surgical', 'Non-surgical']
 
 # isolation #
 ISOLATION_WEIGHTS = np.ones(len(ISOLATION_OPTIONS))
@@ -43,7 +44,12 @@ SEVERITY_WEIGHTS = np.zeros(len(SEVERITY_OPTIONS))
 for iseverity in range (len(SEVERITY_WEIGHTS)):
     string = SEVERITY_OPTIONS[iseverity]
     SEVERITY_WEIGHTS[iseverity]= disease_params['case_severity'][0][string]
-    
+
+# mask type #
+MASK_WEIGHTS = np.zeros(len(MASK_OPTIONS))
+for imask in range (len(MASK_WEIGHTS)):
+    string = MASK_OPTIONS[imask]
+    MASK_WEIGHTS[imask]= disease_params['mask_type'][0][string]
     
 # mask
 PROB_HAS_MASK = 0.8
@@ -83,6 +89,7 @@ class Population:
         job_arr = np.random.choice(a=JOB_OPTIONS, p=JOB_WEIGHTS, size=nPop)
         isolation_tend_arr = np.random.choice(a=ISOLATION_OPTIONS, p=ISOLATION_WEIGHTS, size=nPop)
         case_severity_arr = np.random.choice(a=SEVERITY_OPTIONS, p=SEVERITY_WEIGHTS, size=nPop)
+        mask_type_arr = np.random.choice(a=MASK_OPTIONS, p=MASK_WEIGHTS, size=nPop)
         has_mask_arr = np.random.uniform(size=nPop) < PROB_HAS_MASK
 
         for i in range(0, nPop):
@@ -93,7 +100,7 @@ class Population:
                                       others_infected=None, cure_days=None, recent_infections=None,
                                       age=age_arr[i], job=job_arr[i], house_index=0,
                                       isolation_tendencies=isolation_tend_arr[i],
-                                      case_severity=case_severity_arr[i],
+                                      case_severity=case_severity_arr[i], mask_type=mask_type_arr[i], 
                                       has_mask=has_mask_arr[i])
 
             # ADD A PERSON

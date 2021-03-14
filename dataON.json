@@ -4,5 +4,6 @@
  "max_infectious": [{"Note": "max number of days that a person with this level of infection stays sick for", "MILD": 10, "SEVERE": 20}],
  "case_severity": [{"Note": "distribution of severity of the case", "Mild": 0.761, "Death": 0.083, "Hospitalization": 0.127, "ICU": 0.029}],
  "recovery": [{"Note": "mild cases last ~14, severe 21 to 42", "MAX_SEVERE": 42, "MIN_SEVERE": 21, "MAX_MILD": 20, "MIN_MILD": 12, "MAX_ICU": 59, "MIN_ICU": 43, "MAX_DIE": 30, "MIN_DIE": 14}],
- "incubation": [{"Note": "just a guess that its poisson", "MAX": 14, "AVG": 5, "MIN": 1, "Dist": "poisson"}]
+ "incubation": [{"Note": "just a guess that its poisson", "MAX": 14, "AVG": 5, "MIN": 1, "Dist": "poisson"}]], "mask_type": [{"Note": "number of people wearing a specific type of mask", "Surgical": 0.2, "Non-surgical": 0.8}]
+
 }

@@ -15,7 +15,6 @@ INFECTION_SPREAD_PROB = 0.05
 # House spread parameters
 HOUSE_SPREAD_PROB = 0.2
 
-MASK_REDUCTION = 0.6
 BASE_INFECTION_SPREAD_PROB = 0.15
 HOUSE_INFECTION_SPREAD_PROB = BASE_INFECTION_SPREAD_PROB*(1.25)
 
@@ -153,9 +152,16 @@ class Interaction_Sites:
         else:
             p1Mask = self.pop.get_person(person_1).wear_mask()
             p2Mask = self.pop.get_person(person_2).wear_mask()
+            p1Infected = self.pop.get_person(person_1).is_infected()
+            p2Infected = self.pop.get_person(person_2).is_infected()
+            P1_INWARD_PROB, P1_OUTWARD_PROB = self.pop.get_person(person_1).mask_type_efficiency()
+            P2_INWARD_PROB, P2_OUTWARD_PROB = self.pop.get_person(person_2).mask_type_efficiency()
 
-            if p1Mask and p2Mask: spread_prob = BASE_INFECTION_SPREAD_PROB*MASK_REDUCTION**2
-            elif p1Mask or p2Mask: spread_prob = BASE_INFECTION_SPREAD_PROB*MASK_REDUCTION
+            if p1Mask and p2Mask: spread_prob = BASE_INFECTION_SPREAD_PROB*P1_OUTWARD_PROB*P2_OUTWARD_PROB
+            elif p1Mask == True and p1Infected == True: spread_prob = BASE_INFECTION_SPREAD_PROB*P1_OUTWARD_PROB
+            elif p1Mask == True and p2Infected == True: spread_prob = BASE_INFECTION_SPREAD_PROB*P1_INWARD_PROB
+            elif p2Mask == True and p2Infected == True: spread_prob = BASE_INFECTION_SPREAD_PROB*P2_OUTWARD_PROB
+            elif p2Mask == True and p1Infected == True: spread_prob = BASE_INFECTION_SPREAD_PROB*P2_INWARD_PROB
             else: spread_prob = BASE_INFECTION_SPREAD_PROB
         
         return random.random() < spread_prob
