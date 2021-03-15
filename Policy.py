@@ -1,5 +1,7 @@
 import numpy as np
 
+test_baseline = 10 #starting test number
+
 class Policy:
     '''
     Handles all of the metrics that would be dealt with by policy, including mask mandates, quarantines, testing, 
@@ -20,10 +22,10 @@ class Policy:
         self.lockdown_mandate = initial_lockdown_mandate  # Start with no lockdown requirement
         self.lockdown_trigger = lockdown_trigger          # Percent infected to start lockdown
         self.lockdown_day_trigger = lockdown_day_trigger  # A specific day to start lockdown
-        self.testing_rate = testing_rate                # Number of tests run per day
+        self.testing_rate = testing_rate                  # Number of tests run per day
         self.testing_trigger = testing_trigger            # Percent infected to start lockdown
-        self.testing_day_trigger = testing_day_trigger   # A specific day to start testing
-        self.initial_testing = initial_testing
+        self.testing_day_trigger = testing_day_trigger    # A specific day to start testing
+        self.initial_testing = initial_testing            # Starting testing requirement
         
     def set_simulation(self, population, interaction_sites):
         # These should act like pointers and change with the classes
@@ -74,13 +76,11 @@ class Policy:
             testing = False
         return testing
     
-    def get_num_tests(self, delta_wait_list):  
-        rate = self.testing_rate
-        tests = int(rate*self.pop.count_infected())
-        if (tests == 0 and delta_wait_list > 0): 
-            tests = 10 #since the number infected indivals in this case will be less than 100
+    def get_num_tests(self, wait_list):  
+        tests = int(self.testing_rate*self.pop.count_quarantined()) # number of tests
+        if (tests < test_baseline and wait_list > 0): 
+            tests = test_baseline
         return tests
     
-            
     
     

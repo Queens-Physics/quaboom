@@ -69,7 +69,6 @@ def RunEpidemic(nPop, n0, nDays):
             new_recovered = track_recovered[day] - track_recovered[day-1]
             new_dead = track_dead[day] - track_dead[day-1]
             track_new_infected[day] = track_infected[day] - track_infected[day-1] + new_recovered + new_dead
-            new_tests = track_testing_wait_list[day]-track_testing_wait_list[day-1]
             
         ############### POLICY STUFF ###############
         mask_mandate = policy.update_mask_mandate(day=day)
@@ -100,8 +99,8 @@ def RunEpidemic(nPop, n0, nDays):
         inter_sites.house_interact(day)
         
         # Manage testing sites        
-        if (testing_ON == True): 
-            tests = policy.get_num_tests(new_tests)
+        if (testing_ON): 
+            tests = policy.get_num_tests(track_testing_wait_list[day])
             inter_sites.testing_site(tests,day)
         
         # Manage Quarantine
