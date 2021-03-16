@@ -10,8 +10,6 @@ A_LOYALTY_MEAN, A_LOYALTY_STD = 4, 2
 B_LOYALTY_MEAN, B_LOYALTY_STD = 1, 1
 C_LOYALTY_MEAN, C_LOYALTY_STD = 1, .5
 
-# Infection spread parameter
-INFECTION_SPREAD_PROB = 0.05
 # House spread parameters
 HOUSE_SPREAD_PROB = 0.2
 
@@ -157,12 +155,17 @@ class Interaction_Sites:
             P1_INWARD_PROB, P1_OUTWARD_PROB = self.pop.get_person(person_1).mask_type_efficiency()
             P2_INWARD_PROB, P2_OUTWARD_PROB = self.pop.get_person(person_2).mask_type_efficiency()
 
-            if p1Mask and p2Mask: spread_prob = BASE_INFECTION_SPREAD_PROB*P1_OUTWARD_PROB*P2_OUTWARD_PROB
-            elif p1Mask == True and p1Infected == True: spread_prob = BASE_INFECTION_SPREAD_PROB*P1_OUTWARD_PROB
-            elif p1Mask == True and p2Infected == True: spread_prob = BASE_INFECTION_SPREAD_PROB*P1_INWARD_PROB
-            elif p2Mask == True and p2Infected == True: spread_prob = BASE_INFECTION_SPREAD_PROB*P2_OUTWARD_PROB
-            elif p2Mask == True and p1Infected == True: spread_prob = BASE_INFECTION_SPREAD_PROB*P2_INWARD_PROB
-            else: spread_prob = BASE_INFECTION_SPREAD_PROB
+            if p1Infected:
+                if p1Mask and p2Mask: spread_prob = BASE_INFECTION_SPREAD_PROB*P1_OUTWARD_PROB*P2_INWARD_PROB
+                elif p1Mask: spread_prob = BASE_INFECTION_SPREAD_PROB*P1_OUTWARD_PROB
+                elif p2Mask: spread_prob = BASE_INFECTION_SPREAD_PROB*P2_INWARD_PROB
+                else: spread_prob = BASE_INFECTION_SPREAD_PROB
+
+            else:
+                if p1Mask and p2Mask: spread_prob = BASE_INFECTION_SPREAD_PROB*P2_OUTWARD_PROB*P1_INWARD_PROB
+                elif p1Mask: spread_prob = BASE_INFECTION_SPREAD_PROB*P1_INWARD_PROB
+                elif p2Mask: spread_prob = BASE_INFECTION_SPREAD_PROB*P2_OUTWARD_PROB
+                else: spread_prob = BASE_INFECTION_SPREAD_PROB
         
         return random.random() < spread_prob
    
