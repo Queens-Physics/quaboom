@@ -62,6 +62,10 @@ NULL_ID = -1 # This value means that the person index at this location is not su
 
 PROB_OF_TEST = 1 #probability that the person will get tested
 
+# Student parameters
+nStudents = 24000 # full capacity ~ 24000
+percent_infected = 0.03 # the percent of students who are infected
+
 class Population:
     '''creates a population of people based on the total population
      uses and age distrubution to weight the assignment of ages
@@ -92,7 +96,7 @@ class Population:
         mask_type_arr = np.random.choice(a=MASK_OPTIONS, p=MASK_WEIGHTS, size=nPop)
         has_mask_arr = np.random.uniform(size=nPop) < PROB_HAS_MASK
 
-        for i in range(0, nPop):
+        for i in range(0, nPop-nStudents):
             # MAKE A PERSON
             newPerson = Person.Person(index=i, infected=False, recovered=False, dead=False,
                                       quarantined=False, quarantined_day=None,
@@ -112,6 +116,28 @@ class Population:
                 houseSize = np.random.choice(HOUSE_OPTIONS)
                 houseIndex += 1
                 self.household[houseIndex] = houseSize
+                
+        ############### STUDENTS ###############
+        self.students = np.zeros(nPop, dtype=int) + NULL_ID # list of people who are students
+        
+        for i in range(nPop-nStudents, nPop):
+            student_age = random.randint(18,23)
+            isolation_tend = np.random.choice(a=ISOLATION_OPTIONS, p=ISOLATION_WEIGHTS)
+            has_mask = np.random.random() < PROB_HAS_MASK
+            infected_prob = random.uniform(0, 1)
+            if (infected_prob > percent_infected):
+                infected = False
+            else:
+                infected = True
+
+            newStudent = Person.Person(index=i, infected=infected, recovered=False, dead=False, quarantined=False, 
+                               quarantined_day=None, infected_day=None, recovered_day=None, death_day=None,
+                               others_infected=None, cure_days=None, recent_infections=None, age=student_age, job='Student',
+                               house_index=0, isolation_tendencies=isolation_tend, case_severity='Mild', has_mask=has_mask)
+            self.population[i] = newStudent
+            
+            self.students[i] = i # set their student status
+            
 
         # Make sure last household number is right (when it runs out of people to fill)
         if houseSize != self.household[houseIndex]:
@@ -162,6 +188,9 @@ class Population:
     
     def get_quarantined(self):
         return self.quarantined[self.quarantined != NULL_ID]
+    
+    def get_students(self): # change this to look thru job == 'Student' ?
+        return self.students[self.students != NULL_ID]
     
     # Count the number of people in each bin
     def count_susceptible(self):

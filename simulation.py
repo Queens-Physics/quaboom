@@ -9,6 +9,11 @@ import Policy
 A_WILL_GO_PROB = .05
 B_WILL_GO_PROB = .4
 C_WILL_GO_PROB = .8
+UNI_GO_PROB = 0.95
+
+# Visitor parameters
+N_VIS_OPTIONS = [0, 1, 2, 3]
+N_VIS_PROB = [0.7, 0.17, 0.8, 0.05]
 
 # Testing parameters
 TESTING_RATE = 0.5 #rate at which people get positive tests (testing rate/infected person)
@@ -19,16 +24,17 @@ initial_mask_mandate, initial_lockdown_mandate, initial_testing = False, False, 
 lockdown_trigger, lockdown_day_trigger = None, 5
 mask_trigger, mask_day_trigger = None, 5
 testing_trigger, testing_day_trigger = None, 5
-
+initial_students, students_day_trigger = False, 20
 
 def RunEpidemic(nPop, n0, nDays):
     # Initalize the policy class
     policy = Policy.Policy(initial_mask_mandate=initial_mask_mandate, initial_lockdown_mandate=initial_lockdown_mandate, 
                            mask_trigger=mask_trigger, mask_day_trigger=mask_day_trigger, 
                            lockdown_trigger=lockdown_trigger, lockdown_day_trigger=lockdown_day_trigger, testing_rate=TESTING_RATE,
-                           testing_trigger=testing_trigger,testing_day_trigger=testing_day_trigger,initial_testing=initial_testing,baseline_testing = test_baseline)
+                           testing_trigger=testing_trigger,testing_day_trigger=testing_day_trigger,initial_testing=initial_testing,baseline_testing = test_baseline, 
+                           students_mandate=initial_students, students_day_trigger=students_day_trigger)
     
-    old_mask_mandate, old_lockdown, old_testing = initial_mask_mandate, initial_lockdown_mandate, initial_testing
+    old_mask_mandate, old_lockdown, old_students = initial_mask_mandate, initial_lockdown_mandate, initial_students
     
     # Initialize the population
     pop = Population.Population(nPop, n0, policy=policy)
@@ -96,18 +102,23 @@ def RunEpidemic(nPop, n0, nDays):
             print("Day: {}, Testing: {}".format(day, testing_ON))
         old_testing = testing_ON
 
+        students_go = policy.check_students(day=day)
+        if students_go != old_students:
+            print("Day: {}, Uni Mandate: {}".format(day, students_go))
+        old_students = students_go
+        
         ############### VISITOR STUFF ###############
         #add a random number of visitors to the population
-        num_vis = random.randint(0,3) if (nPop < 20e4) else random.randint(0,int(0.00002*nPop))
+        np.random.choice(n=N_VIS_OPTION, p=N_VIS_PROB)
         
         for i in range(0, num_vis):
             vis_age = random.randint(16,50)
             
-            newPerson = Person.Person(index=i+nPop, infected=True, recovered=False, dead=False, quarantined=False, 
+            visitor = Person.Person(index=i+nPop, infected=True, recovered=False, dead=False, quarantined=False, 
                                quarantined_day=None, infected_day=None, recovered_day=None, death_day=None,
                                others_infected=None, cure_days=None, recent_infections=None, age=vis_age, job=None,
                                house_index=None, isolation_tendencies=0.2, case_severity='Mild', has_mask=True)
-            pop.population.append(newPerson)
+            pop.population.append(visitor)
         
         ############### INTERACTION SITES STUFF ###############
         will_visit_A = inter_sites.will_visit_site(inter_sites.get_grade_A_sites(), A_WILL_GO_PROB)
@@ -117,6 +128,9 @@ def RunEpidemic(nPop, n0, nDays):
             inter_sites.site_interaction(will_visit_B, day)
             will_visit_C = inter_sites.will_visit_site(inter_sites.get_grade_C_sites(), C_WILL_GO_PROB)
             inter_sites.site_interaction(will_visit_C, day)
+        if students_go:
+            will_visit_uni = inter_sites.will_visit_site(inter_sites.get_uni_site(), UNI_GO_PROB)
+            inter_sites.site_interaction(will_visit_uni, inter_sites.get_uni_sites(), day)
         
         # Manage at home interactions
         inter_sites.house_interact(day)
