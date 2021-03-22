@@ -62,10 +62,6 @@ NULL_ID = -1 # This value means that the person index at this location is not su
 
 PROB_OF_TEST = 1 #probability that the person will get tested
 
-# Student parameters
-nStudents = 24000 # full capacity ~ 24000
-percent_infected = 0.03 # the percent of students who are infected
-
 class Population:
     '''creates a population of people based on the total population
      uses and age distrubution to weight the assignment of ages
@@ -86,6 +82,9 @@ class Population:
         houseSize = np.random.choice(a=HOUSE_OPTIONS, p=HOUSE_WEIGHTS)
         houseIndex = 0
         self.household[houseIndex] = houseSize
+        
+        # Student parameter
+        nStudents = int(nPop/5) # full capacity ~ 24k students
 
         # Initialize parameters of people immediately.
         # Much quick this way, utilizes numpy efficiency.
@@ -119,23 +118,16 @@ class Population:
                 
         ############### STUDENTS ###############
         self.students = np.zeros(nPop, dtype=int) + NULL_ID # list of people who are students
-        
+
         for i in range(nPop-nStudents, nPop):
             student_age = random.randint(18,23)
-            isolation_tend = np.random.choice(a=ISOLATION_OPTIONS, p=ISOLATION_WEIGHTS)
-            has_mask = np.random.random() < PROB_HAS_MASK
-            infected_prob = random.uniform(0, 1)
-            if (infected_prob > percent_infected):
-                infected = False
-            else:
-                infected = True
-
-            newStudent = Person.Person(index=i, infected=infected, recovered=False, dead=False, quarantined=False, 
+            newStudent = Person.Person(index=i, infected=False, recovered=False, dead=False, quarantined=False, 
                                quarantined_day=None, infected_day=None, recovered_day=None, death_day=None,
                                others_infected=None, cure_days=None, recent_infections=None, age=student_age, job='Student',
-                               house_index=0, isolation_tendencies=isolation_tend, case_severity='Mild', has_mask=has_mask)
+                               house_index=0, isolation_tendencies=isolation_tend_arr[i],
+                               case_severity=case_severity_arr[i], has_mask=has_mask_arr[i])
             self.population[i] = newStudent
-            
+
             self.students[i] = i # set their student status
             
 
@@ -172,6 +164,14 @@ class Population:
 
     def get_population(self):
         return self.population
+    
+    def remove_visitors(self, indices):
+        for i in indices:
+            np.delete(self.population, i)
+            
+    def remove_visitors(self, indices):
+        for i in indices:
+            np.delete(self.population, i)
 
     # Properly return the actual indices of each bin of people
     def get_susceptible(self):
@@ -198,6 +198,13 @@ class Population:
     
     def count_infected(self):
         return np.count_nonzero(self.infected != NULL_ID)
+    
+    def count_infected_students(self):
+        infStudents = 0
+        for i in range (self.nPop):
+            if (self.students[i] != NULL_ID and self.infected[i] != NULL_ID):
+                infStudents += 1
+        return infStudents
     
     def count_recovered(self):
         return np.count_nonzero(self.recovered != NULL_ID)

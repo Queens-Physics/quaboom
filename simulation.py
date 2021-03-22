@@ -12,8 +12,8 @@ C_WILL_GO_PROB = .8
 UNI_GO_PROB = 0.95
 
 # Visitor parameters
-N_VIS_OPTIONS = [0, 1, 2, 3]
-N_VIS_PROB = [0.7, 0.17, 0.8, 0.05]
+N_VIS_OPTION = [0, 1, 2, 3]
+N_VIS_PROB = [0.7, 0.17, 0.08, 0.05]
 
 # Testing parameters
 TESTING_RATE = 0.5 #rate at which people get positive tests (testing rate/infected person)
@@ -34,7 +34,8 @@ def RunEpidemic(nPop, n0, nDays):
                            testing_trigger=testing_trigger,testing_day_trigger=testing_day_trigger,initial_testing=initial_testing,baseline_testing = test_baseline, 
                            students_mandate=initial_students, students_day_trigger=students_day_trigger)
     
-    old_mask_mandate, old_lockdown, old_students = initial_mask_mandate, initial_lockdown_mandate, initial_students
+    old_mask_mandate, old_lockdown, old_testing = initial_mask_mandate, initial_lockdown_mandate, initial_testing
+    old_students = initial_students
     
     # Initialize the population
     pop = Population.Population(nPop, n0, policy=policy)
@@ -109,7 +110,8 @@ def RunEpidemic(nPop, n0, nDays):
         
         ############### VISITOR STUFF ###############
         #add a random number of visitors to the population
-        np.random.choice(n=N_VIS_OPTION, p=N_VIS_PROB)
+        num_vis = np.random.choice(a=N_VIS_OPTION, p=N_VIS_PROB)
+        visitors_ind = []
         
         for i in range(0, num_vis):
             vis_age = random.randint(16,50)
@@ -119,6 +121,7 @@ def RunEpidemic(nPop, n0, nDays):
                                others_infected=None, cure_days=None, recent_infections=None, age=vis_age, job=None,
                                house_index=None, isolation_tendencies=0.2, case_severity='Mild', has_mask=True)
             pop.population.append(visitor)
+            visitors_ind.append(i+nPop)
         
         ############### INTERACTION SITES STUFF ###############
         will_visit_A = inter_sites.will_visit_site(inter_sites.get_grade_A_sites(), A_WILL_GO_PROB)
@@ -146,11 +149,11 @@ def RunEpidemic(nPop, n0, nDays):
         
         ############### UPDATE POPULATION ###############
         # remove the guest visitors
-        pop.population = pop.population[:-num_vis]
+        pop.remove_visitors(visitors_ind)
         
         # See who needs to be cured or die
         infected_people = pop.get_infected()
-        for index in infected_people: 
+        for index in infected_people:
             infected_person = pop.get_person(index=index) 
             
             if infected_person.get_case_severity() == "Death":
