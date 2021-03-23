@@ -78,7 +78,9 @@ class Policy:
     
     def get_num_tests(self, wait_list):  
         tests = int(self.testing_rate*self.pop.count_quarantined()) # number of tests
-        if (tests < self.baseline_testing and wait_list > 0): 
+        if (self.baseline_testing == None): 
+            self.baseline_testing = 0
+        elif (tests < self.baseline_testing and wait_list > 0): 
             tests = self.baseline_testing
         return tests
     

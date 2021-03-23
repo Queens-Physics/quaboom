@@ -92,7 +92,7 @@ class Person(object):
     
     def not_infected_symptoms(self):
         prob_of_symptom = random.random()
-        if (self.show_symptoms and prob_of_symptom <= CHANCE_OF_COLD):
+        if (prob_of_symptom <= CHANCE_OF_COLD):
             self.show_symptoms = True
         return self.show_symptoms
             

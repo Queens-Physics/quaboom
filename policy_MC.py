@@ -10,13 +10,13 @@ B_WILL_GO_PROB = .4
 C_WILL_GO_PROB = .8
 
 # Testing parameters
-TESTING_RATE = 0.8 #rate at which people get positive tests (testing rate/infected person)
+TESTING_RATE = 0.5 #rate at which people get positive tests (testing rate/infected person)
 test_baseline = 100 #starting test number
 
 # Polciy variables
 initial_mask_mandate, initial_lockdown_mandate, initial_testing = False, False, False
-lockdown_trigger, lockdown_day_trigger = None, 25
-mask_trigger, mask_day_trigger = None, 25
+lockdown_trigger, lockdown_day_trigger = None, 5
+mask_trigger, mask_day_trigger = None, 5
 testing_trigger, testing_day_trigger = None, 5
 
 
@@ -68,6 +68,7 @@ def RunEpidemic(nPop, n0, nDays):
         track_lockdown[day] = old_lockdown
         track_testing_wait_list[day] = pop.get_testing_wait_list()
         track_new_quarantined[day] = pop.get_new_quarantined()
+        
         new_tests = 0
         
         #track the days someone has been infected?
@@ -110,6 +111,7 @@ def RunEpidemic(nPop, n0, nDays):
         if (testing_ON): 
             tests = policy.get_num_tests(track_testing_wait_list[day])
             inter_sites.testing_site(tests,day)
+
         
         # Manage Quarantine
         pop.update_quarantine(day)
