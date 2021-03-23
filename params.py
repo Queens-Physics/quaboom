@@ -1,0 +1,5 @@
+
+class Params:
+
+    CONTACT_TRACING_LENGTH = 2
+    CONTACT_TRACING_CAPACITY = 50 # In percent

@@ -109,6 +109,7 @@ class Interaction_Sites:
 
             while np.sum(num_interactions > 0) > 1:
                 # grab the highest interactor
+                # NOTE: person_1 may be an array of indices
                 person_1 = np.argmax(num_interactions)
                 # find a random interactor for them to pair with (that is not them)
                 new_options = [i for i in range(len(num_interactions)) if num_interactions[i] > 0 and i != person_1]
@@ -117,6 +118,12 @@ class Interaction_Sites:
                 # Get the actual people at these indexes
                 person_1_index = ppl_going[person_1]
                 person_2_index = ppl_going[person_2]
+
+                # Getting the Person objects and logging the contacts
+                p1_obj = self.pop.get_person(person_1_index)
+                p2_obj = self.pop.get_person(person_2_index)
+                p1_obj.log_contact(p2_obj, day)
+                p2_obj.log_contact(p1_obj, day)
                 
                 # Check to make sure one is infected
                 person_1_infected = self.pop.get_person(person_1_index).is_infected()

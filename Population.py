@@ -169,7 +169,7 @@ class Population:
         return np.count_nonzero(self.has_mask > 0)
     
     #returns an individual based on their index
-    def get_person(self, index):
+    def get_person(self, index) -> Person:
         return self.population[index]
 
     # Infect a person
@@ -262,6 +262,7 @@ class Population:
             person_index = self.testing[0] #gets first person waiting for test
             self.testing.pop(0) # removes first person waiting for test
             person = self.population[person_index]
+            print(f"Testing person {person_index}: {person.infected}, {person.all_contacts}")
 
             if person.infected==True:
                 person.knows_infected = True
@@ -269,6 +270,9 @@ class Population:
                 person.set_quarantine(day)
                 self.quarantined[person_index] = person_index
                 self.have_been_tested[person_index] = person_index
+
+                # Contact trace the person
+                person.contact_tracing(day)
 
 
             else:

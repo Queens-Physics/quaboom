@@ -1,6 +1,7 @@
 import numpy as np
 import random
 import json
+from params import Params
 
 TIME_QUARANTINE = 14 #days people have to quarantine
 
@@ -25,6 +26,8 @@ QUARANTINE_TIME = 14
 json_file.close()
 
 class Person(object):
+
+    
 
     # Initalize a person - Can set properties but only needed one is inde
     def __init__(self, index, infected=False, recovered=False, dead=False, quarantined=False, quarantined_day=None, 
@@ -54,7 +57,15 @@ class Person(object):
         self.knows_infected = False
         self.will_get_symptoms = False
         self.has_mask = has_mask
+
+        # Contact Tracing information
+        # Dictionary of sets that stores all the contacts on a given day
+        self.all_contacts = dict()
+        self.personal_contacts = dict()
         
+    def __repr__(self):
+        return f"Person #{self.index}"
+
     # Return True if infected, False if not
     def is_infected(self):
         return self.infected
@@ -244,3 +255,32 @@ class Person(object):
             self.recent_infections.append(person_index)
 
         return len(self.recent_infections)
+
+    def log_contact(self, other, day: int, personal: bool = False) -> None:
+        """Logs a personal contact (where person A and person B know each other). """
+
+        if day in self.all_contacts.keys():
+            self.all_contacts[day].add(other)                
+        else:
+            self.all_contacts[day] = {other}
+
+    def contact_tracing(self, day: int) -> None:
+        """Contacts everyone that they have had contact with. """
+
+        #NOTE: not differentiating between all and personal contacts
+        end = day + 1
+        beginning = end - Params.CONTACT_TRACING_LENGTH
+        contacts = set()
+        for d in range(beginning, end):
+            if d in self.all_contacts.keys():
+                contacts = contacts.union(self.all_contacts[d])
+        for contact in contacts:
+            contact.positive_contact(day)
+
+    def positive_contact(self, day):
+
+        # NOTE: Should they go to get tested? Should they go into quarantine?
+        # Right now I'll get make them get tested.
+        self.set_quarantine(day)
+        print(f"\tPerson {self.index}: quarantined!")
+        

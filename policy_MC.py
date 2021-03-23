@@ -121,6 +121,8 @@ def RunEpidemic(nPop, n0, nDays):
                                                                                       track_dead[day],
                                                                                       track_tested[day],
                                                                                       track_quarantined[day]))
+        
+
     print("At the end, ", track_susceptible[-1], "never got it")
     print(track_dead[-1], "died")
     print(np.max(track_infected), "had it at the peak")
