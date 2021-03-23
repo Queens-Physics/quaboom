@@ -3,6 +3,10 @@ import random
 import json
 
 TIME_QUARANTINE = 14 #days people have to quarantine
+Surgical_Inward_Eff = 0.4
+Surgical_Outward_Eff = 0.3
+NonSurgical_Inward_Eff = 0.6
+NonSurgical_Outward_Eff = 0.5
 
 # How long the infection will last
 json_file = open('dataK.json')
@@ -29,7 +33,7 @@ class Person(object):
     # Initalize a person - Can set properties but only needed one is inde
     def __init__(self, index, infected=False, recovered=False, dead=False, quarantined=False, quarantined_day=None, 
                  infected_day=None, recovered_day=None, death_day=None, others_infected=None, cure_days=None, 
-                 recent_infections=None, age=None, job=None, house_index=0,isolation_tendencies=None,case_severity=None, 
+                 recent_infections=None, age=None, job=None, house_index=0,isolation_tendencies=None,case_severity=None, mask_type=None, 
                  has_mask=True):
 
         self.infected = infected
@@ -49,6 +53,7 @@ class Person(object):
         self.household = house_index
         self.isolation_tendencies = isolation_tendencies
         self.case_severity = case_severity
+        self.mask_type = mask_type
         self.show_symptoms = False
         self.days_until_symptoms = None
         self.knows_infected = False
@@ -213,6 +218,16 @@ class Person(object):
         else:
             return False
     
+
+#Determines what the inward and outward efficiency of the spread will be based on the mask they are wearing
+    def mask_type_efficiency(self):
+        if self.has_mask == True and self.mask_type == "Surgical":
+            return Surgical_Inward_Eff, Surgical_Outward_Eff
+        elif self.has_mask == True and self.mask_type == "Non-surgical":
+            return NonSurgical_Inward_Eff, NonSurgical_Outward_Eff
+        else:
+            return 1, 1 #Not wearing a mask so this will function will not effect their change of getting the virus
+        
     # Method to infect a random subset of the susceptable population. Returns how many people infected
     def infect_others(self, pop_list, suscept_pop, day, num_to_infect=1):
 
