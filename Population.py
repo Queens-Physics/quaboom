@@ -125,7 +125,8 @@ class Population:
         self.testing = [] # list of people waiting to be others_infected
         self.test_sum = 0 # total number of tests that have been run
         self.quarantined_sum = 0 # total number of people in quarantine (created as the list was having indexing issues)
-
+        self.new_quarantined = 0 # new people in quarantine
+        
         # Infect first n0 people
         for i in range(n0):
             self.population[i].infect(day=0)
@@ -238,7 +239,10 @@ class Population:
 
     def count_quarantined(self):
         return np.count_nonzero(self.quarantined != NULL_ID) 
-
+    
+    def get_new_quarantined(self):
+            return self.new_quarantined
+        
     def count_tested(self):
         return self.test_sum
 
@@ -257,15 +261,22 @@ class Population:
                             self.testing.append(i)#adds the person to the testing list
                             self.population[i].knows_infected = True
     
+    #causes random people to get the cold                    
+    def random_symptomatic(self): 
+        for i in range (len(self.population)):
+            self.population[i].not_infected_symptoms()
+    
     def get_testing_wait_list(self): 
         return len(self.testing)
     
     def get_tested(self, tests_per_day, day):
-
+        
         #if less people are in the list than testing capacity test everyone in the list
         if len(self.testing) < tests_per_day:
             tests_per_day = len(self.testing)
-        self.test_sum += tests_per_day #add the daily tests to the total number of tests
+        self.test_sum += tests_per_day # add the daily tests to the total number of tests
+        
+        self.new_quarantined = 0 # reset number of newly quarantined
         
         for i in range(tests_per_day):
             person_index = self.testing[0] #gets first person waiting for test
@@ -278,7 +289,6 @@ class Population:
                 person.set_quarantine(day)
                 self.quarantined[person_index] = person_index
                 self.have_been_tested[person_index] = person_index
-
-
+                self.new_quarantined += 1
             else:
                 person.knows_infected = False
