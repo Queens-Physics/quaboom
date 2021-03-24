@@ -7,19 +7,25 @@ import Population
 import Interaction_Sites
 import Policy
 
+#### LOAD IN PARAMS FROM CONFIG FILE ####
+import config_files.config as config
 # will_go_to_site parameters (prob person will go somewhere each day) 
-A_WILL_GO_PROB = .05
-B_WILL_GO_PROB = .4
-C_WILL_GO_PROB = .8
+A_WILL_GO_PROB = config.A_WILL_GO_PROB
+B_WILL_GO_PROB = config.B_WILL_GO_PROB
+C_WILL_GO_PROB = config.C_WILL_GO_PROB
 
 # Testing parameters
-TESTING_RATE = .8 #rate at which people get positive tests (testing rate/infected person)
+TESTING_RATE = config.TESTING_RATE #rate at which people get positive tests (testing rate/infected person)
 
 # Polciy variables
-initial_mask_mandate, initial_lockdown_mandate, initial_testing = False, False, False
-lockdown_trigger, lockdown_day_trigger = None, 1
-mask_trigger, mask_day_trigger = None, 25
-testing_trigger, testing_day_trigger = None, 5
+initial_mask_mandate = config.initial_mask_mandate
+initial_lockdown_mandate = config.initial_lockdown_mandate
+initial_testing = config.initial_testing
+lockdown_trigger, lockdown_day_trigger = config.lockdown_trigger, config.lockdown_day_trigger
+mask_trigger, mask_day_trigger = config.mask_trigger, config.mask_day_trigger
+testing_trigger, testing_day_trigger = config.testing_trigger, config.testing_day_trigger
+
+#### DEFINE THE CLASS ####
 
 class simulation():
     
