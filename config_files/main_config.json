@@ -1,0 +1,24 @@
+{
+    "simulation_data":{
+        "nDays":100,
+        "nPop":10000,
+        "n0":10, 
+        
+    }, 
+    
+    "policy_data":{
+    },
+    
+    "population_data":{
+    }, 
+    
+    "interaction_sites_data":{
+    }, 
+    
+    "person_data":{
+    }
+      
+}
+
+
+
