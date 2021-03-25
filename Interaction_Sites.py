@@ -1,5 +1,3 @@
-import Person
-import Population
 import random
 import numpy as np
 
@@ -28,26 +26,26 @@ class Interaction_Sites:
 
     ###### NEW CLASS ######
     def __init__(self, pop_obj):
-        
+
         self.pop = pop_obj
-        self.policy = pop_obj.policy 
+        self.policy = pop_obj.policy
         # Grade A means ones you go to different ones of (resturants, gas station, retail stores)
         # Grade B means usually the same one, but sometimes not (gym, grocery store)
         # Grade C means almost always go to the same one (office, school)
 
         # Generates a list of ppl that go to different grade X sites
         # len(grade_X_sites) is how many sites there are; len(grade_X_sites[i]) is how many ppl go to that site
-        
+
         self.grade_A_sites = np.array(self.init_grade(GRADE_A_PER_POP, A_LOYALTY_MEAN, A_LOYALTY_STD))
         self.grade_B_sites = np.array(self.init_grade(GRADE_B_PER_POP, B_LOYALTY_MEAN, B_LOYALTY_STD))
         self.grade_C_sites = np.array(self.init_grade(GRADE_C_PER_POP, C_LOYALTY_MEAN, C_LOYALTY_STD))
         self.house_sites = np.array(pop_obj.household).copy()
-        
+
 
     def init_grade(self, grade_pop_size, loyalty_mean, loyalty_std):
         # Find out how many sites there should be - guessing right now
         num_sites = round(self.pop.get_population_size()*grade_pop_size)
-        grade_sites = [[] for i in range(num_sites)]
+        grade_sites = [[] for _ in range(num_sites)]
 
         for person in self.pop.get_population():
             # Assign people to this specific site
@@ -60,8 +58,7 @@ class Interaction_Sites:
                 grade_sites[site].append(person.get_index())
 
         # Convert everything to numpy arrays
-        for i, site in enumerate(grade_sites):
-            grade_sites[i] = np.array(site)
+        grade_sites = [np.asarray(site) for site in grade_sites]
 
         return grade_sites
 
@@ -73,34 +70,33 @@ class Interaction_Sites:
         # to prevent quarantined people from going, their will_go_prob will be Q_GO_PROB (0)
 
         # Could add something here that limits how many sites one person can visit (not real to visit 11 sites a day)
-        will_visit_grade = [[] for i in range(len(site_array))]
+        will_visit_grade = [[] for _ in range(len(site_array))]
         for i, site in enumerate(site_array):
+            # initialize probability array, all of the same probability
+            prob_attendance = np.zeros(shape=len(site)) + will_go_prob
 
-            prob_attendance = [will_go_prob for j in range(len(site))]
-
+            # change the probabilities for quarantined people
             for j, person in enumerate(site):
-                if (self.pop.get_person(person).is_quarantined == True):
+                if self.pop.get_person(person).is_quarantined():
                     prob_attendance[j] = Q_GO_PROB
 
-            site_attendance = np.array([random.random()<=prob_attendance[i] for i in range(len(site))])
-
-            will_visit_grade[i] = site[site_attendance==True]
+            site_attendance = np.random.uniform(size=prob_attendance.shape[0]) < prob_attendance
+            will_visit_grade[i] = site[site_attendance]
 
         return will_visit_grade
 
 
-    def site_interaction(self, will_go_array, site_array, day):
+    def site_interaction(self, will_go_array, day):
         # Find out how many interactions each person has at the site - FUNCTION IS PRETTY SLOW RN
         # Should deal with case where one person is left with more than one interaction
-        new_infections = np.zeros(self.pop.get_population_size(), dtype=int)
-        new_infections_count = 0
+        new_infections = np.zeros(self.pop.get_population_size(), dtype=bool)
 
         for ppl_going in will_go_array:
 
-            infected_persons = [index for index in ppl_going if self.pop.get_person(index).is_infected()==True]
-            recovered_persons = [index for index in ppl_going if self.pop.get_person(index).is_recovered()==True]
+            infected_persons = [index for index in ppl_going if self.pop.get_person(index).is_infected()]
+            recovered_persons = [index for index in ppl_going if self.pop.get_person(index).is_recovered()]
 
-            if len(infected_persons)==0 or len(infected_persons)+len(recovered_persons)==len(ppl_going):
+            if len(infected_persons) == 0 or (len(infected_persons) + len(recovered_persons) == len(ppl_going)):
                 continue # No ppl to infect here or no one already infected
 
             # Generate a list of how many interactions ppl have at the site
@@ -112,8 +108,9 @@ class Interaction_Sites:
                 # NOTE: person_1 may be an array of indices
                 person_1 = np.argmax(num_interactions)
                 # find a random interactor for them to pair with (that is not them)
-                new_options = [i for i in range(len(num_interactions)) if num_interactions[i] > 0 and i != person_1]
-                person_2 = np.random.choice(new_options)
+                person_2 = np.random.randint(num_interactions.shape[0])
+                while person_2 == person_1 or num_interactions[person_2] <= 0:
+                    person_2 = np.random.randint(num_interactions.shape[0])
 
                 # Get the actual people at these indexes
                 person_1_index = ppl_going[person_1]
@@ -128,13 +125,15 @@ class Interaction_Sites:
                 # Check to make sure one is infected
                 person_1_infected = self.pop.get_person(person_1_index).is_infected()
                 person_2_infected = self.pop.get_person(person_2_index).is_infected()
-                if person_1_infected!=person_2_infected:
-                    
+
+                if person_1_infected != person_2_infected:
                     # Have an interaction between those people
                     did_infect = self.interact(person_1_index, person_2_index)
                     if did_infect:
-                        new_infections[new_infections_count] = person_2_index if person_1_infected else person_1_index
-                        new_infections_count += 1
+                        if person_1_infected:
+                            new_infections[person_2_index] = True
+                        else:
+                            new_infections[person_1_index] = True
 
                 # Lower the interaction count for those people
                 num_interactions[person_1] -= 1
@@ -142,7 +141,8 @@ class Interaction_Sites:
 
 
         # Update people who get infected only at the end (if i get CV19 at work, prolly wont spread at the store that night ?)
-        for new_infection in new_infections[:new_infections_count]:
+        new_infection_indexes = np.where(new_infections)[0]
+        for new_infection in new_infection_indexes:
             self.pop.infect(index=new_infection, day=day)
 
 

@@ -66,30 +66,36 @@ class Population:
      '''
 
     def __init__(self, nPop, n0, policy):
-        
+
         self.policy = policy
 
-        self.population = [0]*nPop  # The list of all people
-        self.household = [0]*nPop #list of all houses (list that contains all lists of the people in the house)
-        self.nPop = nPop #total population
+        self.population = [0] * nPop  # The list of all people
+        self.household = [0] * nPop # list of all houses (list that contains all lists of the people in the house)
+        self.nPop = nPop # total population
 
         houseSize = np.random.choice(a=HOUSE_OPTIONS, p=HOUSE_WEIGHTS)
         houseIndex = 0
         self.household[houseIndex] = houseSize
 
+        # Initialize parameters of people immediately.
+        # Much quick this way, utilizes numpy efficiency.
+        age_arr = np.random.choice(a=AGE_OPTIONS, p=AGE_WEIGHTS, size=nPop)
+        job_arr = np.random.choice(a=JOB_OPTIONS, p=JOB_WEIGHTS, size=nPop)
+        isolation_tend_arr = np.random.choice(a=ISOLATION_OPTIONS, p=ISOLATION_WEIGHTS, size=nPop)
+        case_severity_arr = np.random.choice(a=SEVERITY_OPTIONS, p=SEVERITY_WEIGHTS, size=nPop)
+        has_mask_arr = np.random.uniform(size=nPop) < PROB_HAS_MASK
+
         for i in range(0, nPop):
             # MAKE A PERSON
-            age = np.random.choice(a=AGE_OPTIONS, p=AGE_WEIGHTS)
-            job = np.random.choice(a=JOB_OPTIONS, p=JOB_WEIGHTS)
-            isolation_tend = np.random.choice(a=ISOLATION_OPTIONS, p=ISOLATION_WEIGHTS)
-            case_severity = np.random.choice(a=SEVERITY_OPTIONS, p=SEVERITY_WEIGHTS)
-            has_mask = np.random.random() < PROB_HAS_MASK
+            newPerson = Person.Person(index=i, infected=False, recovered=False, dead=False,
+                                      quarantined=False, quarantined_day=None,
+                                      infected_day=None, recovered_day=None, death_day=None,
+                                      others_infected=None, cure_days=None, recent_infections=None,
+                                      age=age_arr[i], job=job_arr[i], house_index=0,
+                                      isolation_tendencies=isolation_tend_arr[i],
+                                      case_severity=case_severity_arr[i],
+                                      has_mask=has_mask_arr[i])
 
-            newPerson = Person.Person(index=i, infected=False, recovered=False, dead=False, quarantined=False, quarantined_day=None,
-                               infected_day=None, recovered_day=None, death_day=None,
-                               others_infected=None, cure_days=None, recent_infections=None, age=age, 
-                               job=job, house_index=0,isolation_tendencies=isolation_tend,case_severity=case_severity, has_mask=has_mask)
-            
             # ADD A PERSON
             self.population[i] = newPerson
 
@@ -112,11 +118,11 @@ class Population:
         self.infected = np.zeros(nPop, dtype=int) + NULL_ID  # list of all infected people
         self.recovered = np.zeros(nPop, dtype=int) + NULL_ID # list of recovered people
         self.dead = np.zeros(nPop, dtype=int) + NULL_ID # list of recovered people
-        self.testing = []# list of people waiting to be others_infected
         self.have_been_tested = np.zeros(nPop, dtype=int) + NULL_ID # list of people who have been tested
         self.knows_infected = np.zeros(nPop, dtype=int) + NULL_ID # list of people who have a positive test and are still infected
         self.quarantined = np.zeros(nPop, dtype=int) + NULL_ID #list of people who are currently in quarantine
 
+        self.testing = [] # list of people waiting to be others_infected
         self.test_sum = 0 # total number of tests that have been run
         self.quarantined_sum = 0 # total number of people in quarantine (created as the list was having indexing issues)
 
@@ -250,7 +256,10 @@ class Population:
                         if infected_person.show_symptoms==True and infected_person.knows_infected==False:
                             self.testing.append(i)#adds the person to the testing list
                             self.population[i].knows_infected = True
-
+    
+    def get_testing_wait_list(self): 
+        return len(self.testing)
+    
     def get_tested(self, tests_per_day, day):
 
         #if less people are in the list than testing capacity test everyone in the list
