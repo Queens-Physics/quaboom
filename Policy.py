@@ -1,7 +1,3 @@
-import numpy as np
-
-test_baseline = 10 #starting test number
-
 class Policy:
     '''
     Handles all of the metrics that would be dealt with by policy, including mask mandates, quarantines, testing, 
@@ -10,35 +6,31 @@ class Policy:
     
     '''
     
-    
-    def __init__(self, initial_mask_mandate=False, mask_trigger=None, mask_day_trigger=None, 
-                 initial_lockdown_mandate=False, lockdown_trigger=None, lockdown_day_trigger=None,
-                 testing_rate=None,testing_trigger=None,testing_day_trigger=None, initial_testing=False):
+    def __init__(self, sim_obj):
+        
+        self.sim_obj = sim_obj
         
         # Set the triggers and mandates
-        self.mask_mandate = initial_mask_mandate          # Start with no mask requirement
-        self.mask_trigger = mask_trigger                  # Percent infected to start mask mandate
-        self.mask_day_trigger = mask_day_trigger          # A specific day to start wearing masks
-        self.lockdown_mandate = initial_lockdown_mandate  # Start with no lockdown requirement
-        self.lockdown_trigger = lockdown_trigger          # Percent infected to start lockdown
-        self.lockdown_day_trigger = lockdown_day_trigger  # A specific day to start lockdown
-        self.testing_rate = testing_rate                  # Number of tests run per day
-        self.testing_trigger = testing_trigger            # Percent infected to start lockdown
-        self.testing_day_trigger = testing_day_trigger    # A specific day to start testing
-        self.initial_testing = initial_testing            # Starting testing requirement
+        self.mask_mandate = bool(sim_obj.initial_mask_mandate)
+        self.mask_trigger = sim_obj.mask_trigger if sim_obj.mask_trigger!=0 else None     
+        self.mask_day_trigger = sim_obj.mask_day_trigger if sim_obj.mask_day_trigger!=0 else None
         
-    def set_simulation(self, population, interaction_sites):
-        # These should act like pointers and change with the classes
-        self.interaction_sites = interaction_sites
-        self.pop = population
+        self.lockdown_mandate = bool(sim_obj.initial_lockdown_mandate)
+        self.lockdown_trigger = sim_obj.lockdown_trigger if sim_obj.lockdown_trigger!=0 else None
+        self.lockdown_day_trigger = sim_obj.lockdown_day_trigger if sim_obj.lockdown_day_trigger!=0 else None
         
-        self.pop_size = population.get_population_size()
+        self.initial_testing_mandate = bool(sim_obj.initial_testing_mandate)
+        self.testing_trigger = sim_obj.testing_trigger if sim_obj.testing_trigger!=0 else None
+        self.testing_day_trigger = sim_obj.testing_day_trigger if sim_obj.testing_day_trigger!=0 else None
+        
+        self.testing_rate = sim_obj.testing_rate
+        self.testing_baseline = sim_obj.testing_baseline
         
     def update_mask_mandate(self, day):
         # Change the policy based on conditions
         if self.mask_day_trigger is not None and day >= self.mask_day_trigger:
             mask_mandate = True
-        elif self.mask_trigger is not None and self.pop.count_infected()/self.pop_size > self.mask_trigger:
+        elif self.mask_trigger is not None and self.sim_obj.pop.count_infected()/self.sim_obj.nPop > self.mask_trigger:
             mask_mandate = True
         else:
             mask_mandate = False
@@ -55,7 +47,7 @@ class Policy:
         # Change the policy based on conditions
         if self.lockdown_day_trigger is not None and day >= self.lockdown_day_trigger:
             lockdown_mandate = True
-        elif self.lockdown_trigger is not None and self.pop.count_infected()/self.pop_size > self.lockdown_trigger:
+        elif self.lockdown_trigger is not None and self.sim_obj.pop.count_infected()/self.sim_obj.nPop > self.lockdown_trigger:
             lockdown_mandate = True
         else:
             lockdown_mandate = False
@@ -70,16 +62,16 @@ class Policy:
     def update_testing(self,day):
         if self.testing_day_trigger is not None and day >= self.testing_day_trigger: 
             testing = True
-        elif self.testing_trigger is not None and self.pop.count_infected()/self.pop_size > self.testing_trigger: 
+        elif self.testing_trigger is not None and self.sim_obj.pop.count_infected()/self.sim_obj.pop.nPop > self.testing_trigger: 
             testing = True
         else:
             testing = False
         return testing
     
     def get_num_tests(self, wait_list):  
-        tests = int(self.testing_rate*self.pop.count_quarantined()) # number of tests
-        if (tests < test_baseline and wait_list > 0): 
-            tests = test_baseline
+        tests = int(self.testing_rate*self.sim_obj.pop.count_quarantined()) # number of tests
+        if (tests < self.testing_baseline and wait_list > 0): 
+            tests = self.testing_baseline
         return tests
     
     

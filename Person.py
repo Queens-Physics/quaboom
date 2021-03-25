@@ -1,40 +1,13 @@
 import numpy as np
 import random
-import json
-
-TIME_QUARANTINE = 14 #days people have to quarantine
-Surgical_Inward_Eff = 0.4
-Surgical_Outward_Eff = 0.3
-NonSurgical_Inward_Eff = 0.6
-NonSurgical_Outward_Eff = 0.5
-
-# How long the infection will last
-json_file = open('dataK.json')
-disease_params = json.load(json_file)
-
-# recovery
-MIN_MILD= disease_params['recovery'][0]['MIN_MILD']
-MAX_MILD= disease_params['recovery'][0]['MAX_MILD']
-MIN_SEVERE= disease_params['recovery'][0]['MIN_SEVERE']
-MAX_SEVERE= disease_params['recovery'][0]['MAX_SEVERE']
-MIN_ICU= disease_params['recovery'][0]['MIN_ICU']
-MAX_ICU= disease_params['recovery'][0]['MAX_ICU']
-MIN_DIE= disease_params['recovery'][0]['MIN_DIE']
-MAX_DIE= disease_params['recovery'][0]['MAX_DIE']
-
-MASKPROB = 0.8 #Probability of wearing a mask properly
-MILD_SYMPTOM_PROB = 0.8 # Probability of mild symptoms
-MIN_DAY_BEFORE_SYMPTOM, MAX_DAY_BEFORE_SYMPTOM = 1, 10
-QUARANTINE_TIME = 14
-json_file.close()
 
 class Person(object):
 
     # Initalize a person - Can set properties but only needed one is inde
-    def __init__(self, index, infected=False, recovered=False, dead=False, quarantined=False, quarantined_day=None, 
+    def __init__(self, index, sim_obj, infected=False, recovered=False, dead=False, quarantined=False, quarantined_day=None, 
                  infected_day=None, recovered_day=None, death_day=None, others_infected=None, cure_days=None, 
-                 recent_infections=None, age=None, job=None, house_index=0,isolation_tendencies=None,case_severity=None, mask_type=None, 
-                 has_mask=True):
+                 recent_infections=None, age=None, job=None, house_index=0, isolation_tendencies=None, case_severity=None, 
+                 mask_type=None, has_mask=True):
 
         self.infected = infected
         self.recovered = recovered
@@ -59,6 +32,9 @@ class Person(object):
         self.knows_infected = False
         self.will_get_symptoms = False
         self.has_mask = has_mask
+        
+        # Set the simulaiton object to access the variables
+        self.sim_obj = sim_obj
         
     # Return True if infected, False if not
     def is_infected(self):
@@ -85,7 +61,7 @@ class Person(object):
     def leave_quarantine(self, day):
         if self.quarantined_day == None: 
             self.quarantined_day = 0
-        if self.recovered == True or self.dead == True or (day - self.quarantined_day) >= QUARANTINE_TIME:
+        if self.recovered == True or self.dead == True or (day - self.quarantined_day) >= self.sim_obj.quarantine_time:
             self.quarantined = False
             return True
         return False
@@ -128,24 +104,25 @@ class Person(object):
             self.infected = True
             self.infected_day = day
             self.will_get_symptoms = True
-            self.days_until_symptoms  = np.random.randint(MIN_DAY_BEFORE_SYMPTOM,MAX_DAY_BEFORE_SYMPTOM)
+            self.days_until_symptoms  = np.random.randint(self.sim_obj.min_day_before_symptoms, 
+                                                          self.sim_obj.max_day_before_symptoms)
             
             # If cure days not specified then choose random number inbetween min and max
             if self.case_severity == 'Mild' or self.case_severity == None: # If severity not specified, choose Mild
                 prob_of_symptom = random.random()
-                if (prob_of_symptom > MILD_SYMPTOM_PROB): #probability that the person has mild symtoms
+                if (prob_of_symptom > self.sim_obj.mild_symptom_prob): #probability that the person has mild symtoms
                     # choose number of days after infection when symptoms show
                     self.will_get_symptoms = False
                     self.days_until_symptoms = None
 
-                self.cure_days = np.random.randint(MIN_MILD, MAX_MILD) if cure_days is None else cure_days
+                self.cure_days = np.random.randint(self.sim_obj.min_mild_days, self.sim_obj.max_mild_days) if cure_days is None else cure_days
             #Assuming that all hospitalization or worse cases will show symptoms
             elif self.case_severity == 'Hospitalization':
-                self.cure_days = np.random.randint(MIN_SEVERE, MAX_SEVERE) if cure_days is None else cure_days
+                self.cure_days = np.random.randint(self.sim_obj.min_severe_days, self.sim_obj.max_severe_days) if cure_days is None else cure_days
             elif self.case_severity == 'ICU':
-                self.cure_days = np.random.randint(MIN_ICU, MAX_ICU) if cure_days is None else cure_days
+                self.cure_days = np.random.randint(self.sim_obj.min_ICU_days, self.sim_obj.max_ICU_days) if cure_days is None else cure_days
             elif self.case_severity == 'Death':
-                self.cure_days = np.random.randint(MIN_DIE, MAX_DIE) if cure_days is None else cure_days
+                self.cure_days = np.random.randint(self.sim_obj.min_die_days, self.sim_obj.max_die_days) if cure_days is None else cure_days
 
             return True
 
@@ -156,7 +133,7 @@ class Person(object):
     def check_quarantine(self, day):
         if self.quarantined:
             days_since_quarantined = day - self.quarantined_day
-            if days_since_quarantined >= TIME_QUARANTINE:
+            if days_since_quarantined >= self.sim_obj.quarantine_time:
                 self.quarantined = False
                 return False
             return True
@@ -211,7 +188,7 @@ class Person(object):
         mask_options = np.random.uniform()
         
         if self.has_mask:
-            if mask_options > MASKPROB:
+            if mask_options > self.sim_obj.wear_mask_properly:
                 return False #False = not wearing a mask
             else:
                 return True #True = wearing a mask
@@ -222,9 +199,9 @@ class Person(object):
 #Determines what the inward and outward efficiency of the spread will be based on the mask they are wearing
     def mask_type_efficiency(self):
         if self.has_mask == True and self.mask_type == "Surgical":
-            return Surgical_Inward_Eff, Surgical_Outward_Eff
+            return self.sim_obj.surgical_inward_eff, self.sim_obj.surgical_outward_eff
         elif self.has_mask == True and self.mask_type == "Non-surgical":
-            return NonSurgical_Inward_Eff, NonSurgical_Outward_Eff
+            return self.sim_obj.nonsurgical_inward_eff, self.sim_obj.nonsurgical_outward_eff
         else:
             return 1, 1 #Not wearing a mask so this will function will not effect their change of getting the virus
         

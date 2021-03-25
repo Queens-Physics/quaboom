@@ -1,21 +1,65 @@
 {
-    "simulation_data":{
+    "simulation_data":
+    {
         "nDays":100,
         "nPop":10000,
         "n0":10, 
-        
+        "A_will_go_prob":0.05,
+        "B_will_go_prob":0.4,
+        "C_will_go_prob":0.8
     }, 
     
-    "policy_data":{
+    "policy_data":
+    {
+        "testing_rate":0.8, 
+        "initial_mask_mandate":0, 
+        "mask_trigger":0, 
+        "mask_day_trigger":25,
+        "initial_lockdown_mandate":0, 
+        "lockdown_trigger":0, 
+        "lockdown_day_trigger":1,
+        "initial_testing_mandate":0, 
+        "testing_trigger":0, 
+        "testing_day_trigger":25,
+        "testing_baseline":10
+        
     },
     
     "population_data":{
+        "demographics_file":"./dataK.json", 
+        "prob_has_mask":0.8, 
+        "prob_of_test":0.5
     }, 
     
     "interaction_sites_data":{
+        
+        "grade_per_pop":{"A":500, "B":500, "C":500},
+        "grade_loyalty_means":{"A":4, "B":1, "C":1},
+        "grade_loyalty_stds":{"A":2, "B":1, "C":0.5},
+        "base_infection_spread_prob":0.15, 
+        "house_infection_spread_factor":1.25, 
+        "quarantine_isolation_factor":0
+        
     }, 
     
     "person_data":{
+        "quarantine_time":14, 
+        "surgical_inward_eff":0.4, 
+        "surgical_outward_eff":0.3, 
+        "nonsurgical_inward_eff":0.6, 
+        "nonsurgical_outward_eff":0.5, 
+        "wear_mask_properly":0.8, 
+        "mild_symptom_prob":0.8, 
+        "min_day_before_symptoms":1, 
+        "max_day_before_symptoms":10,
+        "max_severe_days": 42, 
+        "min_severe_days": 21, 
+        "max_mild_days": 20, 
+        "min_mild_days": 12, 
+        "max_ICU_days": 59, 
+        "min_ICU_days": 43, 
+        "max_die_days": 30, 
+        "min_die_days": 14
     }
       
 }

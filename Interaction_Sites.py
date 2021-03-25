@@ -1,31 +1,16 @@
-import random
 import numpy as np
-
-# __init__ parameters
-GRADE_A_PER_POP = 1./500
-GRADE_B_PER_POP = 1./500
-GRADE_C_PER_POP = 1./500
-
-A_LOYALTY_MEAN, A_LOYALTY_STD = 4, 2
-B_LOYALTY_MEAN, B_LOYALTY_STD = 1, 1
-C_LOYALTY_MEAN, C_LOYALTY_STD = 1, .5
-
-# House spread parameters
-HOUSE_SPREAD_PROB = 0.2
-
-BASE_INFECTION_SPREAD_PROB = 0.15
-HOUSE_INFECTION_SPREAD_PROB = BASE_INFECTION_SPREAD_PROB*(1.25)
-
-# probability of someone going out when they're quarantined
-Q_GO_PROB = 0
-
+import random
 class Interaction_Sites:
 
-    ###### NEW CLASS ######
-    def __init__(self, pop_obj):
+    def __init__(self, sim_obj):
 
-        self.pop = pop_obj
-        self.policy = pop_obj.policy
+        self.base_infection_spread_prob = sim_obj.base_infection_spread_prob
+        self.house_infection_spread_prob = self.base_infection_spread_prob * sim_obj.house_infection_spread_factor
+        self.quarantine_isolation_factor = sim_obj.quarantine_isolation_factor
+        
+        self.pop = sim_obj.pop
+        self.policy = sim_obj.policy
+        
         # Grade A means ones you go to different ones of (resturants, gas station, retail stores)
         # Grade B means usually the same one, but sometimes not (gym, grocery store)
         # Grade C means almost always go to the same one (office, school)
@@ -33,15 +18,18 @@ class Interaction_Sites:
         # Generates a list of ppl that go to different grade X sites
         # len(grade_X_sites) is how many sites there are; len(grade_X_sites[i]) is how many ppl go to that site
 
-        self.grade_A_sites = np.array(self.init_grade(GRADE_A_PER_POP, A_LOYALTY_MEAN, A_LOYALTY_STD))
-        self.grade_B_sites = np.array(self.init_grade(GRADE_B_PER_POP, B_LOYALTY_MEAN, B_LOYALTY_STD))
-        self.grade_C_sites = np.array(self.init_grade(GRADE_C_PER_POP, C_LOYALTY_MEAN, C_LOYALTY_STD))
-        self.house_sites = np.array(pop_obj.household).copy()
+        self.grade_A_sites = np.array(self.init_grade(sim_obj.grade_per_pop["A"], sim_obj.grade_loyalty_means["A"], 
+                                                      sim_obj.grade_loyalty_stds["A"]))
+        self.grade_B_sites = np.array(self.init_grade(sim_obj.grade_per_pop["B"], sim_obj.grade_loyalty_means["B"], 
+                                                      sim_obj.grade_loyalty_stds["B"]))
+        self.grade_C_sites = np.array(self.init_grade(sim_obj.grade_per_pop["C"], sim_obj.grade_loyalty_means["C"], 
+                                                      sim_obj.grade_loyalty_stds["C"]))
+        self.house_sites = np.array(self.pop.household).copy()
 
 
     def init_grade(self, grade_pop_size, loyalty_mean, loyalty_std):
         # Find out how many sites there should be - guessing right now
-        num_sites = round(self.pop.get_population_size()*grade_pop_size)
+        num_sites = round(self.pop.get_population_size()/grade_pop_size)
         grade_sites = [[] for _ in range(num_sites)]
 
         for person in self.pop.get_population():
@@ -75,7 +63,7 @@ class Interaction_Sites:
             # change the probabilities for quarantined people
             for j, person in enumerate(site):
                 if self.pop.get_person(person).is_quarantined():
-                    prob_attendance[j] = Q_GO_PROB
+                    prob_attendance[j] = self.quarantine_isolation_factor
 
             site_attendance = np.random.uniform(size=prob_attendance.shape[0]) < prob_attendance
             will_visit_grade[i] = site[site_attendance]
@@ -146,7 +134,7 @@ class Interaction_Sites:
     def interact(self, person_1, person_2):
         # Function that models the interaction between two people, and will return if interaction spread
         if self.policy.get_mask_mandate==False:
-            spread_prob = BASE_INFECTION_SPREAD_PROB
+            spread_prob = self.base_infection_spread_prob
         else:
             p1Mask = self.pop.get_person(person_1).wear_mask()
             p2Mask = self.pop.get_person(person_2).wear_mask()
@@ -156,16 +144,16 @@ class Interaction_Sites:
             P2_INWARD_PROB, P2_OUTWARD_PROB = self.pop.get_person(person_2).mask_type_efficiency()
 
             if p1Infected:
-                if p1Mask and p2Mask: spread_prob = BASE_INFECTION_SPREAD_PROB*P1_OUTWARD_PROB*P2_INWARD_PROB
-                elif p1Mask: spread_prob = BASE_INFECTION_SPREAD_PROB*P1_OUTWARD_PROB
-                elif p2Mask: spread_prob = BASE_INFECTION_SPREAD_PROB*P2_INWARD_PROB
-                else: spread_prob = BASE_INFECTION_SPREAD_PROB
+                if p1Mask and p2Mask: spread_prob = self.base_infection_spread_prob*P1_OUTWARD_PROB*P2_INWARD_PROB
+                elif p1Mask: spread_prob = self.base_infection_spread_prob*P1_OUTWARD_PROB
+                elif p2Mask: spread_prob = self.base_infection_spread_prob*P2_INWARD_PROB
+                spread_prob = self.base_infection_spread_prob
 
             else:
-                if p1Mask and p2Mask: spread_prob = BASE_INFECTION_SPREAD_PROB*P2_OUTWARD_PROB*P1_INWARD_PROB
-                elif p1Mask: spread_prob = BASE_INFECTION_SPREAD_PROB*P1_INWARD_PROB
-                elif p2Mask: spread_prob = BASE_INFECTION_SPREAD_PROB*P2_OUTWARD_PROB
-                else: spread_prob = BASE_INFECTION_SPREAD_PROB
+                if p1Mask and p2Mask: spread_prob = self.base_infection_spread_prob*P2_OUTWARD_PROB*P1_INWARD_PROB
+                elif p1Mask: spread_prob = self.base_infection_spread_prob*P1_INWARD_PROB
+                elif p2Mask: spread_prob = self.base_infection_spread_prob*P2_OUTWARD_PROB
+                else: spread_prob = self.base_infection_spread_prob
         
         return random.random() < spread_prob
    
@@ -186,12 +174,12 @@ class Interaction_Sites:
 
                 for person in healthy_housemembers:
                     # This should be more complicated and depend on len(infectpplinhouse)
-                    infection_chance = HOUSE_INFECTION_SPREAD_PROB
+                    infection_chance = self.house_infection_spread_prob
                     caught_infection = random.random()<infection_chance
                     if caught_infection:
                         self.pop.infect(index=housemembers[person].get_index(), day=day)
 
-    # Function thats tests the symtomatic individuals as well as brining them in and out of quarentine
+    # Function thats tests the symtomatic individuals as well as brining them in and out of quarantine
     def testing_site (self, tests_per_day, day): 
         #tests per day is number of postive tests per day as we ignore negative tests
         self.pop.update_symptomatic(day)

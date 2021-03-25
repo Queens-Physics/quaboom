@@ -1,77 +1,116 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import copy as copy
+import json
+import random
 
 import Person
 import Population
 import Interaction_Sites
 import Policy
 
-#### LOAD IN PARAMS FROM CONFIG FILE ####
-import config_files.config as config
-# will_go_to_site parameters (prob person will go somewhere each day) 
-A_WILL_GO_PROB = config.A_WILL_GO_PROB
-B_WILL_GO_PROB = config.B_WILL_GO_PROB
-C_WILL_GO_PROB = config.C_WILL_GO_PROB
-
-# Testing parameters
-TESTING_RATE = config.TESTING_RATE #rate at which people get positive tests (testing rate/infected person)
-
-# Polciy variables
-initial_mask_mandate = config.initial_mask_mandate
-initial_lockdown_mandate = config.initial_lockdown_mandate
-initial_testing = config.initial_testing
-lockdown_trigger, lockdown_day_trigger = config.lockdown_trigger, config.lockdown_day_trigger
-mask_trigger, mask_day_trigger = config.mask_trigger, config.mask_day_trigger
-testing_trigger, testing_day_trigger = config.testing_trigger, config.testing_day_trigger
-
-#### DEFINE THE CLASS ####
-
 class simulation():
     
-    def __init__(self, nPop, n0, nDays):
+    def __init__(self, config_file):
         
-        self.nPop = nPop
-        self.n0 = n0
-        self.nDays = nDays
-
-        # Initalize the policy class
-        self.policy = Policy.Policy(initial_mask_mandate=initial_mask_mandate, initial_lockdown_mandate=initial_lockdown_mandate, 
-                                   mask_trigger=mask_trigger, mask_day_trigger=mask_day_trigger, 
-                                   lockdown_trigger=lockdown_trigger, lockdown_day_trigger=lockdown_day_trigger,
-                                   testing_rate=TESTING_RATE, testing_trigger=testing_trigger, 
-                                   testing_day_trigger=testing_day_trigger, 
-                                   initial_testing=initial_testing)
-
-        # Initialize the population
-        self.pop = Population.Population(nPop, n0, policy=self.policy)
-
-        # Initalize the interaction sites
-        self.inter_sites = Interaction_Sites.Interaction_Sites(pop_obj=self.pop)
-
-        # Link the pop and inter_sites to the policy class
-        self.policy.set_simulation(population=self.pop, interaction_sites=self.inter_sites)
+        self.load_parameters(config_file)
+        self.init_classes() # Have to initalize the classes after we have all of the parameters
 
         # Arrays to store the values during the simulation                   
-        self.track_new_infected = np.zeros(nDays, dtype=int) # new infections 
-        self.track_infected = np.zeros(nDays, dtype=int)     # currently infected 
-        self.track_susceptible = np.zeros(nDays, dtype=int)  # never been exposed
-        self.track_recovered = np.zeros(nDays, dtype=int)    # total recovered
-        self.track_dead = np.zeros(nDays, dtype=int)         # total deaths
-        self.track_tested = np.zeros(nDays, dtype=int)       # total tested individuals
-        self.track_quarantined = np.zeros(nDays, dtype=int)  # population currently in quarantine ACTUALLY DOES TOTAL QUARINTIED 
-        self.track_testing_wait_list = np.zeros(nDays, dtype=int) # counts the number of people waiting to get tests each day
-        self.track_masks = np.zeros(nDays, dtype=bool)
-        self.track_lockdown = np.zeros(nDays, dtype=bool)
-        self.track_testing = np.zeros(nDays, dtype=bool)
+        self.track_new_infected = np.zeros(self.nDays, dtype=int) # new infections 
+        self.track_infected = np.zeros(self.nDays, dtype=int)     # currently infected 
+        self.track_susceptible = np.zeros(self.nDays, dtype=int)  # never been exposed
+        self.track_recovered = np.zeros(self.nDays, dtype=int)    # total recovered
+        self.track_dead = np.zeros(self.nDays, dtype=int)         # total deaths
+        self.track_tested = np.zeros(self.nDays, dtype=int)       # total tested individuals
+        self.track_quarantined = np.zeros(self.nDays, dtype=int)  # population currently in quarantine 
+        self.track_testing_wait_list = np.zeros(self.nDays, dtype=int) # counts the number of people waiting to get tests each day
+        self.track_masks = np.zeros(self.nDays, dtype=bool)
+        self.track_lockdown = np.zeros(self.nDays, dtype=bool)
+        self.track_testing = np.zeros(self.nDays, dtype=bool)
         
         self.has_run = False                                 # Indicates if the sim has run yet
+ 
+        
+    def load_parameters(self, filename):
+        file = open(filename)
+        parameters = json.load(file)
+        
+        #### Do the simulation parameters ####
+        sim_params = parameters["simulation_data"]
+        self.nDays = sim_params["nDays"]
+        self.nPop = sim_params["nPop"]
+        self.n0 = sim_params["n0"]
+        self.A_will_go_prob = sim_params["A_will_go_prob"]
+        self.B_will_go_prob = sim_params["B_will_go_prob"]
+        self.C_will_go_prob = sim_params["C_will_go_prob"]
+        
+        #### Do the policy parameters ####
+        policy_params = parameters["policy_data"]
+        self.testing_rate = policy_params["testing_rate"]
+        self.initial_mask_mandate = policy_params["initial_mask_mandate"]
+        self.mask_trigger = policy_params["mask_trigger"]
+        self.mask_day_trigger = policy_params["mask_day_trigger"]
+        self.initial_lockdown_mandate = policy_params["initial_lockdown_mandate"]
+        self.lockdown_trigger = policy_params["lockdown_trigger"]
+        self.lockdown_day_trigger = policy_params["lockdown_day_trigger"]
+        self.initial_testing_mandate = policy_params["initial_testing_mandate"]
+        self.testing_trigger = policy_params["testing_trigger"]
+        self.testing_day_trigger = policy_params["testing_day_trigger"]
+        self.testing_baseline = policy_params["testing_baseline"]
+        
+        #### Do the population parameters ####
+        pop_params = parameters["population_data"]
+        self.demographics_file = pop_params["demographics_file"]
+        self.prob_has_mask = pop_params["prob_has_mask"]
+        self.prob_of_test = pop_params["prob_of_test"]
+        
+        #### Do the interaction site parameters ####
+        is_params = parameters["interaction_sites_data"]
+        self.grade_per_pop = is_params["grade_per_pop"]
+        self.grade_loyalty_means = is_params["grade_loyalty_means"]
+        self.grade_loyalty_stds = is_params["grade_loyalty_stds"]
+        self.base_infection_spread_prob = is_params["base_infection_spread_prob"]
+        self.house_infection_spread_factor = is_params["house_infection_spread_factor"]
+        self.quarantine_isolation_factor = is_params["quarantine_isolation_factor"]
+        
+        #### Do the person parameters ####
+        person_params = parameters["person_data"]
+        self.quarantine_time = person_params['quarantine_time']
+        self.surgical_inward_eff = person_params['surgical_inward_eff']
+        self.surgical_outward_eff = person_params['surgical_outward_eff']
+        self.nonsurgical_inward_eff = person_params['nonsurgical_inward_eff']
+        self.nonsurgical_outward_eff = person_params['nonsurgical_outward_eff']
+        self.wear_mask_properly = person_params["wear_mask_properly"]
+        self.mild_symptom_prob = person_params["mild_symptom_prob"]
+        self.min_day_before_symptoms = person_params["min_day_before_symptoms"]
+        self.max_day_before_symptoms = person_params["max_day_before_symptoms"]
+        self.min_severe_days = person_params["min_severe_days"]
+        self.max_severe_days = person_params["max_severe_days"]
+        self.min_mild_days = person_params["min_mild_days"]
+        self.max_mild_days = person_params["max_mild_days"]
+        self.min_ICU_days = person_params["min_ICU_days"]
+        self.max_ICU_days = person_params["max_ICU_days"]
+        self.min_die_days = person_params["min_die_days"]
+        self.max_die_days = person_params["max_die_days"]
+        
+    def init_classes(self):
+        # Initalize the policy class
+        self.policy = Policy.Policy(self)
+
+        # Initialize the population
+        self.pop = Population.Population(self)
+
+        # Initalize the interaction sites
+        self.inter_sites = Interaction_Sites.Interaction_Sites(self)
         
         
     def run(self):
         
         # Initalize variables to flag state changes
-        old_mask_mandate, old_lockdown, old_testing = initial_mask_mandate, initial_lockdown_mandate, initial_testing
+        old_mask_mandate = self.initial_mask_mandate
+        old_lockdown_mandate = self.initial_lockdown_mandate
+        old_testing_mandate = self.initial_testing_mandate
         # Loop over the number of days
         for day in range(self.nDays):
 
@@ -87,8 +126,8 @@ class simulation():
             self.track_testing_wait_list[day] = self.pop.get_testing_wait_list()
             
             self.track_masks[day] = old_mask_mandate
-            self.track_lockdown[day] = old_lockdown
-            self.track_testing[day] = old_testing
+            self.track_lockdown[day] = old_lockdown_mandate
+            self.track_testing[day] = old_testing_mandate
 
             self.new_tests = 0
 
@@ -104,22 +143,22 @@ class simulation():
             old_mask_mandate = mask_mandate
 
             lockdown = self.policy.update_lockdown(day=day)
-            if lockdown != old_lockdown:
+            if lockdown != old_lockdown_mandate:
                 print("Day: {}, Lockdown: {}".format(day, lockdown))
-            old_lockdown = lockdown
+            old_lockdown_mandate = lockdown
 
             testing_ON = self.policy.update_testing(day)   
-            if testing_ON != old_testing: 
+            if testing_ON != old_testing_mandate: 
                 print("Day: {}, Testing: {}".format(day, testing_ON))
-            old_testing = testing_ON
+            old_testing_mandate = testing_ON
 
             ############### INTERACTION SITES STUFF ###############
-            will_visit_A = self.inter_sites.will_visit_site(self.inter_sites.get_grade_A_sites(), A_WILL_GO_PROB)
+            will_visit_A = self.inter_sites.will_visit_site(self.inter_sites.get_grade_A_sites(), self.A_will_go_prob)
             self.inter_sites.site_interaction(will_visit_A, day)
             if not lockdown:
-                will_visit_B = self.inter_sites.will_visit_site(self.inter_sites.get_grade_B_sites(), B_WILL_GO_PROB)
+                will_visit_B = self.inter_sites.will_visit_site(self.inter_sites.get_grade_B_sites(), self.B_will_go_prob)
                 self.inter_sites.site_interaction(will_visit_B, day)
-                will_visit_C = self.inter_sites.will_visit_site(self.inter_sites.get_grade_C_sites(), C_WILL_GO_PROB)
+                will_visit_C = self.inter_sites.will_visit_site(self.inter_sites.get_grade_C_sites(), self.C_will_go_prob)
                 self.inter_sites.site_interaction(will_visit_C, day)
 
             # Manage at home interactions
