@@ -13,14 +13,14 @@
     {
         "testing_rate":0.8, 
         "initial_mask_mandate":0, 
-        "mask_trigger":0, 
-        "mask_day_trigger":25,
+        "mask_trigger":0.5, 
+        "mask_day_trigger":0,
         "initial_lockdown_mandate":0, 
-        "lockdown_trigger":0, 
-        "lockdown_day_trigger":1,
+        "lockdown_trigger":0.5, 
+        "lockdown_day_trigger":0,
         "initial_testing_mandate":0, 
-        "testing_trigger":0, 
-        "testing_day_trigger":25,
+        "testing_trigger":0.5, 
+        "testing_day_trigger":0,
         "testing_baseline":10
         
     },
@@ -63,6 +63,3 @@
     }
       
 }
-
-
-
