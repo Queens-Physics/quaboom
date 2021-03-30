@@ -6,10 +6,12 @@ import Interaction_Sites
 import Policy
 
 # will_go_to_site parameters (prob person will go somewhere each day) 
-A_WILL_GO_PROB = .05
-B_WILL_GO_PROB = .4
-C_WILL_GO_PROB = .8
-UNI_GO_PROB = 0.95
+A_WILL_GO_PROB = .05 ## .05
+B_WILL_GO_PROB = .1 ## .4
+C_WILL_GO_PROB = .2 ## .8
+LECT_GO_PROB = .7 ## .8
+STUDY_GO_PROB = .05 ## .2
+FOOD_GO_PROB = .1
 
 # Visitor parameters
 N_VIS_OPTION = [0, 1, 2, 3]
@@ -24,7 +26,7 @@ initial_mask_mandate, initial_lockdown_mandate, initial_testing = False, False, 
 lockdown_trigger, lockdown_day_trigger = None, 5
 mask_trigger, mask_day_trigger = None, 5
 testing_trigger, testing_day_trigger = None, 5
-initial_students, students_day_trigger = False, 20
+initial_students, students_day_trigger = False, 20 ## 20
 
 def RunEpidemic(nPop, n0, nDays):
     # Initalize the policy class
@@ -59,7 +61,8 @@ def RunEpidemic(nPop, n0, nDays):
     track_masks = np.zeros(nDays, dtype=int) 
     track_lockdown = np.zeros(nDays, dtype=int)
     track_testing_wait_list = np.zeros(nDays, dtype=int) # counts the number of people waiting to get tests each day
-    
+    track_inf_students = np.zeros(nDays, dtype=int) # counts number of students infected each day
+
     # Loop over the number of days
     for day in range(nDays):
 
@@ -76,6 +79,7 @@ def RunEpidemic(nPop, n0, nDays):
         track_lockdown[day] = old_lockdown
         track_testing_wait_list[day] = pop.get_testing_wait_list()
         track_new_quarantined[day] = pop.get_new_quarantined()
+        track_inf_students[day] = pop.count_infected_students()
         
         new_tests = 0
         
@@ -132,8 +136,13 @@ def RunEpidemic(nPop, n0, nDays):
             will_visit_C = inter_sites.will_visit_site(inter_sites.get_grade_C_sites(), C_WILL_GO_PROB)
             inter_sites.site_interaction(will_visit_C, day)
         if students_go:
-            will_visit_uni = inter_sites.will_visit_site(inter_sites.get_uni_site(), UNI_GO_PROB)
-            inter_sites.site_interaction(will_visit_uni, inter_sites.get_uni_sites(), day)
+            will_visit_study = inter_sites.will_visit_site(inter_sites.get_study_sites(), STUDY_GO_PROB)
+            inter_sites.site_interaction(will_visit_study, day)
+            will_visit_food = inter_sites.will_visit_site(inter_sites.get_food_sites(), FOOD_GO_PROB)
+            inter_sites.site_interaction(will_visit_food, day)
+            if not lockdown:
+                will_visit_lects = inter_sites.will_visit_site(inter_sites.get_lect_sites(), LECT_GO_PROB)
+                inter_sites.site_interaction(will_visit_lects, day)
         
         # Manage at home interactions
         inter_sites.house_interact(day)
@@ -168,17 +177,18 @@ def RunEpidemic(nPop, n0, nDays):
                     
                 is_quarantined = infected_person.check_quarantine(day)
 
-        print("Day: {}, infected: {}, recovered: {}, suceptible: {}, dead: {}, tested: {} total quarantined: {}".format(day, 
+        print("Day: {}, infected: {}, recovered: {}, suceptible: {}, dead: {}, tested: {} total quarantined: {}, infected students: {}".format(day, 
                                                                                       track_infected[day],
                                                                                       track_recovered[day],
                                                                                       track_susceptible[day],
                                                                                       track_dead[day],
                                                                                       track_tested[day],
-                                                                                      track_quarantined[day]))
+                                                                                      track_quarantined[day],
+                                                                                      track_inf_students[day]))
     print("At the end, ", track_susceptible[-1], "never got it")
     print(track_dead[-1], "died")
     print(np.max(track_infected), "had it at the peak")
     print(track_tested[day], "have been tested")
     print (np.max(track_quarantined), "were in quarantine at the peak")
     
-    return track_infected, track_new_infected, track_recovered, track_susceptible, track_dead, track_tested, track_new_tested, track_quarantined, track_new_quarantined, track_masks, track_lockdown, Population
+    return track_infected, track_new_infected, track_recovered, track_susceptible, track_dead, track_tested, track_quarantined, track_masks, track_lockdown, track_inf_students, Population

@@ -82,10 +82,10 @@ class Population:
         houseSize = np.random.choice(a=HOUSE_OPTIONS, p=HOUSE_WEIGHTS)
         houseIndex = 0
         self.household[houseIndex] = houseSize
-        
+
         # Student parameter
         nStudents = int(nPop/5) # full capacity ~ 24k students
-
+        
         # Initialize parameters of people immediately.
         # Much quick this way, utilizes numpy efficiency.
         age_arr = np.random.choice(a=AGE_OPTIONS, p=AGE_WEIGHTS, size=nPop)
