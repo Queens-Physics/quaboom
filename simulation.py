@@ -108,8 +108,6 @@ def RunEpidemic(nPop, n0, nDays):
         # Manage Quarantine
         pop.update_quarantine(day)
         
-        # Manage Hospitalized
-        pop.update_hospitalized(day)
         
         ############### UPDATE POPULATION ###############
         # See who needs to be cured or die
@@ -142,5 +140,7 @@ def RunEpidemic(nPop, n0, nDays):
     print(np.max(track_infected), "had it at the peak")
     print(track_tested[day], "have been tested")
     print (np.max(track_quarantined), "were in quarantine at the peak")
+    print(np.max(track_hospitalized), "at peak hospitalizations")
+    print(np.max(track_dead[-1]), "at peak deaths")
     
     return track_infected, track_new_infected, track_recovered, track_susceptible, track_dead, track_hospitalized, track_tested, track_quarantined, track_masks, track_lockdown, Population

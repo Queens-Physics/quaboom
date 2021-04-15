@@ -198,7 +198,9 @@ class Population:
         if didWork:
             self.infected[index] = index
             self.susceptible[index] = NULL_ID
-
+            if self.population[index].hospitalized:
+                self.hospitalized[index] = index
+    
         return didWork
 
     # Update lists for already infected people
@@ -225,6 +227,7 @@ class Population:
             return False
         self.infected[index] = NULL_ID
         self.recovered[index] = index
+        self.hospitalized[index] = NULL_ID
         return True
 
     def die(self, index, day):
@@ -240,15 +243,9 @@ class Population:
             return False
         self.infected[index] = NULL_ID
         self.recovered[index] = NULL_ID
+        self.hospitalized[index] = NULL_ID
         self.dead[index] = index
         return True
-    
-    def update_hospitalized(self, index):
-        for i in self.get_hospitalized(): 
-          
-            if infected_person.get_case_severity[i] == "Hospitalization" or infected_person.get_case_severity[i] == "ICU":
-                self.hospitalized[i] = NULL_ID
-                return True
 
     def update_quarantine(self, day):
         # Release everyone who has done their quarantine - DOES NOT ADD NEW PPL TO LIST

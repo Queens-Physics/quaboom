@@ -146,10 +146,13 @@ class Person(object):
             #Assuming that all hospitalization or worse cases will show symptoms
             elif self.case_severity == 'Hospitalization':
                 self.cure_days = np.random.randint(MIN_SEVERE, MAX_SEVERE) if cure_days is None else cure_days
+                self.hospitalized = True
             elif self.case_severity == 'ICU':
                 self.cure_days = np.random.randint(MIN_ICU, MAX_ICU) if cure_days is None else cure_days
+                self.hospitalized = True
             elif self.case_severity == 'Death':
                 self.cure_days = np.random.randint(MIN_DIE, MAX_DIE) if cure_days is None else cure_days
+                self.hospitalized = True
 
             return True
 
@@ -193,6 +196,7 @@ class Person(object):
                 self.knows_infected = False
                 self.days_until_symptoms = None
                 self.show_symptoms = False
+                self.hospitalized = False
 
                 return True
         return False
@@ -212,10 +216,8 @@ class Person(object):
         return False
     
     def check_hospitalized(self, day): # checking that case_severity==death outside of the loop
-
         if self.infected:
-
-            if self.case_severity == 'Hospitalization' or self.case_severity == 'ICU':
+            if self.case_severity == 'Hospitalization' or self.case_severity == 'ICU' or self.case_severity == 'Death':
                 self.hospitalized = True
 
             return True
