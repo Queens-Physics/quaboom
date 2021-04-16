@@ -10,21 +10,15 @@ class Policy:
         
         self.sim_obj = sim_obj
         
-        # Set the triggers and mandates
-        self.mask_mandate = bool(sim_obj.initial_mask_mandate)
-        self.mask_trigger = sim_obj.mask_trigger if sim_obj.mask_trigger!=0 else None     
-        self.mask_day_trigger = sim_obj.mask_day_trigger if sim_obj.mask_day_trigger!=0 else None
+        # Set attributes
+        self.load_attributes_from_sim_obj()
         
-        self.lockdown_mandate = bool(sim_obj.initial_lockdown_mandate)
-        self.lockdown_trigger = sim_obj.lockdown_trigger if sim_obj.lockdown_trigger!=0 else None
-        self.lockdown_day_trigger = sim_obj.lockdown_day_trigger if sim_obj.lockdown_day_trigger!=0 else None
-        
-        self.initial_testing_mandate = bool(sim_obj.initial_testing_mandate)
-        self.testing_trigger = sim_obj.testing_trigger if sim_obj.testing_trigger!=0 else None
-        self.testing_day_trigger = sim_obj.testing_day_trigger if sim_obj.testing_day_trigger!=0 else None
-        
-        self.testing_rate = sim_obj.testing_rate
-        self.testing_baseline = sim_obj.testing_baseline
+    def load_attributes_from_sim_obj(self):
+        # Loop through keys instead
+        attributes = self.sim_obj.parameters["policy_data"].keys()
+
+        for attr in attributes:
+            setattr(self, attr, self.sim_obj.parameters["policy_data"][attr])
         
     def update_mask_mandate(self, day):
         # Change the policy based on conditions
@@ -73,6 +67,3 @@ class Policy:
         if (tests < self.testing_baseline and wait_list > 0): 
             tests = self.testing_baseline
         return tests
-    
-    
-    

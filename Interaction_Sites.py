@@ -3,13 +3,9 @@ import random
 class Interaction_Sites:
 
     def __init__(self, sim_obj):
-
-        self.base_infection_spread_prob = sim_obj.base_infection_spread_prob
-        self.house_infection_spread_prob = self.base_infection_spread_prob * sim_obj.house_infection_spread_factor
-        self.quarantine_isolation_factor = sim_obj.quarantine_isolation_factor
         
-        self.pop = sim_obj.pop
-        self.policy = sim_obj.policy
+        # Set attributes from config file
+        self.load_attributes_from_sim_obj(sim_obj)
         
         # Grade A means ones you go to different ones of (resturants, gas station, retail stores)
         # Grade B means usually the same one, but sometimes not (gym, grocery store)
@@ -18,14 +14,25 @@ class Interaction_Sites:
         # Generates a list of ppl that go to different grade X sites
         # len(grade_X_sites) is how many sites there are; len(grade_X_sites[i]) is how many ppl go to that site
 
-        self.grade_A_sites = np.array(self.init_grade(sim_obj.grade_per_pop["A"], sim_obj.grade_loyalty_means["A"], 
-                                                      sim_obj.grade_loyalty_stds["A"]))
-        self.grade_B_sites = np.array(self.init_grade(sim_obj.grade_per_pop["B"], sim_obj.grade_loyalty_means["B"], 
-                                                      sim_obj.grade_loyalty_stds["B"]))
-        self.grade_C_sites = np.array(self.init_grade(sim_obj.grade_per_pop["C"], sim_obj.grade_loyalty_means["C"], 
-                                                      sim_obj.grade_loyalty_stds["C"]))
+        self.grade_A_sites = np.array(self.init_grade(self.grade_per_pop["A"], self.grade_loyalty_means["A"], 
+                                                      self.grade_loyalty_stds["A"]))
+        self.grade_B_sites = np.array(self.init_grade(self.grade_per_pop["B"], self.grade_loyalty_means["B"], 
+                                                      self.grade_loyalty_stds["B"]))
+        self.grade_C_sites = np.array(self.init_grade(self.grade_per_pop["C"], self.grade_loyalty_means["C"], 
+                                                      self.grade_loyalty_stds["C"]))
         self.house_sites = np.array(self.pop.household).copy()
 
+        
+    def load_attributes_from_sim_obj(self, sim_obj):
+        attributes = sim_obj.parameters["interaction_sites_data"].keys()
+        for attr in attributes:
+            setattr(self, attr, sim_obj.parameters["interaction_sites_data"][attr])
+            
+        self.house_infection_spread_prob = self.base_infection_spread_prob * self.house_infection_spread_factor
+        
+        # Set the actual objects now
+        self.pop = sim_obj.pop
+        self.policy = sim_obj.policy
 
     def init_grade(self, grade_pop_size, loyalty_mean, loyalty_std):
         # Find out how many sites there should be - guessing right now
@@ -126,11 +133,12 @@ class Interaction_Sites:
 
     def calc_interactions(self, person_index, how_busy):
         # This will be some function that returns how many interactions for this person
-        upper_interaction_bound = 10
+        upper_interaction_bound = 5
         lower_interaction_bound = 0  # Random numbers at the moment
 
         return np.random.randint(lower_interaction_bound, upper_interaction_bound)
          
+        
     def interact(self, person_1, person_2):
         # Function that models the interaction between two people, and will return if interaction spread
         if self.policy.get_mask_mandate==False:
@@ -157,6 +165,7 @@ class Interaction_Sites:
         
         return random.random() < spread_prob
    
+
     def house_interact(self, day):
         # It is assumed that if people go to the same home they will interact with eachother
         house_count = 0
@@ -179,6 +188,7 @@ class Interaction_Sites:
                     if caught_infection:
                         self.pop.infect(index=housemembers[person].get_index(), day=day)
 
+                        
     # Function thats tests the symtomatic individuals as well as brining them in and out of quarantine
     def testing_site (self, tests_per_day, day): 
         #tests per day is number of postive tests per day as we ignore negative tests
@@ -193,4 +203,3 @@ class Interaction_Sites:
 
     def get_grade_C_sites(self):
         return self.grade_C_sites.copy()
-

@@ -16,19 +16,20 @@ class Population:
      '''
 
     def __init__(self, sim_obj):
-        
-        # Load in the demographics file
-        self.demographics_file = sim_obj.demographics_file
+       
+        # Set attributes from sim_obj file
+        self.load_attributes_from_sim_obj(sim_obj)
         
         # Actually set all of these values
-        self.set_demographic_parameters()
+        self.set_demographic_parameters(sim_obj)
 
-        self.population = [0] * sim_obj.nPop  # The list of all people
-        self.household = [0] * sim_obj.nPop # list of all houses (list that contains all lists of the people in the house)
         self.nPop = sim_obj.nPop # total population
         self.n0 = sim_obj.n0 # initial infected
-        self.prob_of_test = sim_obj.prob_of_test
-        self.prob_has_mask = sim_obj.prob_has_mask
+        
+        self.population = [0] * self.nPop  # The list of all people
+        self.household = [0] * self.nPop # list of all houses (list that contains all lists of the people in the house)
+        self.prob_of_test = self.prob_of_test
+        self.prob_has_mask = self.prob_has_mask
 
         houseSize = np.random.choice(a=self.HOUSE_OPTIONS, p=self.HOUSE_WEIGHTS)
         houseIndex = 0
@@ -91,7 +92,12 @@ class Population:
             self.susceptible[i] = NULL_ID
 
             
-    def set_demographic_parameters(self):
+    def load_attributes_from_sim_obj(self, sim_obj):
+        attributes = sim_obj.parameters["population_data"].keys()
+        for attr in attributes:
+            setattr(self, attr, sim_obj.parameters["population_data"][attr])
+            
+    def set_demographic_parameters(self, sim_obj):
         json_file = open(self.demographics_file)
         disease_params = json.load(json_file)
 

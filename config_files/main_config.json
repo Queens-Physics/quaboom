@@ -5,22 +5,22 @@
         "nPop":10000,
         "n0":10, 
         "A_will_go_prob":0.05,
-        "B_will_go_prob":0.4,
-        "C_will_go_prob":0.8
+        "B_will_go_prob":0.2,
+        "C_will_go_prob":0.7
     }, 
     
     "policy_data":
     {
         "testing_rate":0.8, 
-        "initial_mask_mandate":0, 
-        "mask_trigger":0.5, 
-        "mask_day_trigger":0,
-        "initial_lockdown_mandate":0, 
+        "initial_mask_mandate":true, 
+        "mask_trigger":0.3, 
+        "mask_day_trigger":15,
+        "initial_lockdown_mandate":false, 
         "lockdown_trigger":0.5, 
-        "lockdown_day_trigger":0,
-        "initial_testing_mandate":0, 
+        "lockdown_day_trigger":null,
+        "initial_testing_mandate":false, 
         "testing_trigger":0.5, 
-        "testing_day_trigger":0,
+        "testing_day_trigger":null,
         "testing_baseline":10
         
     },
@@ -33,9 +33,9 @@
     
     "interaction_sites_data":{
         
-        "grade_per_pop":{"A":500, "B":500, "C":500},
+        "grade_per_pop":{"A":1000, "B":1000, "C":1000},
         "grade_loyalty_means":{"A":4, "B":1, "C":1},
-        "grade_loyalty_stds":{"A":2, "B":1, "C":0.5},
+        "grade_loyalty_stds":{"A":2, "B":1, "C":0.2},
         "base_infection_spread_prob":0.15, 
         "house_infection_spread_factor":1.25, 
         "quarantine_isolation_factor":0

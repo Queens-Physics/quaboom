@@ -115,14 +115,18 @@ class Person(object):
                     self.will_get_symptoms = False
                     self.days_until_symptoms = None
 
-                self.cure_days = np.random.randint(self.sim_obj.min_mild_days, self.sim_obj.max_mild_days) if cure_days is None else cure_days
+                self.cure_days = np.random.randint(self.sim_obj.min_mild_days, 
+                                                   self.sim_obj.max_mild_days) if cure_days is None else cure_days
             #Assuming that all hospitalization or worse cases will show symptoms
             elif self.case_severity == 'Hospitalization':
-                self.cure_days = np.random.randint(self.sim_obj.min_severe_days, self.sim_obj.max_severe_days) if cure_days is None else cure_days
+                self.cure_days = np.random.randint(self.sim_obj.min_severe_days, 
+                                                   self.sim_obj.max_severe_days) if cure_days is None else cure_days
             elif self.case_severity == 'ICU':
-                self.cure_days = np.random.randint(self.sim_obj.min_ICU_days, self.sim_obj.max_ICU_days) if cure_days is None else cure_days
+                self.cure_days = np.random.randint(self.sim_obj.min_ICU_days, 
+                                                   self.sim_obj.max_ICU_days) if cure_days is None else cure_days
             elif self.case_severity == 'Death':
-                self.cure_days = np.random.randint(self.sim_obj.min_die_days, self.sim_obj.max_die_days) if cure_days is None else cure_days
+                self.cure_days = np.random.randint(self.sim_obj.min_die_days, 
+                                                   self.sim_obj.max_die_days) if cure_days is None else cure_days
 
             return True
 
@@ -195,8 +199,7 @@ class Person(object):
         else:
             return False
     
-
-#Determines what the inward and outward efficiency of the spread will be based on the mask they are wearing
+    #Determines what the inward and outward efficiency of the spread will be based on the mask they are wearing
     def mask_type_efficiency(self):
         if self.has_mask == True and self.mask_type == "Surgical":
             return self.sim_obj.surgical_inward_eff, self.sim_obj.surgical_outward_eff
@@ -204,35 +207,3 @@ class Person(object):
             return self.sim_obj.nonsurgical_inward_eff, self.sim_obj.nonsurgical_outward_eff
         else:
             return 1, 1 #Not wearing a mask so this will function will not effect their change of getting the virus
-        
-    # Method to infect a random subset of the susceptable population. Returns how many people infected
-    def infect_others(self, pop_list, suscept_pop, day, num_to_infect=1):
-
-        # If there are no susceptable people, return 0 infections
-        if len(suscept_pop) == 0:
-            return 0
-
-        # Choose the random indices from the population to have infectious contacts with
-        contact_options = list(range(len(pop_list)))
-        contact_options.remove(self.index)       # Make it so that it can not select itself as a contact
-        infect_indexs = np.random.choice(contact_options, num_to_infect, replace=False)
-        self.recent_infections = []
-        infectCount = 0
-        for index in infect_indexs:
-            # If the contact was not susceptable, nothing happens
-            if index not in suscept_pop:
-                continue
-
-            # Get the id of the susceptable person being infected
-            person_to_infect = pop_list[index]
-            person_index = person_to_infect.get_index()
-
-            # Infect that person
-            person_to_infect.infect(day)
-
-            # Update others infected list
-            self.others_infected.append(person_index)
-            # Update who was actually infected
-            self.recent_infections.append(person_index)
-
-        return len(self.recent_infections)
