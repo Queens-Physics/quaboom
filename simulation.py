@@ -10,19 +10,22 @@ B_WILL_GO_PROB = .4
 C_WILL_GO_PROB = .8
 
 # Testing parameters
-TESTING_RATE = .8 #rate at which people get positive tests (testing rate/infected person)
+TESTING_RATE = 0.5 #rate at which people get positive tests (testing rate/infected person)
+test_baseline = 100 #starting test number
 
 # Polciy variables
 initial_mask_mandate, initial_lockdown_mandate, initial_testing = False, False, False
-lockdown_trigger, lockdown_day_trigger = None, 1
-mask_trigger, mask_day_trigger = None, 25
+lockdown_trigger, lockdown_day_trigger = None, 5
+mask_trigger, mask_day_trigger = None, 5
 testing_trigger, testing_day_trigger = None, 5
+
+
 def RunEpidemic(nPop, n0, nDays):
     # Initalize the policy class
     policy = Policy.Policy(initial_mask_mandate=initial_mask_mandate, initial_lockdown_mandate=initial_lockdown_mandate, 
                            mask_trigger=mask_trigger, mask_day_trigger=mask_day_trigger, 
                            lockdown_trigger=lockdown_trigger, lockdown_day_trigger=lockdown_day_trigger, testing_rate=TESTING_RATE,
-                           testing_trigger=testing_trigger,testing_day_trigger=testing_day_trigger,initial_testing=initial_testing)
+                           testing_trigger=testing_trigger,testing_day_trigger=testing_day_trigger,initial_testing=initial_testing,baseline_testing = test_baseline)
     
     old_mask_mandate, old_lockdown, old_testing = initial_mask_mandate, initial_lockdown_mandate, initial_testing
     
@@ -42,10 +45,13 @@ def RunEpidemic(nPop, n0, nDays):
     track_recovered = np.zeros(nDays, dtype=int)    # total recovered
     track_dead = np.zeros(nDays, dtype=int)         # total deaths
     track_tested = np.zeros(nDays, dtype=int)       # total tested individuals
+    track_new_tested = np.zeros(nDays, dtype=int)    # new tests per day
     track_quarantined = np.zeros(nDays, dtype=int)  # population currently in quarantine ACTUALLY DOES TOTAL QUARINTIED 
-    track_masks = np.zeros(nDays, dtype=int)
+    track_new_quarantined = np.zeros(nDays, dtype=int) #new quarantined
+    track_masks = np.zeros(nDays, dtype=int) 
     track_lockdown = np.zeros(nDays, dtype=int)
     track_testing_wait_list = np.zeros(nDays, dtype=int) # counts the number of people waiting to get tests each day
+    
     # Loop over the number of days
     for day in range(nDays):
 
@@ -61,6 +67,7 @@ def RunEpidemic(nPop, n0, nDays):
         track_masks[day] = old_mask_mandate
         track_lockdown[day] = old_lockdown
         track_testing_wait_list[day] = pop.get_testing_wait_list()
+        track_new_quarantined[day] = pop.get_new_quarantined()
         
         new_tests = 0
         
@@ -69,6 +76,8 @@ def RunEpidemic(nPop, n0, nDays):
             new_recovered = track_recovered[day] - track_recovered[day-1]
             new_dead = track_dead[day] - track_dead[day-1]
             track_new_infected[day] = track_infected[day] - track_infected[day-1] + new_recovered + new_dead
+            track_new_tested[day] = track_tested[day] - track_tested[day-1]
+                
             
         ############### POLICY STUFF ###############
         mask_mandate = policy.update_mask_mandate(day=day)
@@ -102,6 +111,7 @@ def RunEpidemic(nPop, n0, nDays):
         if (testing_ON): 
             tests = policy.get_num_tests(track_testing_wait_list[day])
             inter_sites.testing_site(tests,day)
+
         
         # Manage Quarantine
         pop.update_quarantine(day)
@@ -137,4 +147,4 @@ def RunEpidemic(nPop, n0, nDays):
     print(track_tested[day], "have been tested")
     print (np.max(track_quarantined), "were in quarantine at the peak")
     
-    return track_infected, track_new_infected, track_recovered, track_susceptible, track_dead, track_tested, track_quarantined, track_masks, track_lockdown, Population
+    return track_infected, track_new_infected, track_recovered, track_susceptible, track_dead, track_tested, track_new_tested, track_quarantined, track_new_quarantined, track_masks, track_lockdown, Population

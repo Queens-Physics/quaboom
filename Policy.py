@@ -1,6 +1,5 @@
 import numpy as np
 
-test_baseline = 10 #starting test number
 
 class Policy:
     '''
@@ -13,7 +12,7 @@ class Policy:
     
     def __init__(self, initial_mask_mandate=False, mask_trigger=None, mask_day_trigger=None, 
                  initial_lockdown_mandate=False, lockdown_trigger=None, lockdown_day_trigger=None,
-                 testing_rate=None,testing_trigger=None,testing_day_trigger=None, initial_testing=False):
+                 testing_rate=None,testing_trigger=None,testing_day_trigger=None, initial_testing=False, baseline_testing=None):
         
         # Set the triggers and mandates
         self.mask_mandate = initial_mask_mandate          # Start with no mask requirement
@@ -26,6 +25,7 @@ class Policy:
         self.testing_trigger = testing_trigger            # Percent infected to start lockdown
         self.testing_day_trigger = testing_day_trigger    # A specific day to start testing
         self.initial_testing = initial_testing            # Starting testing requirement
+        self.baseline_testing = baseline_testing
         
     def set_simulation(self, population, interaction_sites):
         # These should act like pointers and change with the classes
@@ -78,8 +78,10 @@ class Policy:
     
     def get_num_tests(self, wait_list):  
         tests = int(self.testing_rate*self.pop.count_quarantined()) # number of tests
-        if (tests < test_baseline and wait_list > 0): 
-            tests = test_baseline
+        if (self.baseline_testing == None): 
+            self.baseline_testing = 0
+        elif (tests < self.baseline_testing and wait_list > 0): 
+            tests = self.baseline_testing
         return tests
     
     
