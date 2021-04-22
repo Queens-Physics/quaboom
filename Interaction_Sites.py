@@ -67,27 +67,6 @@ class Interaction_Sites:
         grade_sites = [np.asarray(site) for site in grade_sites]
 
         return grade_sites
-
-    def init_uni(self, sites_per_pop, loyalty_mean, loyalty_std):
-        num_sites = round(self.pop.get_population_size()*sites_per_pop)
-        grade_sites = [[] for i in range(num_sites)]
-
-        for student in self.pop.get_population():
-            if (student.job == 'Student'): ##########################################
-                # Assign people to this specific site
-                num_diff_sites = abs(round(np.random.normal(loyalty_mean, loyalty_std)))
-                num_diff_sites = num_diff_sites if num_diff_sites <= num_sites else num_sites
-                # Get a list of len num_diff_sites for this person to be associated with now
-                student_sites = np.random.choice(num_sites, num_diff_sites, replace=False)
-                for site in student_sites:
-                    # Assign this person to that site
-                    grade_sites[site].append(student.get_index())
-
-        # Convert everything to numpy arrays
-        for i, site in enumerate(grade_sites):
-            grade_sites[i] = np.array(site)
-
-        return grade_sites
     
     def init_uni(self, sites_per_pop, loyalty_mean, loyalty_std):
         num_sites = round(self.pop.get_population_size()*sites_per_pop)
@@ -261,14 +240,5 @@ class Interaction_Sites:
     def get_study_sites(self):
         return self.study_sites.copy()
     
-    def get_food_sites(self):
-        return self.food_sites.copy()
-
-    def get_lect_sites(self):
-        return self.lect_sites.copy()
-
-    def get_study_sites(self):
-        return self.study_sites.copy()
-
     def get_food_sites(self):
         return self.food_sites.copy()

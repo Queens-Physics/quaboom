@@ -168,10 +168,6 @@ class Population:
     def remove_visitors(self, indices):
         for i in indices:
             np.delete(self.population, i)
-            
-    def remove_visitors(self, indices):
-        for i in indices:
-            np.delete(self.population, i)
 
     # Properly return the actual indices of each bin of people
     def get_susceptible(self):

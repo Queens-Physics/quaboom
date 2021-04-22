@@ -5,11 +5,11 @@ import Interaction_Sites
 import Policy
 
 # will_go_to_site parameters (prob person will go somewhere each day) 
-A_WILL_GO_PROB = .05 ## .05
-B_WILL_GO_PROB = .1 ## .4
-C_WILL_GO_PROB = .2 ## .8
-LECT_GO_PROB = .7 ## .8
-STUDY_GO_PROB = .05 ## .2
+A_WILL_GO_PROB = .05
+B_WILL_GO_PROB = .4
+C_WILL_GO_PROB = .8
+LECT_GO_PROB = .8
+STUDY_GO_PROB = .2
 FOOD_GO_PROB = .1
 
 # Visitor parameters
@@ -192,4 +192,4 @@ def RunEpidemic(nPop, n0, nDays):
     print(track_tested[day], "have been tested")
     print (np.max(track_quarantined), "were in quarantine at the peak")
     
-    return track_infected, track_new_infected, track_recovered, track_susceptible, track_dead, track_tested, track_quarantined, track_masks, track_lockdown, track_inf_students, Population
+    return track_infected, track_new_infected, track_recovered, track_susceptible, track_dead, track_tested, track_new_tested, track_quarantined, track_new_quarantined, track_masks, track_lockdown, track_inf_students, Population
