@@ -14,7 +14,7 @@ TESTING_RATE = .8 #rate at which people get positive tests (testing rate/infecte
 
 # Polciy variables
 initial_mask_mandate, initial_lockdown_mandate, initial_testing = False, False, False
-lockdown_trigger, lockdown_day_trigger = None, 1
+lockdown_trigger, lockdown_day_trigger = None, 5
 mask_trigger, mask_day_trigger = None, 25
 testing_trigger, testing_day_trigger = None, 5
 def RunEpidemic(nPop, n0, nDays):
@@ -88,12 +88,12 @@ def RunEpidemic(nPop, n0, nDays):
         
         ############### INTERACTION SITES STUFF ###############
         will_visit_A = inter_sites.will_visit_site(inter_sites.get_grade_A_sites(), A_WILL_GO_PROB)
-        inter_sites.site_interaction(will_visit_A, day)
+        inter_sites.site_interaction(will_visit_A, day, personal=True)
         if not lockdown:
             will_visit_B = inter_sites.will_visit_site(inter_sites.get_grade_B_sites(), B_WILL_GO_PROB)
-            inter_sites.site_interaction(will_visit_B, day)
+            inter_sites.site_interaction(will_visit_B, day, personal=False)
             will_visit_C = inter_sites.will_visit_site(inter_sites.get_grade_C_sites(), C_WILL_GO_PROB)
-            inter_sites.site_interaction(will_visit_C, day)
+            inter_sites.site_interaction(will_visit_C, day, personal=False)
         
         # Manage at home interactions
         inter_sites.house_interact(day)
@@ -140,3 +140,7 @@ def RunEpidemic(nPop, n0, nDays):
     print (np.max(track_quarantined), "were in quarantine at the peak")
     
     return track_infected, track_new_infected, track_recovered, track_susceptible, track_dead, track_tested, track_quarantined, track_masks, track_lockdown, Population
+
+
+if __name__ == "__main__":
+    RunEpidemic(10000, 20, 100)

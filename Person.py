@@ -63,10 +63,13 @@ class Person(object):
         self.will_get_symptoms = False
         self.has_mask = has_mask
 
-        # Contact Tracing information
+        #### CONTACT TRACING INFO ####
         # Dictionary of sets that stores all the contacts on a given day
         self.all_contacts = dict()
         self.personal_contacts = dict()
+        # Whether the person uses a contact tracing app
+        self.has_ct_app = True
+
         
     def __repr__(self):
         return f"Person #{self.index}"
@@ -139,7 +142,7 @@ class Person(object):
             self.infected = True
             self.infected_day = day
             self.will_get_symptoms = True
-            self.days_until_symptoms  = np.random.randint(MIN_DAY_BEFORE_SYMPTOM,MAX_DAY_BEFORE_SYMPTOM)
+            self.days_until_symptoms  = 2 #np.random.randint(MIN_DAY_BEFORE_SYMPTOM,MAX_DAY_BEFORE_SYMPTOM)
             
             # If cure days not specified then choose random number inbetween min and max
             if self.case_severity == 'Mild' or self.case_severity == None: # If severity not specified, choose Mild
@@ -271,31 +274,52 @@ class Person(object):
 
         return len(self.recent_infections)
 
-    def log_contact(self, other, day: int, personal: bool = False) -> None:
-        """Logs a personal contact (where person A and person B know each other). """
 
-        if day in self.all_contacts.keys():
-            self.all_contacts[day].add(other)                
-        else:
-            self.all_contacts[day] = {other}
+    #### CONTACT TRACING FUNCTIONS ####
+
+    def log_contact(self, other, day: int, personal: bool = False) -> None:
+        """Logs a contact between two individuals. """
+
+        def add_contact(log):
+            if day in log.keys():
+                log[day].add(other)                
+            else:
+                log[day] = set([other])
+
+        add_contact(self.all_contacts)
+        if personal:
+            add_contact(self.personal_contacts)
+        
 
     def contact_tracing(self, day: int) -> None:
         """Contacts everyone that they have had contact with. """
 
-        #NOTE: not differentiating between all and personal contacts
         end = day + 1
         beginning = end - Params.CONTACT_TRACING_LENGTH
-        contacts = set()
-        for d in range(beginning, end):
-            if d in self.all_contacts.keys():
-                contacts = contacts.union(self.all_contacts[d])
+        
+        def get_contacts(log):
+            contacts = set()
+            for d in range(beginning, end):
+                if d in log.keys():
+                    contacts = contacts.union(log[d])
+            return contacts
+
+        # Personal contacts
+        contacts = get_contacts(self.personal_contacts)
+
+        # CT apps
+        if self.has_ct_app:
+            contacts = contacts.union(get_contacts(self.all_contacts))
+
+        # Notify all contacts
         for contact in contacts:
+            #NOTE: apply some memory coefficient
             contact.positive_contact(day)
+        
+        
 
     def positive_contact(self, day):
 
         # NOTE: Should they go to get tested? Should they go into quarantine?
-        # Right now I'll get make them get tested.
-        self.set_quarantine(day)
-        print(f"\tPerson {self.index}: quarantined!")
-        
+        # Right now I'll get make them go to quarantine
+        self.set_quarantine(day)        

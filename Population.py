@@ -133,11 +133,17 @@ class Population:
         self.test_sum = 0 # total number of tests that have been run
         self.quarantined_sum = 0 # total number of people in quarantine (created as the list was having indexing issues)
 
-        # Infect first n0 people
-        for i in range(n0):
+        # Select the indices of the n0 initially infected people
+        # randomly, and then infect them
+        indices = random.sample(range(nPop), n0)
+        for i in indices:
             self.population[i].infect(day=0)
             self.infected[i] = i
             self.susceptible[i] = NULL_ID
+        
+        # Contact tracing statistics
+        self.contact_tracing = True
+        self.ct_capacity = 10000
 
     #returns the population
     def get_population_size(self):
@@ -274,11 +280,13 @@ class Population:
             tests_per_day = len(self.testing)
         self.test_sum += tests_per_day #add the daily tests to the total number of tests
         
+        # Number of contacts traced so far
+        num_contacts_traced = 0
+
         for i in range(tests_per_day):
             person_index = self.testing[0] #gets first person waiting for test
             self.testing.pop(0) # removes first person waiting for test
             person = self.population[person_index]
-            print(f"Testing person {person_index}: {person.infected}, {person.all_contacts}")
 
             if person.infected==True:
                 person.knows_infected = True
@@ -288,7 +296,9 @@ class Population:
                 self.have_been_tested[person_index] = person_index
 
                 # Contact trace the person
-                person.contact_tracing(day)
+                if self.contact_tracing and num_contacts_traced < self.ct_capacity:
+                    person.contact_tracing(day)
+                    self.ct_capacity += 1
 
 
             else:

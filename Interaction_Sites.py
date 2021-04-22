@@ -83,7 +83,7 @@ class Interaction_Sites:
         return will_visit_grade
 
 
-    def site_interaction(self, will_go_array, day):
+    def site_interaction(self, will_go_array, day, personal = False):
         # Find out how many interactions each person has at the site - FUNCTION IS PRETTY SLOW RN
         # Should deal with case where one person is left with more than one interaction
         new_infections = np.zeros(self.pop.get_population_size(), dtype=bool)
@@ -116,8 +116,8 @@ class Interaction_Sites:
                 # Getting the Person objects and logging the contacts
                 p1_obj = self.pop.get_person(person_1_index)
                 p2_obj = self.pop.get_person(person_2_index)
-                p1_obj.log_contact(p2_obj, day)
-                p2_obj.log_contact(p1_obj, day)
+                p1_obj.log_contact(p2_obj, day, personal)
+                p2_obj.log_contact(p1_obj, day, personal)
                 
                 # Check to make sure one is infected
                 person_1_infected = self.pop.get_person(person_1_index).is_infected()
@@ -184,6 +184,12 @@ class Interaction_Sites:
             house_size = self.house_sites[i]
             housemembers = self.pop.get_population()[house_count:house_count+house_size]
             house_count += house_size
+
+            # Adding contact to everyone in the house
+            for member in housemembers:
+                for other in housemembers:
+                    if member is not other:
+                        member.log_contact(other, day, personal=True)
 
             # Check if anyone in the house is infected
             infected_housemembers = [i for i in range(house_size) if housemembers[i].is_infected() == True]
