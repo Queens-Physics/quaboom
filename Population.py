@@ -60,7 +60,7 @@ NULL_ID = -1 # This value means that the person index at this location is not su
              # All arrays are intialized to this (except healthy, as everyone is healthy)
 
 
-PROB_OF_TEST = 0.5 #probability that the person will get tested
+PROB_OF_TEST = 1 #probability that the person will get tested
 
 class Population:
     '''creates a population of people based on the total population
@@ -251,9 +251,17 @@ class Population:
 
     def count_quarantined(self):
         return np.count_nonzero(self.quarantined != NULL_ID) 
-
+    
+    def get_new_quarantined(self):
+            return self.new_quarantined_num
+        
     def count_tested(self):
         return self.test_sum
+
+    #causes random people to get the cold                    
+    def random_symptomatic(self): 
+        for i in range (len(self.population)):
+            self.population[i].not_infected_symptoms()
 
     # updates the list of symptomatic people and adds the people who are symtomatic to the testing array
     def update_symptomatic(self, day):
@@ -270,15 +278,18 @@ class Population:
                             self.testing.append(i)#adds the person to the testing list
                             self.population[i].knows_infected = True
     
+    
     def get_testing_wait_list(self): 
         return len(self.testing)
     
     def get_tested(self, tests_per_day, day):
-
+        
         #if less people are in the list than testing capacity test everyone in the list
         if len(self.testing) < tests_per_day:
             tests_per_day = len(self.testing)
-        self.test_sum += tests_per_day #add the daily tests to the total number of tests
+        self.test_sum += tests_per_day # add the daily tests to the total number of tests
+        
+        self.new_quarantined_num = 0 # reset number of newly quarantined
         
         # Number of contacts traced so far
         num_contacts_traced = 0
@@ -288,7 +299,7 @@ class Population:
             self.testing.pop(0) # removes first person waiting for test
             person = self.population[person_index]
 
-            if person.infected==True:
+            if person.infected == True:
                 person.knows_infected = True
                 #quarantines the person
                 person.set_quarantine(day)
@@ -301,5 +312,8 @@ class Population:
                     self.ct_capacity += 1
 
 
+                self.new_quarantined_num += 1
             else:
                 person.knows_infected = False
+                self.have_been_tested[person_index] = person_index
+
