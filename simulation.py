@@ -35,8 +35,8 @@ def RunEpidemic(nPop, n0, nDays):
     policy = Policy.Policy(initial_mask_mandate=initial_mask_mandate, initial_lockdown_mandate=initial_lockdown_mandate, 
                            mask_trigger=mask_trigger, mask_day_trigger=mask_day_trigger, 
                            lockdown_trigger=lockdown_trigger, lockdown_day_trigger=lockdown_day_trigger, testing_rate=TESTING_RATE,
-                           testing_trigger=testing_trigger,testing_day_trigger=testing_day_trigger,initial_testing=initial_testing,baseline_testing = test_baseline, 
-                           students_mandate=initial_students, students_day_trigger=students_day_trigger)
+                           testing_trigger=testing_trigger, testing_day_trigger=testing_day_trigger, initial_testing=initial_testing,
+                           baseline_testing = test_baseline, students_mandate=initial_students, students_day_trigger=students_day_trigger)
     
     old_mask_mandate, old_lockdown, old_testing = initial_mask_mandate, initial_lockdown_mandate, initial_testing
     old_students = initial_students
