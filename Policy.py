@@ -101,3 +101,4 @@ class Policy:
 
     def get_students_mandate(self):
         return self.students_mandate
+
