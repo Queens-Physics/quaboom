@@ -1,5 +1,4 @@
 import numpy as np
-import random
 import Person
 import Population
 import Interaction_Sites
@@ -16,6 +15,9 @@ FOOD_GO_PROB = .1
 # Visitor parameters
 N_VIS_OPTION = [0, 1, 2, 3]
 N_VIS_PROB = [0.7, 0.17, 0.08, 0.05]
+vis_age_lower = 16
+vis_age_upper = 60
+# those are both arbitrary
 
 # Testing parameters
 TESTING_RATE = 0.5 #rate at which people get positive tests (testing rate/infected person)
@@ -115,17 +117,16 @@ def RunEpidemic(nPop, n0, nDays):
         ############### VISITOR STUFF ###############
         #add a random number of visitors to the population
         num_vis = np.random.choice(a=N_VIS_OPTION, p=N_VIS_PROB)
-        visitors_ind = []
+        visitors_ind = [x for x in range(nPop, nPop+num_vis-1)]
         
         for i in range(0, num_vis):
-            vis_age = random.randint(16,50)
+            vis_age = np.random.randint(vis_age_lower,vis_age_upper)
             
             visitor = Person.Person(index=i+nPop, infected=True, recovered=False, dead=False, quarantined=False, 
                                quarantined_day=None, infected_day=None, recovered_day=None, death_day=None,
                                others_infected=None, cure_days=None, recent_infections=None, age=vis_age, job=None,
                                house_index=None, isolation_tendencies=0.2, case_severity='Mild', has_mask=True)
             pop.population.append(visitor)
-            visitors_ind.append(i+nPop)
         
         ############### INTERACTION SITES STUFF ###############
         will_visit_A = inter_sites.will_visit_site(inter_sites.get_grade_A_sites(), A_WILL_GO_PROB)
