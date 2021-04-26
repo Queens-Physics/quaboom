@@ -26,6 +26,8 @@ MASKPROB = 0.8 #Probability of wearing a mask properly
 MILD_SYMPTOM_PROB = 0.8 # Probability of mild symptoms
 MIN_DAY_BEFORE_SYMPTOM, MAX_DAY_BEFORE_SYMPTOM = 1, 10
 QUARANTINE_TIME = 14
+CHANCE_OF_COLD = 0.02 #probability of getting a cold or flu during quarantine
+
 json_file.close()
 
 class Person(object):
@@ -96,7 +98,14 @@ class Person(object):
 
     def get_quarantine_day(self):
         return self.quarantined_day
-
+    
+    def not_infected_symptoms(self):
+        prob_of_symptom = random.random()
+        if (prob_of_symptom <= CHANCE_OF_COLD):
+            self.show_symptoms = True
+        return self.show_symptoms
+            
+    
     #checks to see if person shows symptoms on the current day
     def check_symptoms (self,day):
         if (self.will_get_symptoms == True and (day - self.infected_day) >= self.days_until_symptoms
