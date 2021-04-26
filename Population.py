@@ -97,7 +97,7 @@ class Population:
 
         for i in range(0, nPop-nStudents):
             # MAKE A PERSON
-            newPerson = Person.Person(index=i, infected=False, recovered=False, dead=False,
+            newPerson = Person.Person(index=i, infected=False, recovered=False, dead=False, hospitalized=False,
                                       quarantined=False, quarantined_day=None,
                                       infected_day=None, recovered_day=None, death_day=None,
                                       others_infected=None, cure_days=None, recent_infections=None,
@@ -139,13 +139,14 @@ class Population:
         self.household = self.household[:houseIndex]
 
         # Create person status arrays
-        self.susceptible = np.array(range(nPop), dtype=int) #list of all susceptible individuals
-        self.infected = np.zeros(nPop, dtype=int) + NULL_ID  # list of all infected people
-        self.recovered = np.zeros(nPop, dtype=int) + NULL_ID # list of recovered people
-        self.dead = np.zeros(nPop, dtype=int) + NULL_ID # list of recovered people
+        self.susceptible = np.array(range(nPop), dtype=int)         # list of all susceptible individuals
+        self.infected = np.zeros(nPop, dtype=int) + NULL_ID         # list of all infected people
+        self.recovered = np.zeros(nPop, dtype=int) + NULL_ID        # list of recovered people
+        self.dead = np.zeros(nPop, dtype=int) + NULL_ID             # list of recovered people
+        self.hospitalized = np.zeros(nPop, dtype=int) + NULL_ID     # list of people hospitalized and in the ICU
         self.have_been_tested = np.zeros(nPop, dtype=int) + NULL_ID # list of people who have been tested
-        self.knows_infected = np.zeros(nPop, dtype=int) + NULL_ID # list of people who have a positive test and are still infected
-        self.quarantined = np.zeros(nPop, dtype=int) + NULL_ID #list of people who are currently in quarantine
+        self.knows_infected = np.zeros(nPop, dtype=int) + NULL_ID   # list of people who have a positive test and are still infected
+        self.quarantined = np.zeros(nPop, dtype=int) + NULL_ID      # list of people who are currently in quarantine
 
         self.testing = [] # list of people waiting to be others_infected
         self.test_sum = 0 # total number of tests that have been run
@@ -182,6 +183,9 @@ class Population:
     def get_dead(self):
         return self.dead[self.dead != NULL_ID]
     
+    def get_hospitalized(self):
+        return self.hospitalized[self.hospitalized != NULL_ID]
+    
     def get_quarantined(self):
         return self.quarantined[self.quarantined != NULL_ID]
     
@@ -208,6 +212,9 @@ class Population:
     def count_dead(self):
         return np.count_nonzero(self.dead != NULL_ID)
     
+    def count_hospitalized(self):
+        return np.count_nonzero(self.hospitalized != NULL_ID)
+    
     def count_quarantined(self):
         return np.count_nonzero(self.quarantined != NULL_ID)
     
@@ -224,7 +231,9 @@ class Population:
         if didWork:
             self.infected[index] = index
             self.susceptible[index] = NULL_ID
-
+            if self.population[index].hospitalized:
+                self.hospitalized[index] = index
+    
         return didWork
 
     # Update lists for already infected people
@@ -251,6 +260,7 @@ class Population:
             return False
         self.infected[index] = NULL_ID
         self.recovered[index] = index
+        self.hospitalized[index] = NULL_ID
         return True
 
     def die(self, index, day):
@@ -266,6 +276,7 @@ class Population:
             return False
         self.infected[index] = NULL_ID
         self.recovered[index] = NULL_ID
+        self.hospitalized[index] = NULL_ID
         self.dead[index] = index
         return True
 

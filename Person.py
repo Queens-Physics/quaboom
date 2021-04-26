@@ -33,7 +33,7 @@ json_file.close()
 class Person(object):
 
     # Initalize a person - Can set properties but only needed one is inde
-    def __init__(self, index, infected=False, recovered=False, dead=False, quarantined=False, quarantined_day=None, 
+    def __init__(self, index, infected=False, recovered=False, dead=False, hospitalized=False, quarantined=False, quarantined_day=None, 
                  infected_day=None, recovered_day=None, death_day=None, others_infected=None, cure_days=None, 
                  recent_infections=None, age=None, job=None, house_index=0,isolation_tendencies=None,case_severity=None, mask_type=None, 
                  has_mask=True):
@@ -41,6 +41,7 @@ class Person(object):
         self.infected = infected
         self.recovered = recovered
         self.dead = dead
+        self.hospitalized = hospitalized
         self.quarantined = quarantined
         self.quarantined_day = quarantined_day
         self.infected_day = infected_day
@@ -77,6 +78,9 @@ class Person(object):
     #return True if quarantined, False if not
     def is_quarantined(self):
         return self.quarantined
+    
+    def is_hospitalzied(self):
+        return self.hospitalized
 
     #Puts person in quarantine
     def set_quarantine(self,day):
@@ -151,10 +155,13 @@ class Person(object):
             #Assuming that all hospitalization or worse cases will show symptoms
             elif self.case_severity == 'Hospitalization':
                 self.cure_days = np.random.randint(MIN_SEVERE, MAX_SEVERE) if cure_days is None else cure_days
+                self.hospitalized = True
             elif self.case_severity == 'ICU':
                 self.cure_days = np.random.randint(MIN_ICU, MAX_ICU) if cure_days is None else cure_days
+                self.hospitalized = True
             elif self.case_severity == 'Death':
                 self.cure_days = np.random.randint(MIN_DIE, MAX_DIE) if cure_days is None else cure_days
+                self.hospitalized = True
 
             return True
 
@@ -198,6 +205,7 @@ class Person(object):
                 self.knows_infected = False
                 self.days_until_symptoms = None
                 self.show_symptoms = False
+                self.hospitalized = False
 
                 return True
         return False
@@ -214,6 +222,14 @@ class Person(object):
                 self.death_day = day
 
                 return True
+        return False
+    
+    def check_hospitalized(self, day): # checking that case_severity==death outside of the loop
+        if self.infected:
+            if self.case_severity == 'Hospitalization' or self.case_severity == 'ICU' or self.case_severity == 'Death':
+                self.hospitalized = True
+
+            return True
         return False
 
     def wear_mask(self): #Determines and returns if person is wearing mask
