@@ -35,6 +35,9 @@ class Population:
         houseIndex = 0
         self.household[houseIndex] = houseSize
 
+        # Student parameter
+        nStudents = int(nPop/5) # full capacity ~ 24k students
+        
         # Initialize parameters of people immediately.
         # Much quick this way, utilizes numpy efficiency.
         age_arr = np.random.choice(a=self.AGE_OPTIONS, p=self.AGE_WEIGHTS, size=self.nPop)
@@ -44,9 +47,9 @@ class Population:
         mask_type_arr = np.random.choice(a=self.MASK_OPTIONS, p=self.MASK_WEIGHTS, size=self.nPop)
         has_mask_arr = np.random.uniform(size=self.nPop) < self.prob_has_mask
 
-        for i in range(0, self.nPop):
+        for i in range(0, self.nPop-nStudents):
             # MAKE A PERSON
-            newPerson = Person.Person(index=i, sim_obj=sim_obj, infected=False, recovered=False, dead=False,
+            newPerson = Person.Person(index=i, sim_obj=sim_obj, infected=False, recovered=False, dead=False, hospitalized=False,
                                       quarantined=False, quarantined_day=None,
                                       infected_day=None, recovered_day=None, death_day=None,
                                       others_infected=None, cure_days=None, recent_infections=None,
@@ -64,6 +67,21 @@ class Population:
                 houseSize = np.random.choice(self.HOUSE_OPTIONS)
                 houseIndex += 1
                 self.household[houseIndex] = houseSize
+                
+        ############### STUDENTS ###############
+        self.students = np.zeros(nPop, dtype=int) + NULL_ID # list of people who are students
+
+        for i in range(nPop-nStudents, nPop):
+            student_age = random.randint(18,23)
+            newStudent = Person.Person(index=i, infected=False, recovered=False, dead=False, quarantined=False, 
+                               quarantined_day=None, infected_day=None, recovered_day=None, death_day=None,
+                               others_infected=None, cure_days=None, recent_infections=None, age=student_age, job='Student',
+                               house_index=0, isolation_tendencies=isolation_tend_arr[i],
+                               case_severity=case_severity_arr[i], has_mask=has_mask_arr[i])
+            self.population[i] = newStudent
+
+            self.students[i] = i # set their student status
+            
 
         # Make sure last household number is right (when it runs out of people to fill)
         if houseSize != self.household[houseIndex]:
@@ -79,12 +97,14 @@ class Population:
         self.dead = np.zeros(self.nPop, dtype=int) + NULL_ID # list of recovered people
         self.have_been_tested = np.zeros(self.nPop, dtype=int) + NULL_ID # list of people who have been tested
         self.knows_infected = np.zeros(self.nPop, dtype=int) + NULL_ID # list of people with positive test and still infected
+        self.hospitalized = np.zeros(self.nPop, dtype=int) + NULL_ID     # list of people hospitalized and in the ICU
         self.quarantined = np.zeros(self.nPop, dtype=int) + NULL_ID #list of people who are currently in quarantine
 
         self.testing = [] # list of people waiting to be others_infected
         self.test_sum = 0 # total number of tests that have been run
         self.quarantined_sum = 0 # total number of people in quarantine (created as the list was having indexing issues)
-
+        self.new_quarantined_num = 0 # new people in quarantine
+        
         # Infect first n0 people
         for i in range(self.n0):
             self.population[i].infect(day=0)
@@ -152,6 +172,10 @@ class Population:
 
     def get_population(self):
         return self.population
+    
+    def remove_visitors(self, indices):
+        for i in indices:
+            np.delete(self.population, i)
 
     # Properly return the actual indices of each bin of people
     def get_susceptible(self):
@@ -166,8 +190,14 @@ class Population:
     def get_dead(self):
         return self.dead[self.dead != NULL_ID]
     
+    def get_hospitalized(self):
+        return self.hospitalized[self.hospitalized != NULL_ID]
+    
     def get_quarantined(self):
         return self.quarantined[self.quarantined != NULL_ID]
+    
+    def get_students(self): # change this to look thru job == 'Student' ?
+        return self.students[self.students != NULL_ID]
     
     # Count the number of people in each bin
     def count_susceptible(self):
@@ -176,11 +206,21 @@ class Population:
     def count_infected(self):
         return np.count_nonzero(self.infected != NULL_ID)
     
+    def count_infected_students(self):
+        infStudents = 0
+        for i in range (self.nPop):
+            if (self.students[i] != NULL_ID and self.infected[i] != NULL_ID):
+                infStudents += 1
+        return infStudents
+    
     def count_recovered(self):
         return np.count_nonzero(self.recovered != NULL_ID)
 
     def count_dead(self):
         return np.count_nonzero(self.dead != NULL_ID)
+    
+    def count_hospitalized(self):
+        return np.count_nonzero(self.hospitalized != NULL_ID)
     
     def count_quarantined(self):
         return np.count_nonzero(self.quarantined != NULL_ID)
@@ -198,7 +238,9 @@ class Population:
         if didWork:
             self.infected[index] = index
             self.susceptible[index] = NULL_ID
-
+            if self.population[index].hospitalized:
+                self.hospitalized[index] = index
+    
         return didWork
 
     # Update lists for already infected people
@@ -225,6 +267,7 @@ class Population:
             return False
         self.infected[index] = NULL_ID
         self.recovered[index] = index
+        self.hospitalized[index] = NULL_ID
         return True
 
     def die(self, index, day):
@@ -240,6 +283,7 @@ class Population:
             return False
         self.infected[index] = NULL_ID
         self.recovered[index] = NULL_ID
+        self.hospitalized[index] = NULL_ID
         self.dead[index] = index
         return True
 
@@ -252,9 +296,17 @@ class Population:
 
     def count_quarantined(self):
         return np.count_nonzero(self.quarantined != NULL_ID) 
-
+    
+    def get_new_quarantined(self):
+            return self.new_quarantined_num
+        
     def count_tested(self):
         return self.test_sum
+
+    #causes random people to get the cold                    
+    def random_symptomatic(self): 
+        for i in range (len(self.population)):
+            self.population[i].not_infected_symptoms()
 
     # updates the list of symptomatic people and adds the people who are symtomatic to the testing array
     def update_symptomatic(self, day):
@@ -271,28 +323,32 @@ class Population:
                             self.testing.append(i)#adds the person to the testing list
                             self.population[i].knows_infected = True
     
+    
     def get_testing_wait_list(self): 
         return len(self.testing)
     
     def get_tested(self, tests_per_day, day):
-
+        
         #if less people are in the list than testing capacity test everyone in the list
         if len(self.testing) < tests_per_day:
             tests_per_day = len(self.testing)
-        self.test_sum += tests_per_day #add the daily tests to the total number of tests
+        self.test_sum += tests_per_day # add the daily tests to the total number of tests
+        
+        self.new_quarantined_num = 0 # reset number of newly quarantined
         
         for i in range(tests_per_day):
             person_index = self.testing[0] #gets first person waiting for test
             self.testing.pop(0) # removes first person waiting for test
             person = self.population[person_index]
 
-            if person.infected==True:
+            if person.infected == True:
                 person.knows_infected = True
                 #quarantines the person
                 person.set_quarantine(day)
                 self.quarantined[person_index] = person_index
                 self.have_been_tested[person_index] = person_index
-
-
+                self.new_quarantined_num += 1
             else:
                 person.knows_infected = False
+                self.have_been_tested[person_index] = person_index
+

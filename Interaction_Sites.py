@@ -1,5 +1,6 @@
 import numpy as np
 import random
+
 class Interaction_Sites:
 
     def __init__(self, sim_obj):
@@ -13,7 +14,6 @@ class Interaction_Sites:
 
         # Generates a list of ppl that go to different grade X sites
         # len(grade_X_sites) is how many sites there are; len(grade_X_sites[i]) is how many ppl go to that site
-
         self.grade_A_sites = np.array(self.init_grade(self.grade_per_pop["A"], self.grade_loyalty_means["A"], 
                                                       self.grade_loyalty_stds["A"]))
         self.grade_B_sites = np.array(self.init_grade(self.grade_per_pop["B"], self.grade_loyalty_means["B"], 
@@ -21,7 +21,14 @@ class Interaction_Sites:
         self.grade_C_sites = np.array(self.init_grade(self.grade_per_pop["C"], self.grade_loyalty_means["C"], 
                                                       self.grade_loyalty_stds["C"]))
         self.house_sites = np.array(self.pop.household).copy()
-
+        
+        # Students Stuff #
+        self.lect_sites = np.array(self.init_uni(self.grade_per_pop["LECT"], self.grade_loyalty_means["LECT"],
+                                                 self.grade_loyalty_stds["LECT"]))
+        self.study_sites = np.array(self.init_uni(self.grade_per_pop["STUDY"], self.grade_loyalty_means["STUDY"],
+                                                 self.grade_loyalty_stds["STUDY"]))
+        self.food_sites = np.array(self.init_uni(self.grade_per_pop["FOOD"], self.grade_loyalty_means["FOOD"],
+                                                 self.grade_loyalty_stds["FOOD"]))
         
     def load_attributes_from_sim_obj(self, sim_obj):
         attributes = sim_obj.parameters["interaction_sites_data"].keys()
@@ -40,6 +47,7 @@ class Interaction_Sites:
         grade_sites = [[] for _ in range(num_sites)]
 
         for person in self.pop.get_population():
+            #if (person.job != 'Student'): ##########################################
             # Assign people to this specific site
             num_diff_sites = abs(round(np.random.normal(loyalty_mean, loyalty_std)))
             num_diff_sites = num_diff_sites if num_diff_sites <= num_sites else num_sites
@@ -53,7 +61,27 @@ class Interaction_Sites:
         grade_sites = [np.asarray(site) for site in grade_sites]
 
         return grade_sites
+    
+    def init_uni(self, sites_per_pop, loyalty_mean, loyalty_std):
+        num_sites = round(self.pop.get_population_size()*sites_per_pop)
+        grade_sites = [[] for i in range(num_sites)]
+        
+        for student in self.pop.get_population():
+            if (student.job == 'Student'): ##########################################
+                # Assign people to this specific site
+                num_diff_sites = abs(round(np.random.normal(loyalty_mean, loyalty_std)))
+                num_diff_sites = num_diff_sites if num_diff_sites <= num_sites else num_sites
+                # Get a list of len num_diff_sites for this person to be associated with now
+                student_sites = np.random.choice(num_sites, num_diff_sites, replace=False)
+                for site in student_sites:
+                    # Assign this person to that site
+                    grade_sites[site].append(student.get_index())
 
+        # Convert everything to numpy arrays
+        for i, site in enumerate(grade_sites):
+            grade_sites[i] = np.array(site)
+
+        return grade_sites
 
     def will_visit_site(self, site_array, will_go_prob):
         # Function that finds how many people will go to each site of a grade in a given day
@@ -76,8 +104,8 @@ class Interaction_Sites:
             will_visit_grade[i] = site[site_attendance]
 
         return will_visit_grade
-
-
+    
+    
     def site_interaction(self, will_go_array, day):
         # Find out how many interactions each person has at the site - FUNCTION IS PRETTY SLOW RN
         # Should deal with case where one person is left with more than one interaction
@@ -129,7 +157,6 @@ class Interaction_Sites:
         new_infection_indexes = np.where(new_infections)[0]
         for new_infection in new_infection_indexes:
             self.pop.infect(index=new_infection, day=day)
-
 
     def calc_interactions(self, person_index, how_busy):
         # This will be some function that returns how many interactions for this person
@@ -191,7 +218,7 @@ class Interaction_Sites:
                         
     # Function thats tests the symtomatic individuals as well as brining them in and out of quarantine
     def testing_site (self, tests_per_day, day): 
-        #tests per day is number of postive tests per day as we ignore negative tests
+        self.pop.random_symptomatic()
         self.pop.update_symptomatic(day)
         self.pop.get_tested(tests_per_day, day)
 
@@ -203,3 +230,12 @@ class Interaction_Sites:
 
     def get_grade_C_sites(self):
         return self.grade_C_sites.copy()
+
+    def get_lect_sites(self):
+        return self.lect_sites.copy()
+    
+    def get_study_sites(self):
+        return self.study_sites.copy()
+    
+    def get_food_sites(self):
+        return self.food_sites.copy()

@@ -5,7 +5,7 @@ class Policy:
     Initalized once for the entire simulation. 
     
     '''
-    
+
     def __init__(self, sim_obj):
         
         self.sim_obj = sim_obj
@@ -14,7 +14,7 @@ class Policy:
         self.load_attributes_from_sim_obj()
         
     def load_attributes_from_sim_obj(self):
-        # Loop through keys instead
+        # Loop through keys
         attributes = self.sim_obj.parameters["policy_data"].keys()
 
         for attr in attributes:
@@ -51,7 +51,7 @@ class Policy:
         return lockdown_mandate
             
     def get_lockdown_mandate(self):
-        return self.mask_mandate
+        return self.lockdown_mandate
     
     def update_testing(self,day):
         if self.testing_day_trigger is not None and day >= self.testing_day_trigger: 
@@ -64,6 +64,23 @@ class Policy:
     
     def get_num_tests(self, wait_list):  
         tests = int(self.testing_rate*self.sim_obj.pop.count_quarantined()) # number of tests
-        if (tests < self.testing_baseline and wait_list > 0): 
-            tests = self.testing_baseline
+
+        if (self.baseline_testing == None): 
+            self.baseline_testing = 0
+        elif (tests < self.baseline_testing and wait_list > 0): 
+            tests = self.baseline_testing
         return tests
+    
+    def check_students(self, day):
+        # Change the policy based on conditions
+        if self.students_day_trigger is not None and day >= self.students_day_trigger:
+            students_mandate = True
+        else:
+            students_mandate = False
+            
+        # Actually change the conditions
+        self.students_mandate = students_mandate
+        return students_mandate
+
+    def get_students_mandate(self):
+        return self.students_mandate

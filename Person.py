@@ -1,17 +1,49 @@
 import numpy as np
 import random
+<<<<<<< HEAD
+=======
+import json
+
+TIME_QUARANTINE = 14 #days people have to quarantine
+Surgical_Inward_Eff = 0.4
+Surgical_Outward_Eff = 0.3
+NonSurgical_Inward_Eff = 0.6
+NonSurgical_Outward_Eff = 0.5
+
+# How long the infection will last
+json_file = open('dataK.json')
+disease_params = json.load(json_file)
+
+# recovery
+MIN_MILD= disease_params['recovery'][0]['MIN_MILD']
+MAX_MILD= disease_params['recovery'][0]['MAX_MILD']
+MIN_SEVERE= disease_params['recovery'][0]['MIN_SEVERE']
+MAX_SEVERE= disease_params['recovery'][0]['MAX_SEVERE']
+MIN_ICU= disease_params['recovery'][0]['MIN_ICU']
+MAX_ICU= disease_params['recovery'][0]['MAX_ICU']
+MIN_DIE= disease_params['recovery'][0]['MIN_DIE']
+MAX_DIE= disease_params['recovery'][0]['MAX_DIE']
+
+MASKPROB = 0.8 #Probability of wearing a mask properly
+MILD_SYMPTOM_PROB = 0.8 # Probability of mild symptoms
+MIN_DAY_BEFORE_SYMPTOM, MAX_DAY_BEFORE_SYMPTOM = 1, 10
+QUARANTINE_TIME = 14
+CHANCE_OF_COLD = 0.02 #probability of getting a cold or flu during quarantine
+
+json_file.close()
 
 class Person(object):
 
-    # Initalize a person - Can set properties but only needed one is inde
-    def __init__(self, index, sim_obj, infected=False, recovered=False, dead=False, quarantined=False, quarantined_day=None, 
-                 infected_day=None, recovered_day=None, death_day=None, others_infected=None, cure_days=None, 
-                 recent_infections=None, age=None, job=None, house_index=0, isolation_tendencies=None, case_severity=None, 
-                 mask_type=None, has_mask=True):
+
+    def __init__(self, index, sim_obj, infected=False, recovered=False, dead=False, hospitalized=False, quarantined=False,
+                 quarantined_day=None, infected_day=None, recovered_day=None, death_day=None, others_infected=None,
+                 cure_days=None, recent_infections=None, age=None, job=None, house_index=0, isolation_tendencies=None,
+                 case_severity=None, mask_type=None, has_mask=True):
 
         self.infected = infected
         self.recovered = recovered
         self.dead = dead
+        self.hospitalized = hospitalized
         self.quarantined = quarantined
         self.quarantined_day = quarantined_day
         self.infected_day = infected_day
@@ -51,6 +83,9 @@ class Person(object):
     #return True if quarantined, False if not
     def is_quarantined(self):
         return self.quarantined
+    
+    def is_hospitalzied(self):
+        return self.hospitalized
 
     #Puts person in quarantine
     def set_quarantine(self,day):
@@ -68,7 +103,14 @@ class Person(object):
 
     def get_quarantine_day(self):
         return self.quarantined_day
-
+    
+    def not_infected_symptoms(self):
+        prob_of_symptom = random.random()
+        if (prob_of_symptom <= CHANCE_OF_COLD):
+            self.show_symptoms = True
+        return self.show_symptoms
+            
+    
     #checks to see if person shows symptoms on the current day
     def check_symptoms (self,day):
         if (self.will_get_symptoms == True and (day - self.infected_day) >= self.days_until_symptoms
@@ -121,12 +163,15 @@ class Person(object):
             elif self.case_severity == 'Hospitalization':
                 self.cure_days = np.random.randint(self.sim_obj.min_severe_days, 
                                                    self.sim_obj.max_severe_days) if cure_days is None else cure_days
+                self.hospitalized = True
             elif self.case_severity == 'ICU':
                 self.cure_days = np.random.randint(self.sim_obj.min_ICU_days, 
                                                    self.sim_obj.max_ICU_days) if cure_days is None else cure_days
+                self.hospitalized = True
             elif self.case_severity == 'Death':
                 self.cure_days = np.random.randint(self.sim_obj.min_die_days, 
                                                    self.sim_obj.max_die_days) if cure_days is None else cure_days
+                 self.hospitalized = True
 
             return True
 
@@ -170,6 +215,7 @@ class Person(object):
                 self.knows_infected = False
                 self.days_until_symptoms = None
                 self.show_symptoms = False
+                self.hospitalized = False
 
                 return True
         return False
@@ -186,6 +232,14 @@ class Person(object):
                 self.death_day = day
 
                 return True
+        return False
+    
+    def check_hospitalized(self, day): # checking that case_severity==death outside of the loop
+        if self.infected:
+            if self.case_severity == 'Hospitalization' or self.case_severity == 'ICU' or self.case_severity == 'Death':
+                self.hospitalized = True
+
+            return True
         return False
 
     def wear_mask(self): #Determines and returns if person is wearing mask
