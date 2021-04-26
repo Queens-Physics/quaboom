@@ -83,6 +83,9 @@ class Population:
         houseIndex = 0
         self.household[houseIndex] = houseSize
 
+        # Student parameter
+        nStudents = int(nPop/5) # full capacity ~ 24k students
+        
         # Initialize parameters of people immediately.
         # Much quick this way, utilizes numpy efficiency.
         age_arr = np.random.choice(a=AGE_OPTIONS, p=AGE_WEIGHTS, size=nPop)
@@ -92,7 +95,7 @@ class Population:
         mask_type_arr = np.random.choice(a=MASK_OPTIONS, p=MASK_WEIGHTS, size=nPop)
         has_mask_arr = np.random.uniform(size=nPop) < PROB_HAS_MASK
 
-        for i in range(0, nPop):
+        for i in range(0, nPop-nStudents):
             # MAKE A PERSON
             newPerson = Person.Person(index=i, infected=False, recovered=False, dead=False,
                                       quarantined=False, quarantined_day=None,
@@ -112,6 +115,21 @@ class Population:
                 houseSize = np.random.choice(HOUSE_OPTIONS)
                 houseIndex += 1
                 self.household[houseIndex] = houseSize
+                
+        ############### STUDENTS ###############
+        self.students = np.zeros(nPop, dtype=int) + NULL_ID # list of people who are students
+
+        for i in range(nPop-nStudents, nPop):
+            student_age = random.randint(18,23)
+            newStudent = Person.Person(index=i, infected=False, recovered=False, dead=False, quarantined=False, 
+                               quarantined_day=None, infected_day=None, recovered_day=None, death_day=None,
+                               others_infected=None, cure_days=None, recent_infections=None, age=student_age, job='Student',
+                               house_index=0, isolation_tendencies=isolation_tend_arr[i],
+                               case_severity=case_severity_arr[i], has_mask=has_mask_arr[i])
+            self.population[i] = newStudent
+
+            self.students[i] = i # set their student status
+            
 
         # Make sure last household number is right (when it runs out of people to fill)
         if houseSize != self.household[houseIndex]:
@@ -146,6 +164,10 @@ class Population:
 
     def get_population(self):
         return self.population
+    
+    def remove_visitors(self, indices):
+        for i in indices:
+            np.delete(self.population, i)
 
     # Properly return the actual indices of each bin of people
     def get_susceptible(self):
@@ -163,12 +185,22 @@ class Population:
     def get_quarantined(self):
         return self.quarantined[self.quarantined != NULL_ID]
     
+    def get_students(self): # change this to look thru job == 'Student' ?
+        return self.students[self.students != NULL_ID]
+    
     # Count the number of people in each bin
     def count_susceptible(self):
         return np.count_nonzero(self.susceptible != NULL_ID)
     
     def count_infected(self):
         return np.count_nonzero(self.infected != NULL_ID)
+    
+    def count_infected_students(self):
+        infStudents = 0
+        for i in range (self.nPop):
+            if (self.students[i] != NULL_ID and self.infected[i] != NULL_ID):
+                infStudents += 1
+        return infStudents
     
     def count_recovered(self):
         return np.count_nonzero(self.recovered != NULL_ID)
