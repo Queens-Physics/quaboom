@@ -61,6 +61,9 @@ def RunEpidemic(nPop, n0, nDays):
     track_quarantined = np.zeros(nDays, dtype=int)       # population currently in quarantine ACTUALLY DOES TOTAL QUARINTIED 
     track_masks = np.zeros(nDays, dtype=int)
 
+    track_new_tested = np.zeros(nDays, dtype=int)    # new tests per day
+    track_new_quarantined = np.zeros(nDays, dtype=int) #new quarantined
+
     track_lockdown = np.zeros(nDays, dtype=int)
     track_testing_wait_list = np.zeros(nDays, dtype=int) # counts the number of people waiting to get tests each day
     track_inf_students = np.zeros(nDays, dtype=int) # counts number of students infected each day
