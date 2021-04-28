@@ -2,34 +2,6 @@ import numpy as np
 import random
 import json
 
-TIME_QUARANTINE = 14 #days people have to quarantine
-Surgical_Inward_Eff = 0.4
-Surgical_Outward_Eff = 0.3
-NonSurgical_Inward_Eff = 0.6
-NonSurgical_Outward_Eff = 0.5
-
-# How long the infection will last
-json_file = open('dataK.json')
-disease_params = json.load(json_file)
-
-# recovery
-# MIN_MILD= disease_params['recovery'][0]['MIN_MILD']
-# MAX_MILD= disease_params['recovery'][0]['MAX_MILD']
-# MIN_SEVERE= disease_params['recovery'][0]['MIN_SEVERE']
-# MAX_SEVERE= disease_params['recovery'][0]['MAX_SEVERE']
-# MIN_ICU= disease_params['recovery'][0]['MIN_ICU']
-# MAX_ICU= disease_params['recovery'][0]['MAX_ICU']
-# MIN_DIE= disease_params['recovery'][0]['MIN_DIE']
-# MAX_DIE= disease_params['recovery'][0]['MAX_DIE']
-
-MASKPROB = 0.8 #Probability of wearing a mask properly
-MILD_SYMPTOM_PROB = 0.8 # Probability of mild symptoms
-MIN_DAY_BEFORE_SYMPTOM, MAX_DAY_BEFORE_SYMPTOM = 1, 10
-QUARANTINE_TIME = 14
-CHANCE_OF_COLD = 0.02 #probability of getting a cold or flu during quarantine
-
-json_file.close()
-
 class Person(object):
 
 
@@ -104,7 +76,7 @@ class Person(object):
     
     def not_infected_symptoms(self):
         prob_of_symptom = random.random()
-        if (prob_of_symptom <= CHANCE_OF_COLD):
+        if (prob_of_symptom <= self.sim_obj.cold_prob):
             self.show_symptoms = True
         return self.show_symptoms
             

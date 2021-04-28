@@ -52,6 +52,7 @@
         "nonsurgical_inward_eff":0.6, 
         "nonsurgical_outward_eff":0.5, 
         "wear_mask_properly":0.8, 
+        "cold_prob":0.02,
         "mild_symptom_prob":0.8, 
         "min_day_before_symptoms":1, 
         "max_day_before_symptoms":10,
