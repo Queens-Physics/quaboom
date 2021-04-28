@@ -1,7 +1,5 @@
 import numpy as np
 import random
-<<<<<<< HEAD
-=======
 import json
 
 TIME_QUARANTINE = 14 #days people have to quarantine
@@ -15,14 +13,14 @@ json_file = open('dataK.json')
 disease_params = json.load(json_file)
 
 # recovery
-MIN_MILD= disease_params['recovery'][0]['MIN_MILD']
-MAX_MILD= disease_params['recovery'][0]['MAX_MILD']
-MIN_SEVERE= disease_params['recovery'][0]['MIN_SEVERE']
-MAX_SEVERE= disease_params['recovery'][0]['MAX_SEVERE']
-MIN_ICU= disease_params['recovery'][0]['MIN_ICU']
-MAX_ICU= disease_params['recovery'][0]['MAX_ICU']
-MIN_DIE= disease_params['recovery'][0]['MIN_DIE']
-MAX_DIE= disease_params['recovery'][0]['MAX_DIE']
+# MIN_MILD= disease_params['recovery'][0]['MIN_MILD']
+# MAX_MILD= disease_params['recovery'][0]['MAX_MILD']
+# MIN_SEVERE= disease_params['recovery'][0]['MIN_SEVERE']
+# MAX_SEVERE= disease_params['recovery'][0]['MAX_SEVERE']
+# MIN_ICU= disease_params['recovery'][0]['MIN_ICU']
+# MAX_ICU= disease_params['recovery'][0]['MAX_ICU']
+# MIN_DIE= disease_params['recovery'][0]['MIN_DIE']
+# MAX_DIE= disease_params['recovery'][0]['MAX_DIE']
 
 MASKPROB = 0.8 #Probability of wearing a mask properly
 MILD_SYMPTOM_PROB = 0.8 # Probability of mild symptoms
@@ -171,7 +169,7 @@ class Person(object):
             elif self.case_severity == 'Death':
                 self.cure_days = np.random.randint(self.sim_obj.min_die_days, 
                                                    self.sim_obj.max_die_days) if cure_days is None else cure_days
-                 self.hospitalized = True
+                self.hospitalized = True
 
             return True
 

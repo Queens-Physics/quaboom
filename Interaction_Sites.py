@@ -29,7 +29,7 @@ class Interaction_Sites:
                                                  self.grade_loyalty_stds["STUDY"]))
         self.food_sites = np.array(self.init_uni(self.grade_per_pop["FOOD"], self.grade_loyalty_means["FOOD"],
                                                  self.grade_loyalty_stds["FOOD"]))
-        
+
     def load_attributes_from_sim_obj(self, sim_obj):
         attributes = sim_obj.parameters["interaction_sites_data"].keys()
         for attr in attributes:
@@ -63,7 +63,7 @@ class Interaction_Sites:
         return grade_sites
     
     def init_uni(self, sites_per_pop, loyalty_mean, loyalty_std):
-        num_sites = round(self.pop.get_population_size()*sites_per_pop)
+        num_sites = round(self.pop.get_population_size()/sites_per_pop)
         grade_sites = [[] for i in range(num_sites)]
         
         for student in self.pop.get_population():

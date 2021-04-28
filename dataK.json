@@ -1,7 +1,45 @@
-{"age_weights": [{"Note": "these are based on the Kingston population numbers; they might have to be changed for Ontario. 90-99 is actually 90+ this is just for easier looping", "0-9": 0.101, "10-19": 0.103, "20-29": 0.154, "30-39": 0.131, "40-49": 0.116, "50-59": 0.141, "60-69": 0.119, "70-79": 0.077, "80-89": 0.046, "90-99": 0.012}],
- "job_weights": [{"Note": "all the jobs that weren't health or sales were combined; if needed we can separate them again", "NEITHER": 0.659, "HEALTH": 0.097, "SALES": 0.244}],
- "house_weights": [{"Note": "Weights of number of people in each house in Kingston. 5 is actually 5+ this is just for easier looping", "1": 0.293, "2": 0.376, "3": 0.149, "4": 0.123, "5": 0.059}],
- "max_infectious": [{"Note": "max number of days that a person with this level of infection stays sick for", "MILD": 10, "SEVERE": 20}],
- "case_severity": [{"Note": "distribution of severity of the case; those in None would be considered mild", "Mild": 0.761, "Death": 0.083, "Hospitalization": 0.127, "ICU": 0.029}],
- "incubation": [{"Note": "just a guess that its poisson", "MAX": 14, "AVG": 5, "MIN": 1, "Dist": "poisson"}], "mask_type": [{"Note": "number of people wearing a specific type of mask", "Surgical": 0.2, "Non-surgical": 0.8}]
+{
+    "age_weights": [{"Note": "these are based on the Kingston population numbers; they might have to be changed for Ontario. 90-99 is actually 90+ this is just for easier looping", 
+                     "0-9": 0.101, 
+                     "10-19": 0.103, 
+                     "20-29": 0.154, 
+                     "30-39": 0.131, 
+                     "40-49": 0.116, 
+                     "50-59": 0.141, 
+                     "60-69": 0.119, 
+                     "70-79": 0.077, 
+                     "80-89": 0.046, 
+                     "90-99": 0.012}
+                   ],
+    "job_weights": [{"Note": "all the jobs that weren't health or sales were combined; if needed we can separate them again",
+                     "NEITHER": 0.659, 
+                     "HEALTH": 0.097, 
+                     "SALES": 0.244}
+                   ],
+    "house_weights": [{"Note": "Weights of number of people in each house in Kingston. 5 is actually 5+ this is just for easier looping", 
+                       "1": 0.293, 
+                       "2": 0.376, 
+                       "3": 0.149, 
+                       "4": 0.123, 
+                       "5": 0.059}
+                     ],
+    "max_infectious": [{"Note": "max number of days that a person with this level of infection stays sick for", 
+                        "MILD": 10, 
+                        "SEVERE": 20}
+                      ],
+    "case_severity": [{"Note": "distribution of severity of the case; those in None would be considered mild", 
+                       "Mild": 0.761, 
+                       "Death": 0.083, 
+                       "Hospitalization": 0.127, 
+                       "ICU": 0.029}
+                     ],
+    "incubation": [{"Note": "just a guess that its poisson", 
+                    "MAX": 14, 
+                    "AVG": 5, 
+                    "MIN": 1, 
+                    "Dist": "poisson"}
+                  ], 
+    "mask_type": [{"Note": "number of people wearing a specific type of mask", 
+                   "Surgical": 0.2, 
+                   "Non-surgical": 0.8}]
 }

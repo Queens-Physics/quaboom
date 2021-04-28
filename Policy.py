@@ -65,22 +65,22 @@ class Policy:
     def get_num_tests(self, wait_list):  
         tests = int(self.testing_rate*self.sim_obj.pop.count_quarantined()) # number of tests
 
-        if (self.baseline_testing == None): 
-            self.baseline_testing = 0
-        elif (tests < self.baseline_testing and wait_list > 0): 
-            tests = self.baseline_testing
+        if (self.testing_baseline == None): 
+            self.testing_baseline = 0
+        elif (tests < self.testing_baseline and wait_list > 0): 
+            tests = self.testing_baseline
         return tests
     
     def check_students(self, day):
         # Change the policy based on conditions
-        if self.students_day_trigger is not None and day >= self.students_day_trigger:
-            students_mandate = True
+        if self.student_day_trigger is not None and day >= self.student_day_trigger:
+            student_mandate = True
         else:
-            students_mandate = False
+            student_mandate = False
             
         # Actually change the conditions
-        self.students_mandate = students_mandate
-        return students_mandate
+        self.student_mandate = student_mandate
+        return student_mandate
 
     def get_students_mandate(self):
-        return self.students_mandate
+        return self.student_mandate

@@ -36,7 +36,7 @@ class Population:
         self.household[houseIndex] = houseSize
 
         # Student parameter
-        nStudents = int(nPop/5) # full capacity ~ 24k students
+        self.nStudents = int(self.nPop/5) # full capacity ~ 24k students
         
         # Initialize parameters of people immediately.
         # Much quick this way, utilizes numpy efficiency.
@@ -47,7 +47,7 @@ class Population:
         mask_type_arr = np.random.choice(a=self.MASK_OPTIONS, p=self.MASK_WEIGHTS, size=self.nPop)
         has_mask_arr = np.random.uniform(size=self.nPop) < self.prob_has_mask
 
-        for i in range(0, self.nPop-nStudents):
+        for i in range(0, self.nPop-self.nStudents):
             # MAKE A PERSON
             newPerson = Person.Person(index=i, sim_obj=sim_obj, infected=False, recovered=False, dead=False, hospitalized=False,
                                       quarantined=False, quarantined_day=None,
@@ -69,11 +69,11 @@ class Population:
                 self.household[houseIndex] = houseSize
                 
         ############### STUDENTS ###############
-        self.students = np.zeros(nPop, dtype=int) + NULL_ID # list of people who are students
+        self.students = np.zeros(self.nPop, dtype=int) + NULL_ID # list of people who are students
 
-        for i in range(nPop-nStudents, nPop):
+        for i in range(self.nPop-self.nStudents, self.nPop):
             student_age = random.randint(18,23)
-            newStudent = Person.Person(index=i, infected=False, recovered=False, dead=False, quarantined=False, 
+            newStudent = Person.Person(index=i, sim_obj=sim_obj, infected=False, recovered=False, dead=False, quarantined=False, 
                                quarantined_day=None, infected_day=None, recovered_day=None, death_day=None,
                                others_infected=None, cure_days=None, recent_infections=None, age=student_age, job='Student',
                                house_index=0, isolation_tendencies=isolation_tend_arr[i],
