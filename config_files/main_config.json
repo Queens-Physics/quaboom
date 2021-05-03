@@ -30,7 +30,7 @@
     },
     
     "population_data":{
-        "demographics_file":"./dataK.json", 
+        "demographics_file":"./data/dataK.json", 
         "prob_has_mask":0.8, 
         "prob_of_test":1 
     },
