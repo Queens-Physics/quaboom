@@ -1,4 +1,10 @@
 {
+    "age_options":["0-9", "10-19", "20-29", "30-39", "40-49", "50-59", "60-69", "70-79", "80-89", "90+"],
+    "job_options":["Health", "Sales", "Neither"],
+    "house_options":[1,2,3,4,5],
+    "isolation_options":[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1],
+    "severity_options":["Mild", "Hospitalization", "ICU", "Death"],
+    "mask_options":["Surgical", "Non-surgical"],
     "age_weights": [{"Note": "these are based on the Kingston population numbers; they might have to be changed for Ontario. 90-99 is actually 90+ this is just for easier looping", 
                      "0-9": 0.101, 
                      "10-19": 0.103, 
