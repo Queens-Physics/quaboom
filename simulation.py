@@ -37,8 +37,8 @@ class simulation():
         self.has_run = False                                 # Indicates if the sim has run yet
         
     def load_parameters(self, filename):
-        file = open(filename)
-        self.parameters = json.load(file)
+        with open(filename) as file:
+            self.parameters = json.load(file)
         
         #### Do the simulation parameters ####
         attributes = self.parameters["simulation_data"].keys()

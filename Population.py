@@ -31,7 +31,7 @@ class Population:
         self.prob_of_test = self.prob_of_test
         self.prob_has_mask = self.prob_has_mask
 
-        houseSize = np.random.choice(a=self.HOUSE_OPTIONS, p=self.HOUSE_WEIGHTS)
+        houseSize = np.random.choice(a=self.house_options, p=self.house_weights)
         houseIndex = 0
         self.household[houseIndex] = houseSize
 
@@ -40,11 +40,11 @@ class Population:
         
         # Initialize parameters of people immediately.
         # Much quick this way, utilizes numpy efficiency.
-        age_arr = np.random.choice(a=self.AGE_OPTIONS, p=self.AGE_WEIGHTS, size=self.nPop)
-        job_arr = np.random.choice(a=self.JOB_OPTIONS, p=self.JOB_WEIGHTS, size=self.nPop)
-        isolation_tend_arr = np.random.choice(a=self.ISOLATION_OPTIONS, p=self.ISOLATION_WEIGHTS, size=self.nPop)
-        case_severity_arr = np.random.choice(a=self.SEVERITY_OPTIONS, p=self.SEVERITY_WEIGHTS, size=self.nPop)
-        mask_type_arr = np.random.choice(a=self.MASK_OPTIONS, p=self.MASK_WEIGHTS, size=self.nPop)
+        age_arr = np.random.choice(a=self.age_options, p=self.age_weights, size=self.nPop)
+        job_arr = np.random.choice(a=self.job_options, p=self.job_weights, size=self.nPop)
+        isolation_tend_arr = np.random.choice(a=self.isolation_options, p=self.isolation_weights, size=self.nPop)
+        case_severity_arr = np.random.choice(a=self.severity_options, p=self.severity_weights, size=self.nPop)
+        mask_type_arr = np.random.choice(a=self.mask_options, p=self.mask_weights, size=self.nPop)
         has_mask_arr = np.random.uniform(size=self.nPop) < self.prob_has_mask
 
         for i in range(0, self.nPop-self.nStudents):
@@ -64,7 +64,7 @@ class Population:
             # Increment house info
             houseSize -= 1
             if houseSize == 0:
-                houseSize = np.random.choice(self.HOUSE_OPTIONS)
+                houseSize = np.random.choice(self.house_options)
                 houseIndex += 1
                 self.household[houseIndex] = houseSize
                 
@@ -118,51 +118,51 @@ class Population:
             setattr(self, attr, sim_obj.parameters["population_data"][attr])
             
     def set_demographic_parameters(self, sim_obj):
-        json_file = open(self.demographics_file)
-        disease_params = json.load(json_file)
+        with open(self.demographics_file) as json_file:
+            disease_params = json.load(json_file)
 
-        self.AGE_OPTIONS = ['0-9', '10-19', '20-29', '30-39', '40-49', '50-59', '60-69', '70-79', '80-89', '90+']
-        self.JOB_OPTIONS = ['Health', 'Sales', 'Neither']
-        self.HOUSE_OPTIONS = [1,2,3,4,5]
-        self.ISOLATION_OPTIONS = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
-        self.SEVERITY_OPTIONS = ['Mild', 'Hospitalization', 'ICU', 'Death']
-        self.MASK_OPTIONS = ['Surgical', 'Non-surgical']
+        self.age_options = disease_params["age_options"]
+        self.job_options = disease_params["job_options"]
+        self.house_options = disease_params["house_options"]
+        self.isolation_options = disease_params["isolation_options"]
+        self.severity_options = disease_params["severity_options"]
+        self.mask_options = disease_params["mask_options"]
 
         # isolation #
-        self.ISOLATION_WEIGHTS = np.ones(len(self.ISOLATION_OPTIONS))
+        self.isolation_weights = np.ones(len(self.isolation_options))
         # Normalize the probability
-        self.ISOLATION_WEIGHTS /= float(sum(self.ISOLATION_WEIGHTS)) #this is the one we don't have data on yet
+        self.isolation_weights /= float(sum(self.isolation_weights)) #this is the one we don't have data on yet
 
         # PULL DATA FROM THE JSON FILE #
         # age #
-        self.AGE_WEIGHTS = np.zeros(len(self.AGE_OPTIONS))
-        for iage in range (len(self.AGE_WEIGHTS)):
+        self.age_weights = np.zeros(len(self.age_options))
+        for iage in range (len(self.age_weights)):
             string = str(iage*10)+'-'+str(iage*10+9)
-            self.AGE_WEIGHTS[iage]= disease_params['age_weights'][0][string]
+            self.age_weights[iage]= disease_params['age_weights'][0][string]
 
         # job #
-        self.JOB_WEIGHTS = np.zeros(len(self.JOB_OPTIONS))
-        for ijob in range (len(self.JOB_WEIGHTS)):
-            string = self.JOB_OPTIONS[ijob].upper()
-            self.JOB_WEIGHTS[ijob]= disease_params['job_weights'][0][string]
+        self.job_weights = np.zeros(len(self.job_options))
+        for ijob in range (len(self.job_weights)):
+            string = self.job_options[ijob].upper()
+            self.job_weights[ijob]= disease_params['job_weights'][0][string]
 
         # house # 
-        self.HOUSE_WEIGHTS = np.zeros(len(self.HOUSE_OPTIONS))
-        for ihouse in range (len(self.HOUSE_WEIGHTS)):
+        self.house_weights = np.zeros(len(self.house_options))
+        for ihouse in range (len(self.house_weights)):
             string = str(ihouse+1)
-            self.HOUSE_WEIGHTS[ihouse]= disease_params['house_weights'][0][string]
+            self.house_weights[ihouse]= disease_params['house_weights'][0][string]
 
         # case severity #
-        self.SEVERITY_WEIGHTS = np.zeros(len(self.SEVERITY_OPTIONS))
-        for iseverity in range (len(self.SEVERITY_WEIGHTS)):
-            string = self.SEVERITY_OPTIONS[iseverity]
-            self.SEVERITY_WEIGHTS[iseverity]= disease_params['case_severity'][0][string]
+        self.severity_weights = np.zeros(len(self.severity_options))
+        for iseverity in range (len(self.severity_weights)):
+            string = self.severity_options[iseverity]
+            self.severity_weights[iseverity]= disease_params['case_severity'][0][string]
 
         # mask type #
-        self.MASK_WEIGHTS = np.zeros(len(self.MASK_OPTIONS))
-        for imask in range (len(self.MASK_WEIGHTS)):
-            string = self.MASK_OPTIONS[imask]
-            self.MASK_WEIGHTS[imask]= disease_params['mask_type'][0][string]
+        self.mask_weights = np.zeros(len(self.mask_options))
+        for imask in range (len(self.mask_weights)):
+            string = self.mask_options[imask]
+            self.mask_weights[imask]= disease_params['mask_type'][0][string]
             
         json_file.close()
         
