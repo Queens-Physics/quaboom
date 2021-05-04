@@ -164,7 +164,6 @@ class Population:
             string = self.mask_options[imask]
             self.mask_weights[imask]= disease_params['mask_type'][0][string]
             
-        json_file.close()
         
     #returns the population
     def get_population_size(self):
