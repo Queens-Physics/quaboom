@@ -3,6 +3,10 @@ import random
 import json
 
 TIME_QUARANTINE = 14 #days people have to quarantine
+Surgical_Inward_Eff = 0.4
+Surgical_Outward_Eff = 0.3
+NonSurgical_Inward_Eff = 0.6
+NonSurgical_Outward_Eff = 0.5
 
 # How long the infection will last
 json_file = open('dataK.json')
@@ -22,19 +26,22 @@ MASKPROB = 0.8 #Probability of wearing a mask properly
 MILD_SYMPTOM_PROB = 0.8 # Probability of mild symptoms
 MIN_DAY_BEFORE_SYMPTOM, MAX_DAY_BEFORE_SYMPTOM = 1, 10
 QUARANTINE_TIME = 14
+CHANCE_OF_COLD = 0.02 #probability of getting a cold or flu during quarantine
+
 json_file.close()
 
 class Person(object):
 
     # Initalize a person - Can set properties but only needed one is inde
-    def __init__(self, index, infected=False, recovered=False, dead=False, quarantined=False, quarantined_day=None, 
+    def __init__(self, index, infected=False, recovered=False, dead=False, hospitalized=False, quarantined=False, quarantined_day=None, 
                  infected_day=None, recovered_day=None, death_day=None, others_infected=None, cure_days=None, 
-                 recent_infections=None, age=None, job=None, house_index=0,isolation_tendencies=None,case_severity=None, 
+                 recent_infections=None, age=None, job=None, house_index=0,isolation_tendencies=None,case_severity=None, mask_type=None, 
                  has_mask=True):
 
         self.infected = infected
         self.recovered = recovered
         self.dead = dead
+        self.hospitalized = hospitalized
         self.quarantined = quarantined
         self.quarantined_day = quarantined_day
         self.infected_day = infected_day
@@ -49,6 +56,7 @@ class Person(object):
         self.household = house_index
         self.isolation_tendencies = isolation_tendencies
         self.case_severity = case_severity
+        self.mask_type = mask_type
         self.show_symptoms = False
         self.days_until_symptoms = None
         self.knows_infected = False
@@ -70,6 +78,9 @@ class Person(object):
     #return True if quarantined, False if not
     def is_quarantined(self):
         return self.quarantined
+    
+    def is_hospitalzied(self):
+        return self.hospitalized
 
     #Puts person in quarantine
     def set_quarantine(self,day):
@@ -87,7 +98,14 @@ class Person(object):
 
     def get_quarantine_day(self):
         return self.quarantined_day
-
+    
+    def not_infected_symptoms(self):
+        prob_of_symptom = random.random()
+        if (prob_of_symptom <= CHANCE_OF_COLD):
+            self.show_symptoms = True
+        return self.show_symptoms
+            
+    
     #checks to see if person shows symptoms on the current day
     def check_symptoms (self,day):
         if (self.will_get_symptoms == True and (day - self.infected_day) >= self.days_until_symptoms
@@ -137,10 +155,13 @@ class Person(object):
             #Assuming that all hospitalization or worse cases will show symptoms
             elif self.case_severity == 'Hospitalization':
                 self.cure_days = np.random.randint(MIN_SEVERE, MAX_SEVERE) if cure_days is None else cure_days
+                self.hospitalized = True
             elif self.case_severity == 'ICU':
                 self.cure_days = np.random.randint(MIN_ICU, MAX_ICU) if cure_days is None else cure_days
+                self.hospitalized = True
             elif self.case_severity == 'Death':
                 self.cure_days = np.random.randint(MIN_DIE, MAX_DIE) if cure_days is None else cure_days
+                self.hospitalized = True
 
             return True
 
@@ -184,6 +205,7 @@ class Person(object):
                 self.knows_infected = False
                 self.days_until_symptoms = None
                 self.show_symptoms = False
+                self.hospitalized = False
 
                 return True
         return False
@@ -201,6 +223,14 @@ class Person(object):
 
                 return True
         return False
+    
+    def check_hospitalized(self, day): # checking that case_severity==death outside of the loop
+        if self.infected:
+            if self.case_severity == 'Hospitalization' or self.case_severity == 'ICU' or self.case_severity == 'Death':
+                self.hospitalized = True
+
+            return True
+        return False
 
     def wear_mask(self): #Determines and returns if person is wearing mask
         mask_options = np.random.uniform()
@@ -213,6 +243,16 @@ class Person(object):
         else:
             return False
     
+
+#Determines what the inward and outward efficiency of the spread will be based on the mask they are wearing
+    def mask_type_efficiency(self):
+        if self.has_mask == True and self.mask_type == "Surgical":
+            return Surgical_Inward_Eff, Surgical_Outward_Eff
+        elif self.has_mask == True and self.mask_type == "Non-surgical":
+            return NonSurgical_Inward_Eff, NonSurgical_Outward_Eff
+        else:
+            return 1, 1 #Not wearing a mask so this will function will not effect their change of getting the virus
+        
     # Method to infect a random subset of the susceptable population. Returns how many people infected
     def infect_others(self, pop_list, suscept_pop, day, num_to_infect=1):
 
