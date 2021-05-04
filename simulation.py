@@ -1,8 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import copy as copy
 import json
-import random
 
 import Person
 import Population
