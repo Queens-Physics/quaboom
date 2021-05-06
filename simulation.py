@@ -139,10 +139,7 @@ def RunEpidemic(nPop, n0, nDays):
             will_visit_B = inter_sites.will_visit_site(inter_sites.get_grade_B_sites(), B_WILL_GO_PROB)
             inter_sites.site_interaction(will_visit_B, day, personal=False)
             will_visit_C = inter_sites.will_visit_site(inter_sites.get_grade_C_sites(), C_WILL_GO_PROB)
-<<<<<<< HEAD
             inter_sites.site_interaction(will_visit_C, day, personal=False)
-=======
-            inter_sites.site_interaction(will_visit_C, day)
         if students_go:
             will_visit_study = inter_sites.will_visit_site(inter_sites.get_study_sites(), STUDY_GO_PROB)
             inter_sites.site_interaction(will_visit_study, day)
@@ -151,7 +148,6 @@ def RunEpidemic(nPop, n0, nDays):
             if not lockdown:
                 will_visit_lects = inter_sites.will_visit_site(inter_sites.get_lect_sites(), LECT_GO_PROB)
                 inter_sites.site_interaction(will_visit_lects, day)
->>>>>>> 9099e8e05c6c4459dfbd7ac253412f8147c4b5e6
         
         # Manage at home interactions
         inter_sites.house_interact(day)
@@ -195,14 +191,8 @@ def RunEpidemic(nPop, n0, nDays):
                                                                                       track_dead[day], 
                                                                                       track_hospitalized[day],
                                                                                       track_tested[day],
-<<<<<<< HEAD
-                                                                                      track_quarantined[day]))
-        
-
-=======
                                                                                       track_quarantined[day],
                                                                                       track_inf_students[day]))
->>>>>>> 9099e8e05c6c4459dfbd7ac253412f8147c4b5e6
     print("At the end, ", track_susceptible[-1], "never got it")
     print(track_dead[-1], "died")
     print(np.max(track_infected), "had it at the peak")
@@ -210,15 +200,10 @@ def RunEpidemic(nPop, n0, nDays):
     print (np.max(track_quarantined), "were in quarantine at the peak")
     print(np.max(track_hospitalized), "at peak hospitalizations")
     print(np.max(track_dead[-1]), "at peak deaths")
-    
-<<<<<<< HEAD
-    return track_infected, track_new_infected, track_recovered, track_susceptible, track_dead, track_tested, track_quarantined, track_masks, track_lockdown, Population
-
-
-if __name__ == "__main__":
-    RunEpidemic(10000, 20, 100)
-=======
 
     return track_infected, track_new_infected, track_recovered, track_susceptible, track_dead, track_hospitalized, track_tested, track_quarantined, track_masks, track_lockdown, Population
 
->>>>>>> 9099e8e05c6c4459dfbd7ac253412f8147c4b5e6
+if __name__ == "__main__":
+    RunEpidemic(10000, 20, 100)
+
+
