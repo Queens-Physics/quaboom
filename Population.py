@@ -62,6 +62,10 @@ NULL_ID = -1 # This value means that the person index at this location is not su
 
 PROB_OF_TEST = 1 #probability that the person will get tested
 
+# Capacity for contact tracing daily
+CT_CAPACITY = 10000
+CT_ENABLED = True
+
 class Population:
     '''creates a population of people based on the total population
      uses and age distrubution to weight the assignment of ages
@@ -140,10 +144,8 @@ class Population:
             self.population[i].infect(day=0)
             self.infected[i] = i
             self.susceptible[i] = NULL_ID
-        
-        # Contact tracing statistics
-        self.contact_tracing = True
-        self.ct_capacity = 10000
+
+        self.new_quarantined_num = 0
 
     #returns the population
     def get_population_size(self):
@@ -307,9 +309,9 @@ class Population:
                 self.have_been_tested[person_index] = person_index
 
                 # Contact trace the person
-                if self.contact_tracing and num_contacts_traced < self.ct_capacity:
+                if CT_ENABLED and num_contacts_traced < CT_CAPACITY:
                     person.contact_tracing(day)
-                    self.ct_capacity += 1
+                    num_contacts_traced += 1
 
 
                 self.new_quarantined_num += 1

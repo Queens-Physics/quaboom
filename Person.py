@@ -1,7 +1,6 @@
 import numpy as np
 import random
 import json
-from params import Params
 
 TIME_QUARANTINE = 14 #days people have to quarantine
 Surgical_Inward_Eff = 0.4
@@ -28,6 +27,10 @@ MILD_SYMPTOM_PROB = 0.8 # Probability of mild symptoms
 MIN_DAY_BEFORE_SYMPTOM, MAX_DAY_BEFORE_SYMPTOM = 1, 10
 QUARANTINE_TIME = 14
 CHANCE_OF_COLD = 0.02 #probability of getting a cold or flu during quarantine
+
+CT_APP_PROB = 0.8
+PROB_REMEMBERING_PERSONAL_CONTACTS = 0.75
+CT_LENGTH = 2
 
 json_file.close()
 
@@ -69,8 +72,9 @@ class Person(object):
         # Dictionary of sets that stores all the contacts on a given day
         self.all_contacts = dict()
         self.personal_contacts = dict()
+        
         # Whether the person uses a contact tracing app
-        self.has_ct_app = True
+        self.has_ct_app = random.random() < CT_APP_PROB
 
         
     def __repr__(self):
@@ -304,7 +308,7 @@ class Person(object):
         """Contacts everyone that they have had contact with. """
 
         end = day + 1
-        beginning = end - Params.CONTACT_TRACING_LENGTH
+        beginning = end - CT_LENGTH
         
         def get_contacts(log):
             contacts = set()
@@ -314,16 +318,21 @@ class Person(object):
             return contacts
 
         # Personal contacts
-        contacts = get_contacts(self.personal_contacts)
+        personal_contacts = get_contacts(self.personal_contacts)
+
+        # Notify all personal contacts   
+        for contact in personal_contacts:
+            if random.random() < PROB_REMEMBERING_PERSONAL_CONTACTS:
+                contact.positive_contact(day)
 
         # CT apps
         if self.has_ct_app:
-            contacts = contacts.union(get_contacts(self.all_contacts))
+            # Gets all contacts that are from the CT app but removes the personal contacts
+            impersonal_contacts = get_contacts(self.all_contacts).difference(personal_contacts)
 
-        # Notify all contacts
-        for contact in contacts:
-            #NOTE: apply some memory coefficient
-            contact.positive_contact(day)
+            for contact in impersonal_contacts:
+                contact.positive_contact(day)
+        
         
         
 
