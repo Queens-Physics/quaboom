@@ -161,7 +161,7 @@ def RunEpidemic(nPop, n0, nDays):
         # Manage Quarantine
         pop.update_quarantine(day)
         
-        
+
         ############### UPDATE POPULATION ###############
         # remove the guest visitors
         pop.remove_visitors(visitors_ind)

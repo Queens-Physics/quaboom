@@ -62,8 +62,12 @@ NULL_ID = -1 # This value means that the person index at this location is not su
 
 PROB_OF_TEST = 1 #probability that the person will get tested
 
+#### Contact Tracing Variables
+
 # Capacity for contact tracing daily
 CT_CAPACITY = 10000
+
+# Whether to do contact tracing
 CT_ENABLED = True
 
 class Population:

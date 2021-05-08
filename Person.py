@@ -28,8 +28,16 @@ MIN_DAY_BEFORE_SYMPTOM, MAX_DAY_BEFORE_SYMPTOM = 1, 10
 QUARANTINE_TIME = 14
 CHANCE_OF_COLD = 0.02 #probability of getting a cold or flu during quarantine
 
-CT_APP_PROB = 0.8
+#### Contact Tracing Variables
+
+# Probability [0, 1] that a person has a contact tracing app
+CT_APP_PROB = 1
+
+# Proportion of personal contacts [0, 1] that are remembered when it's time
+# to do contact tracing
 PROB_REMEMBERING_PERSONAL_CONTACTS = 0.75
+
+# How many days in the past to contact trace to
 CT_LENGTH = 2
 
 json_file.close()
@@ -159,7 +167,7 @@ class Person(object):
             self.infected = True
             self.infected_day = day
             self.will_get_symptoms = True
-            self.days_until_symptoms  = 2 #np.random.randint(MIN_DAY_BEFORE_SYMPTOM,MAX_DAY_BEFORE_SYMPTOM)
+            self.days_until_symptoms  = np.random.randint(MIN_DAY_BEFORE_SYMPTOM,MAX_DAY_BEFORE_SYMPTOM)
             
             # If cure days not specified then choose random number inbetween min and max
             if self.case_severity == 'Mild' or self.case_severity == None: # If severity not specified, choose Mild
@@ -335,25 +343,27 @@ class Person(object):
 
         # Personal contacts
         personal_contacts = get_contacts(self.personal_contacts)
+        remembered_contacts = set()
 
         # Notify all personal contacts   
         for contact in personal_contacts:
             if random.random() < PROB_REMEMBERING_PERSONAL_CONTACTS:
                 contact.positive_contact(day)
+                remembered_contacts.add(contact)
 
         # CT apps
         if self.has_ct_app:
-            # Gets all contacts that are from the CT app but removes the personal contacts
-            impersonal_contacts = get_contacts(self.all_contacts).difference(personal_contacts)
+            # Gets all contacts that are from the CT app, minus those 
+            # already contacted because they were personal contacts
+            impersonal_contacts = get_contacts(self.all_contacts).difference(remembered_contacts)
 
             for contact in impersonal_contacts:
                 contact.positive_contact(day)
         
-        
-        
-
     def positive_contact(self, day):
+        '''Called when a person is notified of a positive contact with a
+        covid case. '''
 
-        # NOTE: Should they go to get tested? Should they go into quarantine?
-        # Right now I'll get make them go to quarantine
+        #NOTE: This is a pretty intense course of action. Maybe adding them to
+        # the testing list would be better?
         self.set_quarantine(day)        
