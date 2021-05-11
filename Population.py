@@ -3,64 +3,8 @@ import Person
 import json
 import random
 
-json_file = open('dataK.json')
-disease_params = json.load(json_file)
-
-
-AGE_OPTIONS = ['0-9', '10-19', '20-29', '30-39', '40-49', '50-59', '60-69', '70-79', '80-89', '90+']
-JOB_OPTIONS = ['Health', 'Sales', 'Neither']
-HOUSE_OPTIONS = [1,2,3,4,5]
-ISOLATION_OPTIONS = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
-SEVERITY_OPTIONS = ['Mild', 'Hospitalization', 'ICU', 'Death']
-MASK_OPTIONS = ['Surgical', 'Non-surgical']
-
-# isolation #
-ISOLATION_WEIGHTS = np.ones(len(ISOLATION_OPTIONS))
-# Normalize the probability
-ISOLATION_WEIGHTS /= float(sum(ISOLATION_WEIGHTS)) #this is the one we don't have data on yet
-
-# PULL DATA FROM THE JSON FILE #
-# age #
-AGE_WEIGHTS = np.zeros(len(AGE_OPTIONS))
-for iage in range (len(AGE_WEIGHTS)):
-    string = str(iage*10)+'-'+str(iage*10+9)
-    AGE_WEIGHTS[iage]= disease_params['age_weights'][0][string]
-
-# job #
-JOB_WEIGHTS = np.zeros(len(JOB_OPTIONS))
-for ijob in range (len(JOB_WEIGHTS)):
-    string = JOB_OPTIONS[ijob].upper()
-    JOB_WEIGHTS[ijob]= disease_params['job_weights'][0][string]
-
-
-# house # 
-HOUSE_WEIGHTS = np.zeros(len(HOUSE_OPTIONS))
-for ihouse in range (len(HOUSE_WEIGHTS)):
-    string = str(ihouse+1)
-    HOUSE_WEIGHTS[ihouse]= disease_params['house_weights'][0][string]
-
-# case severity #
-SEVERITY_WEIGHTS = np.zeros(len(SEVERITY_OPTIONS))
-for iseverity in range (len(SEVERITY_WEIGHTS)):
-    string = SEVERITY_OPTIONS[iseverity]
-    SEVERITY_WEIGHTS[iseverity]= disease_params['case_severity'][0][string]
-
-# mask type #
-MASK_WEIGHTS = np.zeros(len(MASK_OPTIONS))
-for imask in range (len(MASK_WEIGHTS)):
-    string = MASK_OPTIONS[imask]
-    MASK_WEIGHTS[imask]= disease_params['mask_type'][0][string]
-    
-# mask
-PROB_HAS_MASK = 0.8
-
-json_file.close()
-
 NULL_ID = -1 # This value means that the person index at this location is not susceptible/infected/dead/...
              # All arrays are intialized to this (except healthy, as everyone is healthy)
-
-
-PROB_OF_TEST = 1 #probability that the person will get tested
 
 class Population:
     '''creates a population of people based on the total population
@@ -71,33 +15,41 @@ class Population:
      recovered list has negative values for not recovered, and postitive indicies for recovered
      '''
 
-    def __init__(self, nPop, n0, policy):
+    def __init__(self, sim_obj):
+       
+        # Set attributes from sim_obj file
+        self.load_attributes_from_sim_obj(sim_obj)
+        
+        # Actually set all of these values
+        self.set_demographic_parameters(sim_obj)
 
-        self.policy = policy
+        self.nPop = sim_obj.nPop # total population
+        self.n0 = sim_obj.n0 # initial infected
+        
+        self.population = [0] * self.nPop  # The list of all people
+        self.household = [0] * self.nPop # list of all houses (list that contains all lists of the people in the house)
+        self.prob_of_test = self.prob_of_test
+        self.prob_has_mask = self.prob_has_mask
 
-        self.population = [0] * nPop  # The list of all people
-        self.household = [0] * nPop # list of all houses (list that contains all lists of the people in the house)
-        self.nPop = nPop # total population
-
-        houseSize = np.random.choice(a=HOUSE_OPTIONS, p=HOUSE_WEIGHTS)
+        houseSize = np.random.choice(a=self.house_options, p=self.house_weights)
         houseIndex = 0
         self.household[houseIndex] = houseSize
 
         # Student parameter
-        nStudents = int(nPop/5) # full capacity ~ 24k students
+        self.nStudents = int(self.nPop/5) # full capacity ~ 24k students
         
         # Initialize parameters of people immediately.
         # Much quick this way, utilizes numpy efficiency.
-        age_arr = np.random.choice(a=AGE_OPTIONS, p=AGE_WEIGHTS, size=nPop)
-        job_arr = np.random.choice(a=JOB_OPTIONS, p=JOB_WEIGHTS, size=nPop)
-        isolation_tend_arr = np.random.choice(a=ISOLATION_OPTIONS, p=ISOLATION_WEIGHTS, size=nPop)
-        case_severity_arr = np.random.choice(a=SEVERITY_OPTIONS, p=SEVERITY_WEIGHTS, size=nPop)
-        mask_type_arr = np.random.choice(a=MASK_OPTIONS, p=MASK_WEIGHTS, size=nPop)
-        has_mask_arr = np.random.uniform(size=nPop) < PROB_HAS_MASK
+        age_arr = np.random.choice(a=self.age_options, p=self.age_weights, size=self.nPop)
+        job_arr = np.random.choice(a=self.job_options, p=self.job_weights, size=self.nPop)
+        isolation_tend_arr = np.random.choice(a=self.isolation_options, p=self.isolation_weights, size=self.nPop)
+        case_severity_arr = np.random.choice(a=self.severity_options, p=self.severity_weights, size=self.nPop)
+        mask_type_arr = np.random.choice(a=self.mask_options, p=self.mask_weights, size=self.nPop)
+        has_mask_arr = np.random.uniform(size=self.nPop) < self.prob_has_mask
 
-        for i in range(0, nPop-nStudents):
+        for i in range(0, self.nPop-self.nStudents):
             # MAKE A PERSON
-            newPerson = Person.Person(index=i, infected=False, recovered=False, dead=False, hospitalized=False,
+            newPerson = Person.Person(index=i, sim_obj=sim_obj, infected=False, recovered=False, dead=False, hospitalized=False,
                                       quarantined=False, quarantined_day=None,
                                       infected_day=None, recovered_day=None, death_day=None,
                                       others_infected=None, cure_days=None, recent_infections=None,
@@ -112,16 +64,16 @@ class Population:
             # Increment house info
             houseSize -= 1
             if houseSize == 0:
-                houseSize = np.random.choice(HOUSE_OPTIONS)
+                houseSize = np.random.choice(self.house_options)
                 houseIndex += 1
                 self.household[houseIndex] = houseSize
                 
         ############### STUDENTS ###############
-        self.students = np.zeros(nPop, dtype=int) + NULL_ID # list of people who are students
+        self.students = np.zeros(self.nPop, dtype=int) + NULL_ID # list of people who are students
 
-        for i in range(nPop-nStudents, nPop):
+        for i in range(self.nPop-self.nStudents, self.nPop):
             student_age = random.randint(18,23)
-            newStudent = Person.Person(index=i, infected=False, recovered=False, dead=False, quarantined=False, 
+            newStudent = Person.Person(index=i, sim_obj=sim_obj, infected=False, recovered=False, dead=False, quarantined=False, 
                                quarantined_day=None, infected_day=None, recovered_day=None, death_day=None,
                                others_infected=None, cure_days=None, recent_infections=None, age=student_age, job='Student',
                                house_index=0, isolation_tendencies=isolation_tend_arr[i],
@@ -139,14 +91,14 @@ class Population:
         self.household = self.household[:houseIndex]
 
         # Create person status arrays
-        self.susceptible = np.array(range(nPop), dtype=int)         # list of all susceptible individuals
-        self.infected = np.zeros(nPop, dtype=int) + NULL_ID         # list of all infected people
-        self.recovered = np.zeros(nPop, dtype=int) + NULL_ID        # list of recovered people
-        self.dead = np.zeros(nPop, dtype=int) + NULL_ID             # list of recovered people
-        self.hospitalized = np.zeros(nPop, dtype=int) + NULL_ID     # list of people hospitalized and in the ICU
-        self.have_been_tested = np.zeros(nPop, dtype=int) + NULL_ID # list of people who have been tested
-        self.knows_infected = np.zeros(nPop, dtype=int) + NULL_ID   # list of people who have a positive test and are still infected
-        self.quarantined = np.zeros(nPop, dtype=int) + NULL_ID      # list of people who are currently in quarantine
+        self.susceptible = np.array(range(self.nPop), dtype=int) #list of all susceptible individuals
+        self.infected = np.zeros(self.nPop, dtype=int) + NULL_ID  # list of all infected people
+        self.recovered = np.zeros(self.nPop, dtype=int) + NULL_ID # list of recovered people
+        self.dead = np.zeros(self.nPop, dtype=int) + NULL_ID # list of recovered people
+        self.have_been_tested = np.zeros(self.nPop, dtype=int) + NULL_ID # list of people who have been tested
+        self.knows_infected = np.zeros(self.nPop, dtype=int) + NULL_ID # list of people with positive test and still infected
+        self.hospitalized = np.zeros(self.nPop, dtype=int) + NULL_ID     # list of people hospitalized and in the ICU
+        self.quarantined = np.zeros(self.nPop, dtype=int) + NULL_ID #list of people who are currently in quarantine
 
         self.testing = [] # list of people waiting to be others_infected
         self.test_sum = 0 # total number of tests that have been run
@@ -154,11 +106,65 @@ class Population:
         self.new_quarantined_num = 0 # new people in quarantine
         
         # Infect first n0 people
-        for i in range(n0):
+        for i in range(self.n0):
             self.population[i].infect(day=0)
             self.infected[i] = i
             self.susceptible[i] = NULL_ID
 
+            
+    def load_attributes_from_sim_obj(self, sim_obj):
+        attributes = sim_obj.parameters["population_data"].keys()
+        for attr in attributes:
+            setattr(self, attr, sim_obj.parameters["population_data"][attr])
+            
+    def set_demographic_parameters(self, sim_obj):
+        with open(self.demographics_file) as json_file:
+            disease_params = json.load(json_file)
+
+        self.age_options = disease_params["age_options"]
+        self.job_options = disease_params["job_options"]
+        self.house_options = disease_params["house_options"]
+        self.isolation_options = disease_params["isolation_options"]
+        self.severity_options = disease_params["severity_options"]
+        self.mask_options = disease_params["mask_options"]
+
+        # isolation #
+        self.isolation_weights = np.ones(len(self.isolation_options))
+        # Normalize the probability
+        self.isolation_weights /= float(sum(self.isolation_weights)) #this is the one we don't have data on yet
+
+        # PULL DATA FROM THE JSON FILE #
+        # age #
+        self.age_weights = np.zeros(len(self.age_options))
+        for iage in range (len(self.age_weights)):
+            string = str(iage*10)+'-'+str(iage*10+9)
+            self.age_weights[iage]= disease_params['age_weights'][0][string]
+
+        # job #
+        self.job_weights = np.zeros(len(self.job_options))
+        for ijob in range (len(self.job_weights)):
+            string = self.job_options[ijob].upper()
+            self.job_weights[ijob]= disease_params['job_weights'][0][string]
+
+        # house # 
+        self.house_weights = np.zeros(len(self.house_options))
+        for ihouse in range (len(self.house_weights)):
+            string = str(ihouse+1)
+            self.house_weights[ihouse]= disease_params['house_weights'][0][string]
+
+        # case severity #
+        self.severity_weights = np.zeros(len(self.severity_options))
+        for iseverity in range (len(self.severity_weights)):
+            string = self.severity_options[iseverity]
+            self.severity_weights[iseverity]= disease_params['case_severity'][0][string]
+
+        # mask type #
+        self.mask_weights = np.zeros(len(self.mask_options))
+        for imask in range (len(self.mask_weights)):
+            string = self.mask_options[imask]
+            self.mask_weights[imask]= disease_params['mask_type'][0][string]
+            
+        
     #returns the population
     def get_population_size(self):
         return self.nPop
@@ -309,7 +315,7 @@ class Population:
             if self.population[i].check_symptoms(day)==True:
 
                 if i not in self.testing and self.have_been_tested[i]!=1: # if person is not already in testing function
-                    if random.random() < PROB_OF_TEST:
+                    if random.random() < self.prob_of_test:
                         infected_person = self.population[i] #gets the infected person from the population list
 
                         if infected_person.show_symptoms==True and infected_person.knows_infected==False:
