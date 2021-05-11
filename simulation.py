@@ -57,6 +57,7 @@ def RunEpidemic(nPop, n0, nDays):
     track_recovered = np.zeros(nDays, dtype=int)         # total recovered
     track_dead = np.zeros(nDays, dtype=int)              # total deaths
     track_hospitalized = np.zeros(nDays, dtype=int)      # total hospitalizations
+    track_ICU = np.zeros(nDays, dtype=int)               # total in ICU
     track_tested = np.zeros(nDays, dtype=int)            # total tested individuals
     track_quarantined = np.zeros(nDays, dtype=int)       # population currently in quarantine ACTUALLY DOES TOTAL QUARINTIED 
     track_masks = np.zeros(nDays, dtype=int)
@@ -79,6 +80,7 @@ def RunEpidemic(nPop, n0, nDays):
         track_recovered[day] = pop.count_recovered()
         track_dead[day] = pop.count_dead()
         track_hospitalized[day] = pop.count_hospitalized()
+        track_ICU[day] = pop.count_ICU()
         track_tested[day] = pop.count_tested()
         track_quarantined[day] = pop.count_quarantined()
         track_masks[day] = old_mask_mandate
@@ -184,12 +186,13 @@ def RunEpidemic(nPop, n0, nDays):
                 is_quarantined = infected_person.check_quarantine(day)
 
 
-        print("Day: {}, infected: {}, recovered: {}, suceptible: {}, dead: {}, hospitalized: {}, tested: {} total quarantined: {}".format(day, 
+        print("Day: {}, infected: {}, recovered: {}, suceptible: {}, dead: {}, hospitalized: {}, ICU: {}, tested: {}, total quarantined: {}".format(day, 
                                                                                       track_infected[day],
                                                                                       track_recovered[day],
                                                                                       track_susceptible[day],
                                                                                       track_dead[day], 
                                                                                       track_hospitalized[day],
+                                                                                      track_ICU[day],                     
                                                                                       track_tested[day],
                                                                                       track_quarantined[day],
                                                                                       track_inf_students[day]))
@@ -202,5 +205,5 @@ def RunEpidemic(nPop, n0, nDays):
     print(np.max(track_dead[-1]), "at peak deaths")
     
 
-    return track_infected, track_new_infected, track_recovered, track_susceptible, track_dead, track_hospitalized, track_tested, track_quarantined, track_masks, track_lockdown, Population
+    return track_infected, track_new_infected, track_recovered, track_susceptible, track_dead, track_hospitalized, track_ICU, track_tested, track_quarantined, track_masks, track_lockdown, Population
 
