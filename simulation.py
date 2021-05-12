@@ -24,7 +24,7 @@ class simulation():
         self.track_quarantined = np.zeros(self.nDays, dtype=int)  # population currently in quarantine 
         self.track_new_quarantined = np.zeros(self.nDays, dtype=int)
         self.track_tested = np.zeros(self.nDays, dtype=int)       # total tested individuals
-        self.track_new_tested = np.zeros(self.nDays, dtype=int)
+        self.track_new_tested = np.zeros(self.nDays, dtype=int)   # new tested per day
         self.track_testing_wait_list = np.zeros(self.nDays, dtype=int) # counts the number of people waiting to get tests each day
         self.track_inf_students = np.zeros(self.nDays, dtype=int)
         
