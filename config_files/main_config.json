@@ -1,6 +1,7 @@
 {
     "simulation_data":
     {
+        "disease_config_file":"./config_files/disease_config_1.json",
         "nDays":100,
         "nPop":10000,
         "n0":10,
@@ -32,7 +33,8 @@
     "population_data":{
         "demographics_file":"./data/dataK.json", 
         "prob_has_mask":0.8, 
-        "prob_of_test":1 
+        "prob_of_test":1,
+        "mask_type": {"Surgical": 0.2, "Non-surgical": 0.8}
     },
     
     "interaction_sites_data":{
@@ -40,8 +42,6 @@
         "grade_per_pop":{"A":1000, "B":1000, "C":1000, "LECT":300, "STUDY":6, "FOOD":1000},
         "grade_loyalty_means":{"A":4, "B":1, "C":1, "LECT":7, "STUDY":2, "FOOD":1},
         "grade_loyalty_stds":{"A":2, "B":1, "C":0.2, "LECT":2, "STUDY":1, "FOOD":0.5},
-        "base_infection_spread_prob":0.15, 
-        "house_infection_spread_factor":1.25, 
         "quarantine_isolation_factor":0
     }, 
     
@@ -52,18 +52,7 @@
         "nonsurgical_inward_eff":0.6, 
         "nonsurgical_outward_eff":0.5, 
         "wear_mask_properly":0.8, 
-        "cold_prob":0.02,
-        "mild_symptom_prob":0.8, 
-        "min_day_before_symptoms":1, 
-        "max_day_before_symptoms":10,
-        "max_severe_days": 42, 
-        "min_severe_days": 21, 
-        "max_mild_days": 20, 
-        "min_mild_days": 12, 
-        "max_ICU_days": 59, 
-        "min_ICU_days": 43, 
-        "max_die_days": 30, 
-        "min_die_days": 14
+        "cold_prob":0.02
     }
       
 }

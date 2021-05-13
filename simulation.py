@@ -11,7 +11,9 @@ class simulation():
     
     def __init__(self, config_file):
         
-        self.load_parameters(config_file)
+        self.load_general_parameters(config_file)
+        self.load_disease_parameters(self.disease_config_file)
+        
         self.init_classes() # Have to initalize the classes after we have all of the parameters
 
         # Arrays to store the values during the simulation                   
@@ -34,7 +36,7 @@ class simulation():
         
         self.has_run = False                                 # Indicates if the sim has run yet
         
-    def load_parameters(self, filename):
+    def load_general_parameters(self, filename):
         with open(filename) as file:
             self.parameters = json.load(file)
         
@@ -47,6 +49,10 @@ class simulation():
         person_attributes = self.parameters["person_data"].keys()
         for attr in person_attributes:
             setattr(self, attr, self.parameters["person_data"][attr])
+            
+    def load_disease_parameters(self, filename):
+        with open(filename) as file:
+            self.disease_parameters = json.load(file)
         
     def init_classes(self):
         # Initalize the policy class
