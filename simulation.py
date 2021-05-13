@@ -32,6 +32,8 @@ class simulation():
         self.track_lockdown = np.zeros(self.nDays, dtype=bool)
         self.track_testing = np.zeros(self.nDays, dtype=bool)
         
+        self.track_virus_type = np.zeros(self.nDays, dtype=object)
+        
         self.has_run = False                                 # Indicates if the sim has run yet
         
     def load_parameters(self, filename):
@@ -86,6 +88,8 @@ class simulation():
             
             self.track_new_quarantined[day] = self.pop.get_new_quarantined()
             self.track_inf_students[day] = self.pop.count_infected_students()
+            
+            self.track_virus_type[day] = self.pop.count_virus_types()
 
             self.new_tests = 0
 
@@ -182,7 +186,7 @@ class simulation():
                     # Update quarintine stuff
                     is_quarantined = infected_person.check_quarantine(day)
 
-            print("Day: {}, infected: {}, recovered: {}, suceptible: {}, dead: {}, hospitalized: {}, tested: {}, total quarantined: {}, infected students: {}".format(day, 
+            print("Day: {}, infected: {}, recovered: {}, suceptible: {}, dead: {}, hospitalized: {}, tested: {}, total quarantined: {}, infected students: {}, variants: {}".format(day, 
                                                                                       self.track_infected[day],
                                                                                       self.track_recovered[day],
                                                                                       self.track_susceptible[day],
@@ -190,7 +194,8 @@ class simulation():
                                                                                       self.track_hospitalized[day],
                                                                                       self.track_tested[day],
                                                                                       self.track_quarantined[day],
-                                                                                      self.track_inf_students[day]))
+                                                                                      self.track_inf_students[day],
+                                                                                      self.track_virus_type[day]))
         print("At the end, ", self.track_susceptible[-1], "never got it")
         print(self.track_dead[-1], "died")
         print(np.max(self.track_infected), "had it at the peak")
@@ -198,6 +203,7 @@ class simulation():
         print(np.max(self.track_quarantined), "were in quarantine at the peak")
         print(np.max(self.track_hospitalized), "at peak hospitalizations")
         print(np.max(self.track_dead[-1]), "at peak deaths")
+        print("The breakdown of variants is", np.max(self.track_virus_type[day]))
 
         self.has_run = True
         
@@ -208,7 +214,7 @@ class simulation():
 
     def plot(self, plot_infected=True, plot_susceptible=True, plot_dead=True, plot_recovered=True, plot_new_infected=True, 
              plot_tested=True, plot_quarantined=True, plot_masks=True, plot_lockdown=True, plot_testing=True, 
-             plot_students=True, log=False):
+             plot_students=True, plot_virus_types=True, log=False):
         self.check_has_run()
 
         fig, ax = plt.subplots(figsize=(10,8), dpi=100)
@@ -223,6 +229,7 @@ class simulation():
         if plot_quarantined: plt.plot(days, self.track_quarantined, label='quarantined')
         if plot_tested: plt.plot(days, self.track_tested, label='total tests')
         if plot_students: plt.plot(days, self.track_inf_students, label="infected students")
+        if plot_virus_types: plt.plot(days, self.track_virus_type, label="test")   
             
         # Indicate when certain mandates were in place
         if plot_masks: 
@@ -246,4 +253,4 @@ class simulation():
         self.check_has_run()
 
         return (self.track_infected, self.track_new_infected, self.track_recovered, self.track_susceptible, self.track_dead, 
-                self.track_tested, self.track_quarantined, self.track_inf_students, self.track_masks, self.track_lockdown)
+                self.track_tested, self.track_quarantined, self.track_inf_students, self.track_masks, self.track_lockdown, self.track_virus_type)

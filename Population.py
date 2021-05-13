@@ -30,6 +30,8 @@ class Population:
         self.household = [0] * self.nPop # list of all houses (list that contains all lists of the people in the house)
         self.prob_of_test = self.prob_of_test
         self.prob_has_mask = self.prob_has_mask
+        
+        #self.virus_type=self.virus_type
 
         houseSize = np.random.choice(a=self.house_options, p=self.house_weights)
         houseIndex = 0
@@ -56,7 +58,7 @@ class Population:
                                       age=age_arr[i], job=job_arr[i], house_index=0,
                                       isolation_tendencies=isolation_tend_arr[i],
                                       case_severity=case_severity_arr[i], mask_type=mask_type_arr[i], 
-                                      has_mask=has_mask_arr[i])
+                                      has_mask=has_mask_arr[i], virus_type=None)
 
             # ADD A PERSON
             self.population[i] = newPerson
@@ -77,7 +79,7 @@ class Population:
                                quarantined_day=None, infected_day=None, recovered_day=None, death_day=None,
                                others_infected=None, cure_days=None, recent_infections=None, age=student_age, job='Student',
                                house_index=0, isolation_tendencies=isolation_tend_arr[i],
-                               case_severity=case_severity_arr[i], has_mask=has_mask_arr[i])
+                               case_severity=case_severity_arr[i], has_mask=has_mask_arr[i], virus_type=None)
             self.population[i] = newStudent
 
             self.students[i] = i # set their student status
@@ -99,6 +101,8 @@ class Population:
         self.knows_infected = np.zeros(self.nPop, dtype=int) + NULL_ID # list of people with positive test and still infected
         self.hospitalized = np.zeros(self.nPop, dtype=int) + NULL_ID     # list of people hospitalized and in the ICU
         self.quarantined = np.zeros(self.nPop, dtype=int) + NULL_ID #list of people who are currently in quarantine
+        
+        self.virus_type = np.array(["None" for i in range(self.nPop)]) #list of individuals with None as virus type
 
         self.testing = [] # list of people waiting to be others_infected
         self.test_sum = 0 # total number of tests that have been run
@@ -110,6 +114,7 @@ class Population:
             self.population[i].infect(day=0)
             self.infected[i] = i
             self.susceptible[i] = NULL_ID
+            self.virus_type = "general"
 
             
     def load_attributes_from_sim_obj(self, sim_obj):
@@ -226,6 +231,11 @@ class Population:
     
     def count_masks(self):
         return np.count_nonzero(self.has_mask > 0)
+    
+    def count_virus_types(self):
+        counts={}
+        for virus_type in np.unique(self.virus_type):
+            counts[virus_type] = np.count_nonzero(self.virus_type==virus_type)
     
     #returns an individual based on their index
     def get_person(self, index):

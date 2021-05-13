@@ -7,7 +7,7 @@ class Person(object):
     def __init__(self, index, sim_obj, infected=False, recovered=False, dead=False, hospitalized=False, quarantined=False,
                  quarantined_day=None, infected_day=None, recovered_day=None, death_day=None, others_infected=None,
                  cure_days=None, recent_infections=None, age=None, job=None, house_index=0, isolation_tendencies=None,
-                 case_severity=None, mask_type=None, has_mask=True):
+                 case_severity=None, mask_type=None, has_mask=True, virus_type=None):
 
         self.infected = infected
         self.recovered = recovered
@@ -33,6 +33,7 @@ class Person(object):
         self.knows_infected = False
         self.will_get_symptoms = False
         self.has_mask = has_mask
+        self.virus_type = virus_type
         
         # Set the simulaiton object to access the variables
         self.sim_obj = sim_obj
@@ -106,6 +107,9 @@ class Person(object):
     
     def get_mask(self):
         return self.has_mask
+    
+    def get_virus_type(self):
+        return self.virus_type
 
     # Method to infect a person
     def infect(self, day, cure_days=None):
@@ -113,6 +117,7 @@ class Person(object):
         # Check that they are suseptable (maybe should have that as property?)
         if not self.recovered and not self.infected and not self.dead:
             self.infected = True
+            #self.virus_type = virus_type
             self.infected_day = day
             self.will_get_symptoms = True
             self.days_until_symptoms  = np.random.randint(self.sim_obj.min_day_before_symptoms, 

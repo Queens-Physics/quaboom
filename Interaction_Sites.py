@@ -110,6 +110,7 @@ class Interaction_Sites:
         # Find out how many interactions each person has at the site - FUNCTION IS PRETTY SLOW RN
         # Should deal with case where one person is left with more than one interaction
         new_infections = np.zeros(self.pop.get_population_size(), dtype=bool)
+        new_infection_type = np.zeros(self.pop.get_population_size(), dtype=object)
 
         for ppl_going in will_go_array:
 
@@ -145,8 +146,10 @@ class Interaction_Sites:
                     if did_infect:
                         if person_1_infected:
                             new_infections[person_2_index] = True
+                            new_infection_type[person_2_index] = self.pop.get_person(person_1_index).get_virus_type()
                         else:
                             new_infections[person_1_index] = True
+                            new_infection_type[person_1_index] = self.pop.get_person(person_2_index).get_virus_type()
 
                 # Lower the interaction count for those people
                 num_interactions[person_1] -= 1
@@ -155,8 +158,9 @@ class Interaction_Sites:
 
         # Update people who get infected only at the end (if i get CV19 at work, prolly wont spread at the store that night ?)
         new_infection_indexes = np.where(new_infections)[0]
+        new_infection_type_indexes = np.where(new_infection_type)[0]
         for new_infection in new_infection_indexes:
-            self.pop.infect(index=new_infection, day=day)
+            self.pop.infect(index=new_infection, day=day, virus_type=new_infection_type)
 
     def calc_interactions(self, person_index, how_busy):
         # This will be some function that returns how many interactions for this person
