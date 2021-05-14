@@ -68,8 +68,6 @@ class TestPerson(unittest.TestCase):
         person5 = Person.Person(5, sim_obj=self.sim_obj, infected=False, recovered=False)
         person5.infect(day=infected_day)
         self.assertIsNotNone(person5.cure_days)            # Make sure that cure days is set even though no parameter passed
-        
-    
+
 if __name__ == '__main__':
     unittest.main()
-    
