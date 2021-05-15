@@ -80,10 +80,12 @@ class Person(object):
     def is_quarantined(self):
         return self.quarantined
     
+    #return True if hospitalized, Flase if not
     def is_hospitalzied(self):
         return self.hospitalized
     
-    def in_ICU(self):
+    #return True if in ICU, Flase if not
+    def is_ICU(self):
         return self.ICU
 
     #Puts person in quarantine

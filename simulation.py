@@ -128,7 +128,7 @@ def RunEpidemic(nPop, n0, nDays):
         for i in range(0, num_vis):
             vis_age = np.random.randint(vis_age_lower,vis_age_upper)
             
-            visitor = Person.Person(index=i+nPop, infected=True, recovered=False, dead=False, quarantined=False, 
+            visitor = Person.Person(index=i+nPop, infected=True, recovered=False, dead=False, hospitalized=False, ICU=False, quarantined=False, 
                                quarantined_day=None, infected_day=None, recovered_day=None, death_day=None,
                                others_infected=None, cure_days=None, recent_infections=None, age=vis_age, job=None,
                                house_index=None, isolation_tendencies=0.2, case_severity='Mild', has_mask=True)

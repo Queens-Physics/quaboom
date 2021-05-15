@@ -11,7 +11,7 @@ AGE_OPTIONS = ['0-9', '10-19', '20-29', '30-39', '40-49', '50-59', '60-69', '70-
 JOB_OPTIONS = ['Health', 'Sales', 'Neither']
 HOUSE_OPTIONS = [1,2,3,4,5]
 ISOLATION_OPTIONS = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
-SEVERITY_OPTIONS = ['Mild', 'Hospitalization', 'ICU', 'Death']
+SEVERITY_OPTIONS = ['Mild', 'Death', 'Hospitalization', 'ICU']
 MASK_OPTIONS = ['Surgical', 'Non-surgical']
 
 # isolation #
@@ -53,7 +53,7 @@ for imask in range (len(MASK_WEIGHTS)):
     
 # mask
 PROB_HAS_MASK = 0.8
-ICU_MAX = 100
+ICU_MAX = 95 # https://kingstonhsc.ca/khscconnect/news/khsc-increasing-icu-capacity-support-patient-demand-during-pandemic
 
 json_file.close()
 
@@ -122,7 +122,7 @@ class Population:
 
         for i in range(nPop-nStudents, nPop):
             student_age = random.randint(18,23)
-            newStudent = Person.Person(index=i, infected=False, recovered=False, dead=False, quarantined=False, 
+            newStudent = Person.Person(index=i, infected=False, recovered=False, dead=False, hospitalized=False, ICU=False, quarantined=False, 
                                quarantined_day=None, infected_day=None, recovered_day=None, death_day=None,
                                others_infected=None, cure_days=None, recent_infections=None, age=student_age, job='Student',
                                house_index=0, isolation_tendencies=isolation_tend_arr[i],
@@ -270,8 +270,11 @@ class Population:
             return False
         self.infected[index] = NULL_ID
         self.recovered[index] = index
-        self.hospitalized[index] = NULL_ID
-        self.ICU[index] = NULL_ID
+        
+        if self.hospitalized[index] == index:
+            self.hospitalized[index] = NULL_ID
+        if self.ICU[index] == index:
+            self.ICU[index] = NULL_ID
         return True
 
     def die(self, index, day):
@@ -280,6 +283,7 @@ class Population:
             self.infected[index] = NULL_ID
             self.recovered[index] = NULL_ID
             self.dead[index] = index
+                
         return didWork
 
     def update_dead(self, index):
