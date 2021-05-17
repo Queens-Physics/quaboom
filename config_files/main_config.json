@@ -6,7 +6,7 @@
         "n0":10,
         "will_go_prob":{"A":0.05, "B":0.2, "C":0.7, "LECT":0.8, "STUDY":0.2, "FOOD":0.1},
         "N_VIS_OPTION":[ 0, 1, 2, 3 ], 
-        "N_VIS_PROB":[ 0.7, 0.17, 0.08, 0.05 ], 
+        "N_VIS_PROB":[ 0.7, 0.17, 0.08, 0.05], 
         "vis_age_upper":60, 
         "vis_age_lower":16
     }, 
@@ -18,15 +18,18 @@
         "mask_trigger":0.3, 
         "mask_day_trigger":15,
         "initial_lockdown_mandate":false, 
-        "lockdown_trigger":0.5, 
-        "lockdown_day_trigger":null,
+        "lockdown_on_trigger":0.005, 
+        "lockdown_off_trigger":0.1,
+        "lockdown_on_day_trigger":null,
+        "lockdown_off_day_trigger":null,
         "initial_testing_mandate":false, 
-        "testing_trigger":0.5, 
-        "testing_day_trigger":null,
-        "testing_baseline":100, 
-        "testing_rate":0.5,
+        "testing_trigger":null, 
+        "testing_day_trigger":0,
+        "testing_baseline":10, 
+        "testing_rate":[[0.1, 0.8, 0.1]],
         "initial_student_mandate":false, 
-        "student_day_trigger":20
+        "student_day_trigger":20,
+        "prob_of_symptoms":0.7
     },
     
     "population_data":{
@@ -52,7 +55,7 @@
         "nonsurgical_inward_eff":0.6, 
         "nonsurgical_outward_eff":0.5, 
         "wear_mask_properly":0.8, 
-        "cold_prob":0.02,
+        "cold_prob":0.0001,
         "mild_symptom_prob":0.8, 
         "min_day_before_symptoms":1, 
         "max_day_before_symptoms":10,

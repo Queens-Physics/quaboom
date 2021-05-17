@@ -33,6 +33,8 @@ class Person(object):
         self.knows_infected = False
         self.will_get_symptoms = False
         self.has_mask = has_mask
+        self.test_day = None
+        self.has_cold = False
         
         # Set the simulaiton object to access the variables
         self.sim_obj = sim_obj
@@ -67,6 +69,7 @@ class Person(object):
             self.quarantined_day = 0
         if self.recovered == True or self.dead == True or (day - self.quarantined_day) >= self.sim_obj.quarantine_time:
             self.quarantined = False
+            self.show_symptoms = False
             return True
         return False
 
@@ -77,15 +80,31 @@ class Person(object):
         prob_of_symptom = random.random()
         if (prob_of_symptom <= self.sim_obj.cold_prob):
             self.show_symptoms = True
+            self.has_cold = True
         return self.show_symptoms
-            
+          
+    def set_test_day(self,day): 
+        self.test_day = day
+    
+    def get_test_day(self): 
+        return self.test_day
+    
+    
+    def check_test_day (self, day): 
+        if self.test_day == None: 
+            return False
+        elif (day - self.test_day) >= self.quarantine_time: 
+            self.test_day = None
+            self.has_cold = False
+            return True
+        return False
     
     #checks to see if person shows symptoms on the current day
     def check_symptoms (self,day):
-        if (self.will_get_symptoms == True and (day - self.infected_day) >= self.days_until_symptoms
-            and self.infected == True):
+        if (self.will_get_symptoms == True and (day - self.infected_day) >= self.days_until_symptoms 
+            and self.infected == True) or self.has_cold == True:
             self.show_symptoms = True
-        elif(self.infected == False):
+        elif(self.infected == False and self.has_cold == False):
             self.show_symptoms = False
         return self.show_symptoms
 

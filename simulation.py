@@ -207,7 +207,7 @@ class simulation():
             print("Simulation has not run yet, returning empty arrays")
 
     def plot(self, plot_infected=True, plot_susceptible=True, plot_dead=True, plot_recovered=True, plot_new_infected=True, 
-             plot_tested=True, plot_quarantined=True, plot_masks=True, plot_lockdown=True, plot_testing=True, 
+             plot_tested=True, plot_quarantined=True, plot_new_tests=True, plot_new_quarantined=True, plot_masks=True, plot_lockdown=True, plot_testing=True, 
              plot_students=True, log=False):
         self.check_has_run()
 
@@ -222,6 +222,8 @@ class simulation():
         if plot_new_infected: plt.plot(days, self.track_new_infected, label='new infections')
         if plot_quarantined: plt.plot(days, self.track_quarantined, label='quarantined')
         if plot_tested: plt.plot(days, self.track_tested, label='total tests')
+        if plot_new_tests: plt.plot(days, self.track_new_tested, label='new tests')
+        if plot_new_quarantined: plt.plot(days, self.track_new_quarantined, label='new quarantined')
         if plot_students: plt.plot(days, self.track_inf_students, label="infected students")
             
         # Indicate when certain mandates were in place
