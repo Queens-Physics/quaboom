@@ -199,7 +199,7 @@ class Population:
     def get_quarantined(self):
         return self.quarantined[self.quarantined != NULL_ID]
     
-    def get_students(self): # change this to look thru job == 'Student' ?
+    def get_students(self):
         return self.students[self.students != NULL_ID]
     
     # Count the number of people in each bin
@@ -245,6 +245,12 @@ class Population:
                 self.hospitalized[index] = index
     
         return didWork
+    
+    def infect_incoming_students(self, indices, day):
+        for i in indices:
+            daysAgo = np.random.randint(13)
+            self.infect(index=i, day=day-daysAgo)
+        return True
 
     # Update lists for already infected people
     def update_infected(self, index):
