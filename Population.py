@@ -121,8 +121,11 @@ class Population:
         # case severity from disease params #
         self.severity_weights = np.array([sim_obj.disease_parameters["case_severity"][key]
                                           for key in constants.SEVERITY_OPTIONS])
+        self.severity_options = constants.SEVERITY_OPTIONS
+        
         # format mask weights correctly
         self.mask_weights = np.array([self.mask_type[key] for key in constants.MASK_OPTIONS])
+        self.mask_options = constants.MASK_OPTIONS
             
     def set_demographic_parameters(self, sim_obj):
         with open(self.demographics_file) as json_file:
@@ -132,8 +135,6 @@ class Population:
         self.job_options = constants.JOB_OPTIONS
         self.house_options = constants.HOUSE_OPTIONS
         self.isolation_options = constants.ISOLATION_OPTIONS
-        self.severity_options = constants.SEVERITY_OPTIONS
-        self.mask_options = constants.MASK_OPTIONS
 
         # isolation #
         self.isolation_weights = np.ones(len(self.isolation_options))
