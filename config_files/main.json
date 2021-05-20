@@ -1,7 +1,7 @@
 {
     "simulation_data":
     {
-        "disease_config_file":"./config_files/disease_config_1.json",
+        "disease_config_file":"./config_files/disease.json",
         "nDays":100,
         "nPop":10000,
         "n0":10,
