@@ -100,8 +100,7 @@ class Person(object):
     
     #checks to see if person shows symptoms on the current day
     def check_symptoms (self,day):
-        if self.will_get_symptoms == True and (day - self.infected_day) >= self.days_until_symptoms 
-            and self.infected == True or self.has_cold:
+        if self.will_get_symptoms == True and (day - self.infected_day) >= self.days_until_symptoms and self.infected == True or self.has_cold:
             self.show_symptoms = True
         elif(self.infected == False and self.has_cold == False):
             self.show_symptoms = False
