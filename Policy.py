@@ -39,7 +39,7 @@ class Policy:
     def update_lockdown(self, day):
         
         # Change the policy based on conditions
-        if self.lockdown_on_day_trigger is not None and day >= self.lockdown_day_trigger:
+        if self.lockdown_on_day_trigger is not None and day >= self.lockdown_on_day_trigger:
             lockdown_mandate = True
         elif self.lockdown_on_day_trigger is not None and day >= self.lockdown_off_day_trigger:
             lockdown_mandate = False
@@ -67,22 +67,15 @@ class Policy:
         return testing
     
     def get_num_tests(self,wait_list):
-        tests = 0 # defines the number of tests going to be run
-        for i in range (len(self.testing_rate)): 
-            if self.testing_rate[i] == None: tests += 0
-            else: 
-                for j in range (len(self.testing_rate[i])): 
-                    if j == 0: 
-                        tests += int(self.testing_rate[i][j]*self.sim_obj.pop.count_quarantined()**(i+1)) 
-                    elif j == 1: 
-                        tests += int(self.testing_rate[i][j]*self.sim_obj.pop.get_new_quarantined()**(i+1)) 
-                    elif j == 2: 
-                        tests += int(self.testing_rate[i][j]*wait_list**(i+1)) 
-                    else: 
-                        break
-        if (self.testing_baseline == None): 
+    '''The number of tests is assumed to have a linaear realtionship with the number of quarantined people, the number     of people who have just joined the quarantine and the waitlist 
+    testing_rate = [number of tests/people in quarantine, number of tests/people newly in quarantine,  number of     
+    tests/number of people in the waitlist]'''
+        tests =  (self.testing_rate[1]*self.sim_obj.pop.count_quarantined()
+                  + self.testing_rate[2]*self.sim_obj.pop.get_new_quarantined()
+                  + self.testing_rate[3]*wait_list) # defines the number of tests going to be run
+        if self.testing_baseline is None: 
             self.testing_baseline = 0
-        elif (tests < self.testing_baseline and wait_list > 0): 
+        elif tests < self.testing_baseline and wait_list > 0: 
             tests = self.testing_baseline
         return tests
     

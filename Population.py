@@ -312,15 +312,15 @@ class Population:
 
         #updates everyone's symptoms
         for i in range (len(self.infected)):
-            if self.population[i].check_symptoms(day)==True:
+            if self.population[i].check_symptoms(day):
                 
                 if i not in self.testing and self.have_been_tested[i] != 1: # if person is not already in testing function
                     infected_person = self.population[i] #gets the infected person from the population list
                     if random.random() < self.prob_of_test:                        
-                        if infected_person.show_symptoms==True and infected_person.knows_infected==False:
+                        if infected_person.show_symptoms and infected_person.knows_infected==False:
                             self.testing.append(i) #adds the person to the testing list
                             self.population[i].knows_infected = True
-                    elif infected_person.check_test_day(day) == True: 
+                    elif infected_person.check_test_day(day): 
                         self.have_been_tested[i] = 0 #remove them from the testing list (allows them to get retested if they get symptoms again)
     
     
@@ -333,13 +333,13 @@ class Population:
         #if less people are in the list than testing capacity test everyone in the list
         if len(self.testing) < tests_per_day:
             tests_per_day = len(self.testing)
-        self.test_sum += tests_per_day                                                          # Add the daily tests to the total number of tests
+        self.test_sum += tests_per_day # Add the daily tests to the total number of tests
         
-        self.new_quarantined_num = 0                                                            # Reset number of newly quarantined
+        self.new_quarantined_num = 0 # Reset number of newly quarantined
         
         for i in range(tests_per_day):
-            person_index = self.testing[0]                                                      # Gets first person waiting for test
-            self.testing.pop(0)                                                                 # Removes first person waiting for test
+            person_index = self.testing[0]  # Gets first person waiting for test
+            self.testing.pop(0)   # Removes first person waiting for test
             person = self.population[person_index]
             person.set_test_day(day)
             self.have_been_tested[person_index] = person_index
