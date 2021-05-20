@@ -67,9 +67,8 @@ class Policy:
         return testing
     
     def get_num_tests(self,wait_list):
-    '''The number of tests is assumed to have a linaear realtionship with the number of quarantined people, the number     of people who have just joined the quarantine and the waitlist 
-    testing_rate = [number of tests/people in quarantine, number of tests/people newly in quarantine,  number of     
-    tests/number of people in the waitlist]'''
+    # The number of tests is assumed to have a linaear realtionship with the number of quarantined people, the number of people who have just joined the quarantine and the waitlist 
+    # testing_rate = [number of tests/people in quarantine, number of tests/people newly in quarantine, number of tests/number of people in the waitlist]
         tests =  (self.testing_rate[1]*self.sim_obj.pop.count_quarantined()
                   + self.testing_rate[2]*self.sim_obj.pop.get_new_quarantined()
                   + self.testing_rate[3]*wait_list) # defines the number of tests going to be run
