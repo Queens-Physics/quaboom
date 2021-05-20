@@ -1,17 +1,57 @@
+'''
+This file holds the interaction sites class used in simulation.py. 
+'''
+
 import numpy as np
 import random
 
 class Interaction_Sites:
+    '''A class designed to host interactions between persons within specific locations.
+    
+    There are currently 7 different locations that can host interactions between
+    person objects. 
+   
+    All attributes are passed through the sim_obj, which accesses the simulation 
+    configuration file. Outlined below are the main object attributes that provide the 
+    interaction functionality. 
+        
+    Attributes
+    ----------
+    grade_A_sites : :obj:`np.array` of :obj:`list` of :obj:`np.array` of :obj:`int`
+        Designed to represent resturants, gas stations, retail stores, etc. Any location where you 
+        do not visit often, but attend a wide variety of them. 
+    grade_B_sites : :obj:`np.array` of :obj:`list` of :obj:`np.array` of :obj:`int`
+        Designed to represent a gym, grocery store, etc. Any location where
+        you visit semi-often, and are likly to visit the same one, but this may varry. 
+    grade_C_sites : :obj:`np.array` of :obj:`list` of :obj:`np.array` of :obj:`int` 
+        Designed to represent offices or schools. Any location where they are 
+        visited almost every workday, and you almost always visit the same one. 
+    house_sites : :obj:`np.array` of :obj:`list` of :obj:`int`
+        Visited by every person each day, and hosts interactions between members
+        of the same household. Infection spread at home is not defined by explicit contacts, 
+        but by a known spread factor. 
+    lect_sites : :obj:`np.array` of :obj:`list` of :obj:`np.array` of :obj:`int` 
+        Designed to replicate university lecture hall interactions. They are only visited by students. 
+    study_sites : :obj:`np.array` of :obj:`list` of :obj:`np.array` of :obj:`int` 
+        Designed to replicate study enviorments at univesity, on-campus (library, bookable rooms, 
+        resturaunt tables, ...). They are only visited by students. 
+    food_sites : :obj:`np.array` of :obj:`list` of :obj:`np.array` of :obj:`int` 
+        Designed to replicate caffeteria interactions on-campus. Only visited by students. 
+    '''
 
     def __init__(self, sim_obj):
+        ''' __init__ method docstring.
+        
+        Parameters
+        ----------
+        sim_obj : simulation class object
+            The encompassing simulation obejct hosting the simulation
+        
+        '''
         
         # Set attributes from config file
         self.load_attributes_from_sim_obj(sim_obj)
         
-        # Grade A means ones you go to different ones of (resturants, gas station, retail stores)
-        # Grade B means usually the same one, but sometimes not (gym, grocery store)
-        # Grade C means almost always go to the same one (office, school)
-
         # Generates a list of ppl that go to different grade X sites
         # len(grade_X_sites) is how many sites there are; len(grade_X_sites[i]) is how many ppl go to that site
         self.grade_A_sites = np.array(self.init_grade(self.grade_per_pop["A"], self.grade_loyalty_means["A"], 
@@ -31,6 +71,17 @@ class Interaction_Sites:
                                                  self.grade_loyalty_stds["FOOD"]))
 
     def load_attributes_from_sim_obj(self, sim_obj):
+        '''Method to load in attributes from the provided simulation class object.
+        
+        Sets all objects in the "interaction_sites_data" dictionary key as self 
+        attributes of the interaction_sites class. 
+        
+        Parameters
+        ----------
+        sim_obj : simulation class object
+            The encompassing simulation obejct hosting the simulation
+
+        '''
         attributes = sim_obj.parameters["interaction_sites_data"].keys()
         for attr in attributes:
             setattr(self, attr, sim_obj.parameters["interaction_sites_data"][attr])
@@ -42,6 +93,29 @@ class Interaction_Sites:
         self.policy = sim_obj.policy
 
     def init_grade(self, grade_pop_size, loyalty_mean, loyalty_std):
+        '''Method designed to associate members of the population with interaction sites
+        
+        This method initializes all non-student interaction sites by creating a list 
+        of person indexes for each interaction site, for that type of interaction type. 
+        
+        Parameters
+        ----------
+        grade_pop_size : int
+            Number of people per interaction site. Determines how many interaction sites
+            there will be across the population. 
+        loyalty_mean : float
+            The mean number of this type of sites that each person will be associated with. 
+        loyalty_std : float
+            The standard deviation in the number of sites of this type a person will be
+            associated with. 
+        
+        Returns
+        -------
+        grade_sites : :obj:`np.array` of :obj:`np.array` of :obj:`int` 
+            An array holding one array for each interaction site of this type. Each nested
+            array holds the index of people that are associated with that site (can visit it)
+        
+        '''
         # Find out how many sites there should be - guessing right now
         num_sites = round(self.pop.get_population_size()/grade_pop_size)
         grade_sites = [[] for _ in range(num_sites)]
@@ -84,10 +158,27 @@ class Interaction_Sites:
         return grade_sites
 
     def will_visit_site(self, site_array, will_go_prob):
-        # Function that finds how many people will go to each site of a grade in a given day
-        # Returns a list of true or false of size(self.grade_X_sites) that has true for ppl going that day
-
-        # to prevent quarantined people from going, their will_go_prob will be Q_GO_PROB (0)
+        '''Method to determine who will visit a site on a given day. 
+        
+        Generates a boolean list for each individual interaction site in site_array, 
+        indicating what people from the list will visit that site on a given day. Accounts
+        for quarantined people by setting their will_go_prob value to 
+        self.quarantine_isolation_factor. 
+       
+        Parameters
+        ----------
+        site_array : :obj:`np.array` of :obj:`np.array` of :obj:`int` 
+            An array holding lists (one for each interaction site) of the index of each person assoicated 
+            with each of the individual sites. 
+        will_go_prob : float
+            The probability that any given person in site_array will visit this type of site. 
+            
+        Returns
+        -------
+        will_visit_grade : :obj:`np.array` of :obj:`np.array` of :obj:`int` 
+            An array holding an array for each site of this interaction site type. Each individual list
+            holds the indexes of people that will visit that site for this day. 
+        '''
 
         # Could add something here that limits how many sites one person can visit (not real to visit 11 sites a day)
         will_visit_grade = [[] for _ in range(len(site_array))]
@@ -107,8 +198,23 @@ class Interaction_Sites:
     
     
     def site_interaction(self, will_go_array, day):
-        # Find out how many interactions each person has at the site - FUNCTION IS PRETTY SLOW RN
-        # Should deal with case where one person is left with more than one interaction
+        '''Method that hosts interactions between people for an interaction site type. 
+        
+        This method manages interactions between people going to the same interaction 
+        site this day. Currently, all people that visit the same site on a day have a 
+        chance to interact with each other. Does not provide a return value, all 
+        infections are managed within the function. 
+        
+        Parameters
+        ----------
+        will_go_array : :obj:`np.array` of :obj:`np.array` of :obj:`int` 
+            An array holding an array for each site of this interaction site type. Each individual list
+            holds the indexes of people that will visit that site for this day. 
+        day : int
+            The day value that this function is being called on in the encompassing simulation class. 
+            Used as input to the infect function after infections have been determined. 
+            
+        '''
         new_infections = np.zeros(self.pop.get_population_size(), dtype=bool)
 
         for ppl_going in will_go_array:
@@ -159,11 +265,34 @@ class Interaction_Sites:
             self.pop.infect(index=new_infection, day=day)
 
     def calc_interactions(self, person_index, how_busy):
+        '''Method to determine how many interactions a person will have. 
+        
+        Note
+        ----
+        This function should really be improved, and calibrated with real data. Current
+        values were arbitrarily chosen. 
+        
+        Parameters
+        ----------
+        person_index : int
+            The index of the person for which the number of interactions are being calculated.
+        how_busy : float
+            A percentage value denoting the capacity of the interaction site this person is 
+            operating within. Currently not used. 
+            
+        Returns
+        -------
+        number_of_interactions : int
+            The number of interactions this person will have within their interaction site.
+            
+        '''
+        
         # This will be some function that returns how many interactions for this person
         upper_interaction_bound = 5
         lower_interaction_bound = 0  # Random numbers at the moment
+        number_of_interactions = np.random.randint(lower_interaction_bound, upper_interaction_bound)
 
-        return np.random.randint(lower_interaction_bound, upper_interaction_bound)
+        return number_of_interactions
          
         
     def interact(self, person_1, person_2):
@@ -194,7 +323,20 @@ class Interaction_Sites:
    
 
     def house_interact(self, day):
-        # It is assumed that if people go to the same home they will interact with eachother
+        '''Method to manage interactions between members of the same household. 
+        
+        Determines if any infection will spread among members of the same household. Different
+        from interaction sites in the fact that contacts are not calculated, but assumed to happen
+        between all house members. Does not have a return value, infections are managed internally. 
+        
+        Parameters
+        ----------
+        day : int
+            The day value that this function is being called on in the encompassing simulation class. 
+            Used as input to the infect function after infections have been determined. 
+        
+        '''
+
         house_count = 0
         for i in range(len(self.house_sites)):
             # Get ppl in house
@@ -218,17 +360,46 @@ class Interaction_Sites:
                         
     # Function thats tests the symtomatic individuals as well as brining them in and out of quarantine
     def testing_site (self, tests_per_day, day): 
+        '''Method to update status of symptoms and run the testing sites code. 
+        
+        Parameters
+        ----------
+        tests_per_day : int
+            The max number of available tests for this given day. 
+        day : int
+            The day value that this function is being called on in the encompassing simulation class. 
+        
+        '''
+        
         self.pop.random_symptomatic()
         self.pop.update_symptomatic(day)
         self.pop.get_tested(tests_per_day, day)
 
     def get_grade_A_sites(self):
+        '''Method to return a copy of the grade_A_sites attribute. 
+        
+        Returns
+        -------
+        self.grade_A_sites.copy() : :obj:`np.array` of :obj:`list` of :obj:`np.array` of :obj:`int` 
+        '''
         return self.grade_A_sites.copy()
 
     def get_grade_B_sites(self):
+        '''Method to return a copy of the grade_B_sites attribute. 
+        
+        Returns
+        -------
+        self.grade_B_sites.copy() : :obj:`np.array` of :obj:`list` of :obj:`np.array` of :obj:`int` 
+        '''
         return self.grade_B_sites.copy()
 
     def get_grade_C_sites(self):
+        '''Method to return a copy of the grade_C_sites attribute. 
+        
+        Returns
+        -------
+        self.grade_C_sites.copy() : :obj:`np.array` of :obj:`list` of :obj:`np.array` of :obj:`int` 
+        '''
         return self.grade_C_sites.copy()
 
     def get_lect_sites(self):
