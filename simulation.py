@@ -14,7 +14,6 @@ class simulation():
         
         self.load_general_parameters(config_file)
         self.load_disease_parameters(self.disease_config_file)
-        
         self.init_classes() # Have to initalize the classes after we have all of the parameters
 
         # Arrays to store the values during the simulation                   
@@ -74,7 +73,7 @@ class simulation():
         old_student_mandate = self.policy.initial_student_mandate
         # Loop over the number of days
         for day in range(self.nDays):
-
+            
             ############### TRACKING STUFF ###############
 
             #Count all the different states of people
@@ -122,6 +121,13 @@ class simulation():
             if students_go != old_student_mandate:
                 print("Day: {}, Uni Mandate: {}".format(day, students_go))
             old_student_mandate = students_go
+            
+            #infect random students on the day they come in
+            if (day == self.policy.student_day_trigger):
+                #infStudents = random number based on percentage of students infected
+                infStudents = 10
+                indices = self.pop.get_students()[0:infStudents]
+                self.pop.infect_incoming_students(indices=indices, day=day)
             
             ############### VISITOR STUFF ###############
             #add a random number of visitors to the population
