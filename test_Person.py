@@ -7,7 +7,7 @@ import simulation as sim
 class TestPerson(unittest.TestCase):
 
     def setUp(self):       # Code that will be run before every test function is executed
-        config_file = "./config_files/main_config.json"
+        config_file = "./config_files/main.json"
         self.sim_obj = sim.simulation(config_file)
 
     def tearDown(self):    # Code that will be run after every test function is executed
