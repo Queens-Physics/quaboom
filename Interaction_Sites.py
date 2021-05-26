@@ -1,9 +1,10 @@
 '''
 This file holds the interaction sites class used in simulation.py. 
 '''
+import random
+from copy import deepcopy
 
 import numpy as np
-import random
 
 class Interaction_Sites:
     '''A class designed to host interactions between persons within specific locations.
@@ -54,21 +55,27 @@ class Interaction_Sites:
         
         # Generates a list of ppl that go to different grade X sites
         # len(grade_X_sites) is how many sites there are; len(grade_X_sites[i]) is how many ppl go to that site
-        self.grade_A_sites = np.array(self.init_grade(self.grade_per_pop["A"], self.grade_loyalty_means["A"], 
-                                                      self.grade_loyalty_stds["A"]))
-        self.grade_B_sites = np.array(self.init_grade(self.grade_per_pop["B"], self.grade_loyalty_means["B"], 
-                                                      self.grade_loyalty_stds["B"]))
-        self.grade_C_sites = np.array(self.init_grade(self.grade_per_pop["C"], self.grade_loyalty_means["C"], 
-                                                      self.grade_loyalty_stds["C"]))
-        self.house_sites = np.array(self.pop.household).copy()
-        
+        self.grade_A_sites = self.init_grade(self.grade_per_pop["A"],
+                                             self.grade_loyalty_means["A"],
+                                             self.grade_loyalty_stds["A"])
+        self.grade_B_sites = self.init_grade(self.grade_per_pop["B"],
+                                             self.grade_loyalty_means["B"],
+                                             self.grade_loyalty_stds["B"])
+        self.grade_C_sites = self.init_grade(self.grade_per_pop["C"],
+                                             self.grade_loyalty_means["C"],
+                                             self.grade_loyalty_stds["C"])
+        self.house_sites = deepcopy(self.pop.household)
+
         # Students Stuff #
-        self.lect_sites = np.array(self.init_uni(self.grade_per_pop["LECT"], self.grade_loyalty_means["LECT"],
-                                                 self.grade_loyalty_stds["LECT"]))
-        self.study_sites = np.array(self.init_uni(self.grade_per_pop["STUDY"], self.grade_loyalty_means["STUDY"],
-                                                 self.grade_loyalty_stds["STUDY"]))
-        self.food_sites = np.array(self.init_uni(self.grade_per_pop["FOOD"], self.grade_loyalty_means["FOOD"],
-                                                 self.grade_loyalty_stds["FOOD"]))
+        self.lect_sites = self.init_uni(self.grade_per_pop["LECT"],
+                                        self.grade_loyalty_means["LECT"],
+                                        self.grade_loyalty_stds["LECT"])
+        self.study_sites = self.init_uni(self.grade_per_pop["STUDY"],
+                                         self.grade_loyalty_means["STUDY"],
+                                         self.grade_loyalty_stds["STUDY"])
+        self.food_sites = self.init_uni(self.grade_per_pop["FOOD"],
+                                        self.grade_loyalty_means["FOOD"],
+                                        self.grade_loyalty_stds["FOOD"])
 
     def load_attributes_from_sim_obj(self, sim_obj):
         '''Method to load in attributes from the provided simulation class object.
@@ -86,14 +93,14 @@ class Interaction_Sites:
         attributes = sim_obj.parameters["interaction_sites_data"].keys()
         for attr in attributes:
             setattr(self, attr, sim_obj.parameters["interaction_sites_data"][attr])
-            
+
         # Get the disease parameters
         d_attributes = sim_obj.disease_parameters["spread_data"].keys()
         for attr in d_attributes:
             setattr(self, attr, sim_obj.disease_parameters["spread_data"][attr])
-            
+
         self.house_infection_spread_prob = self.base_infection_spread_prob * self.house_infection_spread_factor
-        
+
         # Set the actual objects now
         self.pop = sim_obj.pop
         self.policy = sim_obj.policy
@@ -363,7 +370,7 @@ class Interaction_Sites:
                     if caught_infection:
                         self.pop.infect(index=housemembers[person].get_index(), day=day)
 
-                        
+
     # Function thats tests the symtomatic individuals as well as brining them in and out of quarantine
     def testing_site (self, tests_per_day, day): 
         '''Method to update status of symptoms and run the testing sites code. 
@@ -388,7 +395,7 @@ class Interaction_Sites:
         -------
         self.grade_A_sites.copy() : :obj:`np.array` of :obj:`list` of :obj:`np.array` of :obj:`int` 
         '''
-        return self.grade_A_sites.copy()
+        return deepcopy(self.grade_A_sites)
 
     def get_grade_B_sites(self):
         '''Method to return a copy of the grade_B_sites attribute. 
@@ -397,7 +404,7 @@ class Interaction_Sites:
         -------
         self.grade_B_sites.copy() : :obj:`np.array` of :obj:`list` of :obj:`np.array` of :obj:`int` 
         '''
-        return self.grade_B_sites.copy()
+        return deepcopy(self.grade_B_sites)
 
     def get_grade_C_sites(self):
         '''Method to return a copy of the grade_C_sites attribute. 
@@ -406,13 +413,14 @@ class Interaction_Sites:
         -------
         self.grade_C_sites.copy() : :obj:`np.array` of :obj:`list` of :obj:`np.array` of :obj:`int` 
         '''
-        return self.grade_C_sites.copy()
+        return deepcopy(self.grade_C_sites)
+
 
     def get_lect_sites(self):
-        return self.lect_sites.copy()
-    
+        return deepcopy(self.lect_sites)
+
     def get_study_sites(self):
-        return self.study_sites.copy()
-    
+        return deepcopy(self.study_sites)
+
     def get_food_sites(self):
-        return self.food_sites.copy()
+        return deepcopy(self.food_sites)

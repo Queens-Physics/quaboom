@@ -1,8 +1,10 @@
-import numpy as np
-import Person
 import json
 import random
 from data import constants
+
+import numpy as np
+
+from Person import Person
 
 NULL_ID = -1 # This value means that the person index at this location is not susceptible/infected/dead/...
              # All arrays are intialized to this (except healthy, as everyone is healthy)
@@ -50,14 +52,15 @@ class Population:
 
         for i in range(0, self.nPop-self.nStudents):
             # MAKE A PERSON
-            newPerson = Person.Person(index=i, sim_obj=sim_obj, infected=False, recovered=False, dead=False, hospitalized=False,
-                                      quarantined=False, quarantined_day=None,
-                                      infected_day=None, recovered_day=None, death_day=None,
-                                      others_infected=None, cure_days=None, recent_infections=None,
-                                      age=age_arr[i], job=job_arr[i], house_index=0,
-                                      isolation_tendencies=isolation_tend_arr[i],
-                                      case_severity=case_severity_arr[i], mask_type=mask_type_arr[i], 
-                                      has_mask=has_mask_arr[i])
+            newPerson = Person(index=i, sim_obj=sim_obj, infected=False, recovered=False,
+                               dead=False, hospitalized=False,
+                               quarantined=False, quarantined_day=None,
+                               infected_day=None, recovered_day=None, death_day=None,
+                               others_infected=None, cure_days=None, recent_infections=None,
+                               age=age_arr[i], job=job_arr[i], house_index=0,
+                               isolation_tendencies=isolation_tend_arr[i],
+                               case_severity=case_severity_arr[i], mask_type=mask_type_arr[i],
+                               has_mask=has_mask_arr[i])
 
             # ADD A PERSON
             self.population[i] = newPerson
@@ -74,11 +77,14 @@ class Population:
 
         for i in range(self.nPop-self.nStudents, self.nPop):
             student_age = random.randint(18,23)
-            newStudent = Person.Person(index=i, sim_obj=sim_obj, infected=False, recovered=False, dead=False, quarantined=False, 
-                               quarantined_day=None, infected_day=None, recovered_day=None, death_day=None,
-                               others_infected=None, cure_days=None, recent_infections=None, age=student_age, job='Student',
-                               house_index=0, isolation_tendencies=isolation_tend_arr[i],
-                               case_severity=case_severity_arr[i], has_mask=has_mask_arr[i])
+            newStudent = Person(index=i, sim_obj=sim_obj, infected=False, recovered=False,
+                                dead=False, quarantined=False, quarantined_day=None,
+                                infected_day=None, recovered_day=None, death_day=None,
+                                others_infected=None, cure_days=None, recent_infections=None,
+                                age=student_age, job='Student', house_index=0,
+                                isolation_tendencies=isolation_tend_arr[i],
+                                case_severity=case_severity_arr[i],
+                                has_mask=has_mask_arr[i])
             self.population[i] = newStudent
 
             self.students[i] = i # set their student status
