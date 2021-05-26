@@ -25,7 +25,7 @@ class Interaction_Sites:
         self.grade_C_sites = self.init_grade(self.grade_per_pop["C"],
                                              self.grade_loyalty_means["C"],
                                              self.grade_loyalty_stds["C"])
-        self.house_sites = self.pop.household.copy()
+        self.house_sites = deepcopy(self.pop.household)
 
         # Students Stuff #
         self.lect_sites = self.init_uni(self.grade_per_pop["LECT"],
