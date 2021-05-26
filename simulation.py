@@ -1,17 +1,20 @@
-import numpy as np
-import matplotlib.pyplot as plt
 import json
 
-import Person
-import Population
-import Interaction_Sites
-import Policy
+import numpy as np
+import matplotlib.pyplot as plt
+
+from Person import Person
+from Population import Population
+from Policy import Policy
+from Interaction_Sites import Interaction_Sites
 
 class simulation():
     
     def __init__(self, config_file):
         
-        self.load_parameters(config_file)
+        self.load_general_parameters(config_file)
+        self.load_disease_parameters(self.disease_config_file)
+        
         self.init_classes() # Have to initalize the classes after we have all of the parameters
 
         # Arrays to store the values during the simulation                   
@@ -34,7 +37,7 @@ class simulation():
         
         self.has_run = False                                 # Indicates if the sim has run yet
         
-    def load_parameters(self, filename):
+    def load_general_parameters(self, filename):
         with open(filename) as file:
             self.parameters = json.load(file)
         
@@ -47,17 +50,21 @@ class simulation():
         person_attributes = self.parameters["person_data"].keys()
         for attr in person_attributes:
             setattr(self, attr, self.parameters["person_data"][attr])
+            
+    def load_disease_parameters(self, filename):
+        with open(filename) as file:
+            self.disease_parameters = json.load(file)
         
     def init_classes(self):
         # Initalize the policy class
-        self.policy = Policy.Policy(self)
+        self.policy = Policy(self)
 
         # Initialize the population
-        self.pop = Population.Population(self)
+        self.pop = Population(self)
 
         # Initalize the interaction sites
-        self.inter_sites = Interaction_Sites.Interaction_Sites(self)
-        
+        self.inter_sites = Interaction_Sites(self)
+
     def run(self):
 
         # Initalize variables to flag state changes
@@ -124,11 +131,11 @@ class simulation():
             for i in range(0, num_vis):
                 vis_age = np.random.randint(self.vis_age_lower, self.vis_age_upper)
 
-                visitor = Person.Person(index=i+self.nPop, sim_obj=self, infected=True, recovered=False, dead=False,
-                                        quarantined=False, quarantined_day=None, infected_day=None, recovered_day=None,
-                                        death_day=None, others_infected=None, cure_days=None, recent_infections=None, 
-                                        age=vis_age, job=None,house_index=None, isolation_tendencies=0.2, case_severity='Mild',
-                                        has_mask=True)
+                visitor = Person(index=i+self.nPop, sim_obj=self, infected=True, recovered=False, dead=False,
+                                 quarantined=False, quarantined_day=None, infected_day=None, recovered_day=None,
+                                 death_day=None, others_infected=None, cure_days=None, recent_infections=None,
+                                 age=vis_age, job=None,house_index=None, isolation_tendencies=0.2, case_severity='Mild',
+                                 has_mask=True)
                 self.pop.population.append(visitor)
 
             ############### INTERACTION SITES STUFF ###############
