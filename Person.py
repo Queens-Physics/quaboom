@@ -112,12 +112,12 @@ class Person(object):
         return self.virus_type
 
     # Method to infect a person
-    def infect(self, day, cure_days=None):
+    def infect(self, day, virus_type, cure_days=None):
 
         # Check that they are suseptable (maybe should have that as property?)
         if not self.recovered and not self.infected and not self.dead:
             self.infected = True
-            #self.virus_type = virus_type
+            self.virus_type = virus_type
             self.infected_day = day
             self.will_get_symptoms = True
             self.days_until_symptoms  = np.random.randint(self.sim_obj.min_day_before_symptoms, 

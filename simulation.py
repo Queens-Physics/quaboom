@@ -90,6 +90,9 @@ class simulation():
             self.track_inf_students[day] = self.pop.count_infected_students()
             
             self.track_virus_type[day] = self.pop.count_virus_types()
+            #self.track_virus_type_none[day] = self.pop.count_virus_types("None")
+            #self.track_virus_type_general[day] = self.pop.count_virus_types("general")
+            #self.track_virus_type_B117[day] = self.pop.count_virus_types("B117")
 
             self.new_tests = 0
 
@@ -132,7 +135,7 @@ class simulation():
                                         quarantined=False, quarantined_day=None, infected_day=None, recovered_day=None,
                                         death_day=None, others_infected=None, cure_days=None, recent_infections=None, 
                                         age=vis_age, job=None,house_index=None, isolation_tendencies=0.2, case_severity='Mild',
-                                        has_mask=True)
+                                        has_mask=True, virus_type="B117")
                 self.pop.population.append(visitor)
 
             ############### INTERACTION SITES STUFF ###############
@@ -214,7 +217,8 @@ class simulation():
 
     def plot(self, plot_infected=True, plot_susceptible=True, plot_dead=True, plot_recovered=True, plot_new_infected=True, 
              plot_tested=True, plot_quarantined=True, plot_masks=True, plot_lockdown=True, plot_testing=True, 
-             plot_students=True, plot_virus_types=True, log=False):
+             plot_students=True, #plot_virus_type_none=True, plot_virus_type_general=True, plot_virus_type_B117=True,
+             log=False):
         self.check_has_run()
 
         fig, ax = plt.subplots(figsize=(10,8), dpi=100)
@@ -229,7 +233,9 @@ class simulation():
         if plot_quarantined: plt.plot(days, self.track_quarantined, label='quarantined')
         if plot_tested: plt.plot(days, self.track_tested, label='total tests')
         if plot_students: plt.plot(days, self.track_inf_students, label="infected students")
-        if plot_virus_types: plt.plot(days, self.track_virus_type, label="test")   
+        #if plot_virus_type_none: plt.plot(days, self.track_virus_type_none, label="not infected")
+        #if plot_virus_type_general: plt.plot(days, self.track_virus_type_general, label="general")
+        #if plot_virus_type_B117: plt.plot(days, self.track_virus_type_B117, label="B117")    
             
         # Indicate when certain mandates were in place
         if plot_masks: 

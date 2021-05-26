@@ -30,8 +30,6 @@ class Population:
         self.household = [0] * self.nPop # list of all houses (list that contains all lists of the people in the house)
         self.prob_of_test = self.prob_of_test
         self.prob_has_mask = self.prob_has_mask
-        
-        #self.virus_type=self.virus_type
 
         houseSize = np.random.choice(a=self.house_options, p=self.house_weights)
         houseIndex = 0
@@ -111,11 +109,12 @@ class Population:
         
         # Infect first n0 people
         for i in range(self.n0):
-            self.population[i].infect(day=0)
-            self.infected[i] = i
-            self.susceptible[i] = NULL_ID
-            self.virus_type = "general"
-
+            #self.population[i].infect(day=0, virus_type = "general")
+            self.infect(index=i, day=0, virus_type="general")
+            #self.infected[i] = i
+            #self.susceptible[i] = NULL_ID
+            #self.virus_type[i] = "general"
+            
             
     def load_attributes_from_sim_obj(self, sim_obj):
         attributes = sim_obj.parameters["population_data"].keys()
@@ -236,17 +235,19 @@ class Population:
         counts={}
         for virus_type in np.unique(self.virus_type):
             counts[virus_type] = np.count_nonzero(self.virus_type==virus_type)
+        return counts    
     
     #returns an individual based on their index
     def get_person(self, index):
         return self.population[index]
 
     # Infect a person
-    def infect(self, index, day):
-        didWork = self.population[index].infect(day=day)
+    def infect(self, index, day, virus_type):
+        didWork = self.population[index].infect(day=day, virus_type=virus_type)
         if didWork:
             self.infected[index] = index
             self.susceptible[index] = NULL_ID
+            self.virus_type[index] = virus_type
             if self.population[index].hospitalized:
                 self.hospitalized[index] = index
     
@@ -267,6 +268,7 @@ class Population:
         if didWork:
             self.infected[index] = NULL_ID
             self.recovered[index] = index
+            self.virus_type[index] = None
         return didWork
 
     # Updates lists for already cured people

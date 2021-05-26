@@ -159,9 +159,10 @@ class Interaction_Sites:
         # Update people who get infected only at the end (if i get CV19 at work, prolly wont spread at the store that night ?)
         new_infection_indexes = np.where(new_infections)[0]
         new_infection_type_indexes = np.where(new_infection_type)[0]
-        for new_infection in new_infection_indexes:
-            self.pop.infect(index=new_infection, day=day, virus_type=new_infection_type)
-
+        for new_infection, new_infection_type_i in zip(new_infection_indexes, new_infection_type_indexes):
+            self.pop.infect(index=new_infection, day=day, virus_type=new_infection_type[new_infection_type_i])            
+            
+            
     def calc_interactions(self, person_index, how_busy):
         # This will be some function that returns how many interactions for this person
         upper_interaction_bound = 5
@@ -204,10 +205,12 @@ class Interaction_Sites:
             # Get ppl in house
             house_size = self.house_sites[i]
             housemembers = self.pop.get_population()[house_count:house_count+house_size]
+            virus_types = [person.get_virus_type() for person in housemembers]
             house_count += house_size
 
             # Check if anyone in the house is infected
             infected_housemembers = [i for i in range(house_size) if housemembers[i].is_infected() == True]
+            virus_types = [virus_types[i] for i in infected_housemembers]
 
             if len(infected_housemembers)>0:
                 healthy_housemembers = [i for i in range(house_size) if housemembers[i].is_infected() == False]
@@ -217,7 +220,10 @@ class Interaction_Sites:
                     infection_chance = self.house_infection_spread_prob
                     caught_infection = random.random()<infection_chance
                     if caught_infection:
-                        self.pop.infect(index=housemembers[person].get_index(), day=day)
+                        virus_type=np.random.choice(a=virus_types)
+                        if virus_type is None:
+                            print("House infection virus type error")
+                        self.pop.infect(index=housemembers[person].get_index(), day=day, virus_type=virus_type)
 
                         
     # Function thats tests the symtomatic individuals as well as brining them in and out of quarantine
