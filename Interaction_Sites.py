@@ -82,9 +82,15 @@ class Interaction_Sites:
             The encompassing simulation obejct hosting the simulation
 
         '''
+        
         attributes = sim_obj.parameters["interaction_sites_data"].keys()
         for attr in attributes:
             setattr(self, attr, sim_obj.parameters["interaction_sites_data"][attr])
+            
+        # Get the disease parameters
+        d_attributes = sim_obj.disease_parameters["spread_data"].keys()
+        for attr in d_attributes:
+            setattr(self, attr, sim_obj.disease_parameters["spread_data"][attr])
             
         self.house_infection_spread_prob = self.base_infection_spread_prob * self.house_infection_spread_factor
         

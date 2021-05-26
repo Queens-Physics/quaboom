@@ -2,6 +2,7 @@ import numpy as np
 import Person
 import json
 import random
+from data import constants
 
 NULL_ID = -1 # This value means that the person index at this location is not susceptible/infected/dead/...
              # All arrays are intialized to this (except healthy, as everyone is healthy)
@@ -117,16 +118,23 @@ class Population:
         for attr in attributes:
             setattr(self, attr, sim_obj.parameters["population_data"][attr])
             
+        # case severity from disease params #
+        self.severity_weights = np.array([sim_obj.disease_parameters["case_severity"][key]
+                                          for key in constants.SEVERITY_OPTIONS])
+        self.severity_options = constants.SEVERITY_OPTIONS
+        
+        # format mask weights correctly
+        self.mask_weights = np.array([self.mask_type[key] for key in constants.MASK_OPTIONS])
+        self.mask_options = constants.MASK_OPTIONS
+            
     def set_demographic_parameters(self, sim_obj):
         with open(self.demographics_file) as json_file:
             disease_params = json.load(json_file)
 
-        self.age_options = disease_params["age_options"]
-        self.job_options = disease_params["job_options"]
-        self.house_options = disease_params["house_options"]
-        self.isolation_options = disease_params["isolation_options"]
-        self.severity_options = disease_params["severity_options"]
-        self.mask_options = disease_params["mask_options"]
+        self.age_options = constants.AGE_OPTIONS
+        self.job_options = constants.JOB_OPTIONS
+        self.house_options = constants.HOUSE_OPTIONS
+        self.isolation_options = constants.ISOLATION_OPTIONS
 
         # isolation #
         self.isolation_weights = np.ones(len(self.isolation_options))
@@ -138,32 +146,22 @@ class Population:
         self.age_weights = np.zeros(len(self.age_options))
         for iage in range (len(self.age_weights)):
             string = str(iage*10)+'-'+str(iage*10+9)
-            self.age_weights[iage]= disease_params['age_weights'][0][string]
+            self.age_weights[iage]= disease_params['age_weights'][string]
 
         # job #
         self.job_weights = np.zeros(len(self.job_options))
         for ijob in range (len(self.job_weights)):
-            string = self.job_options[ijob].upper()
-            self.job_weights[ijob]= disease_params['job_weights'][0][string]
+            string = self.job_options[ijob]
+            self.job_weights[ijob]= disease_params['job_weights'][string]
 
         # house # 
         self.house_weights = np.zeros(len(self.house_options))
         for ihouse in range (len(self.house_weights)):
             string = str(ihouse+1)
-            self.house_weights[ihouse]= disease_params['house_weights'][0][string]
-
-        # case severity #
-        self.severity_weights = np.zeros(len(self.severity_options))
-        for iseverity in range (len(self.severity_weights)):
-            string = self.severity_options[iseverity]
-            self.severity_weights[iseverity]= disease_params['case_severity'][0][string]
-
-        # mask type #
-        self.mask_weights = np.zeros(len(self.mask_options))
-        for imask in range (len(self.mask_weights)):
-            string = self.mask_options[imask]
-            self.mask_weights[imask]= disease_params['mask_type'][0][string]
-            
+            self.house_weights[ihouse]= disease_params['house_weights'][string] 
+        
+        # Cast this so they can be used as ints
+        self.house_options = [int(x) for x in constants.HOUSE_OPTIONS]
         
     #returns the population
     def get_population_size(self):

@@ -1,0 +1,40 @@
+{
+    "mild_symptom_prob":0.8,
+    "spread_data":{
+        "base_infection_spread_prob":0.15, 
+        "house_infection_spread_factor":1.25
+        },
+    "days_before_symptoms":{
+        "min": 1, 
+        "max": 10
+        },
+    "severe_days":{
+        "max": 42, 
+        "min": 21
+        },
+    "mild_days":{
+        "max": 20, 
+        "min": 12
+        },
+    "ICU_days":{
+        "max": 59, 
+        "min": 43
+        },
+    "die_days":{
+        "max": 30, 
+        "min": 14
+        },
+    "max_infectious": {"Note": "max number of days that a person with this level of infection stays sick for", 
+                        "MILD": 10, 
+                        "SEVERE": 20},
+    "case_severity": {"Note": "distribution of severity of the case; those in None would be considered mild", 
+                       "Mild": 0.761, 
+                       "Death": 0.083, 
+                       "Hospitalization": 0.127, 
+                       "ICU": 0.029},
+    "incubation": {"Note": "just a guess that its poisson", 
+                    "MAX": 14, 
+                    "AVG": 5, 
+                    "MIN": 1, 
+                    "Dist": "poisson"}
+}
