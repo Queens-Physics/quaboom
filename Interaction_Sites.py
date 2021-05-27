@@ -1,27 +1,28 @@
-import numpy as np
 import random
+import numpy as np
+
 
 class Interaction_Sites:
 
     def __init__(self, sim_obj):
-        
+
         # Set attributes from config file
         self.load_attributes_from_sim_obj(sim_obj)
-        
+
         # Grade A means ones you go to different ones of (resturants, gas station, retail stores)
         # Grade B means usually the same one, but sometimes not (gym, grocery store)
         # Grade C means almost always go to the same one (office, school)
 
         # Generates a list of ppl that go to different grade X sites
         # len(grade_X_sites) is how many sites there are; len(grade_X_sites[i]) is how many ppl go to that site
-        self.grade_A_sites = np.array(self.init_grade(self.grade_per_pop["A"], self.grade_loyalty_means["A"], 
+        self.grade_A_sites = np.array(self.init_grade(self.grade_per_pop["A"], self.grade_loyalty_means["A"],
                                                       self.grade_loyalty_stds["A"]))
-        self.grade_B_sites = np.array(self.init_grade(self.grade_per_pop["B"], self.grade_loyalty_means["B"], 
+        self.grade_B_sites = np.array(self.init_grade(self.grade_per_pop["B"], self.grade_loyalty_means["B"],
                                                       self.grade_loyalty_stds["B"]))
-        self.grade_C_sites = np.array(self.init_grade(self.grade_per_pop["C"], self.grade_loyalty_means["C"], 
+        self.grade_C_sites = np.array(self.init_grade(self.grade_per_pop["C"], self.grade_loyalty_means["C"],
                                                       self.grade_loyalty_stds["C"]))
         self.house_sites = np.array(self.pop.household).copy()
-        
+
         # Students Stuff #
         self.lect_sites = np.array(self.init_uni(self.grade_per_pop["LECT"], self.grade_loyalty_means["LECT"],
                                                  self.grade_loyalty_stds["LECT"]))
@@ -42,7 +43,7 @@ class Interaction_Sites:
             setattr(self, attr, sim_obj.disease_parameters["spread_data"][attr])
             
         self.house_infection_spread_prob = self.base_infection_spread_prob * self.house_infection_spread_factor
-        
+
         # Set the actual objects now
         self.pop = sim_obj.pop
         self.policy = sim_obj.policy
@@ -53,7 +54,7 @@ class Interaction_Sites:
         grade_sites = [[] for _ in range(num_sites)]
 
         for person in self.pop.get_population():
-            #if (person.job != 'Student'): ##########################################
+            # if (person.job != 'Student'):
             # Assign people to this specific site
             num_diff_sites = abs(round(np.random.normal(loyalty_mean, loyalty_std)))
             num_diff_sites = num_diff_sites if num_diff_sites <= num_sites else num_sites
@@ -67,13 +68,13 @@ class Interaction_Sites:
         grade_sites = [np.asarray(site) for site in grade_sites]
 
         return grade_sites
-    
+
     def init_uni(self, sites_per_pop, loyalty_mean, loyalty_std):
         num_sites = round(self.pop.get_population_size()/sites_per_pop)
         grade_sites = [[] for i in range(num_sites)]
-        
+
         for student in self.pop.get_population():
-            if (student.job == 'Student'): ##########################################
+            if student.job == 'Student':
                 # Assign people to this specific site
                 num_diff_sites = abs(round(np.random.normal(loyalty_mean, loyalty_std)))
                 num_diff_sites = num_diff_sites if num_diff_sites <= num_sites else num_sites
@@ -110,8 +111,7 @@ class Interaction_Sites:
             will_visit_grade[i] = site[site_attendance]
 
         return will_visit_grade
-    
-    
+
     def site_interaction(self, will_go_array, day):
         # Find out how many interactions each person has at the site - FUNCTION IS PRETTY SLOW RN
         # Should deal with case where one person is left with more than one interaction
@@ -126,8 +126,7 @@ class Interaction_Sites:
                 continue # No ppl to infect here or no one already infected
 
             # Generate a list of how many interactions ppl have at the site
-            num_interactions = np.array([self.calc_interactions(person_index, len(ppl_going))
-                                         for person_index in ppl_going])
+            num_interactions = np.array([self.calc_interactions() for person_index in ppl_going])
 
             while np.sum(num_interactions > 0) > 1:
                 # grab the highest interactor
@@ -158,46 +157,49 @@ class Interaction_Sites:
                 num_interactions[person_1] -= 1
                 num_interactions[person_2] -= 1
 
-
-        # Update people who get infected only at the end (if i get CV19 at work, prolly wont spread at the store that night ?)
+        #  Update people who get infected only at the end (if i get CV19 at work, prolly wont spread at the store that night ?)
         new_infection_indexes = np.where(new_infections)[0]
         for new_infection in new_infection_indexes:
             self.pop.infect(index=new_infection, day=day)
 
-    def calc_interactions(self, person_index, how_busy):
+    def calc_interactions(self):
         # This will be some function that returns how many interactions for this person
         upper_interaction_bound = 5
         lower_interaction_bound = 0  # Random numbers at the moment
 
         return np.random.randint(lower_interaction_bound, upper_interaction_bound)
-         
-        
+
     def interact(self, person_1, person_2):
         # Function that models the interaction between two people, and will return if interaction spread
-        if self.policy.get_mask_mandate==False:
+        if not self.policy.get_mask_mandate:
             spread_prob = self.base_infection_spread_prob
         else:
             p1Mask = self.pop.get_person(person_1).wear_mask()
             p2Mask = self.pop.get_person(person_2).wear_mask()
             p1Infected = self.pop.get_person(person_1).is_infected()
-            p2Infected = self.pop.get_person(person_2).is_infected()
             P1_INWARD_PROB, P1_OUTWARD_PROB = self.pop.get_person(person_1).mask_type_efficiency()
             P2_INWARD_PROB, P2_OUTWARD_PROB = self.pop.get_person(person_2).mask_type_efficiency()
 
             if p1Infected:
-                if p1Mask and p2Mask: spread_prob = self.base_infection_spread_prob*P1_OUTWARD_PROB*P2_INWARD_PROB
-                elif p1Mask: spread_prob = self.base_infection_spread_prob*P1_OUTWARD_PROB
-                elif p2Mask: spread_prob = self.base_infection_spread_prob*P2_INWARD_PROB
+                if p1Mask and p2Mask:
+                    spread_prob = self.base_infection_spread_prob*P1_OUTWARD_PROB*P2_INWARD_PROB
+                elif p1Mask:
+                    spread_prob = self.base_infection_spread_prob*P1_OUTWARD_PROB
+                elif p2Mask:
+                    spread_prob = self.base_infection_spread_prob*P2_INWARD_PROB
                 spread_prob = self.base_infection_spread_prob
 
             else:
-                if p1Mask and p2Mask: spread_prob = self.base_infection_spread_prob*P2_OUTWARD_PROB*P1_INWARD_PROB
-                elif p1Mask: spread_prob = self.base_infection_spread_prob*P1_INWARD_PROB
-                elif p2Mask: spread_prob = self.base_infection_spread_prob*P2_OUTWARD_PROB
-                else: spread_prob = self.base_infection_spread_prob
-        
+                if p1Mask and p2Mask:
+                    spread_prob = self.base_infection_spread_prob*P2_OUTWARD_PROB*P1_INWARD_PROB
+                elif p1Mask:
+                    spread_prob = self.base_infection_spread_prob*P1_INWARD_PROB
+                elif p2Mask:
+                    spread_prob = self.base_infection_spread_prob*P2_OUTWARD_PROB
+                else:
+                    spread_prob = self.base_infection_spread_prob
+
         return random.random() < spread_prob
-   
 
     def house_interact(self, day):
         # It is assumed that if people go to the same home they will interact with eachother
@@ -209,10 +211,10 @@ class Interaction_Sites:
             house_count += house_size
 
             # Check if anyone in the house is infected
-            infected_housemembers = [i for i in range(house_size) if housemembers[i].is_infected() == True]
+            infected_housemembers = [i for i in range(house_size) if housemembers[i].is_infected()]
 
-            if len(infected_housemembers)>0:
-                healthy_housemembers = [i for i in range(house_size) if housemembers[i].is_infected() == False]
+            if len(infected_housemembers) > 0:
+                healthy_housemembers = [i for i in range(house_size) if not housemembers[i].is_infected()]
 
                 for person in healthy_housemembers:
                     # This should be more complicated and depend on len(infectpplinhouse)
@@ -221,9 +223,9 @@ class Interaction_Sites:
                     if caught_infection:
                         self.pop.infect(index=housemembers[person].get_index(), day=day)
 
-                        
+
     # Function thats tests the symtomatic individuals as well as brining them in and out of quarantine
-    def testing_site (self, tests_per_day, day): 
+    def testing_site (self, tests_per_day, day):
         self.pop.random_symptomatic()
         self.pop.update_symptomatic(day)
         self.pop.get_tested(tests_per_day, day)
@@ -239,9 +241,9 @@ class Interaction_Sites:
 
     def get_lect_sites(self):
         return self.lect_sites.copy()
-    
+
     def get_study_sites(self):
         return self.study_sites.copy()
-    
+
     def get_food_sites(self):
         return self.food_sites.copy()
