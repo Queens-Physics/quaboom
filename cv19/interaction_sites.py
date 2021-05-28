@@ -61,15 +61,15 @@ class Interaction_Sites:
         self.grade_A_sites = self.init_grade(self.grade_per_pop["A"],
                                              self.grade_loyalty_means["A"],
                                              self.grade_loyalty_stds["A"],
-                                             True)
+                                             self.students_participate["A"])
         self.grade_B_sites = self.init_grade(self.grade_per_pop["B"],
                                              self.grade_loyalty_means["B"],
                                              self.grade_loyalty_stds["B"],
-                                             True,)
+                                             self.students_participate["B"])
         self.grade_C_sites = self.init_grade(self.grade_per_pop["C"],
                                              self.grade_loyalty_means["C"],
                                              self.grade_loyalty_stds["C"],
-                                             False)
+                                             self.students_participate["C"])
         self.house_sites = deepcopy(self.pop.household)
 
         # Students Stuff #
@@ -82,6 +82,11 @@ class Interaction_Sites:
         self.food_sites = self.init_uni(self.grade_per_pop["FOOD"],
                                         self.grade_loyalty_means["FOOD"],
                                         self.grade_loyalty_stds["FOOD"])
+        self.res_sites = self.init_uni(self.grade_per_pop["RES"],
+                                       self.grade_loyalty_means["RES"],
+                                       self.grade_loyalty_stds["RES"])
+        self.stud_house_sites = deepcopy(self.pop.stud_houses)
+        
 
     def load_attributes_from_sim_obj(self, sim_obj):
         '''Method to load in attributes from the provided simulation class object.
@@ -372,7 +377,8 @@ class Interaction_Sites:
                     if caught_infection:
                         self.pop.infect(index=housemembers[person].get_index(), day=day)
 
-
+    #-------------------- ADD ANOTHER FUNCTION HERE FOR RESIDENCE/STUDENT HOUSING --------------------#
+                        
     # Function thats tests the symtomatic individuals as well as brining them in and out of quarantine
     def testing_site (self, tests_per_day, day):
         '''Method to update status of symptoms and run the testing sites code.

@@ -280,6 +280,7 @@ class simulation():
 
             # Manage at home interactions
             self.inter_sites.house_interact(day)
+            #-------------------- ADD ANOTHER LINE HERE FOR RESIDENCE/STUDENT HOUSING --------------------#
 
             # Manage testing sites
             if testing_ON:
