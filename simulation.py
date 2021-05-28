@@ -166,6 +166,7 @@ class simulation():
                     
             # Manage at home interactions
             self.inter_sites.house_interact(day)
+            #-------------------- ADD ANOTHER LINE HERE FOR RESIDENCE/STUDENT HOUSING --------------------#
 
             # Manage testing sites        
             if (testing_ON): 
@@ -224,7 +225,7 @@ class simulation():
              plot_students=True, log=False):
         self.check_has_run()
 
-        fig, ax = plt.subplots(figsize=(10,8), dpi=100)
+        fig, ax = plt.subplots(figsize=(7,5), dpi=100)
         days = np.linspace(0,self.nDays, self.nDays, dtype=int)
         
         # Plot the tracking arrays
