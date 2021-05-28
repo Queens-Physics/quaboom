@@ -45,6 +45,7 @@
         "grade_per_pop":{"A":1000, "B":1000, "C":1000, "LECT":300, "STUDY":6, "FOOD":1000},
         "grade_loyalty_means":{"A":4, "B":1, "C":1, "LECT":7, "STUDY":2, "FOOD":1},
         "grade_loyalty_stds":{"A":2, "B":1, "C":0.2, "LECT":2, "STUDY":1, "FOOD":0.5},
+        "students_participate":{"A":true, "B":true, "C":false},
         "quarantine_isolation_factor":0
     },
 
