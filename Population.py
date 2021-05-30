@@ -1,8 +1,10 @@
-import numpy as np
-import Person
 import json
 import random
 from data import constants
+
+import numpy as np
+
+from Person import Person
 
 NULL_ID = -1 # This value means that the person index at this location is not susceptible/infected/dead/...
              # All arrays are intialized to this (except healthy, as everyone is healthy)
@@ -50,14 +52,15 @@ class Population:
 
         for i in range(0, self.nPop-self.nStudents):
             # MAKE A PERSON
-            newPerson = Person.Person(index=i, sim_obj=sim_obj, infected=False, recovered=False, dead=False, hospitalized=False,
-                                      quarantined=False, quarantined_day=None,
-                                      infected_day=None, recovered_day=None, death_day=None,
-                                      others_infected=None, cure_days=None, recent_infections=None,
-                                      age=age_arr[i], job=job_arr[i], house_index=0,
-                                      isolation_tendencies=isolation_tend_arr[i],
-                                      case_severity=case_severity_arr[i], mask_type=mask_type_arr[i], 
-                                      has_mask=has_mask_arr[i])
+            newPerson = Person(index=i, sim_obj=sim_obj, infected=False, recovered=False,
+                               dead=False, hospitalized=False,
+                               quarantined=False, quarantined_day=None,
+                               infected_day=None, recovered_day=None, death_day=None,
+                               others_infected=None, cure_days=None, recent_infections=None,
+                               age=age_arr[i], job=job_arr[i], house_index=0,
+                               isolation_tendencies=isolation_tend_arr[i],
+                               case_severity=case_severity_arr[i], mask_type=mask_type_arr[i],
+                               has_mask=has_mask_arr[i])
 
             # ADD A PERSON
             self.population[i] = newPerson
@@ -74,11 +77,14 @@ class Population:
 
         for i in range(self.nPop-self.nStudents, self.nPop):
             student_age = random.randint(18,23)
-            newStudent = Person.Person(index=i, sim_obj=sim_obj, infected=False, recovered=False, dead=False, quarantined=False, 
-                               quarantined_day=None, infected_day=None, recovered_day=None, death_day=None,
-                               others_infected=None, cure_days=None, recent_infections=None, age=student_age, job='Student',
-                               house_index=0, isolation_tendencies=isolation_tend_arr[i],
-                               case_severity=case_severity_arr[i], has_mask=has_mask_arr[i])
+            newStudent = Person(index=i, sim_obj=sim_obj, infected=False, recovered=False,
+                                dead=False, quarantined=False, quarantined_day=None,
+                                infected_day=None, recovered_day=None, death_day=None,
+                                others_infected=None, cure_days=None, recent_infections=None,
+                                age=student_age, job='Student', house_index=0,
+                                isolation_tendencies=isolation_tend_arr[i],
+                                case_severity=case_severity_arr[i],
+                                has_mask=has_mask_arr[i])
             self.population[i] = newStudent
 
             self.students[i] = i # set their student status
@@ -299,8 +305,8 @@ class Population:
         
     def count_tested(self):
         return self.test_sum
-
-    #causes random people to get the cold                    
+    
+    # Causes random people to get the cold                    
     def random_symptomatic(self): 
         for i in range (len(self.population)):
             self.population[i].not_infected_symptoms()
@@ -310,15 +316,17 @@ class Population:
 
         #updates everyone's symptoms
         for i in range (len(self.infected)):
-            if self.population[i].check_symptoms(day)==True:
-
-                if i not in self.testing and self.have_been_tested[i]!=1: # if person is not already in testing function
-                    if random.random() < self.prob_of_test:
-                        infected_person = self.population[i] #gets the infected person from the population list
-
-                        if infected_person.show_symptoms==True and infected_person.knows_infected==False:
-                            self.testing.append(i)#adds the person to the testing list
+            if self.population[i].check_symptoms(day):
+                
+                if i not in self.testing and self.have_been_tested[i] != 1: # if person is not already in testing function
+                    infected_person = self.population[i] #gets the infected person from the population list
+                    if random.random() < self.prob_of_test:                        
+                        if infected_person.show_symptoms and infected_person.knows_infected==False:
+                            self.testing.append(i) #adds the person to the testing list
                             self.population[i].knows_infected = True
+                    elif infected_person.check_test_day(day): 
+                        self.have_been_tested[i] = 0 #remove them from the testing list (allows them to get retested if they get symptoms again)
+    
     
     
     def get_testing_wait_list(self): 
@@ -329,33 +337,27 @@ class Population:
         #if less people are in the list than testing capacity test everyone in the list
         if len(self.testing) < tests_per_day:
             tests_per_day = len(self.testing)
-        self.test_sum += tests_per_day # add the daily tests to the total number of tests
+        self.test_sum += tests_per_day # Add the daily tests to the total number of tests
         
-        self.new_quarantined_num = 0 # reset number of newly quarantined
+        self.new_quarantined_num = 0 # Reset number of newly quarantined
         
         # Number of contacts traced so far
         num_contacts_traced = 0
 
         for i in range(tests_per_day):
-            person_index = self.testing[0] #gets first person waiting for test
-            self.testing.pop(0) # removes first person waiting for test
+            person_index = self.testing[0]  # Gets first person waiting for test
+            self.testing.pop(0)   # Removes first person waiting for test
             person = self.population[person_index]
-
+            person.set_test_day(day)
+            self.have_been_tested[person_index] = person_index
             if person.infected == True:
                 person.knows_infected = True
                 #quarantines the person
                 person.set_quarantine(day)
                 self.quarantined[person_index] = person_index
-                self.have_been_tested[person_index] = person_index
-
-                # Contact trace the person
-                if CT_ENABLED and num_contacts_traced < CT_CAPACITY:
-                    person.contact_tracing(day)
-                    num_contacts_traced += 1
-
-
                 self.new_quarantined_num += 1
-            else:
+            else: 
                 person.knows_infected = False
-                self.have_been_tested[person_index] = person_index
+
+
 
