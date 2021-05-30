@@ -52,6 +52,7 @@ class Person(object):
                  recent_infections=None, age=None, job=None, house_index=0,isolation_tendencies=None,case_severity=None, mask_type=None, 
                  has_mask=True):
 
+
         self.infected = infected
         self.recovered = recovered
         self.dead = dead
@@ -85,6 +86,12 @@ class Person(object):
         # Whether the person uses a contact tracing app
         self.has_ct_app = random.random() < CT_APP_PROB
 
+        self.test_day = None
+        self.has_cold = False
+        
+        # Set the simulaiton object to access the variables
+        self.sim_obj = sim_obj
+
         
     def __repr__(self):
         return f"Person #{self.index}"
@@ -117,8 +124,9 @@ class Person(object):
     def leave_quarantine(self, day):
         if self.quarantined_day == None: 
             self.quarantined_day = 0
-        if self.recovered == True or self.dead == True or (day - self.quarantined_day) >= QUARANTINE_TIME:
+        if self.recovered == True or self.dead == True or (day - self.quarantined_day) >= self.sim_obj.quarantine_time:
             self.quarantined = False
+            self.show_symptoms = False
             return True
         return False
 
@@ -127,17 +135,31 @@ class Person(object):
     
     def not_infected_symptoms(self):
         prob_of_symptom = random.random()
-        if (prob_of_symptom <= CHANCE_OF_COLD):
+        if prob_of_symptom <= self.sim_obj.cold_prob:
             self.show_symptoms = True
+            self.has_cold = True
         return self.show_symptoms
-            
+          
+    def set_test_day(self,day): 
+        self.test_day = day
+    
+    def get_test_day(self): 
+        return self.test_day
+    
+    def check_test_day (self, day): 
+        if self.test_day is None: 
+            return False
+        elif (day - self.test_day) >= self.quarantine_time: 
+            self.test_day = None
+            self.has_cold = False
+            return True
+        return False
     
     #checks to see if person shows symptoms on the current day
     def check_symptoms (self,day):
-        if (self.will_get_symptoms == True and (day - self.infected_day) >= self.days_until_symptoms
-            and self.infected == True):
+        if self.will_get_symptoms == True and (day - self.infected_day) >= self.days_until_symptoms and self.infected == True or self.has_cold:
             self.show_symptoms = True
-        elif(self.infected == False):
+        elif(self.infected == False and self.has_cold == False):
             self.show_symptoms = False
         return self.show_symptoms
 
@@ -162,31 +184,38 @@ class Person(object):
     # Method to infect a person
     def infect(self, day, cure_days=None):
 
+        d_params = self.sim_obj.disease_parameters
+        
         # Check that they are suseptable (maybe should have that as property?)
         if not self.recovered and not self.infected and not self.dead:
             self.infected = True
             self.infected_day = day
             self.will_get_symptoms = True
-            self.days_until_symptoms  = np.random.randint(MIN_DAY_BEFORE_SYMPTOM,MAX_DAY_BEFORE_SYMPTOM)
+            self.days_until_symptoms  = np.random.randint(d_params["days_before_symptoms"]["min"], 
+                                                          d_params["days_before_symptoms"]["max"])
             
             # If cure days not specified then choose random number inbetween min and max
             if self.case_severity == 'Mild' or self.case_severity == None: # If severity not specified, choose Mild
                 prob_of_symptom = random.random()
-                if (prob_of_symptom > MILD_SYMPTOM_PROB): #probability that the person has mild symtoms
+                if (prob_of_symptom > d_params["mild_symptom_prob"]): #probability that the person has mild symtoms
                     # choose number of days after infection when symptoms show
                     self.will_get_symptoms = False
                     self.days_until_symptoms = None
 
-                self.cure_days = np.random.randint(MIN_MILD, MAX_MILD) if cure_days is None else cure_days
+                self.cure_days = np.random.randint(d_params["mild_days"]["min"], 
+                                                   d_params["mild_days"]["max"]) if cure_days is None else cure_days
             #Assuming that all hospitalization or worse cases will show symptoms
             elif self.case_severity == 'Hospitalization':
-                self.cure_days = np.random.randint(MIN_SEVERE, MAX_SEVERE) if cure_days is None else cure_days
+                self.cure_days = np.random.randint(d_params["severe_days"]["min"], 
+                                                   d_params["severe_days"]["max"]) if cure_days is None else cure_days
                 self.hospitalized = True
             elif self.case_severity == 'ICU':
-                self.cure_days = np.random.randint(MIN_ICU, MAX_ICU) if cure_days is None else cure_days
+                self.cure_days = np.random.randint(d_params["ICU_days"]["min"], 
+                                                   d_params["ICU_days"]["max"]) if cure_days is None else cure_days
                 self.hospitalized = True
             elif self.case_severity == 'Death':
-                self.cure_days = np.random.randint(MIN_DIE, MAX_DIE) if cure_days is None else cure_days
+                self.cure_days = np.random.randint(d_params["die_days"]["min"], 
+                                                   d_params["die_days"]["max"]) if cure_days is None else cure_days
                 self.hospitalized = True
 
             return True
@@ -198,7 +227,7 @@ class Person(object):
     def check_quarantine(self, day):
         if self.quarantined:
             days_since_quarantined = day - self.quarantined_day
-            if days_since_quarantined >= TIME_QUARANTINE:
+            if days_since_quarantined >= self.sim_obj.quarantine_time:
                 self.quarantined = False
                 return False
             return True
@@ -262,20 +291,19 @@ class Person(object):
         mask_options = np.random.uniform()
         
         if self.has_mask:
-            if mask_options > MASKPROB:
+            if mask_options > self.sim_obj.wear_mask_properly:
                 return False #False = not wearing a mask
             else:
                 return True #True = wearing a mask
         else:
             return False
     
-
-#Determines what the inward and outward efficiency of the spread will be based on the mask they are wearing
+    #Determines what the inward and outward efficiency of the spread will be based on the mask they are wearing
     def mask_type_efficiency(self):
         if self.has_mask == True and self.mask_type == "Surgical":
-            return Surgical_Inward_Eff, Surgical_Outward_Eff
+            return self.sim_obj.surgical_inward_eff, self.sim_obj.surgical_outward_eff
         elif self.has_mask == True and self.mask_type == "Non-surgical":
-            return NonSurgical_Inward_Eff, NonSurgical_Outward_Eff
+            return self.sim_obj.nonsurgical_inward_eff, self.sim_obj.nonsurgical_outward_eff
         else:
             return 1, 1 #Not wearing a mask so this will function will not effect their change of getting the virus
         
@@ -367,3 +395,4 @@ class Person(object):
         #NOTE: This is a pretty intense course of action. Maybe adding them to
         # the testing list would be better?
         self.set_quarantine(day)        
+

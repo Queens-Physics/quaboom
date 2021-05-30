@@ -1,0 +1,30 @@
+name: Python code checks
+
+on:
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+
+    - name: Install dependencies
+      run: |
+        python3 -m pip install --upgrade pip
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+    - name: Run the Person unit test
+      run: |
+        ./test_Person.py
+
+    - name: Run the Population unit test
+      run: |
+        ./test_Population.py
