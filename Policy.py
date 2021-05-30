@@ -4,10 +4,18 @@ class Policy:
     and travel/lockdowns. 
     Initalized once for the entire simulation. 
     
+    Parameters
+    ----------
+    sim_obj : dict
+        The configuration details for this class
+
+    Attributes
+    ----------
+    test_param : string
+        Lorem ipsum blah blah blah
     '''
 
     def __init__(self, sim_obj):
-        
         self.sim_obj = sim_obj
         
         # Set attributes
@@ -21,6 +29,15 @@ class Policy:
             setattr(self, attr, self.sim_obj.parameters["policy_data"][attr])
         
     def update_mask_mandate(self, day):
+        """Updates the mask mandate for this day
+
+        Parameters
+        ----------
+        day : int
+            The current day
+        
+        """
+
         # Change the policy based on conditions
         if self.mask_day_trigger is not None and day >= self.mask_day_trigger:
             mask_mandate = True
@@ -34,6 +51,14 @@ class Policy:
         return mask_mandate
             
     def get_mask_mandate(self):
+        """Gets whether there is currently a mask mandate.
+
+        Returns
+        -------
+        mask_mandate : bool
+            Whether there is currently a mask mandate
+        """
+
         return self.mask_mandate
     
     def update_lockdown(self, day):
@@ -51,6 +76,15 @@ class Policy:
         return lockdown_mandate
             
     def get_lockdown_mandate(self):
+        """Returns whether or not there is a mandated lockdown.
+
+        Returns
+        -------
+        lockdown_mandate : bool
+            Whether there is currently a lockdown mandate.
+        
+        """
+
         return self.lockdown_mandate
     
     def update_testing(self,day):
