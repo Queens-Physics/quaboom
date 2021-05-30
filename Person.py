@@ -1,13 +1,57 @@
 import numpy as np
 import random
+import json
+
+TIME_QUARANTINE = 14 #days people have to quarantine
+Surgical_Inward_Eff = 0.4
+Surgical_Outward_Eff = 0.3
+NonSurgical_Inward_Eff = 0.6
+NonSurgical_Outward_Eff = 0.5
+
+# How long the infection will last
+json_file = open('dataK.json')
+disease_params = json.load(json_file)
+
+# recovery
+MIN_MILD= disease_params['recovery'][0]['MIN_MILD']
+MAX_MILD= disease_params['recovery'][0]['MAX_MILD']
+MIN_SEVERE= disease_params['recovery'][0]['MIN_SEVERE']
+MAX_SEVERE= disease_params['recovery'][0]['MAX_SEVERE']
+MIN_ICU= disease_params['recovery'][0]['MIN_ICU']
+MAX_ICU= disease_params['recovery'][0]['MAX_ICU']
+MIN_DIE= disease_params['recovery'][0]['MIN_DIE']
+MAX_DIE= disease_params['recovery'][0]['MAX_DIE']
+
+MASKPROB = 0.8 #Probability of wearing a mask properly
+MILD_SYMPTOM_PROB = 0.8 # Probability of mild symptoms
+MIN_DAY_BEFORE_SYMPTOM, MAX_DAY_BEFORE_SYMPTOM = 1, 10
+QUARANTINE_TIME = 14
+CHANCE_OF_COLD = 0.02 #probability of getting a cold or flu during quarantine
+
+#### Contact Tracing Variables
+
+# Probability [0, 1] that a person has a contact tracing app
+CT_APP_PROB = 1
+
+# Proportion of personal contacts [0, 1] that are remembered when it's time
+# to do contact tracing
+PROB_REMEMBERING_PERSONAL_CONTACTS = 0.75
+
+# How many days in the past to contact trace to
+CT_LENGTH = 2
+
+json_file.close()
 
 class Person(object):
 
+    
 
-    def __init__(self, index, sim_obj, infected=False, recovered=False, dead=False, hospitalized=False, quarantined=False,
-                 quarantined_day=None, infected_day=None, recovered_day=None, death_day=None, others_infected=None,
-                 cure_days=None, recent_infections=None, age=None, job=None, house_index=0, isolation_tendencies=None,
-                 case_severity=None, mask_type=None, has_mask=True):
+    # Initalize a person - Can set properties but only needed one is inde
+    def __init__(self, index, infected=False, recovered=False, dead=False, hospitalized=False, quarantined=False, quarantined_day=None, 
+                 infected_day=None, recovered_day=None, death_day=None, others_infected=None, cure_days=None, 
+                 recent_infections=None, age=None, job=None, house_index=0,isolation_tendencies=None,case_severity=None, mask_type=None, 
+                 has_mask=True):
+
 
         self.infected = infected
         self.recovered = recovered
@@ -33,12 +77,25 @@ class Person(object):
         self.knows_infected = False
         self.will_get_symptoms = False
         self.has_mask = has_mask
+
+        #### CONTACT TRACING INFO ####
+        # Dictionary of sets that stores all the contacts on a given day
+        self.all_contacts = dict()
+        self.personal_contacts = dict()
+        
+        # Whether the person uses a contact tracing app
+        self.has_ct_app = random.random() < CT_APP_PROB
+
         self.test_day = None
         self.has_cold = False
         
         # Set the simulaiton object to access the variables
         self.sim_obj = sim_obj
+
         
+    def __repr__(self):
+        return f"Person #{self.index}"
+
     # Return True if infected, False if not
     def is_infected(self):
         return self.infected
@@ -249,3 +306,93 @@ class Person(object):
             return self.sim_obj.nonsurgical_inward_eff, self.sim_obj.nonsurgical_outward_eff
         else:
             return 1, 1 #Not wearing a mask so this will function will not effect their change of getting the virus
+        
+    # Method to infect a random subset of the susceptable population. Returns how many people infected
+    def infect_others(self, pop_list, suscept_pop, day, num_to_infect=1):
+
+        # If there are no susceptable people, return 0 infections
+        if len(suscept_pop) == 0:
+            return 0
+
+        # Choose the random indices from the population to have infectious contacts with
+        contact_options = list(range(len(pop_list)))
+        contact_options.remove(self.index)       # Make it so that it can not select itself as a contact
+        infect_indexs = np.random.choice(contact_options, num_to_infect, replace=False)
+        self.recent_infections = []
+        infectCount = 0
+        for index in infect_indexs:
+            # If the contact was not susceptable, nothing happens
+            if index not in suscept_pop:
+                continue
+
+            # Get the id of the susceptable person being infected
+            person_to_infect = pop_list[index]
+            person_index = person_to_infect.get_index()
+
+            # Infect that person
+            person_to_infect.infect(day)
+
+            # Update others infected list
+            self.others_infected.append(person_index)
+            # Update who was actually infected
+            self.recent_infections.append(person_index)
+
+        return len(self.recent_infections)
+
+
+    #### CONTACT TRACING FUNCTIONS ####
+
+    def log_contact(self, other, day: int, personal: bool = False) -> None:
+        """Logs a contact between two individuals. """
+
+        def add_contact(log):
+            if day in log.keys():
+                log[day].add(other)                
+            else:
+                log[day] = set([other])
+
+        add_contact(self.all_contacts)
+        if personal:
+            add_contact(self.personal_contacts)
+        
+
+    def contact_tracing(self, day: int) -> None:
+        """Contacts everyone that they have had contact with. """
+
+        end = day + 1
+        beginning = end - CT_LENGTH
+        
+        def get_contacts(log):
+            contacts = set()
+            for d in range(beginning, end):
+                if d in log.keys():
+                    contacts = contacts.union(log[d])
+            return contacts
+
+        # Personal contacts
+        personal_contacts = get_contacts(self.personal_contacts)
+        remembered_contacts = set()
+
+        # Notify all personal contacts   
+        for contact in personal_contacts:
+            if random.random() < PROB_REMEMBERING_PERSONAL_CONTACTS:
+                contact.positive_contact(day)
+                remembered_contacts.add(contact)
+
+        # CT apps
+        if self.has_ct_app:
+            # Gets all contacts that are from the CT app, minus those 
+            # already contacted because they were personal contacts
+            impersonal_contacts = get_contacts(self.all_contacts).difference(remembered_contacts)
+
+            for contact in impersonal_contacts:
+                contact.positive_contact(day)
+        
+    def positive_contact(self, day):
+        '''Called when a person is notified of a positive contact with a
+        covid case. '''
+
+        #NOTE: This is a pretty intense course of action. Maybe adding them to
+        # the testing list would be better?
+        self.set_quarantine(day)        
+

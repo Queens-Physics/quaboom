@@ -141,6 +141,7 @@ class simulation():
             ############### INTERACTION SITES STUFF ###############
             will_visit_A = self.inter_sites.will_visit_site(self.inter_sites.get_grade_A_sites(), self.will_go_prob["A"])
             self.inter_sites.site_interaction(will_visit_A, day)
+
             if not lockdown:
                 will_visit_B = self.inter_sites.will_visit_site(self.inter_sites.get_grade_B_sites(), self.will_go_prob["B"])
                 self.inter_sites.site_interaction(will_visit_B, day)
@@ -208,6 +209,15 @@ class simulation():
 
         self.has_run = True
         
+
+        # Manage Quarantine
+        pop.update_quarantine(day)
+        
+
+        ############### UPDATE POPULATION ###############
+        # remove the guest visitors
+        pop.remove_visitors(visitors_ind)
+
     def check_has_run(self):
         # Check that the sim has run
         if self.has_run==False:
@@ -220,6 +230,7 @@ class simulation():
 
         fig, ax = plt.subplots(figsize=(10,8), dpi=100)
         days = np.linspace(0,self.nDays, self.nDays, dtype=int)
+
         
         # Plot the tracking arrays
         if plot_infected: plt.plot(days, self.track_infected, label='infected')
@@ -233,6 +244,7 @@ class simulation():
         if plot_new_quarantined: plt.plot(days, self.track_new_quarantined, label='new quarantined')
         if plot_students: plt.plot(days, self.track_inf_students, label="infected students")
             
+
         # Indicate when certain mandates were in place
         if plot_masks: 
             plt.fill_between(days, 0, 1, where=self.track_masks, alpha=0.3, 
@@ -251,8 +263,8 @@ class simulation():
         plt.ylabel("People")
         plt.xlabel("Days")
 
+
     def get_arrays(self):
         self.check_has_run()
-
         return (self.track_infected, self.track_new_infected, self.track_recovered, self.track_susceptible, self.track_dead, 
                 self.track_tested, self.track_quarantined, self.track_inf_students, self.track_masks, self.track_lockdown)

@@ -208,7 +208,7 @@ class Interaction_Sites:
             will_visit_grade[i] = site[site_attendance]
 
         return will_visit_grade
-    
+
     
     def site_interaction(self, will_go_array, day):
         '''Method that hosts interactions between people for an interaction site type. 
@@ -228,6 +228,7 @@ class Interaction_Sites:
             Used as input to the infect function after infections have been determined. 
             
         '''
+
         new_infections = np.zeros(self.pop.get_population_size(), dtype=bool)
 
         for ppl_going in will_go_array:
@@ -244,6 +245,7 @@ class Interaction_Sites:
 
             while np.sum(num_interactions > 0) > 1:
                 # grab the highest interactor
+                # NOTE: person_1 may be an array of indices
                 person_1 = np.argmax(num_interactions)
                 # find a random interactor for them to pair with (that is not them)
                 person_2 = np.random.randint(num_interactions.shape[0])
@@ -254,6 +256,12 @@ class Interaction_Sites:
                 person_1_index = ppl_going[person_1]
                 person_2_index = ppl_going[person_2]
 
+                # Getting the Person objects and logging the contacts
+                p1_obj = self.pop.get_person(person_1_index)
+                p2_obj = self.pop.get_person(person_2_index)
+                p1_obj.log_contact(p2_obj, day, personal)
+                p2_obj.log_contact(p1_obj, day, personal)
+                
                 # Check to make sure one is infected
                 person_1_infected = self.pop.get_person(person_1_index).is_infected()
                 person_2_infected = self.pop.get_person(person_2_index).is_infected()
@@ -356,6 +364,12 @@ class Interaction_Sites:
             house_size = self.house_sites[i]
             housemembers = self.pop.get_population()[house_count:house_count+house_size]
             house_count += house_size
+
+            # Adding contact to everyone in the house
+            for member in housemembers:
+                for other in housemembers:
+                    if member is not other:
+                        member.log_contact(other, day, personal=True)
 
             # Check if anyone in the house is infected
             infected_housemembers = [i for i in range(house_size) if housemembers[i].is_infected() == True]

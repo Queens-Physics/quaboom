@@ -9,6 +9,16 @@ from Person import Person
 NULL_ID = -1 # This value means that the person index at this location is not susceptible/infected/dead/...
              # All arrays are intialized to this (except healthy, as everyone is healthy)
 
+PROB_OF_TEST = 1 #probability that the person will get tested
+
+#### Contact Tracing Variables
+
+# Capacity for contact tracing daily
+CT_CAPACITY = 10000
+
+# Whether to do contact tracing
+CT_ENABLED = True
+
 class Population:
     '''creates a population of people based on the total population
      uses and age distrubution to weight the assignment of ages
@@ -110,13 +120,17 @@ class Population:
         self.testing = [] # list of people waiting to be others_infected
         self.test_sum = 0 # total number of tests that have been run
         self.quarantined_sum = 0 # total number of people in quarantine (created as the list was having indexing issues)
-        self.new_quarantined_num = 0 # new people in quarantine
-        
-        # Infect first n0 people
-        for i in range(self.n0):
+
+
+        # Select the indices of the n0 initially infected people
+        # randomly, and then infect them
+        indices = random.sample(range(nPop), n0)
+        for i in indices:
+
             self.population[i].infect(day=0)
             self.infected[i] = i
             self.susceptible[i] = NULL_ID
+        self.new_quarantined_num = 0
 
             
     def load_attributes_from_sim_obj(self, sim_obj):
@@ -168,7 +182,7 @@ class Population:
         
         # Cast this so they can be used as ints
         self.house_options = [int(x) for x in constants.HOUSE_OPTIONS]
-        
+
     #returns the population
     def get_population_size(self):
         return self.nPop
@@ -232,7 +246,7 @@ class Population:
         return np.count_nonzero(self.has_mask > 0)
     
     #returns an individual based on their index
-    def get_person(self, index):
+    def get_person(self, index) -> Person:
         return self.population[index]
 
     # Infect a person
@@ -341,6 +355,9 @@ class Population:
         
         self.new_quarantined_num = 0 # Reset number of newly quarantined
         
+        # Number of contacts traced so far
+        num_contacts_traced = 0
+
         for i in range(tests_per_day):
             person_index = self.testing[0]  # Gets first person waiting for test
             self.testing.pop(0)   # Removes first person waiting for test
@@ -352,6 +369,14 @@ class Population:
                 #quarantines the person
                 person.set_quarantine(day)
                 self.quarantined[person_index] = person_index
+                self.have_been_tested[person_index] = person_index
+
+                # Contact trace the person
+                if CT_ENABLED and num_contacts_traced < CT_CAPACITY:
+                    person.contact_tracing(day)
+                    num_contacts_traced += 1
+
+
                 self.new_quarantined_num += 1
             else: 
                 person.knows_infected = False
