@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 
-import numpy as np
 import unittest
+import numpy as np
 import Population
 import simulation as sim
+
 
 class TestPopulation(unittest.TestCase):
 
@@ -25,7 +26,7 @@ class TestPopulation(unittest.TestCase):
         self.assertEqual(pop.count_susceptible(), nPop-n0)
 
     def test_get_count_functions(self):
-        nPop, n0 = self.sim_obj.nPop, self.sim_obj.n0
+        nPop = self.sim_obj.nPop
         pop = Population.Population(self.sim_obj)
 
         # Make sure that get and count functions return the same info
@@ -60,7 +61,6 @@ class TestPopulation(unittest.TestCase):
         self.assertEqual(round(sum(pop.isolation_weights), roundLevel), 1)
 
     def test_infect(self):
-        nPop, n0 = self.sim_obj.nPop, self.sim_obj.n0
         pop = Population.Population(self.sim_obj)
 
         # Infect a susceptible person
@@ -78,7 +78,6 @@ class TestPopulation(unittest.TestCase):
         self.assertFalse(pop.update_infected(index=index))
 
         # Try to infect an infected person now
-        nPop, n0 = self.sim_obj.nPop, self.sim_obj.n0
         pop = Population.Population(self.sim_obj)
 
         index = pop.get_infected()[0]
@@ -88,7 +87,6 @@ class TestPopulation(unittest.TestCase):
         self.assertFalse(pop.update_infected(index=index))
 
     def test_cure(self):
-        nPop, n0 = self.sim_obj.nPop, self.sim_obj.n0
         pop = Population.Population(self.sim_obj)
         infected_id = pop.get_infected()[0]
 
@@ -106,7 +104,6 @@ class TestPopulation(unittest.TestCase):
         self.assertFalse(pop.update_cured(index=infected_id))
 
         # Try to actually cure someone ready to be cured
-        nPop, n0 = self.sim_obj.nPop, self.sim_obj.n0
         pop = Population.Population(self.sim_obj)
         infected_id = pop.get_infected()[0]
 
