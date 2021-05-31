@@ -31,12 +31,16 @@ class Population:
         
         self.population = [0] * self.nPop  # The list of all people
         self.household = [0] * self.nPop # list of all houses (list that contains all lists of the people in the house)
+        self.stud_houses = [0] * self.nStudents
         self.prob_of_test = self.prob_of_test
         self.prob_has_mask = self.prob_has_mask
 
         houseSize = np.random.choice(a=self.house_options, p=self.house_weights)
         houseIndex = 0
         self.household[houseIndex] = houseSize
+        houseSize = np.random.choice(a=self.house_options, p=self.house_weights)
+        houseIndex = 0
+        self.stud_houses[houseIndex] = houseSize
 
         # Student parameter
         self.nStudents = int(self.nPop/5) # full capacity ~ 24k students
@@ -72,6 +76,16 @@ class Population:
                 houseIndex += 1
                 self.household[houseIndex] = houseSize
                 
+        # here the idea is to keep the regular people houses separate from the student houses...
+        # maybe make two separate lists?
+        
+        # Make sure last household number is right (when it runs out of people to fill)
+        if houseSize != self.household[houseIndex]:
+            self.household[houseIndex] = houseSize
+
+        # Slice household list to the right size
+        self.household = self.household[:houseIndex]
+                
         ############### STUDENTS ###############
         self.students = np.zeros(self.nPop, dtype=int) + NULL_ID # list of people who are students
 
@@ -89,13 +103,19 @@ class Population:
 
             self.students[i] = i # set their student status
             
+            # Increment house info
+            houseSize -= 1
+            if houseSize == 0:
+                houseSize = np.random.choice(self.house_options)
+                houseIndex += 1
+                self.stud_houses[houseIndex] = houseSize
 
-        # Make sure last household number is right (when it runs out of people to fill)
-        if houseSize != self.household[houseIndex]:
-            self.household[houseIndex] = houseSize
+        # Make sure last student house number is right (when it runs out of people to fill)
+        if houseSize != self.stud_houses[houseIndex]:
+            self.stud_houses[houseIndex] = houseSize
 
-        # Slice household list to the right size
-        self.household = self.household[:houseIndex]
+        # Slice student houses list to the right size
+        self.stud_houses = self.stud_houses[:houseIndex]
 
         # Create person status arrays
         self.susceptible = np.array(range(self.nPop), dtype=int) #list of all susceptible individuals
@@ -199,7 +219,7 @@ class Population:
     def get_quarantined(self):
         return self.quarantined[self.quarantined != NULL_ID]
     
-    def get_students(self): # change this to look thru job == 'Student' ?
+    def get_students(self):
         return self.students[self.students != NULL_ID]
     
     # Count the number of people in each bin
@@ -245,6 +265,12 @@ class Population:
                 self.hospitalized[index] = index
     
         return didWork
+    
+    def infect_incoming_students(self, indices, day):
+        for i in indices:
+            daysAgo = np.random.randint(13)
+            self.infect(index=i, day=day-daysAgo)
+        return True
 
     # Update lists for already infected people
     def update_infected(self, index):

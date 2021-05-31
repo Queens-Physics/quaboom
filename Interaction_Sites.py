@@ -6,6 +6,9 @@ from copy import deepcopy
 
 import numpy as np
 
+# ratio of queen's students to go to the main interaction sites
+ST_RATIO = 2
+
 class Interaction_Sites:
     '''A class designed to host interactions between persons within specific locations.
     
@@ -57,13 +60,16 @@ class Interaction_Sites:
         # len(grade_X_sites) is how many sites there are; len(grade_X_sites[i]) is how many ppl go to that site
         self.grade_A_sites = self.init_grade(self.grade_per_pop["A"],
                                              self.grade_loyalty_means["A"],
-                                             self.grade_loyalty_stds["A"])
+                                             self.grade_loyalty_stds["A"],
+                                             self.students_participate["A"])
         self.grade_B_sites = self.init_grade(self.grade_per_pop["B"],
                                              self.grade_loyalty_means["B"],
-                                             self.grade_loyalty_stds["B"])
+                                             self.grade_loyalty_stds["B"],
+                                             self.students_participate["B"])
         self.grade_C_sites = self.init_grade(self.grade_per_pop["C"],
                                              self.grade_loyalty_means["C"],
-                                             self.grade_loyalty_stds["C"])
+                                             self.grade_loyalty_stds["C"],
+                                             self.students_participate["C"])
         self.house_sites = deepcopy(self.pop.household)
 
         # Students Stuff #
@@ -76,6 +82,11 @@ class Interaction_Sites:
         self.food_sites = self.init_uni(self.grade_per_pop["FOOD"],
                                         self.grade_loyalty_means["FOOD"],
                                         self.grade_loyalty_stds["FOOD"])
+        self.res_sites = self.init_uni(self.grade_per_pop["RES"],
+                                       self.grade_loyalty_means["RES"],
+                                       self.grade_loyalty_stds["RES"])
+        self.stud_house_sites = deepcopy(self.pop.stud_houses)
+        
 
     def load_attributes_from_sim_obj(self, sim_obj):
         '''Method to load in attributes from the provided simulation class object.
@@ -105,7 +116,7 @@ class Interaction_Sites:
         self.pop = sim_obj.pop
         self.policy = sim_obj.policy
 
-    def init_grade(self, grade_pop_size, loyalty_mean, loyalty_std):
+    def init_grade(self, grade_pop_size, loyalty_mean, loyalty_std, students_interact):
         '''Method designed to associate members of the population with interaction sites
         
         This method initializes all non-student interaction sites by creating a list 
@@ -134,7 +145,12 @@ class Interaction_Sites:
         grade_sites = [[] for _ in range(num_sites)]
 
         for person in self.pop.get_population():
-            #if (person.job != 'Student'): ##########################################
+            if (person.job == 'Student'): ##########################################
+                if (students_interact):
+                    loyalty_mean = loyalty_mean/ST_RATIO
+                else:
+                    loyalty_mean = 0
+                    loyalty_std = 0
             # Assign people to this specific site
             num_diff_sites = abs(round(np.random.normal(loyalty_mean, loyalty_std)))
             num_diff_sites = num_diff_sites if num_diff_sites <= num_sites else num_sites
@@ -253,7 +269,7 @@ class Interaction_Sites:
                 # Get the actual people at these indexes
                 person_1_index = ppl_going[person_1]
                 person_2_index = ppl_going[person_2]
-
+                
                 # Check to make sure one is infected
                 person_1_infected = self.pop.get_person(person_1_index).is_infected()
                 person_2_infected = self.pop.get_person(person_2_index).is_infected()
@@ -370,7 +386,8 @@ class Interaction_Sites:
                     if caught_infection:
                         self.pop.infect(index=housemembers[person].get_index(), day=day)
 
-
+    #-------------------- ADD ANOTHER FUNCTION HERE FOR RESIDENCE/STUDENT HOUSING --------------------#
+                        
     # Function thats tests the symtomatic individuals as well as brining them in and out of quarantine
     def testing_site (self, tests_per_day, day): 
         '''Method to update status of symptoms and run the testing sites code. 
