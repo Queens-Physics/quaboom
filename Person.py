@@ -1,6 +1,7 @@
 import random
 import numpy as np
 
+
 class Person(object):
 
     def __init__(self, index, sim_obj, infected=False, recovered=False, dead=False, hospitalized=False, quarantined=False,
@@ -110,36 +111,36 @@ class Person(object):
     def infect(self, day, cure_days=None):
 
         d_params = self.sim_obj.disease_parameters
-        
+
         # Check that they are suseptable (maybe should have that as property?)
         if not self.recovered and not self.infected and not self.dead:
             self.infected = True
             self.infected_day = day
             self.will_get_symptoms = True
-            self.days_until_symptoms  = np.random.randint(d_params["days_before_symptoms"]["min"], 
+            self.days_until_symptoms  = np.random.randint(d_params["days_before_symptoms"]["min"],
                                                           d_params["days_before_symptoms"]["max"])
-            
+
             # If cure days not specified then choose random number inbetween min and max
             if self.case_severity == 'Mild' or self.case_severity is None:  # If severity not specified, choose Mild
                 prob_of_symptom = random.random()
-                if (prob_of_symptom > d_params["mild_symptom_prob"]): #probability that the person has mild symtoms
+                if prob_of_symptom > d_params["mild_symptom_prob"]:  # probability that the person has mild symtoms
                     # choose number of days after infection when symptoms show
                     self.will_get_symptoms = False
                     self.days_until_symptoms = None
 
-                self.cure_days = np.random.randint(d_params["mild_days"]["min"], 
+                self.cure_days = np.random.randint(d_params["mild_days"]["min"],
                                                    d_params["mild_days"]["max"]) if cure_days is None else cure_days
             #Assuming that all hospitalization or worse cases will show symptoms
             elif self.case_severity == 'Hospitalization':
-                self.cure_days = np.random.randint(d_params["severe_days"]["min"], 
+                self.cure_days = np.random.randint(d_params["severe_days"]["min"],
                                                    d_params["severe_days"]["max"]) if cure_days is None else cure_days
                 self.hospitalized = True
             elif self.case_severity == 'ICU':
-                self.cure_days = np.random.randint(d_params["ICU_days"]["min"], 
+                self.cure_days = np.random.randint(d_params["ICU_days"]["min"],
                                                    d_params["ICU_days"]["max"]) if cure_days is None else cure_days
                 self.hospitalized = True
             elif self.case_severity == 'Death':
-                self.cure_days = np.random.randint(d_params["die_days"]["min"], 
+                self.cure_days = np.random.randint(d_params["die_days"]["min"],
                                                    d_params["die_days"]["max"]) if cure_days is None else cure_days
                 self.hospitalized = True
 

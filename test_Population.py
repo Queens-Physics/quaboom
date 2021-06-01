@@ -11,7 +11,6 @@ class TestPopulation(unittest.TestCase):
     def setUp(self):       # Code that will be run before every test function is executed
         config_file = "./config_files/main.json"
         self.sim_obj = sim.simulation(config_file)
-        pass
 
     def tearDown(self):    # Code that will be run after every test function is executed
         pass
@@ -43,7 +42,6 @@ class TestPopulation(unittest.TestCase):
         self.assertEqual(pop.get_person(index=i).get_index(), i)
 
     def test_globals(self):
-        nPop, n0 = self.sim_obj.nPop, self.sim_obj.n0
         pop = Population.Population(self.sim_obj)
 
         # Make sure weights and options line up - basically just checks config file
@@ -51,9 +49,9 @@ class TestPopulation(unittest.TestCase):
         self.assertEqual(len(pop.job_options), len(pop.job_weights))
         self.assertEqual(len(pop.house_options), len(pop.house_weights))
         self.assertEqual(len(pop.isolation_options), len(pop.isolation_weights))
-        
+
         # Make sure probabilities sum to 1
-        roundLevel = 6 # Decimal digits to round 
+        roundLevel = 6  # Decimal digits to round
 
         self.assertEqual(round(sum(pop.age_weights), roundLevel), 1)
         self.assertEqual(round(sum(pop.job_weights), roundLevel), 1)

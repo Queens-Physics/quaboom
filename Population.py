@@ -1,7 +1,11 @@
 import json
 import random
+import numpy as np
 from data import constants
+from Person import Person
 
+NULL_ID = -1 # This value means that the person index at this location is not susceptible/infected/dead/...
+             # All arrays are intialized to this (except healthy, as everyone is healthy)
 
 class Population:
     '''creates a population of people based on the total population
@@ -46,14 +50,14 @@ class Population:
 
         for i in range(0, self.nPop-self.nStudents):
             # MAKE A PERSON
-            newPerson = Person.Person(index=i, sim_obj=sim_obj, infected=False, recovered=False, dead=False, hospitalized=False,
-                                      quarantined=False, quarantined_day=None,
-                                      infected_day=None, recovered_day=None, death_day=None,
-                                      others_infected=None, cure_days=None, recent_infections=None,
-                                      age=age_arr[i], job=job_arr[i], house_index=0,
-                                      isolation_tendencies=isolation_tend_arr[i],
-                                      case_severity=case_severity_arr[i], mask_type=mask_type_arr[i],
-                                      has_mask=has_mask_arr[i])
+            newPerson = Person(index=i, sim_obj=sim_obj, infected=False, recovered=False, dead=False, hospitalized=False,
+                               quarantined=False, quarantined_day=None,
+                               infected_day=None, recovered_day=None, death_day=None,
+                               others_infected=None, cure_days=None, recent_infections=None,
+                               age=age_arr[i], job=job_arr[i], house_index=0,
+                               isolation_tendencies=isolation_tend_arr[i],
+                               case_severity=case_severity_arr[i], mask_type=mask_type_arr[i],
+                               has_mask=has_mask_arr[i])
 
             # ADD A PERSON
             self.population[i] = newPerson
@@ -70,11 +74,11 @@ class Population:
 
         for i in range(self.nPop-self.nStudents, self.nPop):
             student_age = random.randint(18, 23)
-            newStudent = Person.Person(index=i, sim_obj=sim_obj, infected=False, recovered=False, dead=False, quarantined=False,
-                                       quarantined_day=None, infected_day=None, recovered_day=None, death_day=None,
-                                       others_infected=None, cure_days=None, recent_infections=None, age=student_age, job='Student',
-                                       house_index=0, isolation_tendencies=isolation_tend_arr[i],
-                                       case_severity=case_severity_arr[i], has_mask=has_mask_arr[i])
+            newStudent = Person(index=i, sim_obj=sim_obj, infected=False, recovered=False, dead=False, quarantined=False,
+                                quarantined_day=None, infected_day=None, recovered_day=None, death_day=None,
+                                others_infected=None, cure_days=None, recent_infections=None, age=student_age,
+                                job='Student',house_index=0, isolation_tendencies=isolation_tend_arr[i],
+                                case_severity=case_severity_arr[i], has_mask=has_mask_arr[i])
             self.population[i] = newStudent
 
             self.students[i] = i  # set their student status
@@ -111,17 +115,17 @@ class Population:
         attributes = sim_obj.parameters["population_data"].keys()
         for attr in attributes:
             setattr(self, attr, sim_obj.parameters["population_data"][attr])
-            
+
         # case severity from disease params #
         self.severity_weights = np.array([sim_obj.disease_parameters["case_severity"][key]
                                           for key in constants.SEVERITY_OPTIONS])
         self.severity_options = constants.SEVERITY_OPTIONS
-        
+
         # format mask weights correctly
         self.mask_weights = np.array([self.mask_type[key] for key in constants.MASK_OPTIONS])
         self.mask_options = constants.MASK_OPTIONS
-            
-    def set_demographic_parameters(self, sim_obj):
+
+    def set_demographic_parameters(self):
         with open(self.demographics_file) as json_file:
             disease_params = json.load(json_file)
 
@@ -152,11 +156,11 @@ class Population:
         self.house_weights = np.zeros(len(self.house_options))
         for ihouse in range(len(self.house_weights)):
             string = str(ihouse+1)
-            self.house_weights[ihouse]= disease_params['house_weights'][string] 
-        
+            self.house_weights[ihouse]= disease_params['house_weights'][string]
+
         # Cast this so they can be used as ints
         self.house_options = [int(x) for x in constants.HOUSE_OPTIONS]
-        
+
     #returns the population
     def get_population_size(self):
         return self.nPop
