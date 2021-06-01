@@ -274,21 +274,13 @@ class Interaction_Sites:
         for new_infection in new_infection_indexes:
             self.pop.infect(index=new_infection, day=day)
 
-    def calc_interactions(self, person_index, how_busy):
+    def calc_interactions(self):
         '''Method to determine how many interactions a person will have. 
         
         Note
         ----
         This function should really be improved, and calibrated with real data. Current
         values were arbitrarily chosen. 
-        
-        Parameters
-        ----------
-        person_index : int
-            The index of the person for which the number of interactions are being calculated.
-        how_busy : float
-            A percentage value denoting the capacity of the interaction site this person is 
-            operating within. Currently not used. 
             
         Returns
         -------
