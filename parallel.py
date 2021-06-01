@@ -36,19 +36,16 @@ def run_async(num_runs, config_file, save_name='simulation.pkl'):
     ----------
     num_runs : int
         number of times to run the simulation
-    config_file :
+    config_file : str
         file containing the configuration details
-    save_name : string
-        optional, filename to save the simulation results upon completion
+    save_name : str, default='simulation.pkl'
+        filename to save the simulation results upon completion
     
     Returns
     -------
     pandas.DataFrame
         containing the results of the simulation in tabular format
     """
-
-    # Make the queue and the parameters
-    q = multiprocessing.Manager().Queue()
 
     # Run all of the simulations
     multiprocessing.freeze_support()
@@ -76,6 +73,11 @@ def _config_editor(config, param_name, value):
         string form of a parameter's name (eg. policy_data.testing_rate)
     value : object
         value to set the parameter to
+
+    Raises
+    ------
+    ValueError
+        If param_name is not in the config dictionary
     """
 
     x = config
@@ -94,31 +96,45 @@ def _config_editor(config, param_name, value):
 
 
 
-def tabular_mode(base_config_file, independent, dependent):
+def tabular_mode(base_config_file, independent, dependent, num_runs=8):
     """Automatically measures the impact of various public health measures on different metrics.
     
     Parameters
     ----------
-    base_config_file : string
+    base_config_file : str
         filename for the configuration file to be used as a base
-    independent : dictionary
+    independent : dict
         a dictionary where the keys are names of the parameters that
         are independent variables, and the value is a list with all of the
         values that variable should take on
-        Ex. to set the policy_data -> testing_rate to 0.1, 0.2, ..., 1, you
+        Eg. to set the policy_data -> testing_rate to 0.1, 0.2, ..., 1, you
         would use the following dictionary:
             {"policy_data.testing_rate":[0.1*(x+1) for x in range(10)]}
         ** Currently only supports changing one independent variable **
-    dependent : dictionary
+    dependent : dict
         a dictionary where the keys are the names of the dependent
         variables, and the values are functions that take the simulation
-        results as input and calculate the dependent variable
+        results as input and calculate the dependent variable.
+        Eg. to measure total deaths and peak cases, use the following
+        dictionary:
+            {
+                "total deaths":total_death_func, 
+                "peak cases":peak_case_func
+            }
+    num_runs : int, default = 8
+        number of times to run the simulation per configuration
+
     
     Returns
     -------
     pd.DataFrame
         contains the values of the dependent variables 
         for each of the supplied independent variable values.
+
+    Raises
+    ------
+    NotImplementedError
+        if the number of independent variables is not 1
     """
     
     if len(independent) > 1:
@@ -153,7 +169,7 @@ def tabular_mode(base_config_file, independent, dependent):
 
         # Run the simulations: returns an DataFrame
         #TODO: Make the simulation accept a parameters file
-        data = run_async(8, temp_config_file)
+        data = run_async(num_runs, temp_config_file)
 
         # Processing the results to get the dependent measurements, add to results       
         result = list(map(lambda f: f(data), dep_funcs))
@@ -176,7 +192,7 @@ def confidence_interval(config, num_runs=8, confidence=0.80):
     ----------
     config : str
         filename of the configuration file to use for this simulation
-    num_runs : int, optional
+    num_runs : int, default=8
         number of times to run the simulation
     confidence : float
         confidence of the confidence bands, ie. the proportion of results
@@ -184,7 +200,7 @@ def confidence_interval(config, num_runs=8, confidence=0.80):
         should be (0, 1].
     """
 
-    result = run_async(8, config)
+    result = run_async(num_runs, config)
 
     fig, ax = plt.subplots()
     z_score = st.norm.ppf(confidence)
