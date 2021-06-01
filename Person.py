@@ -21,52 +21,52 @@ class Person(object):
                  quarantined_day=None, infected_day=None, recovered_day=None, death_day=None, others_infected=None,
                  cure_days=None, recent_infections=None, age=None, job=None, house_index=0, isolation_tendencies=None,
                  case_severity=None, mask_type=None, has_mask=True):
-         '''Method to load in attributes from the provided simulation class object.
-        
+        '''Method to load in attributes from the provided simulation class object.
+
         Sets all objects in the "person_data" dictionary key as self attributes of the 
         interaction_sites class. 
-        
+
         Parameters
         ----------
         sim_obj : simulation class object
             The encompassing simulation obejct hosting the simulation
-            
+
         infected : 
-            
+
         recovered : 
-            
+
         dead : 
-            
+
         hospitalized : int
             Determines if infected the person will go to the hospital, defaults False
-            
+
         quarantined : 
-            
+
         quarantined_day :
-            
+
         infected_day :
-            
+
         recovered_day : 
-            
+
         death_day : 
-            
+
         others_infected : 
-            
+
         recent_infections : 
-            
+
         age : 
-            
+
         job : 
-            
+
         house_index : 
-            
+
         isolation_tendencies : 
-            
+
         case_severity : 
-            
+
         mask_type : string
             Determines type of mask worn by person, defaults to None
-            
+
         has_mask : bool
             Determines if a person will wear a mask or not, defaults to True
 
@@ -321,7 +321,7 @@ class Person(object):
                 return True
         return False
     
-    def check_hospitalized(self, day): 
+    def check_hospitalized(self): 
         '''Method to check if a person will be hospitalized or not once being infected.
         
         Returns
