@@ -45,8 +45,7 @@ class simulation():
         elif isinstance(data_file, dict):
             self.parameters = data_file
         else:
-            print("Error: Please supply dictionary object or file path.")
-            return
+            raise TypeError("Please supply dictionary object or file path.")
 
         #### Do the simulation parameters ####
         attributes = self.parameters["simulation_data"].keys()
@@ -274,7 +273,7 @@ class simulation():
         self.check_has_run()
         returnDict = {"infected":self.track_infected, "new_infected":self.track_new_infected, "recovered":self.track_recovered,
                       "susceptible":self.track_susceptible, "dead":self.track_dead, "quarantined":self.track_quarantined,
-                      "inf_students":self.track_inf_students, "tested":self.track_tested, "new_tested":self.track_new_tested,
-                      "testing_enforced":self.track_tested, "masks_enforced":self.track_masks,
-                      "lockdown_enforced":self.track_lockdown}
+                      "inf_students":self.track_inf_students, "total_tested":self.track_tested,
+                      "new_tested":self.track_new_tested, "testing_enforced":self.track_testing,
+                      "masks_enforced":self.track_masks, "lockdown_enforced":self.track_lockdown}
         return returnDict
