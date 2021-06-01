@@ -38,9 +38,15 @@ class simulation():
 
         self.has_run = False                                 # Indicates if the sim has run yet
 
-    def load_general_parameters(self, filename):
-        with open(filename) as file:
-            self.parameters = json.load(file)
+    def load_general_parameters(self, data_file):
+        if type(data_file)==str:
+            with open(data_file) as file:
+                self.parameters = json.load(file)
+        elif type(data_file)==dict:
+            self.parameters = data_file
+        else:
+            print("Error: Please supply dictionary object or file path.")
+            return 
 
         #### Do the simulation parameters ####
         attributes = self.parameters["simulation_data"].keys()
@@ -217,6 +223,7 @@ class simulation():
     def plot(self, plot_infected=True, plot_susceptible=True, plot_dead=True, plot_recovered=True, plot_new_infected=True,
              plot_tested=True, plot_quarantined=True, plot_new_tests=True, plot_new_quarantined=True, plot_masks=True, plot_lockdown=True, plot_testing=True,
              plot_students=True, log=False):
+        
         self.check_has_run()
 
         _, ax = plt.subplots(figsize=(10,8), dpi=100)
@@ -265,6 +272,9 @@ class simulation():
 
     def get_arrays(self):
         self.check_has_run()
-
-        return (self.track_infected, self.track_new_infected, self.track_recovered, self.track_susceptible, self.track_dead,
-                self.track_tested, self.track_quarantined, self.track_inf_students, self.track_masks, self.track_lockdown)
+        returnDict = {"infected":self.track_infected, "new_infected":self.track_new_infected, "recovered":self.track_recovered, 
+                      "susceptible":self.track_susceptible, "dead":self.track_dead, "quarantined":self.track_quarantined, 
+                      "inf_students":self.track_inf_students, "tested":self.track_tested, "new_tested":self.track_new_tested,
+                      "testing_enforced":self.track_tested, "masks_enforced":self.track_masks,
+                      "lockdown_enforced":self.track_lockdown}
+        return returnDict
