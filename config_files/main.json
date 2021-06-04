@@ -5,7 +5,7 @@
         "nDays":100,
         "nPop":10000,
         "n0":10,
-        "will_go_prob":{"A":0.05, "B":0.2, "C":0.7, "LECT":0.8, "STUDY":0.2, "FOOD":0.1},
+        "will_go_prob":{"A":0.05, "B":0.2, "C":0.7, "LECT":0.8, "STUDY":0.2, "FOOD":0.1, "RES":1},
         "N_VIS_OPTION":[ 0, 1, 2, 3 ],
         "N_VIS_PROB":[ 0.7, 0.17, 0.08, 0.05],
         "vis_age_upper":60,
@@ -42,9 +42,9 @@
 
     "interaction_sites_data":{
 
-        "grade_per_pop":{"A":1000, "B":1000, "C":1000, "LECT":300, "STUDY":6, "FOOD":1000},
-        "grade_loyalty_means":{"A":4, "B":1, "C":1, "LECT":7, "STUDY":2, "FOOD":1},
-        "grade_loyalty_stds":{"A":2, "B":1, "C":0.2, "LECT":2, "STUDY":1, "FOOD":0.5},
+        "grade_per_pop":{"A":1000, "B":1000, "C":1000, "LECT":300, "STUDY":10, "FOOD":1000, "RES":17},
+        "grade_loyalty_means":{"A":4, "B":1, "C":1, "LECT":7, "STUDY":2, "FOOD":1, "RES":9},
+        "grade_loyalty_stds":{"A":2, "B":1, "C":0.2, "LECT":2, "STUDY":1, "FOOD":0.5, "RES":1},
         "students_participate":{"A":true, "B":true, "C":false},
         "quarantine_isolation_factor":0
     },

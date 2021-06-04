@@ -240,7 +240,7 @@ class simulation():
             if (day == self.policy.student_day_trigger):
                 #infStudents = random number based on percentage of students infected
                 infStudents = 10
-                indices = self.pop.get_students()[0:infStudents]
+                indices = self.pop.get_student_indices()[0:infStudents]
                 self.pop.infect_incoming_students(indices=indices, day=day)
             
             ############### VISITOR STUFF ###############
@@ -280,7 +280,7 @@ class simulation():
 
             # Manage at home interactions
             self.inter_sites.house_interact(day)
-            #-------------------- ADD ANOTHER LINE HERE FOR RESIDENCE/STUDENT HOUSING --------------------#
+            self.inter_sites.student_house_interact(day)
 
             # Manage testing sites
             if testing_ON:
