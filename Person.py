@@ -28,7 +28,7 @@ class Person(object):
 
         Parameters
         ----------
-        sim_obj : simulation class object
+        sim_obj :obj:`simulation.simulation`
             The encompassing simulation obejct hosting the simulation
 
         infected : 
