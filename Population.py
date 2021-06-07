@@ -13,7 +13,7 @@ class Population:
 
      suscept list has negative values for infected, and positive indicies for susept
      infected list has negative values for healthy, and positive indicies for infected
-     recovered list has negative values for not recovered, and postitive indicies for 
+     recovered list has negative values for not recovered, and postitive indicies for
      recovered
      '''
 
@@ -192,10 +192,10 @@ class Population:
 
     def get_hospitalized(self):
         '''Method to retrieve the people hospitalized.
-        
+
         Returns
         -------
-        self.hospitalized[self.hospitalized != NULL_ID]: :obj:`np.array` of :obj:`int` 
+        self.hospitalized[self.hospitalized != NULL_ID]: :obj:`np.array` of :obj:`int`
         '''
         return self.hospitalized[self.hospitalized != NULL_ID]
 
@@ -233,10 +233,10 @@ class Population:
 
     def count_masks(self):
         '''Method to count the number of people wearing masks.
-        
+
         Returns
         -------
-        np.count_nonzero(self.has_mask > 0): :obj:`np.array` of :obj:`int` 
+        np.count_nonzero(self.has_mask > 0): :obj:`np.array` of :obj:`int`
         '''
         return np.count_nonzero(self.has_mask > 0)
 
