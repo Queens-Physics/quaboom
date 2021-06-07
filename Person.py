@@ -13,7 +13,6 @@ class Person(object):
         
     Attributes
     ----------
-        
        
     '''
 
@@ -30,46 +29,27 @@ class Person(object):
         ----------
         sim_obj :obj:`simulation.simulation`
             The encompassing simulation obejct hosting the simulation
-
         infected : 
-
         recovered : 
-
         dead : 
-
         hospitalized : int
             Determines if infected the person will go to the hospital, defaults False
-
         quarantined : 
-
         quarantined_day :
-
         infected_day :
-
         recovered_day : 
-
         death_day : 
-
         others_infected : 
-
         recent_infections : 
-
         age : 
-
         job : 
-
         house_index : 
-
         isolation_tendencies : 
-
         case_severity : 
-
         mask_type : string
             Determines type of mask worn by person, defaults to None
-
         has_mask : bool
             Determines if a person will wear a mask or not, defaults to True
-
         '''
 
         self.infected = infected
