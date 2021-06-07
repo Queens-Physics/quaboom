@@ -4,11 +4,11 @@ import numpy as np
 
 class Person(object):
     '''A class designed to create individuals to create a population.
-    
+
     There are currently 26 different attributes set for each person.
 
     All attributes are passed through the sim_obj, which accesses the simulation
-    configuration file.Outlined below are the main object attributes that create a 
+    configuration file.Outlined below are the main object attributes that create a
     person.
 
     Attributes
@@ -301,9 +301,9 @@ class Person(object):
                 return True
         return False
 
-    def check_hospitalized(self): 
+    def check_hospitalized(self):
         '''Method to check if a person will be hospitalized or not once being infected.
-        
+
         Returns
         -------
         True if hospitalized and False if not
