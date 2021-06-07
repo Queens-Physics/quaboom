@@ -113,7 +113,7 @@ class Person(object):
 
     # Method to infect a person
     def infect(self, day, virus_type, cure_days=None):
-
+       
         # Check that they are suseptable (maybe should have that as property?)
         if not self.recovered and not self.infected and not self.dead:
             self.infected = True
@@ -235,3 +235,11 @@ class Person(object):
             return self.sim_obj.nonsurgical_inward_eff, self.sim_obj.nonsurgical_outward_eff
         else:
             return 1, 1 #Not wearing a mask so this will function will not effect their change of getting the virus
+        
+    def virus_type_infectiousness(self):
+        if self.infected == True and self.virus_type == "B117":
+            return self.sim_obj.B117_infectiousness
+        elif self.infected == True and self.virus_type == "general":
+            return 1, 1 #general variant will not affect their change of getting the virus 
+        
+        

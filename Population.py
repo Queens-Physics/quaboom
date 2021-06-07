@@ -109,12 +109,10 @@ class Population:
         
         # Infect first n0 people
         for i in range(self.n0):
-            #self.population[i].infect(day=0, virus_type = "general")
             self.infect(index=i, day=0, virus_type="general")
-            #self.infected[i] = i
-            #self.susceptible[i] = NULL_ID
-            #self.virus_type[i] = "general"
-            
+           
+        for i in range(self.n0,(self.n0)+2):
+            self.infect(index=i, day=0, virus_type="B117")   
             
     def load_attributes_from_sim_obj(self, sim_obj):
         attributes = sim_obj.parameters["population_data"].keys()
@@ -244,6 +242,7 @@ class Population:
     # Infect a person
     def infect(self, index, day, virus_type):
         didWork = self.population[index].infect(day=day, virus_type=virus_type)
+     
         if didWork:
             self.infected[index] = index
             self.susceptible[index] = NULL_ID
@@ -264,11 +263,11 @@ class Population:
 
     # Cure a person
     def cure(self, index, day):
+        print("cure")
         didWork = self.population[index].check_cured(day)
         if didWork:
             self.infected[index] = NULL_ID
             self.recovered[index] = index
-            self.virus_type[index] = None
         return didWork
 
     # Updates lists for already cured people
@@ -279,6 +278,7 @@ class Population:
         self.infected[index] = NULL_ID
         self.recovered[index] = index
         self.hospitalized[index] = NULL_ID
+        self.virus_type[index] = "None"
         return True
 
     def die(self, index, day):

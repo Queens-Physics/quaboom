@@ -182,18 +182,23 @@ class Interaction_Sites:
             p2Infected = self.pop.get_person(person_2).is_infected()
             P1_INWARD_PROB, P1_OUTWARD_PROB = self.pop.get_person(person_1).mask_type_efficiency()
             P2_INWARD_PROB, P2_OUTWARD_PROB = self.pop.get_person(person_2).mask_type_efficiency()
+            
+            #p1Virus_type = self.pop.get_person(person_1).get_virus_type()
+            #p2Virus_type = self.pop.get_person(person_2).get_virus_type()
+            #P1_VIRUS_SPREAD_PROB = self.pop.get_person(person_1).virus_type_infectiousness()
+            #P2_VIRUS_SPREAD_PROB = self.pop.get_person(person_2).virus_type_infectiousness()
 
             if p1Infected:
-                if p1Mask and p2Mask: spread_prob = self.base_infection_spread_prob*P1_OUTWARD_PROB*P2_INWARD_PROB
-                elif p1Mask: spread_prob = self.base_infection_spread_prob*P1_OUTWARD_PROB
-                elif p2Mask: spread_prob = self.base_infection_spread_prob*P2_INWARD_PROB
-                spread_prob = self.base_infection_spread_prob
+                if p1Mask and p2Mask: spread_prob = self.base_infection_spread_prob*P1_OUTWARD_PROB*P2_INWARD_PROB#*P1_VIRUS_SPREAD_PROB
+                elif p1Mask: spread_prob = self.base_infection_spread_prob*P1_OUTWARD_PROB#*P1_VIRUS_SPREAD_PROB
+                elif p2Mask: spread_prob = self.base_infection_spread_prob*P2_INWARD_PROB#*P1_VIRUS_SPREAD_PROB
+                else: spread_prob = self.base_infection_spread_prob#*P1_VIRUS_SPREAD_PROB
 
             else:
-                if p1Mask and p2Mask: spread_prob = self.base_infection_spread_prob*P2_OUTWARD_PROB*P1_INWARD_PROB
-                elif p1Mask: spread_prob = self.base_infection_spread_prob*P1_INWARD_PROB
-                elif p2Mask: spread_prob = self.base_infection_spread_prob*P2_OUTWARD_PROB
-                else: spread_prob = self.base_infection_spread_prob
+                if p1Mask and p2Mask: spread_prob = self.base_infection_spread_prob*P2_OUTWARD_PROB*P1_INWARD_PROB#*P2_VIRUS_SPREAD_PROB
+                elif p1Mask: spread_prob = self.base_infection_spread_prob*P1_INWARD_PROB#*P2_VIRUS_SPREAD_PROB
+                elif p2Mask: spread_prob = self.base_infection_spread_prob*P2_OUTWARD_PROB#*P2_VIRUS_SPREAD_PROB
+                else: spread_prob = self.base_infection_spread_prob#*P2_VIRUS_SPREAD_PROB
         
         return random.random() < spread_prob
    
