@@ -13,7 +13,8 @@ class Population:
 
      suscept list has negative values for infected, and positive indicies for susept
      infected list has negative values for healthy, and positive indicies for infected
-     recovered list has negative values for not recovered, and postitive indicies for recovered
+     recovered list has negative values for not recovered, and postitive indicies for
+     recovered
      '''
 
     def __init__(self, sim_obj):
@@ -190,6 +191,12 @@ class Population:
         return self.dead[self.dead != NULL_ID]
 
     def get_hospitalized(self):
+        '''Method to retrieve the people hospitalized.
+
+        Returns
+        -------
+        self.hospitalized[self.hospitalized != NULL_ID]: :obj:`np.array` of :obj:`int`
+        '''
         return self.hospitalized[self.hospitalized != NULL_ID]
 
     def get_quarantined(self):
@@ -225,6 +232,12 @@ class Population:
         return np.count_nonzero(self.quarantined != NULL_ID)
 
     def count_masks(self):
+        '''Method to count the number of people wearing masks.
+
+        Returns
+        -------
+        np.count_nonzero(self.has_mask > 0): :obj:`np.array` of :obj:`int`
+        '''
         return np.count_nonzero(self.has_mask > 0)
 
     #returns an individual based on their index

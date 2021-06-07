@@ -3,11 +3,54 @@ import numpy as np
 
 
 class Person(object):
+    '''A class designed to create individuals to create a population.
+
+    There are currently 26 different attributes set for each person.
+
+    All attributes are passed through the sim_obj, which accesses the simulation
+    configuration file.Outlined below are the main object attributes that create a
+    person.
+
+    Attributes
+    ----------
+
+    '''
 
     def __init__(self, index, sim_obj, infected=False, recovered=False, dead=False, hospitalized=False, quarantined=False,
                  quarantined_day=None, infected_day=None, recovered_day=None, death_day=None, others_infected=None,
                  cure_days=None, recent_infections=None, age=None, job=None, house_index=0, isolation_tendencies=None,
                  case_severity=None, mask_type=None, has_mask=True):
+        '''Method to load in attributes from the provided simulation class object.
+
+        Sets all objects in the "person_data" dictionary key as self attributes of the
+        interaction_sites class.
+
+        Parameters
+        ----------
+        sim_obj :obj:`simulation.simulation`
+            The encompassing simulation obejct hosting the simulation
+        infected :
+        recovered :
+        dead :
+        hospitalized : int
+            Determines if infected the person will go to the hospital, defaults False
+        quarantined :
+        quarantined_day :
+        infected_day :
+        recovered_day :
+        death_day :
+        others_infected :
+        recent_infections :
+        age :
+        job :
+        house_index :
+        isolation_tendencies :
+        case_severity :
+        mask_type : string
+            Determines type of mask worn by person, defaults to None
+        has_mask : bool
+            Determines if a person will wear a mask or not, defaults to True
+        '''
 
         self.infected = infected
         self.recovered = recovered
@@ -39,23 +82,53 @@ class Person(object):
         # Set the simulaiton object to access the variables
         self.sim_obj = sim_obj
 
-    # Return True if infected, False if not
     def is_infected(self):
+        '''Method to retrieve if a person is infected. Returns True if infected, False if
+        not.
+
+        Returns
+        -------
+        self.is_infected: :obj:`bool`
+        '''
         return self.infected
 
-    # Return True if recovered, False if not
     def is_recovered(self):
+        '''Method to retrieve if a person is recovered. Returns True if recovered, False if
+        not.
+
+        Returns
+        -------
+        self.is_recovered: :obj:`bool`
+        '''
         return self.recovered
 
-    #return True if dead, False if not
     def is_dead(self):
+        '''Method to retrieve if a person is dead. Returns True if dead, False if not.
+
+        Returns
+        -------
+        self.is_dead: :obj:`bool`
+        '''
         return self.dead
 
-    #return True if quarantined, False if not
     def is_quarantined(self):
+        '''Method to retrieve if a person is quarantined. Returns True if quarantined,
+        False if not.
+
+        Returns
+        -------
+        self.quarantined: :obj:`bool`
+        '''
         return self.quarantined
 
     def is_hospitalzied(self):
+        '''Method to retrieve if a person is hospitalized. Returns True if dead, False if
+        not.
+
+        Returns
+        -------
+        self.hospitalized: :obj:`bool`
+        '''
         return self.hospitalized
 
     #Puts person in quarantine
@@ -122,6 +195,12 @@ class Person(object):
         return self.case_severity
 
     def get_mask(self):
+        '''Method to retrive if a person is wearing a mask.
+
+        Returns
+        -------
+        self.has_mask: :obj:`bool`
+        '''
         return self.has_mask
 
     # Method to infect a person
@@ -222,7 +301,13 @@ class Person(object):
                 return True
         return False
 
-    def check_hospitalized(self): # checking that case_severity==death outside of the loop
+    def check_hospitalized(self):
+        '''Method to check if a person will be hospitalized or not once being infected.
+
+        Returns
+        -------
+        True if hospitalized and False if not
+        '''
         if self.infected:
             if self.case_severity == 'Hospitalization' or self.case_severity == 'ICU' or self.case_severity == 'Death':
                 self.hospitalized = True
@@ -230,7 +315,13 @@ class Person(object):
             return True
         return False
 
-    def wear_mask(self):  #Determines and returns if person is wearing mask
+    def wear_mask(self):
+        '''Method to check if a person will wear a mask.
+
+        Returns
+        -------
+        True if wearing a mask and False if not.
+        '''
         mask_options = np.random.uniform()
 
         if self.has_mask:
@@ -243,6 +334,13 @@ class Person(object):
 
     # Determines what the inward and outward efficiency of the spread will be based on the mask they are wearing
     def mask_type_efficiency(self):
+        '''Method to determines what the inward and outward efficiency of the spread will
+        be based on the type of mask worn.
+
+        Returns
+        -------
+        self.sim_obj.surgical_inward_eff, self.sim_obj.surgical_outward_eff : :obj:`float`.
+        '''
         if self.has_mask and self.mask_type == "Surgical":
             return self.sim_obj.surgical_inward_eff, self.sim_obj.surgical_outward_eff
         elif self.has_mask and self.mask_type == "Non-surgical":
