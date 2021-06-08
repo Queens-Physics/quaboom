@@ -8,7 +8,9 @@ import scipy.stats as st
 import json
 import os
 
-COLS = ["infected", "new_infected", "recovered", "susceptible", "dead", "hospitalized", "tested", "quarantined", "mask", "lockdown"]
+COLS = ["infected", "new_infected", "recovered", "susceptible", "dead",
+        "quarantined", "inf_students", "total_tested", "new_tested", 
+        "testing_enforced", "masks_enforced", "lockdown_enforced"]
 
 def async_simulation(config_file):
     """Does a single run of the simulation with the supplied configuration details.
@@ -52,10 +54,7 @@ def run_async(num_runs, config_file, save_name='simulation.pkl'):
     with multiprocessing.Pool() as pool:
         results = pool.map(async_simulation, (config_file for _ in range(num_runs)))
 
-    #TODO: It would be beneficial to make the output from the RunEpidemic function
-    # a dictionary, so that if the order was changed it would not screw up
-    # this output.
-    df = pd.DataFrame(results, columns=COLS)
+    df = pd.DataFrame(results)
     with open(save_name, 'wb') as f:
         pickle.dump(df, f)
 
@@ -88,7 +87,7 @@ def _config_editor(config, param_name, value):
 
         # Last parameter: set the value now
         if i == len(param_names) - 1:
-            x[param] = int(value)
+            x[param] = value
         
         # Not the last parameter: advance in the dictionary
         else:
@@ -162,24 +161,15 @@ def tabular_mode(base_config_file, independent, dependent, num_runs=8):
         for key, value in zip(indep_keys, values):
             _config_editor(temp_config, key, value)
 
-        # Writing a temporary configuration file to give to the simulation
-        temp_config_file = 'config_files/temp.json'
-        with open(temp_config_file, 'w') as f:
-            json.dump(temp_config, f)
-
         # Run the simulations: returns an DataFrame
-        #TODO: Make the simulation accept a parameters file
-        data = run_async(num_runs, temp_config_file)
+        data = run_async(num_runs, temp_config)
 
         # Processing the results to get the dependent measurements, add to results       
-        result = list(map(lambda f: f(data), dep_funcs))
+        result = [f(data) for f in dep_funcs]
         results.append(result)
 
     # Convert results to a dataframe
     results = pd.DataFrame(results, index=list(independent.values())[0], columns=dependent.keys())
-
-    # Removing the temp json file
-    os.remove('config_files/temp.json')
 
     return results
 
@@ -209,7 +199,7 @@ def confidence_interval(config, num_runs=8, confidence=0.80):
 
         # If the column is of dtype boolean, then this analysis does
         # not apply
-        if col in ['mask', 'lockdown']:
+        if col in ["testing_enforced", "masks_enforced", "lockdown_enforced"]:
             continue
 
         # Analyze the results
@@ -300,6 +290,8 @@ def hospitalizations(data):
 def deaths(data):
     return data['dead'].apply(max).mean()
 
+def peak_quarantine(data):
+    return data['quarantined'].apply(max).mean()
 
 
 # Sample usage
@@ -313,7 +305,7 @@ if __name__ == "__main__":
         }, 
         {
             'peak cases': peak, 
-            'peak hospitalizations': hospitalizations, 
+            'peak quarantine': peak_quarantine, 
             'cumulative deaths': deaths
         }
     )
@@ -325,6 +317,8 @@ if __name__ == "__main__":
 
     # Confidence interval mode
     confidence_interval('config_files/main.json', confidence=0.9)
+
+    input()
 
 
     
