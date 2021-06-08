@@ -220,7 +220,7 @@ class simulation():
             print("Simulation has not run yet, returning empty arrays")
 
     def plot(self, plot_infected=True, plot_susceptible=True, plot_dead=True, plot_recovered=True, plot_new_infected=True,
-             plot_tested=True, plot_quarantined=True, plot_new_tests=True, plot_new_quarantined=True, plot_masks=True, 
+             plot_tested=True, plot_quarantined=True, plot_new_tests=True, plot_new_quarantined=True, plot_masks=True,
              plot_hospitalized=False, plot_lockdown=True, plot_testing=True, plot_students=True, log=False):
 
         self.check_has_run()
@@ -237,6 +237,8 @@ class simulation():
             plt.plot(days, self.track_recovered, label='recovered')
         if plot_dead:
             plt.plot(days, self.track_dead, label='dead')
+        if plot_hospitalized:
+            plt.plot(days, self.track_hospitalized, label='hospitalized')
         if plot_new_infected:
             plt.plot(days, self.track_new_infected, label='new infections')
         if plot_quarantined:
@@ -275,6 +277,6 @@ class simulation():
                       "susceptible":self.track_susceptible, "dead":self.track_dead, "quarantined":self.track_quarantined,
                       "inf_students":self.track_inf_students, "total_tested":self.track_tested,
                       "new_tested":self.track_new_tested, "hospitalized":self.track_hospitalized,
-                      "testing_enforced":self.track_testing, "masks_enforced":self.track_masks, 
+                      "testing_enforced":self.track_testing, "masks_enforced":self.track_masks,
                       "lockdown_enforced":self.track_lockdown}
         return returnDict
