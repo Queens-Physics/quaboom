@@ -6,11 +6,6 @@ from matplotlib import pyplot as plt
 import pickle
 import scipy.stats as st
 import json
-import os
-
-COLS = ["infected", "new_infected", "recovered", "susceptible", "dead",
-        "quarantined", "inf_students", "total_tested", "new_tested", 
-        "testing_enforced", "masks_enforced", "lockdown_enforced"]
 
 def async_simulation(config_file):
     """Does a single run of the simulation with the supplied configuration details.
