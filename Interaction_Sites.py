@@ -209,7 +209,7 @@ class Interaction_Sites:
 
         return will_visit_grade
 
-    def site_interaction(self, will_go_array, day):
+    def site_interaction(self, will_go_array, day, personal):
         '''Method that hosts interactions between people for an interaction site type.
 
         This method manages interactions between people going to the same interaction
@@ -252,9 +252,15 @@ class Interaction_Sites:
                 person_1_index = ppl_going[person_1]
                 person_2_index = ppl_going[person_2]
 
+                # Getting the Person objects and logging the contacts
+                p1_obj = self.pop.get_person(person_1_index)
+                p2_obj = self.pop.get_person(person_2_index)
+                p1_obj.log_contact(p2_obj, day, personal)
+                p2_obj.log_contact(p1_obj, day, personal)
+
                 # Check to make sure one is infected
-                person_1_infected = self.pop.get_person(person_1_index).is_infected()
-                person_2_infected = self.pop.get_person(person_2_index).is_infected()
+                person_1_infected = p1_obj.is_infected()
+                person_2_infected = p2_obj.is_infected()
 
                 if person_1_infected != person_2_infected:
                     # Have an interaction between those people
@@ -350,6 +356,12 @@ class Interaction_Sites:
             house_size = self.house_sites[i]
             housemembers = self.pop.get_population()[house_count:house_count+house_size]
             house_count += house_size
+
+            # Do interactions between the housemates
+            for member in housemembers:
+                for other in housemembers:
+                    if member is not other:
+                        member.log_contact(other, day, personal=True)
 
             # Check if anyone in the house is infected
             infected_housemembers = [i for i in range(house_size) if housemembers[i].is_infected()]

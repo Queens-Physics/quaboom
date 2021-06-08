@@ -37,7 +37,9 @@
         "demographics_file":"./data/dataK.json",
         "prob_has_mask":0.8,
         "prob_of_test":1,
-        "mask_type": {"Surgical": 0.2, "Non-surgical": 0.8}
+        "mask_type": {"Surgical": 0.2, "Non-surgical": 0.8},
+        "CT_ENABLED": true,
+        "CT_CAPACITY": 10000
     },
 
     "interaction_sites_data":{
@@ -66,7 +68,9 @@
         "max_ICU_days": 59,
         "min_ICU_days": 43,
         "max_die_days": 30,
-        "min_die_days": 14
+        "min_die_days": 14,
+        "CT_LENGTH": 2,
+        "CT_PROB_REMEMBER_PERSONAL_CONTACTS": 0.8
     }
 
 }

@@ -82,6 +82,17 @@ class Person(object):
         # Set the simulaiton object to access the variables
         self.sim_obj = sim_obj
 
+        # Dictionary of sets that stores all the contacts on a given day
+        self.all_contacts = dict()
+        self.personal_contacts = dict()
+
+        # Whether this person uses a contact tracing app
+        self.has_ct_app = random.random() < 1 #TODO add the "CT_APP_PROB" variable here
+
+    def __str__(self):
+        """Useful for debugging purposes. """
+        return f'Person #{self.index}'
+
     def is_infected(self):
         '''Method to retrieve if a person is infected. Returns True if infected, False if
         not.
@@ -347,3 +358,73 @@ class Person(object):
             return self.sim_obj.nonsurgical_inward_eff, self.sim_obj.nonsurgical_outward_eff
         else:
             return 1, 1  #Not wearing a mask so this will function will not effect their change of getting the virus
+
+    def log_contact(self, other, day: int, personal: bool = False) -> None:
+        """Logs a contact between two individuals.
+        
+        Parameters
+        ----------
+        other : Person
+            Person that self is interacting with
+        day : int
+            Current day in the simulation
+        personal : bool, default False
+            Whether or not the two people know each other
+        """
+
+        def add_contact(log):
+            if day in log.keys():
+                log[day].add(other)                
+            else:
+                log[day] = set([other])
+
+        add_contact(self.all_contacts)
+        if personal:
+            add_contact(self.personal_contacts)
+
+
+    def contact_tracing(self, day: int) -> None:
+        """Contacts everyone that they have had contact with. 
+        
+        Parameters
+        ----------
+        day : int
+            Current day in the simulation
+            
+        """
+
+        end = day + 1
+        beginning = end - 2 #TODO Add the variable "CT_LENGTH"
+
+        def get_contacts(log):
+            contacts = set()
+            for d in range(beginning, end):
+                if d in log.keys():
+                    contacts = contacts.union(log[d])
+            return contacts
+
+        # Personal contacts
+        personal_contacts = get_contacts(self.personal_contacts)
+        remembered_contacts = set()
+
+        # Notify all personal contacts   
+        for contact in personal_contacts:
+            if random.random() < 1: #TODO Add the variable "CT_PROB_REMEMBERING_PERSONAL_CONTACTS"
+                contact.positive_contact(day)
+                remembered_contacts.add(contact)
+
+        # CT apps
+        if self.has_ct_app:
+            # Gets all contacts that are from the CT app, minus those 
+            # already contacted because they were personal contacts
+            impersonal_contacts = get_contacts(self.all_contacts).difference(remembered_contacts)
+
+            for contact in impersonal_contacts:
+                contact.positive_contact(day)
+
+    def positive_contact(self, day):
+        '''Called when a person is notified of a positive contact with a
+        covid case. '''
+
+        #NOTE: Is this what we want to happen when a positive contact occurs?
+        self.set_quarantine(day) 
