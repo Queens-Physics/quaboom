@@ -105,7 +105,7 @@ class Population:
 
             self.student_indices[i] = i  # set their student status
             studenti = i-self.nPop+self.nStudents
-            self.students[studenti] = newStudent  # add to the list of students
+            self.students[studenti] = self.population[i]  # add to the list of students
             
             # Increment house info
             studHouseSize -= 1
