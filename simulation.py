@@ -1,5 +1,6 @@
 import json
 import warnings
+from timeit import default_timer as timer
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -75,6 +76,8 @@ class simulation():
         self.inter_sites = Interaction_Sites(self)
 
     def run(self):
+        # Get current time for measuring elapsed time of simulation.
+        beg_time = timer()
 
         # Initalize variables to flag state changes
         old_mask_mandate = self.policy.initial_mask_mandate
@@ -218,6 +221,10 @@ class simulation():
                                                        self.track_inf_students[day]))
 
         print('{:-<80}'.format(''))
+        time_seconds = timer() - beg_time
+        m, s = divmod(time_seconds, 60)
+        h, m = divmod(m, 60)
+        print('Time elapsed: {:02d}:{:02d}:{:02d}'.format(int(h), int(m), int(s)))
         print("At the end,", self.track_susceptible[-1], "never got it")
         print(self.track_dead[-1], "died")
         print(np.max(self.track_infected), "had it at the peak")
