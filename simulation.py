@@ -40,6 +40,8 @@ class simulation():
         self.track_lockdown = np.zeros(self.nDays, dtype=bool)
         self.track_testing = np.zeros(self.nDays, dtype=bool)
 
+        self.track_time = np.zeros(self.nDays, dtype=float) # time elapsed (in seconds) since start of simulation
+
         self.has_run = False                                 # Indicates if the sim has run yet
 
     def load_general_parameters(self, data_file):
@@ -201,6 +203,8 @@ class simulation():
                     # Update quarintine stuff
                     infected_person.check_quarantine(day)
 
+            self.track_time[day] = timer() - beg_time
+
             if self.verbose:
                 print(("Day: {}, "
                        "infected: {}, "
@@ -294,10 +298,12 @@ class simulation():
 
     def get_arrays(self):
         self.check_has_run()
-        returnDict = {"infected":self.track_infected, "new_infected":self.track_new_infected, "recovered":self.track_recovered,
-                      "susceptible":self.track_susceptible, "dead":self.track_dead, "quarantined":self.track_quarantined,
+        returnDict = {"infected":self.track_infected, "new_infected":self.track_new_infected,
+                      "recovered":self.track_recovered, "susceptible":self.track_susceptible,
+                      "dead":self.track_dead, "quarantined":self.track_quarantined,
                       "inf_students":self.track_inf_students, "total_tested":self.track_tested,
                       "new_tested":self.track_new_tested, "hospitalized":self.track_hospitalized,
                       "testing_enforced":self.track_testing, "masks_enforced":self.track_masks,
-                      "lockdown_enforced":self.track_lockdown}
+                      "lockdown_enforced":self.track_lockdown, "time_elapsed":self.track_time}
+
         return returnDict
