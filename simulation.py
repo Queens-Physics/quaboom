@@ -1,4 +1,5 @@
 import json
+import warnings
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -11,12 +12,14 @@ from Interaction_Sites import Interaction_Sites
 
 class simulation():
 
-    def __init__(self, config_file):
+    def __init__(self, config_file, verbose=True):
 
         self.load_general_parameters(config_file)
         self.load_disease_parameters(self.disease_config_file)
 
         self.init_classes() # Have to initalize the classes after we have all of the parameters
+
+        self.verbose = verbose # Whether or not to print daily simulation information.
 
         # Arrays to store the values during the simulation
         self.track_new_infected = np.zeros(self.nDays, dtype=int) # new infections
@@ -184,27 +187,38 @@ class simulation():
                 if infected_person.get_case_severity() == "Death":
                     is_dead = infected_person.check_dead(day)
                     if is_dead and not self.pop.update_dead(index=infected_person.get_index()):
-                        print("Did not die correctly")
+                        warnings.warn("Did not die correctly.", RuntimeWarning)
 
                 else:
                     # Update cured stuff
                     is_cured = infected_person.check_cured(day)
                     if is_cured and not self.pop.update_cured(index=infected_person.get_index()):
-                        print("Did not cure correctly")
+                        warnings.warn("Did not cure correctly.", RuntimeWarning)
 
                     # Update quarintine stuff
                     infected_person.check_quarantine(day)
 
-            print("Day: {}, infected: {}, recovered: {}, suceptible: {}, dead: {}, hospitalized: {}, tested: {}, total quarantined: {}, infected students: {}".format(day,
-                                                                                      self.track_infected[day],
-                                                                                      self.track_recovered[day],
-                                                                                      self.track_susceptible[day],
-                                                                                      self.track_dead[day],
-                                                                                      self.track_hospitalized[day],
-                                                                                      self.track_tested[day],
-                                                                                      self.track_quarantined[day],
-                                                                                      self.track_inf_students[day]))
-        print("At the end, ", self.track_susceptible[-1], "never got it")
+            if self.verbose:
+                print(("Day: {}, "
+                       "infected: {}, "
+                       "recovered: {}, "
+                       "suceptible: {}, "
+                       "dead: {}, "
+                       "hospitalized: {}, "
+                       "tested: {}, "
+                       "total quarantined: {}, "
+                       "infected students: {}").format(day,
+                                                       self.track_infected[day],
+                                                       self.track_recovered[day],
+                                                       self.track_susceptible[day],
+                                                       self.track_dead[day],
+                                                       self.track_hospitalized[day],
+                                                       self.track_tested[day],
+                                                       self.track_quarantined[day],
+                                                       self.track_inf_students[day]))
+
+        print('{:-<80}'.format(''))
+        print("At the end,", self.track_susceptible[-1], "never got it")
         print(self.track_dead[-1], "died")
         print(np.max(self.track_infected), "had it at the peak")
         print(self.track_tested[day], "have been tested")
@@ -217,7 +231,7 @@ class simulation():
     def check_has_run(self):
         # Check that the sim has run
         if not self.has_run:
-            print("Simulation has not run yet, returning empty arrays")
+            warnings.warn("Simulation has not run yet, returning empty arrays.", UserWarning)
 
     def plot(self, plot_infected=True, plot_susceptible=True, plot_dead=True, plot_recovered=True, plot_new_infected=True,
              plot_tested=True, plot_quarantined=True, plot_new_tests=True, plot_new_quarantined=True, plot_masks=True,
