@@ -1,4 +1,6 @@
 import json
+import warnings
+import subprocess
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -17,6 +19,8 @@ class simulation():
         self.load_disease_parameters(self.disease_config_file)
 
         self.init_classes() # Have to initalize the classes after we have all of the parameters
+
+        self.set_code_version() # Set the version of the code being used to run simulation.
 
         # Arrays to store the values during the simulation
         self.track_new_infected = np.zeros(self.nDays, dtype=int) # new infections
@@ -70,6 +74,63 @@ class simulation():
 
         # Initalize the interaction sites
         self.inter_sites = Interaction_Sites(self)
+
+    def set_code_version(self):
+        '''Method to get and set the version of the code used to run the simulation.
+
+        Note
+        ----
+        This function should really be using the --dirty flag, but only based
+        on certain files. For example, local modifications to the notebook do not
+        matter, whereas any modifications to the main classes could.
+        '''
+        # By default, set the code identifier to None.
+        self.code_id = None
+
+        # Describe the tag as best as possible.
+        # Fall back to commit ID in the case of no existing tag.
+        git_version_cmd = ['git', 'describe', '--always', '--tag', '--abbrev=12']
+
+        try:
+            self.code_id = subprocess.check_output(git_version_cmd, text=True)
+            self.code_id = self.code_id.strip()
+
+        except subprocess.CalledProcessError as e:
+            warnings.warn(("Command '{}' returned a non-zero "
+                           "exit code: {}.").format(' '.join(git_version_cmd),
+                                                    e.returncode))
+            print(e.output)
+
+        except OSError:
+            warnings.warn("Could not set code version from git.")
+
+        if self.code_id is not None:
+            # By default, assume no local modifications.
+            dirty = False
+
+            # Check for any differences.
+            git_dirty_cmd = ['git', 'diff', '--name-status', 'HEAD']
+
+            try:
+                diff_names = subprocess.check_output(git_dirty_cmd, text=True)
+                for line in diff_names.split('\n'):
+                    # Need to check for any whitespace, if entire line is whitespace ignore.
+                    name = line.split()[1] if line.strip() else ''
+
+                    if name and name not in ['RunEpidemicPlot.ipynb']:
+                        dirty = True
+
+            except subprocess.CalledProcessError as e:
+                warnings.warn(("Command '{}' returned a non-zero "
+                               "exit code: {}.").format(' '.join(git_dirty_cmd),
+                                                        e.returncode))
+                print(e.output)
+
+            except OSError:
+                warnings.warn("Could not set code version from git.")
+
+            if dirty:
+                self.code_id += '-dirty'
 
     def run(self):
 
@@ -220,8 +281,8 @@ class simulation():
             print("Simulation has not run yet, returning empty arrays")
 
     def plot(self, plot_infected=True, plot_susceptible=True, plot_dead=True, plot_recovered=True, plot_new_infected=True,
-             plot_tested=True, plot_quarantined=True, plot_new_tests=True, plot_new_quarantined=True, plot_masks=True, plot_lockdown=True, plot_testing=True,
-             plot_students=True, log=False):
+             plot_tested=True, plot_quarantined=True, plot_new_tests=True, plot_new_quarantined=True, plot_masks=True,
+             plot_hospitalized=False, plot_lockdown=True, plot_testing=True, plot_students=True, log=False):
 
         self.check_has_run()
 
@@ -237,6 +298,8 @@ class simulation():
             plt.plot(days, self.track_recovered, label='recovered')
         if plot_dead:
             plt.plot(days, self.track_dead, label='dead')
+        if plot_hospitalized:
+            plt.plot(days, self.track_hospitalized, label='hospitalized')
         if plot_new_infected:
             plt.plot(days, self.track_new_infected, label='new infections')
         if plot_quarantined:
@@ -274,6 +337,7 @@ class simulation():
         returnDict = {"infected":self.track_infected, "new_infected":self.track_new_infected, "recovered":self.track_recovered,
                       "susceptible":self.track_susceptible, "dead":self.track_dead, "quarantined":self.track_quarantined,
                       "inf_students":self.track_inf_students, "total_tested":self.track_tested,
-                      "new_tested":self.track_new_tested, "testing_enforced":self.track_testing,
-                      "masks_enforced":self.track_masks, "lockdown_enforced":self.track_lockdown}
+                      "new_tested":self.track_new_tested, "hospitalized":self.track_hospitalized,
+                      "testing_enforced":self.track_testing, "masks_enforced":self.track_masks,
+                      "lockdown_enforced":self.track_lockdown}
         return returnDict
