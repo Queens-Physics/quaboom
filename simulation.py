@@ -13,7 +13,7 @@ from Interaction_Sites import Interaction_Sites
 
 class simulation():
 
-    def __init__(self, config_file, verbose=True):
+    def __init__(self, config_file, verbose=False):
 
         self.load_general_parameters(config_file)
         self.load_disease_parameters(self.disease_config_file)
@@ -239,16 +239,49 @@ class simulation():
 
         self.has_run = True
 
-    def check_has_run(self):
-        # Check that the sim has run
-        if not self.has_run:
-            warnings.warn("Simulation has not run yet, returning empty arrays.", UserWarning)
+    def check_has_run(self, check, information="", fail=True):
+        '''Method to check whether or not the simulation has run.
+
+        Checks against the desired result.
+
+        Parameters
+        ----------
+        check : bool
+            The desired result (i.e., the simulation has or has not been run)
+        information : str
+            Any additional information to include in the warning or error message.
+        fail : bool
+            Whether or not to raise an exception upon an undesired result.
+
+        Returns
+        -------
+        self.has_run : bool
+            Whether or not the simulation has been run.
+        '''
+        if self.has_run == check:
+            return self.has_run
+
+        else:
+            if not self.has_run:
+                message = "Simulation has not been run."
+            else:
+                message = "Simulation has been run."
+
+            if information:
+                message += " " + information
+
+            if fail:
+                raise RuntimeError(message)
+            else:
+                warnings.warn(message, RuntimeWarning)
+
+        return self.has_run
 
     def plot(self, plot_infected=True, plot_susceptible=True, plot_dead=True, plot_recovered=True, plot_new_infected=True,
              plot_tested=True, plot_quarantined=True, plot_new_tests=True, plot_new_quarantined=True, plot_masks=True,
              plot_hospitalized=False, plot_lockdown=True, plot_testing=True, plot_students=True, log=False):
 
-        self.check_has_run()
+        self.check_has_run(check=True, information="Cannot make plots.", fail=True)
 
         _, ax = plt.subplots(figsize=(10,8), dpi=100)
         days = np.linspace(0,self.nDays, self.nDays, dtype=int)
@@ -297,7 +330,10 @@ class simulation():
         plt.xlabel("Days")
 
     def get_arrays(self):
-        self.check_has_run()
+        self.check_has_run(check=True,
+                           information="Cannot return zero-initialized arrays.",
+                           fail=True)
+
         returnDict = {"infected":self.track_infected, "new_infected":self.track_new_infected,
                       "recovered":self.track_recovered, "susceptible":self.track_susceptible,
                       "dead":self.track_dead, "quarantined":self.track_quarantined,
