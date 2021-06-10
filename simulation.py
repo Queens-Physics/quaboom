@@ -1,4 +1,6 @@
 import json
+import warnings
+import subprocess
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -17,6 +19,8 @@ class simulation():
         self.load_disease_parameters(self.disease_config_file)
 
         self.init_classes() # Have to initalize the classes after we have all of the parameters
+
+        self.set_code_version() # Set the version of the code being used to run simulation.
 
         # Arrays to store the values during the simulation
         self.track_new_infected = np.zeros(self.nDays, dtype=int) # new infections
@@ -70,6 +74,63 @@ class simulation():
 
         # Initalize the interaction sites
         self.inter_sites = Interaction_Sites(self)
+
+    def set_code_version(self):
+        '''Method to get and set the version of the code used to run the simulation.
+
+        Note
+        ----
+        This function should really be using the --dirty flag, but only based
+        on certain files. For example, local modifications to the notebook do not
+        matter, whereas any modifications to the main classes could.
+        '''
+        # By default, set the code identifier to None.
+        self.code_id = None
+
+        # Describe the tag as best as possible.
+        # Fall back to commit ID in the case of no existing tag.
+        git_version_cmd = ['git', 'describe', '--always', '--tag', '--abbrev=12']
+
+        try:
+            self.code_id = subprocess.check_output(git_version_cmd, text=True)
+            self.code_id = self.code_id.strip()
+
+        except subprocess.CalledProcessError as e:
+            warnings.warn(("Command '{}' returned a non-zero "
+                           "exit code: {}.").format(' '.join(git_version_cmd),
+                                                    e.returncode))
+            print(e.output)
+
+        except OSError:
+            warnings.warn("Could not set code version from git.")
+
+        if self.code_id is not None:
+            # By default, assume no local modifications.
+            dirty = False
+
+            # Check for any differences.
+            git_dirty_cmd = ['git', 'diff', '--name-status', 'HEAD']
+
+            try:
+                diff_names = subprocess.check_output(git_dirty_cmd, text=True)
+                for line in diff_names.split('\n'):
+                    # Need to check for any whitespace, if entire line is whitespace ignore.
+                    name = line.split()[1] if line.strip() else ''
+
+                    if name and name not in ['RunEpidemicPlot.ipynb']:
+                        dirty = True
+
+            except subprocess.CalledProcessError as e:
+                warnings.warn(("Command '{}' returned a non-zero "
+                               "exit code: {}.").format(' '.join(git_dirty_cmd),
+                                                        e.returncode))
+                print(e.output)
+
+            except OSError:
+                warnings.warn("Could not set code version from git.")
+
+            if dirty:
+                self.code_id += '-dirty'
 
     def run(self):
 
