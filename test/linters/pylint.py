@@ -13,12 +13,14 @@ def run_pylint():
                         'missing-module-docstring',
                         'invalid-name',
                         'attribute-defined-outside-init',
-                        'access-member-before-definition']
+                        'access-member-before-definition',
+                        'fixme']
 
     # List of files or directories to run the linter on.
     file_list = ['Interaction_Sites.py', 'Person.py', 'Policy.py',
                  'Population.py', 'simulation.py',
-                 'test_Person.py', 'test_Population.py']
+                 'test_Person.py', 'test_Population.py',
+                 'test/linters/pylint.py']
 
     # List of class names for which member attributes should not be checked (from pylint).
     ignored_classes = ['Interaction_Sites', 'Person', 'Policy',
