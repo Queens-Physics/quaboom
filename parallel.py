@@ -31,7 +31,7 @@ def async_simulation(config_file):
     sim.run()
     return sim.get_arrays()
 
-def run_async(num_runs, config_file, save_name='simulation.pkl'):
+def run_async(num_runs, config_file, save_name=None, num_cores=-1):
     """Runs multiple simulations in parallel using the supplied configuration settings.
 
     Parameters
@@ -42,6 +42,9 @@ def run_async(num_runs, config_file, save_name='simulation.pkl'):
         file containing the configuration details
     save_name : str, default='simulation.pkl'
         filename to save the simulation results upon completion
+    num_cores : int, default=-1
+        number of CPU cores to use when running the simulation. If -1, then use
+        all available cores.    
     
     Returns
     -------
@@ -49,14 +52,18 @@ def run_async(num_runs, config_file, save_name='simulation.pkl'):
         containing the results of the simulation in tabular format
     """
 
+    if num_cores == -1:
+        num_cores = multiprocessing.cpu_count()
+
     # Run all of the simulations
     multiprocessing.freeze_support()
-    with multiprocessing.Pool() as pool:
+    with multiprocessing.Pool(processes=num_cores) as pool:
         results = pool.map(async_simulation, (config_file for _ in range(num_runs)))
 
     df = pd.DataFrame(results)
-    with open(save_name, 'wb') as f:
-        pickle.dump(df, f)
+    if save_name != None:
+        with open(save_name, 'wb') as f:
+            pickle.dump(df, f)
 
     return df
 
@@ -95,7 +102,7 @@ def _config_editor(config, param_name, value):
 
 
 
-def tabular_mode(base_config_file, independent, dependent, num_runs=8):
+def tabular_mode(base_config_file, independent, dependent, num_runs=8, num_cores=8, save_name=None):
     """Automatically measures the impact of various public health measures on different metrics.
     
     Parameters
@@ -122,8 +129,18 @@ def tabular_mode(base_config_file, independent, dependent, num_runs=8):
             }
     num_runs : int, default = 8
         number of times to run the simulation per configuration
+    num_cores : int, default=-1
+        number of CPU cores to use when running the simulation. If -1, then use
+        all available cores.
+    save_name : str or list[str] or None, default None
+        The filename(s) to use when saving results from the simulation. If using
+        a string, the supplied string with act as the base filename with digits
+        differentiating the scenarios (eg. if save_name == "simulation", then the
+        saved files will have the form "simulation01.pkl", "simulation02.pkl", ...).
+        If using a list, then the list must be exactly as long as the number of values
+        for the independent variable, and each scenario will be saved under its 
+        corresponding filename. If None, then don't save any results. 
 
-    
     Returns
     -------
     pd.DataFrame
@@ -139,6 +156,11 @@ def tabular_mode(base_config_file, independent, dependent, num_runs=8):
     if len(independent) > 1:
         raise NotImplementedError("Number of independent variables must be 1.")
     
+    # Check if the length of the (only) independent variable is the same as the length
+    # of the save_name list.
+    if type(save_name) is list and len(save_name) != len(list(independent.values())[0]):
+        raise ValueError("'save_name' is a list and not the same length as the independent variable. Refer to the documentation for details.")
+
     indep_keys = independent.keys()
     indep_vals = independent.values()
     dep_funcs = dependent.values() 
@@ -151,7 +173,7 @@ def tabular_mode(base_config_file, independent, dependent, num_runs=8):
     results = []
 
     # Running through each scenario
-    for values in zip(*mesh):
+    for i, values in enumerate(zip(*mesh)):
 
         # Load the json file
         with open(base_config_file) as f:
@@ -162,7 +184,13 @@ def tabular_mode(base_config_file, independent, dependent, num_runs=8):
             _config_editor(temp_config, key, value)
 
         # Run the simulations: returns an DataFrame
-        data = run_async(num_runs, temp_config)
+        scenario_save_name = None
+        if type(save_name) is list:
+            scenario_save_name = save_name[i]
+        elif type(save_name) is str:
+            scenario_save_name = save_name + '{:02}'.format(i)
+        data = run_async(num_runs, temp_config, num_cores=num_cores, 
+                        save_name=scenario_save_name)
 
         # Processing the results to get the dependent measurements, add to results       
         result = [f(data) for f in dep_funcs]
@@ -173,7 +201,7 @@ def tabular_mode(base_config_file, independent, dependent, num_runs=8):
 
     return results
 
-def confidence_interval(config, num_runs=8, confidence=0.80):
+def confidence_interval(config, num_runs=8, confidence=0.80, num_cores=-1, save_name=None):
     """Plots the results of multiple simulations with confidence bands
     to give a better understanding of the trend of a given scenario.
     Displays a plot of the results.
@@ -188,9 +216,15 @@ def confidence_interval(config, num_runs=8, confidence=0.80):
         confidence of the confidence bands, ie. the proportion of results
         that fall within the confidence bands. The range of this parameter 
         should be (0, 1].
+    num_cores : int, default=-1
+        number of cores to use when running the simulation. If -1, then use
+        all available cores.
+    save_name: str or None, default None
+        name to save the results under. Default None, which means don't save
+        the results.
     """
 
-    result = run_async(num_runs, config)
+    result = run_async(num_runs, config, num_cores=num_cores, save_name=save_name)
 
     fig, ax = plt.subplots()
     z_score = st.norm.ppf(confidence)
@@ -277,20 +311,88 @@ def confidence_interval_complex(*scenarios, z=2):
 
 #### Metric calculator functions ####
 def peak(data):
+    """Calculates the number of people infected at the peak, averaged over the
+    simulations that were run. 
+    
+    Parameters
+    ----------
+    data : pandas.DataFrame
+        Output from running a simulation.
+
+    Returns
+    -------
+    float
+        number of people infected at the peak, averaged over the simulations that
+        were run.
+    """
     infections = data['infected']
     return infections.apply(max).mean()
 
 def peak_date(data):
+    """Calculates the date of the peak, averaged over the simulations that were
+    run. 
+    
+    Parameters
+    ----------
+    data : pandas.DataFrame
+        Output from running a simulation.
+
+    Returns
+    -------
+    float
+        date of the peak, averaged over the simulations that were run.
+    """
     infections = data['infected']
     return infections.apply(np.argmax).mean()
 
 def hospitalizations(data):
+    """Calculates the number of hospitalizations at the peak, averaged over the
+    simulations that were run.
+
+    Parameters
+    ----------
+    data : pandas.DataFrame
+        Output from running a simulation.
+    
+    Returns
+    -------
+    float
+        number of hospitalizations at the peak, averaged over the simulations that
+        were run.
+    """
+
     return data['hospitalized'].apply(max).mean()
 
 def deaths(data):
+    """The average number of total deaths over all simulations that were run.
+
+    Parameters
+    ----------
+    data : pandas.DataFrame
+        Output from running a simulation.
+    Returns
+    -------
+    float
+        average number of total deaths over all simulation that were run.
+    """
+
     return data['dead'].apply(max).mean()
 
 def peak_quarantine(data):
+    """The number of people in quarantine at the peak, averaged over the simulations
+    that were run.
+
+    Parameters
+    ----------
+    data : pandas.DataFrame
+        Output from running a simulation.
+
+    Returns
+    -------
+    float
+        number of people in quarantine at the peak, averaged over the simulations
+        that were run.
+    """
     return data['quarantined'].apply(max).mean()
 
 
