@@ -12,13 +12,15 @@ COLS = ["infected", "new_infected", "recovered", "susceptible", "dead",
         "quarantined", "inf_students", "total_tested", "new_tested", 
         "testing_enforced", "masks_enforced", "lockdown_enforced"]
 
-def async_simulation(config_file):
+def async_simulation(config_file, verbose=False):
     """Does a single run of the simulation with the supplied configuration details.
 
     Parameters
     ----------
     config_file : str
         filename for the configuration file
+    verbose : bool, default False
+        whether to output information from each day of the simulation
     
     Returns
     -------
@@ -27,11 +29,11 @@ def async_simulation(config_file):
 
     """
 
-    sim = simulation(config_file)
+    sim = simulation(config_file, verbose=verbose)
     sim.run()
     return sim.get_arrays()
 
-def run_async(num_runs, config_file, save_name=None, num_cores=-1):
+def run_async(num_runs, config_file, save_name=None, num_cores=-1, verbose=False):
     """Runs multiple simulations in parallel using the supplied configuration settings.
 
     Parameters
@@ -44,7 +46,9 @@ def run_async(num_runs, config_file, save_name=None, num_cores=-1):
         filename to save the simulation results upon completion
     num_cores : int, default=-1
         number of CPU cores to use when running the simulation. If -1, then use
-        all available cores.    
+        all available cores.   
+    verbose : bool, default False
+        whether to output information from each day of the simulation
     
     Returns
     -------
@@ -58,7 +62,7 @@ def run_async(num_runs, config_file, save_name=None, num_cores=-1):
     # Run all of the simulations
     multiprocessing.freeze_support()
     with multiprocessing.Pool(processes=num_cores) as pool:
-        results = pool.map(async_simulation, (config_file for _ in range(num_runs)))
+        results = pool.starmap(async_simulation, ((config_file, verbose) for _ in range(num_runs)))
 
     df = pd.DataFrame(results)
     if save_name != None:
@@ -102,7 +106,7 @@ def _config_editor(config, param_name, value):
 
 
 
-def tabular_mode(base_config_file, independent, dependent, num_runs=8, num_cores=8, save_name=None):
+def tabular_mode(base_config_file, independent, dependent, num_runs=8, num_cores=8, save_name=None, verbose=False):
     """Automatically measures the impact of various public health measures on different metrics.
     
     Parameters
@@ -139,7 +143,9 @@ def tabular_mode(base_config_file, independent, dependent, num_runs=8, num_cores
         saved files will have the form "simulation01.pkl", "simulation02.pkl", ...).
         If using a list, then the list must be exactly as long as the number of values
         for the independent variable, and each scenario will be saved under its 
-        corresponding filename. If None, then don't save any results. 
+        corresponding filename. If None, then don't save any results.
+    verbose : bool, default False
+        whether to output information from each day of the simulation
 
     Returns
     -------
@@ -190,7 +196,7 @@ def tabular_mode(base_config_file, independent, dependent, num_runs=8, num_cores
         elif type(save_name) is str:
             scenario_save_name = save_name + '{:02}'.format(i)
         data = run_async(num_runs, temp_config, num_cores=num_cores, 
-                        save_name=scenario_save_name)
+                        save_name=scenario_save_name, verbose=verbose)
 
         # Processing the results to get the dependent measurements, add to results       
         result = [f(data) for f in dep_funcs]
@@ -201,7 +207,7 @@ def tabular_mode(base_config_file, independent, dependent, num_runs=8, num_cores
 
     return results
 
-def confidence_interval(config, num_runs=8, confidence=0.80, num_cores=-1, save_name=None):
+def confidence_interval(config, num_runs=8, confidence=0.80, num_cores=-1, save_name=None, verbose=False):
     """Plots the results of multiple simulations with confidence bands
     to give a better understanding of the trend of a given scenario.
     Displays a plot of the results.
@@ -222,9 +228,11 @@ def confidence_interval(config, num_runs=8, confidence=0.80, num_cores=-1, save_
     save_name: str or None, default None
         name to save the results under. Default None, which means don't save
         the results.
+    verbose : bool, default False
+        whether to output information from each day of the simulation
     """
 
-    result = run_async(num_runs, config, num_cores=num_cores, save_name=save_name)
+    result = run_async(num_runs, config, num_cores=num_cores, save_name=save_name, verbose=verbose)
 
     fig, ax = plt.subplots()
     z_score = st.norm.ppf(confidence)
