@@ -389,7 +389,6 @@ class Population:
         return didWork
     
     def infect_incoming_students(self, indices, day):
-        print(indices)
         for i in indices:
             daysAgo = np.random.randint(13)
             self.infect(index=i, day=day-daysAgo)

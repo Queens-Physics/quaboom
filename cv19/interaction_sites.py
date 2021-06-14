@@ -197,8 +197,7 @@ class Interaction_Sites:
         num_sites = round(self.pop.get_population_size()/sites_per_pop)
         grade_sites = [[] for i in range(num_sites)]
 
-        for student in self.pop.get_students(): ## population?
-            #if (student.job == 'Student'):
+        for student in self.pop.get_students():
             # Assign people to this specific site
             num_diff_sites = abs(round(np.random.normal(loyalty_mean, loyalty_std)))
             num_diff_sites = num_diff_sites if num_diff_sites <= num_sites else num_sites
