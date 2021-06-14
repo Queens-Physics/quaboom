@@ -6,9 +6,6 @@ from copy import deepcopy
 
 import numpy as np
 
-# ratio of queen's students to go to the main interaction sites
-ST_RATIO = 2
-
 class Interaction_Sites:
     '''A class designed to host interactions between persons within specific locations.
 
@@ -155,7 +152,7 @@ class Interaction_Sites:
         for person in self.pop.get_population():
             if (person.job == 'Student'):
                 if (students_interact):
-                    loyalty_mean = loyalty_mean/ST_RATIO
+                    loyalty_mean = loyalty_mean/self.student_sites_ratio
                 else:
                     loyalty_mean = 0
                     loyalty_std = 0
@@ -399,7 +396,6 @@ class Interaction_Sites:
             # Get ppl in house
             housemembers = self.pop.get_population()[house_count:house_count+house_size]
             house_count += house_size
-            # eventually this should not be consecutive
 
             # Check if anyone in the house is infected
             if any(housemembers[i].is_infected() for i in range(house_size)):
@@ -438,7 +434,7 @@ class Interaction_Sites:
             # Check if anyone in the house is infected
             infected_housemembers = [i for i in range(house_size) if housemembers[i].is_infected() == True]
 
-            if len(infected_housemembers)>0:
+            if len(infected_housemembers) > 0:
                 healthy_housemembers = [i for i in range(house_size) if housemembers[i].is_infected() == False]
 
                 for person in healthy_housemembers:

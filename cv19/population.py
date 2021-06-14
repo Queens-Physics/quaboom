@@ -77,8 +77,7 @@ class Population:
                 houseIndex += 1
                 self.household[houseIndex] = houseSize
                 
-        # here the idea is to keep the regular people houses separate from the student houses...
-        # maybe make two separate lists?
+        # here the idea is to keep the regular people houses separate from the student houses
         
         # Make sure last household number is right (when it runs out of people to fill)
         if houseSize != self.household[houseIndex]:
@@ -205,9 +204,21 @@ class Population:
         return self.population
     
     def get_students(self):
+        '''Method to retrieve the list of students as a list of persons.
+
+        Returns
+        -------
+        self.students: :obj:`np.array` of :obj:`Person`
+        '''
         return self.students
     
     def get_student_indices(self):
+        '''Method to retrieve a list of the student indices
+
+        Returns
+        -------
+        self.has_mask: :obj:`np.array` of :obj:`int`
+        '''
         return self.student_indices[self.student_indices != NULL_ID]
     
     def remove_visitors(self, indices):
@@ -272,6 +283,12 @@ class Population:
         return self.quarantined[self.quarantined != NULL_ID]
 
     def get_residences(self):
+        '''Method to retrieve a list of the houses that are part of the residences.
+
+        Returns
+        -------
+        self.res_houses: :obj:`np.array` of *something* ? not sure yet, this is a work in progress
+        '''
         return self.res_houses[self.res_houses != NULL_ID]
 
     # Count the number of people in each bin
@@ -294,6 +311,12 @@ class Population:
         return np.count_nonzero(self.infected != NULL_ID)
 
     def count_infected_students(self):
+        '''Method to count how many infected students there are.
+
+        Returns
+        -------
+        infStudents: :obj:`int`
+        '''
         infStudents = 0
         for i in range (self.nPop):
             if (self.student_indices[i] != NULL_ID and self.infected[i] != NULL_ID):
@@ -366,6 +389,7 @@ class Population:
         return didWork
     
     def infect_incoming_students(self, indices, day):
+        print(indices)
         for i in indices:
             daysAgo = np.random.randint(13)
             self.infect(index=i, day=day-daysAgo)
@@ -400,6 +424,19 @@ class Population:
         return True
 
     def die(self, index, day):
+        '''Method to kill a person if they should be dead.
+        
+        Parameters
+        ----------
+        index : int
+            The index of the person in the population who is meant to die.
+        day : int
+            The day value that this function is being called on in the encompassing simulation class.
+
+        Returns
+        -------
+        didWork: :obj:`bool`
+        '''
         didWork = self.population[index].check_dead(day)
         if didWork:
             self.infected[index] = NULL_ID
@@ -408,6 +445,17 @@ class Population:
         return didWork
 
     def update_dead(self, index):
+        '''Method to update the list of the dead population at the specified index.
+        
+        Parameters
+        ----------
+        index : int
+            The index of the person in the population who is meant to die.
+
+        Returns
+        -------
+        True if the value at the index in the dead list was changed, False if it was not changed.
+        '''
         if self.dead[index] == index or not self.population[index].is_dead():
             return False
         self.infected[index] = NULL_ID

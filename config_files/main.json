@@ -9,7 +9,9 @@
         "N_VIS_OPTION":[ 0, 1, 2, 3 ],
         "N_VIS_PROB":[ 0.7, 0.17, 0.08, 0.05],
         "vis_age_upper":60,
-        "vis_age_lower":16
+        "vis_age_lower":16,
+        "inf_students_upper":20,
+        "inf_students_lower":2
     },
 
     "policy_data":
@@ -46,7 +48,8 @@
         "grade_loyalty_means":{"A":4, "B":1, "C":1, "LECT":7, "STUDY":2, "FOOD":1, "RES":9},
         "grade_loyalty_stds":{"A":2, "B":1, "C":0.2, "LECT":2, "STUDY":1, "FOOD":0.5, "RES":1},
         "students_participate":{"A":true, "B":true, "C":false},
-        "quarantine_isolation_factor":0
+        "quarantine_isolation_factor":0,
+        "student_sites_ratio":2
     },
 
     "person_data":{
