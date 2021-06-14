@@ -1,33 +1,44 @@
+import json
+import warnings
+import subprocess
+from timeit import default_timer as timer
+
 import numpy as np
 import matplotlib.pyplot as plt
-import json
 
-import Person
-import Population
-import Interaction_Sites
-import Policy
+from Person import Person
+from Population import Population
+from Policy import Policy
+from Interaction_Sites import Interaction_Sites
+
 
 class simulation():
-    
-    def __init__(self, config_file):
-        
-        self.load_parameters(config_file)
+
+    def __init__(self, config_file, verbose=False):
+
+        self.load_general_parameters(config_file)
+        self.load_disease_parameters(self.disease_config_file)
+
         self.init_classes() # Have to initalize the classes after we have all of the parameters
 
-        # Arrays to store the values during the simulation                   
-        self.track_new_infected = np.zeros(self.nDays, dtype=int) # new infections 
-        self.track_infected = np.zeros(self.nDays, dtype=int)     # currently infected 
+        self.verbose = verbose # Whether or not to print daily simulation information.
+
+        self.set_code_version() # Set the version of the code being used to run simulation.
+
+        # Arrays to store the values during the simulation
+        self.track_new_infected = np.zeros(self.nDays, dtype=int) # new infections
+        self.track_infected = np.zeros(self.nDays, dtype=int)     # currently infected
         self.track_susceptible = np.zeros(self.nDays, dtype=int)  # never been exposed
         self.track_recovered = np.zeros(self.nDays, dtype=int)    # total recovered
         self.track_dead = np.zeros(self.nDays, dtype=int)         # total deaths
         self.track_hospitalized = np.zeros(self.nDays, dtype=int) # total hospitalizations
-        self.track_quarantined = np.zeros(self.nDays, dtype=int)  # population currently in quarantine 
+        self.track_quarantined = np.zeros(self.nDays, dtype=int)  # population currently in quarantine
         self.track_new_quarantined = np.zeros(self.nDays, dtype=int)
         self.track_tested = np.zeros(self.nDays, dtype=int)       # total tested individuals
-        self.track_new_tested = np.zeros(self.nDays, dtype=int)
+        self.track_new_tested = np.zeros(self.nDays, dtype=int)   # new tested per day
         self.track_testing_wait_list = np.zeros(self.nDays, dtype=int) # counts the number of people waiting to get tests each day
         self.track_inf_students = np.zeros(self.nDays, dtype=int)
-        
+
         self.track_masks = np.zeros(self.nDays, dtype=bool)
         self.track_lockdown = np.zeros(self.nDays, dtype=bool)
         self.track_testing = np.zeros(self.nDays, dtype=bool)
@@ -36,34 +47,104 @@ class simulation():
         self.track_virus_type_none = np.zeros(self.nDays, dtype=object)
         self.track_virus_type_general = np.zeros(self.nDays, dtype=object)
         self.track_virus_type_B117 = np.zeros(self.nDays, dtype=object)
-        
+
+        self.track_time = np.zeros(self.nDays, dtype=float) # time elapsed (in seconds) since start of simulation
+
         self.has_run = False                                 # Indicates if the sim has run yet
-        
-    def load_parameters(self, filename):
-        with open(filename) as file:
-            self.parameters = json.load(file)
-        
+
+    def load_general_parameters(self, data_file):
+        if isinstance(data_file, str):
+            with open(data_file) as file:
+                self.parameters = json.load(file)
+        elif isinstance(data_file, dict):
+            self.parameters = data_file
+        else:
+            raise TypeError("Please supply dictionary object or file path.")
+
         #### Do the simulation parameters ####
         attributes = self.parameters["simulation_data"].keys()
-        for attr in attributes: 
+        for attr in attributes:
             setattr(self, attr, self.parameters["simulation_data"][attr])
-            
+
         #### Store the constant person parameters here so they are not duplicated ####
         person_attributes = self.parameters["person_data"].keys()
         for attr in person_attributes:
             setattr(self, attr, self.parameters["person_data"][attr])
-        
+
+    def load_disease_parameters(self, filename):
+        with open(filename) as file:
+            self.disease_parameters = json.load(file)
+
     def init_classes(self):
         # Initalize the policy class
-        self.policy = Policy.Policy(self)
+        self.policy = Policy(self)
 
         # Initialize the population
-        self.pop = Population.Population(self)
+        self.pop = Population(self)
 
         # Initalize the interaction sites
-        self.inter_sites = Interaction_Sites.Interaction_Sites(self)
-        
+        self.inter_sites = Interaction_Sites(self)
+
+    def set_code_version(self):
+        '''Method to get and set the version of the code used to run the simulation.
+
+        Note
+        ----
+        This function should really be using the --dirty flag, but only based
+        on certain files. For example, local modifications to the notebook do not
+        matter, whereas any modifications to the main classes could.
+        '''
+        # By default, set the code identifier to None.
+        self.code_id = None
+
+        # Describe the tag as best as possible.
+        # Fall back to commit ID in the case of no existing tag.
+        git_version_cmd = ['git', 'describe', '--always', '--tag', '--abbrev=12']
+
+        try:
+            self.code_id = subprocess.check_output(git_version_cmd, text=True)
+            self.code_id = self.code_id.strip()
+
+        except subprocess.CalledProcessError as e:
+            warnings.warn(("Command '{}' returned a non-zero "
+                           "exit code: {}.").format(' '.join(git_version_cmd),
+                                                    e.returncode))
+            print(e.output)
+
+        except OSError:
+            warnings.warn("Could not set code version from git.")
+
+        if self.code_id is not None:
+            # By default, assume no local modifications.
+            dirty = False
+
+            # Check for any differences.
+            git_dirty_cmd = ['git', 'diff', '--name-status', 'HEAD']
+
+            try:
+                diff_names = subprocess.check_output(git_dirty_cmd, text=True)
+                for line in diff_names.split('\n'):
+                    # Need to check for any whitespace, if entire line is whitespace ignore.
+                    name = line.split()[1] if line.strip() else ''
+
+                    if name and name not in ['RunEpidemicPlot.ipynb']:
+                        dirty = True
+
+            except subprocess.CalledProcessError as e:
+                warnings.warn(("Command '{}' returned a non-zero "
+                               "exit code: {}.").format(' '.join(git_dirty_cmd),
+                                                        e.returncode))
+                print(e.output)
+
+            except OSError:
+                warnings.warn("Could not set code version from git.")
+
+            if dirty:
+                self.code_id += '-dirty'
+
     def run(self):
+        # Get current time for measuring elapsed time of simulation.
+        beg_time = timer()
 
         # Initalize variables to flag state changes
         old_mask_mandate = self.policy.initial_mask_mandate
@@ -84,11 +165,11 @@ class simulation():
             self.track_tested[day] = self.pop.count_tested()
             self.track_quarantined[day] = self.pop.count_quarantined()
             self.track_testing_wait_list[day] = self.pop.get_testing_wait_list()
-            
+
             self.track_masks[day] = old_mask_mandate
             self.track_lockdown[day] = old_lockdown_mandate
             self.track_testing[day] = old_testing_mandate
-            
+
             self.track_new_quarantined[day] = self.pop.get_new_quarantined()
             self.track_inf_students[day] = self.pop.count_infected_students()
             
@@ -116,16 +197,16 @@ class simulation():
                 print("Day: {}, Lockdown: {}".format(day, lockdown))
             old_lockdown_mandate = lockdown
 
-            testing_ON = self.policy.update_testing(day)   
-            if testing_ON != old_testing_mandate: 
+            testing_ON = self.policy.update_testing(day)
+            if testing_ON != old_testing_mandate:
                 print("Day: {}, Testing: {}".format(day, testing_ON))
             old_testing_mandate = testing_ON
-            
+
             students_go = self.policy.check_students(day=day)
             if students_go != old_student_mandate:
                 print("Day: {}, Uni Mandate: {}".format(day, students_go))
             old_student_mandate = students_go
-            
+
             ############### VISITOR STUFF ###############
             #add a random number of visitors to the population
             num_vis = np.random.choice(a=self.N_VIS_OPTION, p=self.N_VIS_PROB)
@@ -134,11 +215,11 @@ class simulation():
             for i in range(0, num_vis):
                 vis_age = np.random.randint(self.vis_age_lower, self.vis_age_upper)
 
-                visitor = Person.Person(index=i+self.nPop, sim_obj=self, infected=True, recovered=False, dead=False,
-                                        quarantined=False, quarantined_day=None, infected_day=None, recovered_day=None,
-                                        death_day=None, others_infected=None, cure_days=None, recent_infections=None, 
-                                        age=vis_age, job=None,house_index=None, isolation_tendencies=0.2, case_severity='Mild',
-                                        has_mask=True, virus_type="B117")
+                visitor = Person(index=i+self.nPop, sim_obj=self, infected=True, recovered=False, dead=False,
+                                 quarantined=False, quarantined_day=None, infected_day=None, recovered_day=None,
+                                 death_day=None, others_infected=None, cure_days=None, recent_infections=None,
+                                 age=vis_age, job=None,house_index=None, isolation_tendencies=0.2, case_severity='Mild',
+                                 has_mask=True, virus_type="B117")
                 self.pop.population.append(visitor)
 
             ############### INTERACTION SITES STUFF ###############
@@ -153,56 +234,74 @@ class simulation():
                 will_visit_study = self.inter_sites.will_visit_site(self.inter_sites.get_study_sites(),
                                                                     self.will_go_prob["STUDY"])
                 self.inter_sites.site_interaction(will_visit_study, day)
-                will_visit_food = self.inter_sites.will_visit_site(self.inter_sites.get_food_sites(), 
+                will_visit_food = self.inter_sites.will_visit_site(self.inter_sites.get_food_sites(),
                                                                    self.will_go_prob["FOOD"])
                 self.inter_sites.site_interaction(will_visit_food, day)
                 if not lockdown:
                     will_visit_lects = self.inter_sites.will_visit_site(self.inter_sites.get_lect_sites(),
                                                                         self.will_go_prob["LECT"])
                     self.inter_sites.site_interaction(will_visit_lects, day)
-                    
+
             # Manage at home interactions
             self.inter_sites.house_interact(day)
 
-            # Manage testing sites        
-            if (testing_ON): 
+            # Manage testing sites
+            if testing_ON:
                 tests = self.policy.get_num_tests(self.track_testing_wait_list[day])
                 self.inter_sites.testing_site(tests, day)
-            
+
             # Manage Quarantine
             self.pop.update_quarantine(day)
 
             ############### UPDATE POPULATION ###############
             # remove the guest visitors
             self.pop.remove_visitors(visitors_ind)
-            for index in self.pop.get_infected(): 
-                infected_person = self.pop.get_person(index=index) 
+            for index in self.pop.get_infected():
+                infected_person = self.pop.get_person(index=index)
 
                 if infected_person.get_case_severity() == "Death":
                     is_dead = infected_person.check_dead(day)
-                    if is_dead and self.pop.update_dead(index=infected_person.get_index()) == False:
-                        print("Did not die correctly")
+                    if is_dead and not self.pop.update_dead(index=infected_person.get_index()):
+                        warnings.warn("Did not die correctly.", RuntimeWarning)
 
-                else:     
+                else:
                     # Update cured stuff
                     is_cured = infected_person.check_cured(day)
-                    if is_cured and self.pop.update_cured(index=infected_person.get_index()) == False:
-                        print("Did not cure correctly")
+                    if is_cured and not self.pop.update_cured(index=infected_person.get_index()):
+                        warnings.warn("Did not cure correctly.", RuntimeWarning)
 
                     # Update quarintine stuff
-                    is_quarantined = infected_person.check_quarantine(day)
+                    infected_person.check_quarantine(day)
 
-            print("Day: {}, infected: {}, recovered: {}, suceptible: {}, dead: {}, hospitalized: {}, tested: {}, total quarantined: {}, infected students: {}, variants: {}".format(day, 
-                                                                                      self.track_infected[day],
-                                                                                      self.track_recovered[day],
-                                                                                      self.track_susceptible[day],
-                                                                                      self.track_dead[day], 
-                                                                                      self.track_hospitalized[day],
-                                                                                      self.track_tested[day],
-                                                                                      self.track_quarantined[day],
-                                                                                      self.track_inf_students[day],
-                                                                                      self.track_virus_type[day]))
-        print("At the end, ", self.track_susceptible[-1], "never got it")
+            self.track_time[day] = timer() - beg_time
+
+            if self.verbose:
+                print(("Day: {}, "
+                       "infected: {}, "
+                       "recovered: {}, "
+                       "suceptible: {}, "
+                       "dead: {}, "
+                       "hospitalized: {}, "
+                       "tested: {}, "
+                       "total quarantined: {}, "
+                       "infected students: {}, "
+                       "variants: {}").format(day,
+                                                       self.track_infected[day],
+                                                       self.track_recovered[day],
+                                                       self.track_susceptible[day],
+                                                       self.track_dead[day],
+                                                       self.track_hospitalized[day],
+                                                       self.track_tested[day],
+                                                       self.track_quarantined[day],
+                                                       self.track_inf_students[day],
+                                                       self.track_virus_type[day]))
+
+        print('{:-<80}'.format(''))
+        time_seconds = timer() - beg_time
+        m, s = divmod(time_seconds, 60)
+        h, m = divmod(m, 60)
+        print('Time elapsed: {:02d}:{:02d}:{:02d}'.format(int(h), int(m), int(s)))
+        print("At the end,", self.track_susceptible[-1], "never got it")
         print(self.track_dead[-1], "died")
         print(np.max(self.track_infected), "had it at the peak")
         print(self.track_tested[day], "have been tested")
@@ -212,54 +311,117 @@ class simulation():
         print("The breakdown of variants is", np.max(self.track_virus_type[day]))
 
         self.has_run = True
-        
-    def check_has_run(self):
-        # Check that the sim has run
-        if self.has_run==False:
-            print("Simulation has not run yet, returning empty arrays")
 
-    def plot(self, plot_infected=True, plot_susceptible=True, plot_dead=True, plot_recovered=True, plot_new_infected=True, 
-             plot_tested=True, plot_quarantined=True, plot_masks=True, plot_lockdown=True, plot_testing=True, 
-             plot_students=True, plot_virus_type_none=True, plot_virus_type_general=True, plot_virus_type_B117=True, 
+    def check_has_run(self, check, information="", fail=True):
+        '''Method to check whether or not the simulation has run.
+
+        Checks against the desired result.
+
+        Parameters
+        ----------
+        check : bool
+            The desired result (i.e., the simulation has or has not been run)
+        information : str
+            Any additional information to include in the warning or error message.
+        fail : bool
+            Whether or not to raise an exception upon an undesired result.
+
+        Returns
+        -------
+        self.has_run : bool
+            Whether or not the simulation has been run.
+        '''
+        if self.has_run == check:
+            return self.has_run
+
+        else:
+            if not self.has_run:
+                message = "Simulation has not been run."
+            else:
+                message = "Simulation has been run."
+
+            if information:
+                message += " " + information
+
+            if fail:
+                raise RuntimeError(message)
+            else:
+                warnings.warn(message, RuntimeWarning)
+
+        return self.has_run
+
+    def plot(self, plot_infected=True, plot_susceptible=True, plot_dead=True, plot_recovered=True, plot_new_infected=True,
+             plot_tested=True, plot_quarantined=True, plot_new_tests=True, plot_new_quarantined=True, plot_masks=True,
+             plot_hospitalized=False, plot_lockdown=True, plot_testing=True, plot_students=True,
+             plot_virus_type_none=True, plot_virus_type_general=True, plot_virus_type_B117=True,
              log=False):
-        self.check_has_run()
 
-        fig, ax = plt.subplots(figsize=(10,8), dpi=100)
+        self.check_has_run(check=True, information="Cannot make plots.", fail=True)
+
+        _, ax = plt.subplots(figsize=(10,8), dpi=100)
         days = np.linspace(0,self.nDays, self.nDays, dtype=int)
-        
+
         # Plot the tracking arrays
-        if plot_infected: plt.plot(days, self.track_infected, label='infected')
-        if plot_susceptible: plt.plot(days, self.track_susceptible, label='susceptible')
-        if plot_recovered: plt.plot(days, self.track_recovered, label='recovered')
-        if plot_dead: plt.plot(days, self.track_dead, label='dead')
-        if plot_new_infected: plt.plot(days, self.track_new_infected, label='new infections')
-        if plot_quarantined: plt.plot(days, self.track_quarantined, label='quarantined')
-        if plot_tested: plt.plot(days, self.track_tested, label='total tests')
-        if plot_students: plt.plot(days, self.track_inf_students, label="infected students")
-        if plot_virus_type_none: plt.plot(days, self.track_virus_type_none, label="not infected")
-        if plot_virus_type_general: plt.plot(days, self.track_virus_type_general, label="general")
-        if plot_virus_type_B117: plt.plot(days, self.track_virus_type_B117, label="B117")     
-            
+        if plot_infected:
+            plt.plot(days, self.track_infected, label='infected')
+        if plot_susceptible:
+            plt.plot(days, self.track_susceptible, label='susceptible')
+        if plot_recovered:
+            plt.plot(days, self.track_recovered, label='recovered')
+        if plot_dead:
+            plt.plot(days, self.track_dead, label='dead')
+        if plot_hospitalized:
+            plt.plot(days, self.track_hospitalized, label='hospitalized')
+        if plot_new_infected:
+            plt.plot(days, self.track_new_infected, label='new infections')
+        if plot_quarantined:
+            plt.plot(days, self.track_quarantined, label='quarantined')
+        if plot_tested:
+            plt.plot(days, self.track_tested, label='total tests')
+        if plot_new_tests:
+            plt.plot(days, self.track_new_tested, label='new tests')
+        if plot_new_quarantined:
+            plt.plot(days, self.track_new_quarantined, label='new quarantined')
+        if plot_students:
+            plt.plot(days, self.track_inf_students, label="infected students")
+        if plot_virus_type_none: 
+            plt.plot(days, self.track_virus_type_none, label="not infected")
+        if plot_virus_type_general: 
+            plt.plot(days, self.track_virus_type_general, label="general")
+        if plot_virus_type_B117: 
+            plt.plot(days, self.track_virus_type_B117, label="B117")  
+
         # Indicate when certain mandates were in place
-        if plot_masks: 
-            plt.fill_between(days, 0, 1, where=self.track_masks, alpha=0.3, 
+        if plot_masks:
+            plt.fill_between(days, 0, 1, where=self.track_masks, alpha=0.3,
                              transform=ax.get_xaxis_transform(), label="masks required")
-        if plot_testing: 
-            plt.fill_between(days, 0, 1, where=self.track_testing, alpha=0.3, 
+        if plot_testing:
+            plt.fill_between(days, 0, 1, where=self.track_testing, alpha=0.3,
                              transform=ax.get_xaxis_transform(), label="testing performed")
-        if plot_lockdown: 
-            plt.fill_between(days, 0, 1, where=self.track_lockdown, alpha=0.3, 
+        if plot_lockdown:
+            plt.fill_between(days, 0, 1, where=self.track_lockdown, alpha=0.3,
                              transform=ax.get_xaxis_transform(), label="lockdown implemented")
 
         # Final graph formatting
         plt.grid()
         plt.legend()
-        if log: plt.yscale("log")
+        if log:
+            plt.yscale("log")
         plt.ylabel("People")
         plt.xlabel("Days")
 
     def get_arrays(self):
-        self.check_has_run()
+        self.check_has_run(check=True,
+                           information="Cannot return zero-initialized arrays.",
+                           fail=True)
 
-        return (self.track_infected, self.track_new_infected, self.track_recovered, self.track_susceptible, self.track_dead, 
-                self.track_tested, self.track_quarantined, self.track_inf_students, self.track_masks, self.track_lockdown, self.track_virus_type)
+        returnDict = {"infected":self.track_infected, "new_infected":self.track_new_infected,
+                      "recovered":self.track_recovered, "susceptible":self.track_susceptible,
+                      "dead":self.track_dead, "quarantined":self.track_quarantined,
+                      "inf_students":self.track_inf_students, "total_tested":self.track_tested,
+                      "new_tested":self.track_new_tested, "hospitalized":self.track_hospitalized,
+                      "testing_enforced":self.track_testing, "masks_enforced":self.track_masks,
+                      "lockdown_enforced":self.track_lockdown, "time_elapsed":self.track_time,
+                      "virus_type":self.track_virus_type}
+
+        return returnDict
