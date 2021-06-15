@@ -344,7 +344,7 @@ class simulation():
 
         self.check_has_run(check=True, information="Cannot make plots.", fail=True)
 
-        _, ax = plt.subplots(figsize=(7,5), dpi=100)
+        _, ax = plt.subplots(figsize=(8,6), dpi=100)
         days = np.linspace(0,self.nDays, self.nDays, dtype=int)
 
         # Plot the tracking arrays
