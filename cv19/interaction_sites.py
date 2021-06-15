@@ -150,8 +150,8 @@ class Interaction_Sites:
         grade_sites = [[] for _ in range(num_sites)]
 
         for person in self.pop.get_population():
-            if (person.job == 'Student'):
-                if (students_interact):
+            if person.job == 'Student':
+                if students_interact:
                     loyalty_mean = loyalty_mean/self.student_sites_ratio
                 else:
                     loyalty_mean = 0
@@ -431,10 +431,10 @@ class Interaction_Sites:
             house_count += house_size
 
             # Check if anyone in the house is infected
-            infected_housemembers = [i for i in range(house_size) if housemembers[i].is_infected() == True]
+            infected_housemembers = [i for i in range(house_size) if housemembers[i].is_infected()]
 
             if len(infected_housemembers) > 0:
-                healthy_housemembers = [i for i in range(house_size) if housemembers[i].is_infected() == False]
+                healthy_housemembers = [i for i in range(house_size) if housemembers[i].is_infected()]
 
                 for person in healthy_housemembers:
                     # This should be more complicated and depend on len(infectpplinhouse)
