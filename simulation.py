@@ -137,7 +137,15 @@ class simulation():
             if dirty:
                 self.code_id += '-dirty'
 
-    def run(self):
+    def run(self, fail_on_rerun=True):
+        # Check whether the simulation has already been run.
+        if fail_on_rerun:
+            information = ("When running again, previous results will be overwritten. "
+                           "It is probably best to create a new simulation object. "
+                           "However, if this is desired, please explicitly set the "
+                           "fail_on_rerun argument to False.")
+            self.check_has_run(check=False, information=information, fail=True)
+
         # Get current time for measuring elapsed time of simulation.
         beg_time = timer()
 
