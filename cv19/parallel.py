@@ -9,7 +9,9 @@ from matplotlib import pyplot as plt
 
 from .simulation import simulation
 
-def async_simulation(config_file, verbose=False):
+from pathlib import Path
+
+def async_simulation(config_file, config_dir="", verbose=False):
     """Does a single run of the simulation with the supplied configuration details.
 
     Parameters
@@ -25,12 +27,11 @@ def async_simulation(config_file, verbose=False):
         arrays from the simulation
 
     """
-
-    sim = simulation(config_file, verbose=verbose)
+    sim = simulation(config_file, config_dir=config_dir, verbose=verbose)
     sim.run()
     return sim.get_arrays()
 
-def run_async(num_runs, config_file, save_name=None, num_cores=-1, verbose=False):
+def run_async(num_runs, config_file, save_name=None, num_cores=-1, config_dir="", verbose=False):
     """Runs multiple simulations in parallel using the supplied configuration settings.
 
     Parameters
@@ -59,7 +60,7 @@ def run_async(num_runs, config_file, save_name=None, num_cores=-1, verbose=False
     # Run all of the simulations
     multiprocessing.freeze_support()
     with multiprocessing.Pool(processes=num_cores) as pool:
-        results = pool.starmap(async_simulation, ((config_file, verbose) for _ in range(num_runs)))
+        results = pool.starmap(async_simulation, ((config_file, config_dir, verbose) for _ in range(num_runs)))
 
     df = pd.DataFrame(results)
     if save_name is not None:
@@ -182,6 +183,8 @@ def tabular_mode(base_config_file, independent, dependent, num_runs=8, num_cores
         with open(base_config_file) as f:
             temp_config = json.load(f)
 
+        config_dir = Path(base_config_file).parent
+
         # Setting the parameters from the independent variables
         for key, value in zip(indep_keys, values):
             _config_editor(temp_config, key, value)
@@ -193,7 +196,7 @@ def tabular_mode(base_config_file, independent, dependent, num_runs=8, num_cores
         elif isinstance(save_name, str):
             scenario_save_name = save_name + '{:02}'.format(i)
         data = run_async(num_runs, temp_config, num_cores=num_cores,
-                         save_name=scenario_save_name, verbose=verbose)
+                         save_name=scenario_save_name, config_dir=config_dir, verbose=verbose)
 
         # Processing the results to get the dependent measurements, add to results
         result = [f(data) for f in dep_funcs]

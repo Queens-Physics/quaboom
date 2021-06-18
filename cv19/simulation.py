@@ -16,9 +16,9 @@ from .interaction_sites import Interaction_Sites
 
 class simulation():
 
-    def __init__(self, config_file, verbose=False):
+    def __init__(self, config_file, config_dir="", verbose=False):
 
-        self.config_dir = ""
+        self.config_dir = config_dir
         self.load_general_parameters(config_file)
         self.load_disease_parameters(self.disease_config_file)
 
