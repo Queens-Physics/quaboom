@@ -6,10 +6,10 @@ from timeit import default_timer as timer
 import numpy as np
 import matplotlib.pyplot as plt
 
-from Person import Person
-from Population import Population
-from Policy import Policy
-from Interaction_Sites import Interaction_Sites
+from .person import Person
+from .population import Population
+from .policy import Policy
+from .interaction_sites import Interaction_Sites
 
 
 class simulation():

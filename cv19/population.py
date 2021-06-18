@@ -1,8 +1,8 @@
 import json
 import random
 import numpy as np
-from data import constants
-from Person import Person
+from .data import constants
+from .person import Person
 
 NULL_ID = -1 # This value means that the person index at this location is not susceptible/infected/dead/...
              # All arrays are intialized to this (except healthy, as everyone is healthy)

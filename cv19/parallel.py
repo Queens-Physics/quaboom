@@ -7,7 +7,7 @@ import pandas as pd
 import scipy.stats as st
 from matplotlib import pyplot as plt
 
-from simulation import simulation
+from .simulation import simulation
 
 def async_simulation(config_file, verbose=False):
     """Does a single run of the simulation with the supplied configuration details.
