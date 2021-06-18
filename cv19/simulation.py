@@ -186,7 +186,7 @@ class simulation():
         old_student_mandate = self.policy.initial_student_mandate
         # Loop over the number of days
         for day in range(self.nDays):
-            
+
             ############### TRACKING STUFF ###############
 
             #Count all the different states of people
@@ -237,11 +237,11 @@ class simulation():
             old_student_mandate = students_go
 
             #infect random students on the day they come in
-            if day == self.policy.student_day_trigger:
+            if self.inter_sites.students_on and day == self.policy.student_day_trigger:
                 infStudents = np.random.randint(self.inf_students_lower, self.inf_students_upper)
                 indices = np.random.choice(self.pop.get_student_indices(), infStudents, replace=False)
                 self.pop.infect_incoming_students(indices=indices, day=day)
-            
+
             ############### VISITOR STUFF ###############
             #add a random number of visitors to the population
             num_vis = np.random.choice(a=self.N_VIS_OPTION, p=self.N_VIS_PROB)
@@ -265,7 +265,7 @@ class simulation():
                 self.inter_sites.site_interaction(will_visit_B, day)
                 will_visit_C = self.inter_sites.will_visit_site(self.inter_sites.get_grade_C_sites(), self.will_go_prob["C"])
                 self.inter_sites.site_interaction(will_visit_C, day)
-            if students_go:
+            if self.inter_sites.students_on and students_go:
                 will_visit_study = self.inter_sites.will_visit_site(self.inter_sites.get_study_sites(),
                                                                     self.will_go_prob["STUDY"])
                 self.inter_sites.site_interaction(will_visit_study, day)
@@ -279,7 +279,8 @@ class simulation():
 
             # Manage at home interactions
             self.inter_sites.house_interact(day)
-            self.inter_sites.student_house_interact(day)
+            if self.inter_sites.students_on:
+                self.inter_sites.student_house_interact(day)
 
             # Manage testing sites
             if testing_ON:

@@ -266,11 +266,11 @@ class Person(object):
         '''Method to check if a person should be quarantined.
         If they're quarantined and their quarantine time has ended, let them out of quarantine.
         If they're not quarantined but they have severe symptoms, set self.quarantined to be True.
-        
+
         Parameters
         ----------
         day : int
-            The day value that this function is being called on in the encompassing simulation class. 
+            The day value that this function is being called on in the encompassing simulation class.
 
         Returns
         -------

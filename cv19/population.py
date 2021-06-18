@@ -27,10 +27,10 @@ class Population:
 
         self.nPop = sim_obj.nPop  # total population
         self.n0 = sim_obj.n0  # initial infected
-        
+
         # Student parameter
-        self.nStudents = int(self.nPop/5) # full capacity ~ 24k students
-        
+        self.nStudents = self.num_students # full capacity ~ 24k students
+
         self.population = [0] * self.nPop  # The list of all people
         self.household = [0] * self.nPop # list of non-student houses (list that contains all lists of the people in the house)
         self.students = [0] * self.nStudents # The list of only students
@@ -45,7 +45,7 @@ class Population:
         studHouseSize = np.random.choice(a=self.house_options, p=self.house_weights)
         studHouseIndex = 0
         self.stud_houses[studHouseIndex] = studHouseSize
-        
+
         # Initialize parameters of people immediately.
         # Much quick this way, utilizes numpy efficiency.
         age_arr = np.random.choice(a=self.age_options, p=self.age_weights, size=self.nPop)
@@ -76,16 +76,16 @@ class Population:
                 houseSize = np.random.choice(self.house_options)
                 houseIndex += 1
                 self.household[houseIndex] = houseSize
-                
+
         # here the idea is to keep the regular people houses separate from the student houses
-        
+
         # Make sure last household number is right (when it runs out of people to fill)
         if houseSize != self.household[houseIndex]:
             self.household[houseIndex] = houseSize
 
         # Slice household list to the right size
         self.household = self.household[:houseIndex]
-                
+
         ############### STUDENTS ###############
         self.student_indices = np.zeros(self.nPop, dtype=int) + NULL_ID
         self.res_houses = np.zeros(len(self.stud_houses), dtype=int) + NULL_ID # student houses that are in residence will be nonzero
@@ -105,7 +105,7 @@ class Population:
             self.student_indices[i] = i  # set their student status
             studenti = i-self.nPop+self.nStudents
             self.students[studenti] = self.population[i]  # add to the list of students
-            
+
             # Increment house info
             studHouseSize -= 1
             if studHouseSize == 0:
@@ -119,7 +119,7 @@ class Population:
 
         # Slice student houses list to the right size
         self.stud_houses = self.stud_houses[:studHouseIndex]
-        
+
         # Create the list of residence houses
         for index in range(int(len(self.stud_houses)/4)):
             self.res_houses[index] = index
@@ -202,7 +202,7 @@ class Population:
 
     def get_population(self):
         return self.population
-    
+
     def get_students(self):
         '''Method to retrieve the list of students as a list of persons.
 
@@ -211,7 +211,7 @@ class Population:
         self.students: :obj:`np.array` of :obj:`Person`
         '''
         return self.students
-    
+
     def get_student_indices(self):
         '''Method to retrieve a list of the student indices
 
@@ -220,7 +220,7 @@ class Population:
         self.has_mask: :obj:`np.array` of :obj:`int`
         '''
         return self.student_indices[self.student_indices != NULL_ID]
-    
+
     def remove_visitors(self, indices):
         for i in indices:
             np.delete(self.population, i)
@@ -387,7 +387,7 @@ class Population:
                 self.hospitalized[index] = index
 
         return didWork
-    
+
     def infect_incoming_students(self, indices, day):
         for i in indices:
             daysAgo = np.random.randint(13)
@@ -424,7 +424,7 @@ class Population:
 
     def die(self, index, day):
         '''Method to kill a person if they should be dead.
-        
+
         Parameters
         ----------
         index : int
@@ -445,7 +445,7 @@ class Population:
 
     def update_dead(self, index):
         '''Method to update the list of the dead population at the specified index.
-        
+
         Parameters
         ----------
         index : int

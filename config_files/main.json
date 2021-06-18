@@ -39,7 +39,8 @@
         "demographics_file":"../data/dataK.json",
         "prob_has_mask":0.8,
         "prob_of_test":1,
-        "mask_type": {"Surgical": 0.2, "Non-surgical": 0.8}
+        "mask_type": {"Surgical": 0.2, "Non-surgical": 0.8},
+        "num_students":2000
     },
 
     "interaction_sites_data":{
@@ -49,7 +50,8 @@
         "grade_loyalty_stds":{"A":2, "B":1, "C":0.2, "LECT":2, "STUDY":1, "FOOD":0.5, "RES":1},
         "students_participate":{"A":true, "B":true, "C":false},
         "quarantine_isolation_factor":0,
-        "student_sites_ratio":2
+        "student_sites_ratio":2,
+        "students_on":true
     },
 
     "person_data":{

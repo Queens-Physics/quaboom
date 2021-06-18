@@ -29,21 +29,21 @@ class Interaction_Sites:
         visited almost every workday, and you almost always visit the same one.
     house_sites : :obj:`np.array` of :obj:`list` of :obj:`int`
         Visited by every person each day, and hosts interactions between members
-        of the same household. Infection spread at home is not defined by explicit contacts, 
-        but by a known spread factor. 
-    lect_sites : :obj:`np.array` of :obj:`list` of :obj:`np.array` of :obj:`int` 
-        Designed to replicate university lecture hall interactions. They are only visited by students. 
-    study_sites : :obj:`np.array` of :obj:`list` of :obj:`np.array` of :obj:`int` 
+        of the same household. Infection spread at home is not defined by explicit contacts,
+        but by a known spread factor.
+    lect_sites : :obj:`np.array` of :obj:`list` of :obj:`np.array` of :obj:`int`
+        Designed to replicate university lecture hall interactions. They are only visited by students.
+    study_sites : :obj:`np.array` of :obj:`list` of :obj:`np.array` of :obj:`int`
         Designed to replicate study environments at university, on-campus (library, bookable rooms, ...).
-        They are only visited by students. 
-    food_sites : :obj:`np.array` of :obj:`list` of :obj:`np.array` of :obj:`int` 
+        They are only visited by students.
+    food_sites : :obj:`np.array` of :obj:`list` of :obj:`np.array` of :obj:`int`
         Designed to replicate cafeteria and restaurant interactions on-campus. Only visited by students.
     res_sites : :obj:`list` of :obj:`np.array` of :obj:`int`
         Designed to replicate the student residences on campus. They are only visited by first year students.
     stud_house_sites : :obj:`np.array` of :obj:`list` of :obj:`int`
         Visited by every student each day, and hosts interactions between members
-        of the same household. Infection spread at home is not defined by explicit contacts, 
-        but by a known spread factor. 
+        of the same household. Infection spread at home is not defined by explicit contacts,
+        but by a known spread factor.
     '''
 
     def __init__(self, sim_obj):
@@ -89,7 +89,7 @@ class Interaction_Sites:
                                        self.grade_loyalty_means["RES"],
                                        self.grade_loyalty_stds["RES"])
         self.stud_house_sites = deepcopy(self.pop.stud_houses)
-        
+
 
     def load_attributes_from_sim_obj(self, sim_obj):
         '''Method to load in attributes from the provided simulation class object.
@@ -134,10 +134,10 @@ class Interaction_Sites:
             The mean number of this type of sites that each person will be associated with.
         loyalty_std : float
             The standard deviation in the number of sites of this type a person will be
-            associated with. 
+            associated with.
         students_interact : boolean
             Whether or not students will attend the interaction site being initialized
-        
+
         Returns
         -------
         grade_sites : :obj:`np.array` of :obj:`np.array` of :obj:`int`
@@ -150,7 +150,7 @@ class Interaction_Sites:
         grade_sites = [[] for _ in range(num_sites)]
 
         for person in self.pop.get_population():
-            if person.job == 'Student':
+            if self.students_on and person.job == 'Student':
                 if students_interact:
                     loyalty_mean = loyalty_mean/self.student_sites_ratio
                 else:
@@ -172,27 +172,27 @@ class Interaction_Sites:
 
     def init_uni(self, sites_per_pop, loyalty_mean, loyalty_std):
         '''Method designed to associate members of the student population with interaction sites
-        
-        This method initializes all student interaction sites by creating a list 
-        of person indexes for each interaction site, for that type of interaction type. 
-        
+
+        This method initializes all student interaction sites by creating a list
+        of person indexes for each interaction site, for that type of interaction type.
+
         Parameters
         ----------
         grade_pop_size : int
             Number of people per interaction site. Determines how many interaction sites
-            there will be across the population. 
+            there will be across the population.
         loyalty_mean : float
-            The mean number of this type of sites that each person will be associated with. 
+            The mean number of this type of sites that each person will be associated with.
         loyalty_std : float
             The standard deviation in the number of sites of this type a person will be
-            associated with. 
-        
+            associated with.
+
         Returns
         -------
-        grade_sites : :obj:`np.array` of :obj:`np.array` of :obj:`int` 
+        grade_sites : :obj:`np.array` of :obj:`np.array` of :obj:`int`
             An array holding one array for each interaction site of this type. Each nested
             array holds the index of people that are associated with that site (can visit it)
-        
+
         '''
         num_sites = round(self.pop.get_population_size()/sites_per_pop)
         grade_sites = [[] for i in range(num_sites)]
@@ -212,9 +212,9 @@ class Interaction_Sites:
             grade_sites[i] = np.array(site)
 
         return grade_sites
-    
+
     #def init_residence(self, sites_per_pop, loyalty_mean, loyalty_std):
-        
+
 
     def will_visit_site(self, site_array, will_go_prob):
         '''Method to determine who will visit a site on a given day.
@@ -297,7 +297,7 @@ class Interaction_Sites:
                 # Get the actual people at these indexes
                 person_1_index = ppl_going[person_1]
                 person_2_index = ppl_going[person_2]
-                
+
                 # Check to make sure one is infected
                 person_1_infected = self.pop.get_person(person_1_index).is_infected()
                 person_2_infected = self.pop.get_person(person_2_index).is_infected()
@@ -406,21 +406,21 @@ class Interaction_Sites:
                     caught_infection = random.random()<infection_chance
                     if caught_infection:
                         self.pop.infect(index=housemembers[person].get_index(), day=day)
-                        
+
     #-- try merging these two by maybe adding a parameter? moving the deep copying of the houses into simulation maybe --#
     def student_house_interact(self, day):
-        '''Method to manage interactions between members of the same student household. 
-        
+        '''Method to manage interactions between members of the same student household.
+
         Determines if any infection will spread among members of the same household. Different
         from interaction sites in the fact that contacts are not calculated, but assumed to happen
-        between all house members. Does not have a return value, infections are managed internally. 
-        
+        between all house members. Does not have a return value, infections are managed internally.
+
         Parameters
         ----------
         day : int
-            The day value that this function is being called on in the encompassing simulation class. 
-            Used as input to the infect function after infections have been determined. 
-        
+            The day value that this function is being called on in the encompassing simulation class.
+            Used as input to the infect function after infections have been determined.
+
         '''
 
         house_count = 0
@@ -442,7 +442,7 @@ class Interaction_Sites:
                     caught_infection = random.random()<infection_chance
                     if caught_infection:
                         self.pop.infect(index=housemembers[person].get_index(), day=day)
-                        
+
     # Function thats tests the symtomatic individuals as well as brining them in and out of quarantine
     def testing_site (self, tests_per_day, day):
         '''Method to update status of symptoms and run the testing sites code.
@@ -514,12 +514,12 @@ class Interaction_Sites:
         self.food_sites.copy() : :obj:`np.array` of :obj:`list` of :obj:`np.array` of :obj:`int`
         '''
         return deepcopy(self.food_sites)
-    
+
     def get_res_sites(self):
-        '''Method to return a copy of the res_sites attribute. 
-        
+        '''Method to return a copy of the res_sites attribute.
+
         Returns
         -------
-        self.res_sites.copy() : :obj:`np.array` of :obj:`list` of :obj:`np.array` of :obj:`int` 
+        self.res_sites.copy() : :obj:`np.array` of :obj:`list` of :obj:`np.array` of :obj:`int`
         '''
         return deepcopy(self.res_sites)
