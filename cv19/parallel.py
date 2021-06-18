@@ -1,6 +1,7 @@
 import json
 import multiprocessing
 import pickle
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -8,8 +9,6 @@ import scipy.stats as st
 from matplotlib import pyplot as plt
 
 from .simulation import simulation
-
-from pathlib import Path
 
 def async_simulation(config_file, config_dir="", verbose=False):
     """Does a single run of the simulation with the supplied configuration details.

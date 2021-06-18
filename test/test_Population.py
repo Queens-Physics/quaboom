@@ -1,23 +1,25 @@
 #!/usr/bin/env python3
 
 import unittest
+from pathlib import Path
 import numpy as np
-import Population
-import simulation as sim
+
+from cv19.population import Population
+from cv19.simulation import simulation
 
 
 class TestPopulation(unittest.TestCase):
 
     def setUp(self):       # Code that will be run before every test function is executed
-        config_file = "./config_files/main.json"
-        self.sim_obj = sim.simulation(config_file)
+        config_file = str(Path(Path(__file__).parent, "../config_files/main.json").resolve())
+        self.sim_obj = simulation(config_file)
 
     def tearDown(self):    # Code that will be run after every test function is executed
         pass
 
     def test_init(self):
         nPop, n0 = self.sim_obj.nPop, self.sim_obj.n0
-        pop = Population.Population(self.sim_obj)
+        pop = Population(self.sim_obj)
 
         # Make sure that there are n0 infected, 0 recovered, nPop-n0 susceptible
         self.assertEqual(pop.count_infected(), n0)
@@ -26,7 +28,7 @@ class TestPopulation(unittest.TestCase):
 
     def test_get_count_functions(self):
         nPop = self.sim_obj.nPop
-        pop = Population.Population(self.sim_obj)
+        pop = Population(self.sim_obj)
 
         # Make sure that get and count functions return the same info
         self.assertEqual(pop.count_infected(), len(pop.get_infected()))
@@ -42,7 +44,7 @@ class TestPopulation(unittest.TestCase):
         self.assertEqual(pop.get_person(index=i).get_index(), i)
 
     def test_globals(self):
-        pop = Population.Population(self.sim_obj)
+        pop = Population(self.sim_obj)
 
         # Make sure weights and options line up - basically just checks config file
         self.assertEqual(len(pop.age_options), len(pop.age_weights))
@@ -59,7 +61,7 @@ class TestPopulation(unittest.TestCase):
         self.assertEqual(round(sum(pop.isolation_weights), roundLevel), 1)
 
     def test_infect(self):
-        pop = Population.Population(self.sim_obj)
+        pop = Population(self.sim_obj)
 
         # Infect a susceptible person
         index = pop.get_susceptible()[0]
@@ -76,7 +78,7 @@ class TestPopulation(unittest.TestCase):
         self.assertFalse(pop.update_infected(index=index))
 
         # Try to infect an infected person now
-        pop = Population.Population(self.sim_obj)
+        pop = Population(self.sim_obj)
 
         index = pop.get_infected()[0]
         self.assertFalse(pop.infect(index=index, day=0))
@@ -85,7 +87,7 @@ class TestPopulation(unittest.TestCase):
         self.assertFalse(pop.update_infected(index=index))
 
     def test_cure(self):
-        pop = Population.Population(self.sim_obj)
+        pop = Population(self.sim_obj)
         infected_id = pop.get_infected()[0]
 
         # Try to cure a person on day after infection (should not work)
@@ -102,7 +104,7 @@ class TestPopulation(unittest.TestCase):
         self.assertFalse(pop.update_cured(index=infected_id))
 
         # Try to actually cure someone ready to be cured
-        pop = Population.Population(self.sim_obj)
+        pop = Population(self.sim_obj)
         infected_id = pop.get_infected()[0]
 
         # Make sure cure function works
