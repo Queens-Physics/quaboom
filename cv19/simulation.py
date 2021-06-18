@@ -2,10 +2,12 @@ import json
 import warnings
 import subprocess
 from timeit import default_timer as timer
+from pathlib import Path
 
 import numpy as np
 import matplotlib.pyplot as plt
 
+from . import CV19ROOT
 from .person import Person
 from .population import Population
 from .policy import Policy
@@ -16,6 +18,7 @@ class simulation():
 
     def __init__(self, config_file, verbose=False):
 
+        self.config_dir = ""
         self.load_general_parameters(config_file)
         self.load_disease_parameters(self.disease_config_file)
 
@@ -51,8 +54,12 @@ class simulation():
         if isinstance(data_file, str):
             with open(data_file) as file:
                 self.parameters = json.load(file)
+
+            self.config_dir = Path(data_file).parent
+
         elif isinstance(data_file, dict):
             self.parameters = data_file
+
         else:
             raise TypeError("Please supply dictionary object or file path.")
 
@@ -67,8 +74,30 @@ class simulation():
             setattr(self, attr, self.parameters["person_data"][attr])
 
     def load_disease_parameters(self, filename):
-        with open(filename) as file:
-            self.disease_parameters = json.load(file)
+        # If path is absolute, use it.
+        if Path(filename).is_absolute():
+            with open(filename) as file:
+                self.disease_parameters = json.load(file)
+
+        # Assume that the configuration filename is relative to path of main config.
+        # If not set, assume relative to working directory.
+        # Last attempt try relative to cv19 project directory.
+        else:
+            filepath = Path(self.config_dir, filename)
+            try:
+                with open(filepath) as file:
+                    self.disease_parameters = json.load(file)
+
+                return
+
+            except FileNotFoundError:
+                warnings.warn(("Unable to find file: {} "
+                               "assuming directory is relative to main config. "
+                               "Attempting read relative to CV19ROOT directory.").format(filepath))
+
+                filepath = Path(CV19ROOT, filename)
+                with open(filepath) as file:
+                    self.disease_parameters = json.load(file)
 
     def init_classes(self):
         # Initalize the policy class
