@@ -116,7 +116,7 @@ class Population:
         for i in range(self.n0):
             self.infect(index=i, day=0, virus_type="general")
            
-        for i in range(self.n0,(self.n0)+2):
+        for i in range(self.n0,(self.n0)+1):
             self.infect(index=i, day=0, virus_type="B117") 
 
     def load_attributes_from_sim_obj(self, sim_obj):

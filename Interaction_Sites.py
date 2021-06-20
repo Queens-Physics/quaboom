@@ -99,8 +99,6 @@ class Interaction_Sites:
         for attr in d_attributes:
             setattr(self, attr, sim_obj.disease_parameters["spread_data"][attr])
 
-        self.house_infection_spread_prob = self.base_infection_spread_prob * self.house_infection_spread_factor
-
         # Set the actual objects now
         self.pop = sim_obj.pop
         self.policy = sim_obj.policy
@@ -311,30 +309,33 @@ class Interaction_Sites:
             p1Infected = self.pop.get_person(person_1).is_infected()
             P1_INWARD_PROB, P1_OUTWARD_PROB = self.pop.get_person(person_1).mask_type_efficiency()
             P2_INWARD_PROB, P2_OUTWARD_PROB = self.pop.get_person(person_2).mask_type_efficiency()
+            if p1Infected:
+                virus_type = self.pop.get_person(person_1).get_virus_type()
+            else:
+                virus_type = self.pop.get_person(person_2).get_virus_type()
+            base_infection_spread_prob = self.base_infection_spread_prob[virus_type]
             
 
             if p1Infected:
-                p1_infection_type = self.pop.get_person(person_1_index).get_virus_type()
 
                 if p1Mask and p2Mask:
-                    spread_prob = self.base_infection_spread_prob*P1_OUTWARD_PROB*P2_INWARD_PROB
+                    spread_prob = base_infection_spread_prob*P1_OUTWARD_PROB*P2_INWARD_PROB
                 elif p1Mask:
-                    spread_prob = self.base_infection_spread_prob*P1_OUTWARD_PROB
+                    spread_prob = base_infection_spread_prob*P1_OUTWARD_PROB
                 elif p2Mask:
-                    spread_prob = self.base_infection_spread_prob*P2_INWARD_PROB
-                spread_prob = self.base_infection_spread_prob
+                    spread_prob = base_infection_spread_prob*P2_INWARD_PROB
+                spread_prob = base_infection_spread_prob
 
             else:
-                p2_infection_type = self.pop.get_person(person_2_index).get_virus_type()
                 
                 if p1Mask and p2Mask:
-                    spread_prob = self.base_infection_spread_prob*P2_OUTWARD_PROB*P1_INWARD_PROB
+                    spread_prob = base_infection_spread_prob*P2_OUTWARD_PROB*P1_INWARD_PROB
                 elif p1Mask:
-                    spread_prob = self.base_infection_spread_prob*P1_INWARD_PROB
+                    spread_prob = base_infection_spread_prob*P1_INWARD_PROB
                 elif p2Mask:
-                    spread_prob = self.base_infection_spread_prob*P2_OUTWARD_PROB
+                    spread_prob = base_infection_spread_prob*P2_OUTWARD_PROB
                 else:
-                    spread_prob = self.base_infection_spread_prob
+                    spread_prob = base_infection_spread_prob
 
         return random.random() < spread_prob
 
@@ -352,7 +353,6 @@ class Interaction_Sites:
             Used as input to the infect function after infections have been determined.
 
         '''
-
         house_count = 0
         for i in range(len(self.house_sites)):
             # Get ppl in house
@@ -368,13 +368,16 @@ class Interaction_Sites:
 
             if len(infected_housemembers) > 0:
                 healthy_housemembers = [i for i in range(house_size) if not housemembers[i].is_infected()]
+                    
 
                 for person in healthy_housemembers:
+                    virus_type=np.random.choice(a=virus_types)
+                    
                     # This should be more complicated and depend on len(infectpplinhouse)
-                    infection_chance = self.house_infection_spread_prob
+                    infection_chance = self.base_infection_spread_prob[virus_type] * self.house_infection_spread_factor
                     caught_infection = random.random()<infection_chance
                     if caught_infection:
-                        virus_type=np.random.choice(a=virus_types)
+                        
                         if virus_type is None:
                             print("House infection virus type error")
                         self.pop.infect(index=housemembers[person].get_index(), day=day, virus_type=virus_type)
