@@ -1,11 +1,13 @@
+import json
 import multiprocessing
-from simulation import simulation
+import pickle
+
 import numpy as np
 import pandas as pd
-from matplotlib import pyplot as plt
-import pickle
 import scipy.stats as st
-import json
+from matplotlib import pyplot as plt
+
+from simulation import simulation
 
 def async_simulation(config_file, verbose=False):
     """Does a single run of the simulation with the supplied configuration details.
@@ -16,7 +18,7 @@ def async_simulation(config_file, verbose=False):
         filename for the configuration file
     verbose : bool, default False
         whether to output information from each day of the simulation
-    
+
     Returns
     -------
     tuple
@@ -41,10 +43,10 @@ def run_async(num_runs, config_file, save_name=None, num_cores=-1, verbose=False
         filename to save the simulation results upon completion
     num_cores : int, default=-1
         number of CPU cores to use when running the simulation. If -1, then use
-        all available cores.   
+        all available cores.
     verbose : bool, default False
         whether to output information from each day of the simulation
-    
+
     Returns
     -------
     pandas.DataFrame
@@ -60,14 +62,14 @@ def run_async(num_runs, config_file, save_name=None, num_cores=-1, verbose=False
         results = pool.starmap(async_simulation, ((config_file, verbose) for _ in range(num_runs)))
 
     df = pd.DataFrame(results)
-    if save_name != None:
+    if save_name is not None:
         with open(save_name, 'wb') as f:
             pickle.dump(df, f)
 
     return df
 
 def _config_editor(config, param_name, value):
-    """Takes string form of a parameter's name (eg. policy_data.testing_rate) 
+    """Takes string form of a parameter's name (eg. policy_data.testing_rate)
     and changes it to the supplied value.
 
     Parameters
@@ -94,7 +96,7 @@ def _config_editor(config, param_name, value):
         # Last parameter: set the value now
         if i == len(param_names) - 1:
             x[param] = value
-        
+
         # Not the last parameter: advance in the dictionary
         else:
             x = x[param]
@@ -103,7 +105,7 @@ def _config_editor(config, param_name, value):
 
 def tabular_mode(base_config_file, independent, dependent, num_runs=8, num_cores=8, save_name=None, verbose=False):
     """Automatically measures the impact of various public health measures on different metrics.
-    
+
     Parameters
     ----------
     base_config_file : str
@@ -123,7 +125,7 @@ def tabular_mode(base_config_file, independent, dependent, num_runs=8, num_cores
         Eg. to measure total deaths and peak cases, use the following
         dictionary:
             {
-                "total deaths":total_death_func, 
+                "total deaths":total_death_func,
                 "peak cases":peak_case_func
             }
     num_runs : int, default = 8
@@ -137,7 +139,7 @@ def tabular_mode(base_config_file, independent, dependent, num_runs=8, num_cores
         differentiating the scenarios (eg. if save_name == "simulation", then the
         saved files will have the form "simulation01.pkl", "simulation02.pkl", ...).
         If using a list, then the list must be exactly as long as the number of values
-        for the independent variable, and each scenario will be saved under its 
+        for the independent variable, and each scenario will be saved under its
         corresponding filename. If None, then don't save any results.
     verbose : bool, default False
         whether to output information from each day of the simulation
@@ -145,7 +147,7 @@ def tabular_mode(base_config_file, independent, dependent, num_runs=8, num_cores
     Returns
     -------
     pd.DataFrame
-        contains the values of the dependent variables 
+        contains the values of the dependent variables
         for each of the supplied independent variable values.
 
     Raises
@@ -153,19 +155,19 @@ def tabular_mode(base_config_file, independent, dependent, num_runs=8, num_cores
     NotImplementedError
         if the number of independent variables is not 1
     """
-    
+
     if len(independent) > 1:
         raise NotImplementedError("Number of independent variables must be 1.")
-    
+
     # Check if the length of the (only) independent variable is the same as the length
     # of the save_name list.
-    if type(save_name) is list and len(save_name) != len(list(independent.values())[0]):
+    if isinstance(save_name, (list, tuple)) and len(save_name) != len(list(independent.values())[0]):
         raise ValueError("'save_name' is a list and not the same length as the independent variable. Refer to the documentation for details.")
 
     indep_keys = independent.keys()
     indep_vals = independent.values()
-    dep_funcs = dependent.values() 
-    
+    dep_funcs = dependent.values()
+
     # Mesh is list that contains the values of the independent parameters.
     # It guarantees that each combination of parameters will be run.
     mesh = [a.flatten() for a in np.meshgrid(*indep_vals)]
@@ -186,14 +188,14 @@ def tabular_mode(base_config_file, independent, dependent, num_runs=8, num_cores
 
         # Run the simulations: returns an DataFrame
         scenario_save_name = None
-        if type(save_name) is list:
+        if isinstance(save_name, list):
             scenario_save_name = save_name[i]
-        elif type(save_name) is str:
+        elif isinstance(save_name, str):
             scenario_save_name = save_name + '{:02}'.format(i)
-        data = run_async(num_runs, temp_config, num_cores=num_cores, 
-                        save_name=scenario_save_name, verbose=verbose)
+        data = run_async(num_runs, temp_config, num_cores=num_cores,
+                         save_name=scenario_save_name, verbose=verbose)
 
-        # Processing the results to get the dependent measurements, add to results       
+        # Processing the results to get the dependent measurements, add to results
         result = [f(data) for f in dep_funcs]
         results.append(result)
 
@@ -215,7 +217,7 @@ def confidence_interval(config, num_runs=8, confidence=0.80, num_cores=-1, save_
         number of times to run the simulation
     confidence : float
         confidence of the confidence bands, ie. the proportion of results
-        that fall within the confidence bands. The range of this parameter 
+        that fall within the confidence bands. The range of this parameter
         should be (0, 1].
     num_cores : int, default=-1
         number of cores to use when running the simulation. If -1, then use
@@ -229,7 +231,7 @@ def confidence_interval(config, num_runs=8, confidence=0.80, num_cores=-1, save_
 
     result = run_async(num_runs, config, num_cores=num_cores, save_name=save_name, verbose=verbose)
 
-    fig, ax = plt.subplots()
+    fig_ci, ax_ci = plt.subplots()
     z_score = st.norm.ppf(confidence)
 
     for col in result.columns:
@@ -247,19 +249,19 @@ def confidence_interval(config, num_runs=8, confidence=0.80, num_cores=-1, save_
         std = array.std(axis=0)
 
         # Plotting mean and confidence bands
-        ax.plot(
-            mean, 
+        ax_ci.plot(
+            mean,
             label=col
         )
-        ax.fill_between(
+        ax_ci.fill_between(
             range(len(mean)),
             mean - z_score * std,
             mean + z_score * std,
             alpha=0.2
         )
-    
-    ax.legend()
-    fig.show()
+
+    ax_ci.legend()
+    fig_ci.show()
 
 def confidence_interval_complex(*scenarios, z=2):
     """Draws a plot that tracks one or more metrics in the simulation. The
@@ -272,15 +274,17 @@ def confidence_interval_complex(*scenarios, z=2):
         - 'metric': metric to plot
     z: the number of standard deviations above or below the mean to use for
         the confidence bands. For example,
-        - z=1 => 66% confidence, 
+        - z=1 => 66% confidence,
         - z=2 => 95% confidence,
         - z=3 => 99% confidence.
-    
+
     This function draws a plot of the metrics over time.
     """
 
-    raise NotImplementedError()
+    del z
+    del scenarios
 
+    code = '''
     fig, ax = plt.subplots()
 
     for scenario in scenarios:
@@ -298,7 +302,7 @@ def confidence_interval_complex(*scenarios, z=2):
 
         # Plotting mean and confidence bands
         ax.plot(
-            mean, 
+            mean,
             label=scenario['name']
         )
         ax.fill_between(
@@ -307,16 +311,19 @@ def confidence_interval_complex(*scenarios, z=2):
             mean + z * std,
             alpha=0.2
         )
-    
+
     ax.legend()
     fig.show()
+    '''
 
+    raise NotImplementedError(("Function not yet implemented. "
+                               "Current code:\n") + code)
 
 #### Metric calculator functions ####
 def peak(data):
     """Calculates the number of people infected at the peak, averaged over the
-    simulations that were run. 
-    
+    simulations that were run.
+
     Parameters
     ----------
     data : pandas.DataFrame
@@ -333,8 +340,8 @@ def peak(data):
 
 def peak_date(data):
     """Calculates the date of the peak, averaged over the simulations that were
-    run. 
-    
+    run.
+
     Parameters
     ----------
     data : pandas.DataFrame
@@ -356,7 +363,7 @@ def hospitalizations(data):
     ----------
     data : pandas.DataFrame
         Output from running a simulation.
-    
+
     Returns
     -------
     float
@@ -404,13 +411,13 @@ if __name__ == "__main__":
 
     # Tabular mode
     table = tabular_mode(
-        'config_files/main.json', 
+        'config_files/main.json',
         {
             "population_data.prob_has_mask":[1/4, 1/2, 3/4, 1]
-        }, 
+        },
         {
-            'peak cases': peak, 
-            'peak quarantine': peak_quarantine, 
+            'peak cases': peak,
+            'peak quarantine': peak_quarantine,
             'cumulative deaths': deaths
         }
     )
@@ -424,6 +431,3 @@ if __name__ == "__main__":
     confidence_interval('config_files/main.json', confidence=0.9)
 
     input()
-
-
-    
