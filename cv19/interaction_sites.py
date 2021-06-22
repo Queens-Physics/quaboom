@@ -213,7 +213,6 @@ class Interaction_Sites:
 
         return grade_sites
 
-    #def init_residence(self, sites_per_pop, loyalty_mean, loyalty_std):
 
 
     def will_visit_site(self, site_array, will_go_prob):
