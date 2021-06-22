@@ -215,22 +215,22 @@ class simulation():
 
             ############### POLICY STUFF ###############
             mask_mandate = self.policy.update_mask_mandate(day=day)
-            if mask_mandate != old_mask_mandate:
+            if mask_mandate != old_mask_mandate and self.verbose:
                 print("Day: {}, Mask Mandate: {}".format(day, mask_mandate))
             old_mask_mandate = mask_mandate
 
             lockdown = self.policy.update_lockdown(day=day)
-            if lockdown != old_lockdown_mandate:
+            if lockdown != old_lockdown_mandate and self.verbose:
                 print("Day: {}, Lockdown: {}".format(day, lockdown))
             old_lockdown_mandate = lockdown
 
             testing_ON = self.policy.update_testing(day)
-            if testing_ON != old_testing_mandate:
+            if testing_ON != old_testing_mandate and self.verbose:
                 print("Day: {}, Testing: {}".format(day, testing_ON))
             old_testing_mandate = testing_ON
 
             students_go = self.policy.check_students(day=day)
-            if students_go != old_student_mandate:
+            if students_go != old_student_mandate and self.verbose:
                 print("Day: {}, Uni Mandate: {}".format(day, students_go))
             old_student_mandate = students_go
 
@@ -321,18 +321,19 @@ class simulation():
                                                        self.track_quarantined[day],
                                                        self.track_inf_students[day]))
 
-        print('{:-<80}'.format(''))
-        time_seconds = timer() - beg_time
-        m, s = divmod(time_seconds, 60)
-        h, m = divmod(m, 60)
-        print('Time elapsed: {:02d}:{:02d}:{:02d}'.format(int(h), int(m), int(s)))
-        print("At the end,", self.track_susceptible[-1], "never got it")
-        print(self.track_dead[-1], "died")
-        print(np.max(self.track_infected), "had it at the peak")
-        print(self.track_tested[day], "have been tested")
-        print(np.max(self.track_quarantined), "were in quarantine at the peak")
-        print(np.max(self.track_hospitalized), "at peak hospitalizations")
-        print(np.max(self.track_dead[-1]), "at peak deaths")
+        if self.verbose:
+            print('{:-<80}'.format(''))
+            time_seconds = timer() - beg_time
+            m, s = divmod(time_seconds, 60)
+            h, m = divmod(m, 60)
+            print('Time elapsed: {:02d}:{:02d}:{:02d}'.format(int(h), int(m), int(s)))
+            print("At the end,", self.track_susceptible[-1], "never got it")
+            print(self.track_dead[-1], "died")
+            print(np.max(self.track_infected), "had it at the peak")
+            print(self.track_tested[day], "have been tested")
+            print(np.max(self.track_quarantined), "were in quarantine at the peak")
+            print(np.max(self.track_hospitalized), "at peak hospitalizations")
+            print(np.max(self.track_dead[-1]), "at peak deaths")
 
         self.has_run = True
 
