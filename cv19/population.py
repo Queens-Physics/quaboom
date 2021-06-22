@@ -318,7 +318,7 @@ class Population:
         infStudents: :obj:`int`
         '''
         infStudents = 0
-        for i in range (self.nPop):
+        for i in range(self.nPop):
             if (self.student_indices[i] != NULL_ID and self.infected[i] != NULL_ID):
                 infStudents += 1
         return infStudents
