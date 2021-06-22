@@ -4,6 +4,7 @@
         "disease_config_file":"disease.json",
         "nDays":100,
         "nPop":10000,
+        "num_students":2000,
         "n0":10,
         "will_go_prob":{"A":0.05, "B":0.2, "C":0.7, "LECT":0.8, "STUDY":0.2, "FOOD":0.1, "RES":1},
         "N_VIS_OPTION":[ 0, 1, 2, 3 ],
@@ -39,8 +40,7 @@
         "demographics_file":"../data/dataK.json",
         "prob_has_mask":0.8,
         "prob_of_test":1,
-        "mask_type": {"Surgical": 0.2, "Non-surgical": 0.8},
-        "num_students":2000
+        "mask_type": {"Surgical": 0.2, "Non-surgical": 0.8}
     },
 
     "interaction_sites_data":{

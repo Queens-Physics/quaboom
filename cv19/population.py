@@ -29,7 +29,7 @@ class Population:
         self.n0 = sim_obj.n0  # initial infected
 
         # Student parameter
-        self.nStudents = self.num_students # full capacity ~ 24k students
+        self.nStudents = sim_obj.num_students # full capacity ~ 24k students
 
         self.population = [0] * self.nPop  # The list of all people
         self.household = [0] * self.nPop # list of non-student houses (list that contains all lists of the people in the house)
