@@ -459,19 +459,19 @@ class Person(object):
         return self.goodness
     
     def update_goodness(self, lockdown_level, old_lockdown_mandate): 
-       '''Method to update the goodness value of a person.
+        '''Method to update the goodness value of a person.
        
-       Parameters
-        -------
-        lockdown_level: bool 
+        Parameters
+         -------
+         lockdown_level: bool 
             Paramter to check if the lockdown is on (True)
-        old_lockdown_mandate: bool 
+         old_lockdown_mandate: bool 
             Paramter to check what the lockdown was the day before the current one
-        Returns
-        -------
+         Returns
+         -------
          self.goodness: :obj:'float'
-        '''
-        if self.goodness == None: #If no goodness score is defined
+         '''
+        if self.goodness is None: #If no goodness score is defined
             self.goodness = 1
         
         if self.days_in_lockdown > self.sim_obj.quarantine_threshold and random.random() > self.sim_obj.prob_quarantine_threshold: #as the lockdown length increases decrease the goodness of the person 

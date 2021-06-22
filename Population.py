@@ -349,9 +349,9 @@ class Population:
         return len(self.testing)
 
     def get_tested(self, tests_per_day, day):
-       '''Method to test people in the testing waitlist.
+        '''Method to test people in the testing waitlist.
        
-       Parameters
+        Parameters
         -------
         tests_per_day: int 
             Paramter gives the number of tests run 
