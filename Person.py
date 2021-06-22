@@ -446,7 +446,7 @@ class Person(object):
         self.goodness = 1 # Sets the baseline goodness score
         
         if house_size > len(self.sim_obj.prob_house_goodness): #Sets the house size to the largest house size probability if the house size is larger than that number
-            house_size == len(self.sim_obj.prob_house_goodness)
+            house_size = len(self.sim_obj.prob_house_goodness)
         
         if random.random() > self.sim_obj.prob_house_goodness[house_size - 1]:
             self.goodness *= self.sim_obj.house_reduction[house_size - 1] # changes the persons goodness based on house size
@@ -475,7 +475,7 @@ class Person(object):
             self.goodness = 1
         
         if self.days_in_lockdown > self.sim_obj.quarantine_threshold and random.random() > self.sim_obj.prob_quarantine_threshold: #as the lockdown length increases decrease the goodness of the person 
-                self.goodness /= self.sim_obj.lockdown_threshold_reduction
+            self.goodness /= self.sim_obj.lockdown_threshold_reduction
         
         if lockdown_level != old_lockdown_mandate: 
             
@@ -509,5 +509,5 @@ class Person(object):
         if lockdown_level or self.quarantined: 
             self.days_in_lockdown += 1
         elif self.days_in_lockdown != 0: 
-             self.days_in_lockdown -= 1
+            self.days_in_lockdown -= 1
         return self.days_in_lockdown
