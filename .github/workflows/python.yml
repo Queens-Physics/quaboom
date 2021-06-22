@@ -22,10 +22,10 @@ jobs:
         pip install pylint
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
         ./configure
-        source ./env.sh
 
     - name: Lint with Pylint
       run: |
+        source ./env.sh
         python3 test/linters/pylint.py
 
   unit-tests:
@@ -44,14 +44,15 @@ jobs:
         python3 -m pip install --upgrade pip
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
         ./configure
-        source ./env.sh
 
     - name: Run the Person unit test
       run: |
+        source ./env.sh
         cd test
         ./test_Person.py
 
     - name: Run the Population unit test
       run: |
+        source ./env.sh
         cd test
         ./test_Population.py
