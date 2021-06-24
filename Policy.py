@@ -1,19 +1,19 @@
 class Policy:
     '''
-    Handles all of the metrics that would be dealt with by policy, including mask mandates, 
+    Handles all of the metrics that would be dealt with by policy, including mask mandates,
     quarantines, testing, travel/lockdowns, and whether students have entered the simulation.
-    
+
     Initalized once for the entire simulation.
-    
-    In addition to the major attributes outlined below, this class also contains all of the 
-    attributes outlined in the Policy section of the config file used in a given simulation. 
-    
+
+    In addition to the major attributes outlined below, this class also contains all of the
+    attributes outlined in the Policy section of the config file used in a given simulation.
+
     Attributes
     ----------
     sim_obj : :obj:`simulation class`
-        A pointer linking the policy class object to the encompassing simulation class object. 
-        This allows the policy class to access important simulation class functions such as 
-        counting functions for the tracking arrays and population size. 
+        A pointer linking the policy class object to the encompassing simulation class object.
+        This allows the policy class to access important simulation class functions such as
+        counting functions for the tracking arrays and population size.
     '''
 
     def __init__(self, sim_obj):
@@ -22,7 +22,7 @@ class Policy:
         Parameters
         ----------
         sim_obj : simulation class object
-            The encompassing simulation obejct hosting the simulation. 
+            The encompassing simulation obejct hosting the simulation.
 
         '''
 
@@ -35,8 +35,8 @@ class Policy:
         '''Method to load in attributes from the provided simulation class object.
 
         Sets all objects in the "policy_data" dictionary key as self
-        attributes of the policy class. No paramteres are passed, as 
-        the simulation class is set as an attribute. 
+        attributes of the policy class. No paramteres are passed, as
+        the simulation class is set as an attribute.
 
         '''
         # Loop through keys
@@ -47,22 +47,22 @@ class Policy:
 
     def update_mask_mandate(self, day):
         '''Method to update the simulation's mask mandate based on trigger parameters.
-        
+
         This funciton evaluates whether masks should be required based on different
-        triggering parameters: `mask_day_trigger` and `mask_trigger`. 
-        
-        If the current day is greater than the `mask_day_trigger` value, masks will 
-        be required. 
-        
-        If the percent of the populaiton showing infected symptoms is greater than 
-        `mask_trigger`, masks will be required. 
-        
+        triggering parameters: `mask_day_trigger` and `mask_trigger`.
+
+        If the current day is greater than the `mask_day_trigger` value, masks will
+        be required.
+
+        If the percent of the populaiton showing infected symptoms is greater than
+        `mask_trigger`, masks will be required.
+
         Parameters
         ----------
         day : int
             The day value that this function is being called on in the encompassing simulation class.
             Used to evaluate whether the simulation has passed the day trigger.
-            
+
         '''
         # Change the policy based on conditions
         if self.mask_day_trigger is not None and day >= self.mask_day_trigger:
@@ -88,24 +88,24 @@ class Policy:
 
     def update_lockdown(self, day):
         '''Method to update the simulation's lockdown mandate based on trigger parameters.
-        
+
         This funciton evaluates whether lockdown should be enforced based on different
-        triggering parameters: `lockdown_on_day_trigger`, 'lockdown_off_day_trigger`, 
-        `lockdown_on_trigger` and `lockdown_off_trigger`. 
-        
+        triggering parameters: `lockdown_on_day_trigger`, 'lockdown_off_day_trigger`,
+        `lockdown_on_trigger` and `lockdown_off_trigger`.
+
         If the current day is greater than `lockdown_on_day_trigger` and less than
-        `lockdown_off_day_trigger`, lockdown will be enforced. 
-        
+        `lockdown_off_day_trigger`, lockdown will be enforced.
+
         If the current percent of the population showing infection symptoms is above
-        `lockdown_on_trigger` and below `lockdown_off_trigger`, lockdown will be 
-        enforced. 
-        
+        `lockdown_on_trigger` and below `lockdown_off_trigger`, lockdown will be
+        enforced.
+
         Parameters
         ----------
         day : int
             The day value that this function is being called on in the encompassing simulation class.
             Used to evaluate whether the simulation has passed the day trigger.
-            
+
         '''
 
         # Change the policy based on conditions
@@ -135,23 +135,23 @@ class Policy:
 
     def update_testing(self, day):
         '''Method to update the simulation's testing mandate based on trigger parameters.
-        
+
         This funciton evaluates whether testing should be performed based on different
-        triggering parameters: `testing_day_trigger` and `testing_trigger`. 
-        
-        If the current day is greater than `testing_day_trigger`, lockdown will be enforced. 
-        
+        triggering parameters: `testing_day_trigger` and `testing_trigger`.
+
+        If the current day is greater than `testing_day_trigger`, lockdown will be enforced.
+
         If the current percent of the population showing infection symptoms is above
-        `testing_trigger`, lockdown will be enforced. 
-        
+        `testing_trigger`, lockdown will be enforced.
+
         Parameters
         ----------
         day : int
             The day value that this function is being called on in the encompassing simulation class.
             Used to evaluate whether the simulation has passed the day trigger.
-            
+
         '''
-        
+
         if self.testing_day_trigger is not None and day >= self.testing_day_trigger:
             testing = True
         elif self.testing_trigger is not None and self.sim_obj.pop.count_quarantined()/self.prob_of_symptoms/self.sim_obj.pop.nPop > self.testing_trigger:
@@ -161,24 +161,24 @@ class Policy:
         return testing
 
     def get_num_tests(self, wait_list):
-        '''A method to calculate how many tests to administer for a given day. 
-        
-        The number of tests on any given day is assumed to have a linear relationship with 
+        '''A method to calculate how many tests to administer for a given day.
+
+        The number of tests on any given day is assumed to have a linear relationship with
         the number of people quarantined, the number of people who are just entering
-        quarantine, and the number of people joining the quarantine waitlist. 
-        
+        quarantine, and the number of people joining the quarantine waitlist.
+
         This funciton uses the `testing_rate` parameter, which is designed as follows:
-        testing_rate = [number of tests/people in quarantine, 
-                        number of tests/people newly in quarantine, 
+        testing_rate = [number of tests/people in quarantine,
+                        number of tests/people newly in quarantine,
                         number of tests/number of people in the waitlist]
-                        
+
         This method also ensures that, at the minimum, the number of tests administered
-        is not below the `testing_baseline` parameter. 
-                        
+        is not below the `testing_baseline` parameter.
+
         Parameters
         ----------
         wait_list : int
-            The number of people on the testing waitlist for this day in the simulation. 
+            The number of people on the testing waitlist for this day in the simulation.
         '''
 
         tests =  (self.testing_rate[0]*self.sim_obj.pop.count_quarantined()
@@ -192,21 +192,21 @@ class Policy:
 
     def check_students(self, day):
         '''Method to update whether students are added to the simulation.
-        
-        This funciton evaluates whether students should be added based on 
+
+        This funciton evaluates whether students should be added based on
         `studnet_day_trigger`.
-        
+
         If the current day is greater than `student_day_trigger`, students
         will be added to the simulation.
-        
+
         Parameters
         ----------
         day : int
             The day value that this function is being called on in the encompassing simulation class.
             Used to evaluate whether the simulation has passed the day trigger.
-            
+
         '''
-        
+
         # Change the policy based on conditions
         if self.student_day_trigger is not None and day >= self.student_day_trigger:
             student_mandate = True
