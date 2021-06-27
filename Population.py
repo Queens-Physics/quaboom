@@ -323,7 +323,6 @@ class Population:
         for i in range (len(self.population)):
             self.population[i].not_infected_symptoms()
 
-    # updates the list of symptomatic people and adds the people who are symtomatic to the testing array
     def update_symptomatic(self, day):
         '''Method to add people to the testing waitlist based on their symtoms. 
         day: int

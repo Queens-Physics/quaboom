@@ -82,7 +82,7 @@ class Person(object):
         self.has_mask = has_mask
         self.test_day = None
         self.has_cold = False
-        self.goodness = 1
+        self.goodness = None
         self.days_in_lockdown = 0
         # Set the simulaiton object to access the variables
         self.sim_obj = sim_obj
@@ -136,7 +136,6 @@ class Person(object):
         '''
         return self.hospitalized
 
-    #Puts person in quarantine
     def set_quarantine(self, day):
         '''Method to set a person to be in quarantine. Sets the day the quarantine begins to the day inputted.
         
@@ -153,7 +152,7 @@ class Person(object):
         self.quarantined_day = day
         self.quarantined = True
         return self.quarantined
-    #Allows recovered individuals to leave quarantine
+
     def leave_quarantine(self, day):
         ''' Method to determine if a person is done quarantining based on an inputted day.
         Will return True if person is recovered, dead or the inputted day is greater than
@@ -239,7 +238,6 @@ class Person(object):
             return True
         return False
 
-    #checks to see if person shows symptoms on the current day
     def check_symptoms (self, day):
         '''Method to check a persons symtoms based on if they are infected with COVID19 or a cold.  
 
@@ -411,7 +409,6 @@ class Person(object):
         else:
             return False
 
-    # Determines what the inward and outward efficiency of the spread will be based on the mask they are wearing
     def mask_type_efficiency(self):
         '''Method to determines what the inward and outward efficiency of the spread will
         be based on the type of mask worn.
@@ -427,20 +424,21 @@ class Person(object):
         else:
             return 1, 1  #Not wearing a mask so this will function will not effect their change of getting the virus
     
-    # Sets the initial goodness of a person 
     def set_goodness(self, house_size): 
         '''Method to set the initial goodness value of a person.
        
         Parameters
         ----------
         house_size: int
-            Number of people living in said persons house
+            Number of people living in said persons house.
         
         Returns
         -------
         self.goodness: :obj:'float'
         '''
-        self.goodness = 1 #Sets the baseline goodness score
+        
+        if self.goodness is None: #If no goodness score is defined
+            self.goodness = self.sim_obj.goodness
         
         if house_size > len(self.sim_obj.prob_house_goodness): #Sets the house size to the largest house size probability if the house size is larger than that number
             house_size = len(self.sim_obj.prob_house_goodness)
@@ -453,7 +451,7 @@ class Person(object):
         if random.random() > self.sim_obj.prob_case_severity_goodness[self.case_severity]:
             self.goodness *= self.sim_obj.age_case_severity_reduction[self.case_severity] #changes goodness based on how severity of a potential case
         return self.goodness
-    # function that updates the goodness score
+
     def update_goodness(self, lockdown_level, old_lockdown_mandate):
         '''Method to update the goodness value of a person.
         
@@ -468,7 +466,7 @@ class Person(object):
         self.goodness: :obj:'float'
         '''
         if self.goodness is None: #If no goodness score is defined
-            self.goodness = 1
+            self.goodness =  self.sim_obj.goodness
         
         if self.days_in_lockdown > self.sim_obj.quarantine_threshold and random.random() > self.sim_obj.prob_quarantine_threshold: #as the lockdown length increases decrease the goodness of the person 
             self.goodness /= self.sim_obj.lockdown_threshold_reduction
@@ -481,7 +479,7 @@ class Person(object):
             elif lockdown_level is False and random.random() > self.sim_obj.prob_lockdown_goodness:
                 self.goodness /= self.sim_obj.lockdown_reduction
         return self.goodness
-    # Function that returns the goodness
+
     def get_goodness(self):
         '''Method to retrieve the goodness value of a person.
         
@@ -490,7 +488,7 @@ class Person(object):
         self.goodness: :obj:'float'
         '''
         return self.goodness
-    #updates the number of days the person is in lockdown 
+
     def update_lockdown_days(self, lockdown_level):
         '''Method to change the number of days a person is in a lockdown or quarantine.
         

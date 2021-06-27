@@ -67,6 +67,7 @@
         "min_ICU_days": 43,
         "max_die_days": 30,
         "min_die_days": 14,
+        "goodness": 1, 
         "prob_house_goodness":[0.2, 0.4, 0.6, 0.4, 0.2],
         "house_reduction":[1, 0.9, 0.8, 0.7, 0.6],
         "quarantine_threshold":16,
