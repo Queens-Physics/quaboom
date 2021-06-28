@@ -10,7 +10,7 @@ class Policy:
 
     Attributes
     ----------
-    sim_obj : :obj:`simulation class`
+    sim_obj : :obj:`simulation.simulation`
         A pointer linking the policy class object to the encompassing simulation class object.
         This allows the policy class to access important simulation class functions such as
         counting functions for the tracking arrays and population size.
@@ -21,7 +21,7 @@ class Policy:
 
         Parameters
         ----------
-        sim_obj : simulation class object
+        sim_obj : :obj:`simulation.simulation`
             The encompassing simulation obejct hosting the simulation.
 
         '''
