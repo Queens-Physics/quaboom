@@ -310,7 +310,6 @@ class Population:
 
     def count_tested(self):
         '''Method that retreves the total number of people tested.
-        
         Returns
         -------
         self.test_sum: :obj:'int'
@@ -319,14 +318,16 @@ class Population:
 
     # Causes random people to get the cold
     def random_symptomatic(self):
-        '''Method that causes a random sample of people to develop cold like symptoms'''
+        '''Method that causes a random sample of people to develop cold like symptoms.'''
         for i in range (len(self.population)):
             self.population[i].not_infected_symptoms()
 
     def update_symptomatic(self, day):
-        '''Method to add people to the testing waitlist based on their symtoms. 
+        '''Method to add people to the testing waitlist based on their symtoms.
+        Parameters
+        ----------
         day: int
-            The current day the simulation is on
+            The current day the simulation is on.
         '''
         #updates everyone's symptoms
         for i in range (len(self.infected)):
@@ -348,9 +349,9 @@ class Population:
 
     def get_tested(self, tests_per_day, day):
         '''Method to test people in the testing waitlist.
-       
+
         Parameters
-        -------
+        ----------
         tests_per_day: int 
             Paramter gives the number of tests run
         day: int

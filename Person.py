@@ -51,7 +51,7 @@ class Person(object):
             Determines type of mask worn by person, defaults to None
         has_mask : bool
             Determines if a person will wear a mask or not, defaults to True
-        goodness : float   
+        goodness : float
         days_in_lockdown : int
             Records the number of days a person has been under lockdown
         '''
@@ -468,12 +468,12 @@ class Person(object):
         if self.goodness is None: #If no goodness score is defined
             self.goodness =  self.sim_obj.goodness
         
-        if self.days_in_lockdown > self.sim_obj.quarantine_threshold and random.random() > self.sim_obj.prob_quarantine_threshold: #as the lockdown length increases decrease the goodness of the person 
+        if self.days_in_lockdown > self.sim_obj.quarantine_threshold and random.random() > self.sim_obj.prob_quarantine_threshold: #as the lockdown length increases decrease the goodness of the person
             self.goodness /= self.sim_obj.lockdown_threshold_reduction
         
         if lockdown_level != old_lockdown_mandate:
             # when the lockdown starts increase the goodness of a person
-            if lockdown_level and random.random() > self.sim_obj.prob_lockdown_goodness: 
+            if lockdown_level and random.random() > self.sim_obj.prob_lockdown_goodness:
                 self.goodness *= self.sim_obj.lockdown_reduction
             # when the lockdown ends decerase the goodness of a person
             elif lockdown_level is False and random.random() > self.sim_obj.prob_lockdown_goodness:
