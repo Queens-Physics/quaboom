@@ -1,0 +1,15 @@
+#!/bin/bash
+
+echo "Generating env.sh file."
+cat > env.sh << EOF
+CV19ROOT=${PWD}
+PYTHONPATH=\${CV19ROOT}:\${PYTHONPATH}
+EOF
+
+cp env.sh cv19.env
+
+cat >> env.sh << EOF
+export CV19ROOT PYTHONPATH
+EOF
+
+[[ -e env.sh ]] && chmod +x env.sh && echo "Finished."

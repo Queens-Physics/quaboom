@@ -130,3 +130,7 @@ dmypy.json
 
 # Pickle files
 *.pkl
+
+# Environment files
+env.sh
+cv19.env

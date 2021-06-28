@@ -4,6 +4,8 @@ import sys
 import subprocess
 from pathlib import Path
 
+from cv19 import CV19ROOT
+
 def run_pylint():
     # Messages/warnings/errors to enable and disable.
     messages_enable = ['all']
@@ -19,12 +21,13 @@ def run_pylint():
 
     # List of files or directories to run the linter on.
     # Currently assumes that the working directory is where to get the files.
-    file_list = [str(f) for f in Path.cwd().glob('*.py')]
-    file_list += [str(Path(Path.cwd(), 'test/linters/pylint.py'))]
+    file_list = ['cv19']
+    file_list += [str(f) for f in Path(CV19ROOT).glob('test/**/*.py')]
 
     print("Running on:")
     for f in file_list:
         print("\t{}".format(f))
+    print("")
 
     # List of class names for which member attributes should not be checked (from pylint).
     ignored_classes = ['Interaction_Sites', 'Person', 'Policy',
