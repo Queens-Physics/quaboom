@@ -2,20 +2,23 @@ import json
 import warnings
 import subprocess
 from timeit import default_timer as timer
+from pathlib import Path
 
 import numpy as np
 import matplotlib.pyplot as plt
 
-from Person import Person
-from Population import Population
-from Policy import Policy
-from Interaction_Sites import Interaction_Sites
+from . import CV19ROOT
+from .person import Person
+from .population import Population
+from .policy import Policy
+from .interaction_sites import Interaction_Sites
 
 
 class simulation():
 
-    def __init__(self, config_file, verbose=False):
+    def __init__(self, config_file, config_dir="", verbose=False):
 
+        self.config_dir = config_dir
         self.load_general_parameters(config_file)
         self.load_disease_parameters(self.disease_config_file)
 
@@ -51,8 +54,12 @@ class simulation():
         if isinstance(data_file, str):
             with open(data_file) as file:
                 self.parameters = json.load(file)
+
+            self.config_dir = Path(data_file).parent
+
         elif isinstance(data_file, dict):
             self.parameters = data_file
+
         else:
             raise TypeError("Please supply dictionary object or file path.")
 
@@ -67,8 +74,30 @@ class simulation():
             setattr(self, attr, self.parameters["person_data"][attr])
 
     def load_disease_parameters(self, filename):
-        with open(filename) as file:
-            self.disease_parameters = json.load(file)
+        # If path is absolute, use it.
+        if Path(filename).is_absolute():
+            with open(filename) as file:
+                self.disease_parameters = json.load(file)
+
+        # Assume that the configuration filename is relative to path of main config.
+        # If not set, assume relative to working directory.
+        # Last attempt try relative to cv19 project directory.
+        else:
+            filepath = Path(self.config_dir, filename)
+            try:
+                with open(filepath) as file:
+                    self.disease_parameters = json.load(file)
+
+                return
+
+            except FileNotFoundError:
+                warnings.warn(("Unable to find file: {} "
+                               "assuming directory is relative to main config. "
+                               "Attempting read relative to CV19ROOT directory.").format(filepath))
+
+                filepath = Path(CV19ROOT, filename)
+                with open(filepath) as file:
+                    self.disease_parameters = json.load(file)
 
     def init_classes(self):
         # Initalize the policy class
@@ -186,22 +215,22 @@ class simulation():
 
             ############### POLICY STUFF ###############
             mask_mandate = self.policy.update_mask_mandate(day=day)
-            if mask_mandate != old_mask_mandate:
+            if mask_mandate != old_mask_mandate and self.verbose:
                 print("Day: {}, Mask Mandate: {}".format(day, mask_mandate))
             old_mask_mandate = mask_mandate
 
             lockdown = self.policy.update_lockdown(day=day)
-            if lockdown != old_lockdown_mandate:
+            if lockdown != old_lockdown_mandate and self.verbose:
                 print("Day: {}, Lockdown: {}".format(day, lockdown))
             old_lockdown_mandate = lockdown
 
             testing_ON = self.policy.update_testing(day)
-            if testing_ON != old_testing_mandate:
+            if testing_ON != old_testing_mandate and self.verbose:
                 print("Day: {}, Testing: {}".format(day, testing_ON))
             old_testing_mandate = testing_ON
 
             students_go = self.policy.check_students(day=day)
-            if students_go != old_student_mandate:
+            if students_go != old_student_mandate and self.verbose:
                 print("Day: {}, Uni Mandate: {}".format(day, students_go))
             old_student_mandate = students_go
 
@@ -290,18 +319,19 @@ class simulation():
                                                        self.track_quarantined[day],
                                                        self.track_inf_students[day]))
 
-        print('{:-<80}'.format(''))
-        time_seconds = timer() - beg_time
-        m, s = divmod(time_seconds, 60)
-        h, m = divmod(m, 60)
-        print('Time elapsed: {:02d}:{:02d}:{:02d}'.format(int(h), int(m), int(s)))
-        print("At the end,", self.track_susceptible[-1], "never got it")
-        print(self.track_dead[-1], "died")
-        print(np.max(self.track_infected), "had it at the peak")
-        print(self.track_tested[day], "have been tested")
-        print(np.max(self.track_quarantined), "were in quarantine at the peak")
-        print(np.max(self.track_hospitalized), "at peak hospitalizations")
-        print(np.max(self.track_dead[-1]), "at peak deaths")
+        if self.verbose:
+            print('{:-<80}'.format(''))
+            time_seconds = timer() - beg_time
+            m, s = divmod(time_seconds, 60)
+            h, m = divmod(m, 60)
+            print('Time elapsed: {:02d}:{:02d}:{:02d}'.format(int(h), int(m), int(s)))
+            print("At the end,", self.track_susceptible[-1], "never got it")
+            print(self.track_dead[-1], "died")
+            print(np.max(self.track_infected), "had it at the peak")
+            print(self.track_tested[day], "have been tested")
+            print(np.max(self.track_quarantined), "were in quarantine at the peak")
+            print(np.max(self.track_hospitalized), "at peak hospitalizations")
+            print(np.max(self.track_dead[-1]), "at peak deaths")
 
         self.has_run = True
 

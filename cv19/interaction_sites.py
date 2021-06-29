@@ -45,8 +45,8 @@ class Interaction_Sites:
 
         Parameters
         ----------
-        sim_obj : simulation class object
-            The encompassing simulation obejct hosting the simulation
+        sim_obj : :obj:`simulation class`
+            The encompassing simulation obejct hosting the simulation.
 
         '''
 
@@ -85,8 +85,8 @@ class Interaction_Sites:
 
         Parameters
         ----------
-        sim_obj : simulation class object
-            The encompassing simulation obejct hosting the simulation
+        sim_obj : :obj:`simulation class`
+            The encompassing simulation obejct hosting the simulation.
 
         '''
 
@@ -126,7 +126,7 @@ class Interaction_Sites:
         -------
         grade_sites : :obj:`np.array` of :obj:`np.array` of :obj:`int`
             An array holding one array for each interaction site of this type. Each nested
-            array holds the index of people that are associated with that site (can visit it)
+            array holds the index of people that are associated with that site (can visit it).
 
         '''
         # Find out how many sites there should be - guessing right now
@@ -411,10 +411,28 @@ class Interaction_Sites:
 
 
     def get_lect_sites(self):
+        '''Method to return a copy of the lect_sites attribute.
+
+        Returns
+        -------
+        self.lect_sites.copy() : :obj:`np.array` of :obj:`list` of :obj:`np.array` of :obj:`int`
+        '''
         return deepcopy(self.lect_sites)
 
     def get_study_sites(self):
+        '''Method to return a copy of the study_sites attribute.
+
+        Returns
+        -------
+        self.study_sites.copy() : :obj:`np.array` of :obj:`list` of :obj:`np.array` of :obj:`int`
+        '''
         return deepcopy(self.study_sites)
 
     def get_food_sites(self):
+        '''Method to return a copy of the food_sites attribute.
+
+        Returns
+        -------
+        self.food_sites.copy() : :obj:`np.array` of :obj:`list` of :obj:`np.array` of :obj:`int`
+        '''
         return deepcopy(self.food_sites)
