@@ -440,13 +440,13 @@ class Person(object):
 
         if house_size > len(self.sim_obj.prob_house_goodness): #Sets the house size to the largest house size probability if the house size is larger than that number
             house_size = len(self.sim_obj.prob_house_goodness)
-        if random.random() > self.sim_obj.prob_house_goodness[house_size - 1]:
+        if random.random() < self.sim_obj.prob_house_goodness[house_size - 1]:
             self.goodness *= self.sim_obj.house_reduction[house_size - 1] # changes the persons goodness based on house size
 
-        if random.random() > self.sim_obj.prob_age_goodness[self.age]:
+        if random.random() < self.sim_obj.prob_age_goodness[self.age]:
             self.goodness *= self.sim_obj.age_goodness_reduction[self.age]
 
-        if random.random() > self.sim_obj.prob_case_severity_goodness[self.case_severity]:
+        if random.random() < self.sim_obj.prob_case_severity_goodness[self.case_severity]:
             self.goodness *= self.sim_obj.age_case_severity_reduction[self.case_severity] #changes goodness based on how severity of a potential case
         return self.goodness
 
@@ -466,15 +466,15 @@ class Person(object):
         if self.goodness is None: #If no goodness score is defined
             self.goodness =  self.sim_obj.goodness
 
-        if self.days_in_lockdown > self.sim_obj.quarantine_threshold and random.random() > self.sim_obj.prob_quarantine_threshold: #as the lockdown length increases decrease the goodness of the person
+        if self.days_in_lockdown > self.sim_obj.quarantine_threshold and random.random() < self.sim_obj.prob_quarantine_threshold: #as the lockdown length increases decrease the goodness of the person
             self.goodness /= self.sim_obj.lockdown_threshold_reduction
 
         if lockdown_level != old_lockdown_mandate:
             # when the lockdown starts increase the goodness of a person
-            if lockdown_level and random.random() > self.sim_obj.prob_lockdown_goodness:
+            if lockdown_level and random.random() < self.sim_obj.prob_lockdown_goodness:
                 self.goodness *= self.sim_obj.lockdown_reduction
             # when the lockdown ends decerase the goodness of a person
-            elif lockdown_level is False and random.random() > self.sim_obj.prob_lockdown_goodness:
+            elif lockdown_level is False and random.random() < self.sim_obj.prob_lockdown_goodness:
                 self.goodness /= self.sim_obj.lockdown_reduction
         return self.goodness
 
