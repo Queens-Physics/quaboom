@@ -77,7 +77,7 @@ class Population:
         for i in range(self.nPop-self.nStudents, self.nPop):
             student_age = random.randint(18,23)
             newStudent = Person(index=i, sim_obj=sim_obj, infected=False, recovered=False,
-                                dead=False, hospitalized=Flase, ICU=False,quarantined=False, quarantined_day=None,
+                                dead=False, hospitalized=False,ICU=False,quarantined=False,quarantined_day=None,
                                 infected_day=None, recovered_day=None, death_day=None,
                                 others_infected=None, cure_days=None, recent_infections=None,
                                 age=student_age, job='Student', house_index=0,

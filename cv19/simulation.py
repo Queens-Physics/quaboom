@@ -443,7 +443,7 @@ class simulation():
                       "dead":self.track_dead, "quarantined":self.track_quarantined,
                       "inf_students":self.track_inf_students, "total_tested":self.track_tested,
                       "new_tested":self.track_new_tested, "hospitalized":self.track_hospitalized,
-                      "ICU":self.track_ICU, "testing_enforced":self.track_testing, 
+                      "ICU":self.track_ICU, "testing_enforced":self.track_testing,
                       "masks_enforced":self.track_masks, "lockdown_enforced":self.track_lockdown,
                       "time_elapsed":self.track_time}
 
