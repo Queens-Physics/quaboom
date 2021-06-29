@@ -289,7 +289,7 @@ class Population:
             if self.population[index].hospitalized:
                 self.hospitalized[index] = index
                 if self.population[index].ICU:
-                self.ICU[index] = index
+                    self.ICU[index] = index
 
         return didWork
 
