@@ -138,17 +138,15 @@ class Person(object):
 
     def set_quarantine(self, day):
         '''Method to set a person to be in quarantine. Sets the day the quarantine begins to the day inputted.
-        
         Parameters
         ----------
         day: int
             The day in the simulation when a person is put into quarantine.
-        
         Returns
         -------
         self.quarantined: :obj:`bool`
         '''
-        
+
         self.quarantined_day = day
         self.quarantined = True
         return self.quarantined
@@ -158,12 +156,12 @@ class Person(object):
         Will return True if person is recovered, dead or the inputted day is greater than
         self.sim_obj.quarantine_time.
         Will return False otherwise
-        
+
         Parameters
         ----------
         day: int
             The current day in the simulation to check agaisnt the day when a person went into quarantine.
-        
+
         Returns
         -------
         not self.quarantined: :obj:`bool`
@@ -207,10 +205,10 @@ class Person(object):
             The day in the simulation when the person was tested.
         '''
         self.test_day = day
-        
+
     def get_test_day(self):
         '''Method to retrieve the day a person is tested.
-        
+
         Returns
         -------
         self.test_day: :obj:'int'
@@ -219,9 +217,9 @@ class Person(object):
 
     def check_test_day (self, day):
         '''Method to check if the person has been tested in the quarantine time range.
-        If the day is greater than the test day is removed. 
+        If the day is greater than the test day is removed.
         If the person had a cold it is also removed.
-        
+
         Parameters
         ----------
         day: int
@@ -239,13 +237,13 @@ class Person(object):
         return False
 
     def check_symptoms (self, day):
-        '''Method to check a persons symtoms based on if they are infected with COVID19 or a cold.  
+        '''Method to check a persons symtoms based on if they are infected with COVID19 or a cold.
 
         Parameters
         ----------
         day: int
             The current day in the simulation to compare against  when the person was tested.
-            
+
         Returns
         -------
         self.show_symptoms: :obj:'bool'
@@ -423,43 +421,43 @@ class Person(object):
             return self.sim_obj.nonsurgical_inward_eff, self.sim_obj.nonsurgical_outward_eff
         else:
             return 1, 1  #Not wearing a mask so this will function will not effect their change of getting the virus
-    
-    def set_goodness(self, house_size): 
+
+    def set_goodness(self, house_size):
         '''Method to set the initial goodness value of a person.
-       
+
         Parameters
         ----------
         house_size: int
             Number of people living in said persons house.
-        
+
         Returns
         -------
         self.goodness: :obj:'float'
         '''
-        
+
         if self.goodness is None: #If no goodness score is defined
             self.goodness = self.sim_obj.goodness
-        
+
         if house_size > len(self.sim_obj.prob_house_goodness): #Sets the house size to the largest house size probability if the house size is larger than that number
             house_size = len(self.sim_obj.prob_house_goodness)
         if random.random() > self.sim_obj.prob_house_goodness[house_size - 1]:
             self.goodness *= self.sim_obj.house_reduction[house_size - 1] # changes the persons goodness based on house size
-        
+
         if random.random() > self.sim_obj.prob_age_goodness[self.age]:
             self.goodness *= self.sim_obj.age_goodness_reduction[self.age]
-        
+
         if random.random() > self.sim_obj.prob_case_severity_goodness[self.case_severity]:
             self.goodness *= self.sim_obj.age_case_severity_reduction[self.case_severity] #changes goodness based on how severity of a potential case
         return self.goodness
 
     def update_goodness(self, lockdown_level, old_lockdown_mandate):
         '''Method to update the goodness value of a person.
-        
+
         Parameters
         -------
-        lockdown_level: bool 
+        lockdown_level: bool
             Paramter to check if the lockdown is on (True)
-        old_lockdown_mandate: bool 
+        old_lockdown_mandate: bool
             Paramter to check what the lockdown was the day before the current one
         Returns
         -------
@@ -467,10 +465,10 @@ class Person(object):
         '''
         if self.goodness is None: #If no goodness score is defined
             self.goodness =  self.sim_obj.goodness
-        
+
         if self.days_in_lockdown > self.sim_obj.quarantine_threshold and random.random() > self.sim_obj.prob_quarantine_threshold: #as the lockdown length increases decrease the goodness of the person
             self.goodness /= self.sim_obj.lockdown_threshold_reduction
-        
+
         if lockdown_level != old_lockdown_mandate:
             # when the lockdown starts increase the goodness of a person
             if lockdown_level and random.random() > self.sim_obj.prob_lockdown_goodness:
@@ -482,7 +480,7 @@ class Person(object):
 
     def get_goodness(self):
         '''Method to retrieve the goodness value of a person.
-        
+
         Returns
         -------
         self.goodness: :obj:'float'
@@ -491,7 +489,7 @@ class Person(object):
 
     def update_lockdown_days(self, lockdown_level):
         '''Method to change the number of days a person is in a lockdown or quarantine.
-        
+
         Returns
         -------
         self.days_in_lockdown: :obj:'int'

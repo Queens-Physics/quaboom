@@ -120,7 +120,7 @@ class Population:
         for attr in attributes:
             setattr(self, attr, sim_obj.parameters["population_data"][attr])
 
-        # case severity from disease params #
+        # case severity from disease params
         self.severity_weights = np.array([sim_obj.disease_parameters["case_severity"][key]
                                           for key in constants.SEVERITY_OPTIONS])
         self.severity_options = constants.SEVERITY_OPTIONS
@@ -352,8 +352,8 @@ class Population:
 
         Parameters
         ----------
-        tests_per_day: int 
-            Paramter gives the number of tests run
+        tests_per_day: int
+            Paramter gives the number of tests run.
         day: int
             The day the testing is being done on
         '''
