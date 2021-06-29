@@ -16,7 +16,7 @@ class Person(object):
 
     '''
 
-    def __init__(self, index, sim_obj, infected=False, recovered=False, dead=False, hospitalized=False, quarantined=False,
+    def __init__(self, index, sim_obj, infected=False, recovered=False, dead=False, hospitalized=False, ICU=False, quarantined=False,
                  quarantined_day=None, infected_day=None, recovered_day=None, death_day=None, others_infected=None,
                  cure_days=None, recent_infections=None, age=None, job=None, house_index=0, isolation_tendencies=None,
                  case_severity=None, mask_type=None, has_mask=True):
@@ -31,9 +31,12 @@ class Person(object):
             The encompassing simulation obejct hosting the simulation
         infected :
         recovered :
-        dead :
+        dead : int
+            Determines if infected person will die, defaults False
+        ICU : int
+            Determines if infected person will go to the ICU, defaults False
         hospitalized : int
-            Determines if infected the person will go to the hospital, defaults False
+            Determines if infected person will go to the hospital, defaults False
         quarantined :
         quarantined_day :
         infected_day :
@@ -56,6 +59,7 @@ class Person(object):
         self.recovered = recovered
         self.dead = dead
         self.hospitalized = hospitalized
+        self.ICU = ICU
         self.quarantined = quarantined
         self.quarantined_day = quarantined_day
         self.infected_day = infected_day
@@ -121,9 +125,19 @@ class Person(object):
         '''
         return self.quarantined
 
+    def is_ICU(self):
+        '''Method to retrieve if a person will go to ICU. Returns True if in ICU,
+        False if not.
+
+        Returns
+        -------
+        self.ICU: :obj:`bool`
+        '''
+        return self.quarantined
+
     def is_hospitalzied(self):
-        '''Method to retrieve if a person is hospitalized. Returns True if dead, False if
-        not.
+        '''Method to retrieve if a person is hospitalized. Returns True if in hospital,
+        False if not.
 
         Returns
         -------
@@ -265,10 +279,19 @@ class Person(object):
                 return True
             return False
 
-    # Method that checks if a person is past their cure time and will cure them
-    # Returns True if they were cured, False if not
     def check_cured(self, day):
+        '''Method that checks if a person is past their cure time and will cure them
+        their days_since_infected is greater or equal to their cure_days.
 
+        Parameters
+        ----------
+        day : int
+            The day value that this function is being called on to check if cured.
+
+        Returns
+        -------
+        True if they were cured, False if not.
+        '''
         if self.infected and not self.recovered:
 
             days_since_infected = day - self.infected_day
@@ -288,7 +311,18 @@ class Person(object):
         return False
 
     def check_dead(self, day): # checking that case_severity==death outside of the loop
+        '''Method to check the timeline if a person will be die once they are infected if
+        their days_since_infected is greater or equal to their cure_days.
 
+        Parameters
+        ----------
+        day : int
+            The day value that this function is being called on to check if dead.
+
+        Returns
+        -------
+        True they died and False if not.
+        '''
         if self.infected:
 
             days_since_infected = day - self.infected_day
@@ -302,15 +336,29 @@ class Person(object):
         return False
 
     def check_hospitalized(self):
-        '''Method to check if a person will be hospitalized or not once being infected.
+        '''Method to check if a person will be hospitalized or not once they are infected.
 
         Returns
         -------
-        True if hospitalized and False if not
+        True if hospitalized and False if not.
         '''
         if self.infected:
             if self.case_severity == 'Hospitalization' or self.case_severity == 'ICU' or self.case_severity == 'Death':
                 self.hospitalized = True
+
+            return True
+        return False
+
+    def check_ICU(self):
+        '''Method to check if a person will go to ICU or not once they are infected.
+
+        Returns
+        -------
+        True if person goes to ICU and False if not.
+        '''
+        if self.infected:
+            if self.case_severity == 'ICU' or self.case_severity == 'Death':
+                self.ICU = True
 
             return True
         return False
@@ -332,7 +380,6 @@ class Person(object):
         else:
             return False
 
-    # Determines what the inward and outward efficiency of the spread will be based on the mask they are wearing
     def mask_type_efficiency(self):
         '''Method to determines what the inward and outward efficiency of the spread will
         be based on the type of mask worn.

@@ -52,7 +52,7 @@ class Population:
         for i in range(0, self.nPop-self.nStudents):
             # MAKE A PERSON
             newPerson = Person(index=i, sim_obj=sim_obj, infected=False, recovered=False,
-                               dead=False, hospitalized=False,
+                               dead=False, hospitalized=False, ICU = False,
                                quarantined=False, quarantined_day=None,
                                infected_day=None, recovered_day=None, death_day=None,
                                others_infected=None, cure_days=None, recent_infections=None,
@@ -77,7 +77,7 @@ class Population:
         for i in range(self.nPop-self.nStudents, self.nPop):
             student_age = random.randint(18,23)
             newStudent = Person(index=i, sim_obj=sim_obj, infected=False, recovered=False,
-                                dead=False, quarantined=False, quarantined_day=None,
+                                dead=False, hospitalized=Flase, ICU=False,quarantined=False, quarantined_day=None,
                                 infected_day=None, recovered_day=None, death_day=None,
                                 others_infected=None, cure_days=None, recent_infections=None,
                                 age=student_age, job='Student', house_index=0,
@@ -199,6 +199,15 @@ class Population:
         '''
         return self.hospitalized[self.hospitalized != NULL_ID]
 
+    def get_ICU(self):
+        '''Method to retrieve the people in the ICU.
+
+        Returns
+        -------
+        self.ICU[self.ICU != NULL_ID]: :obj:`np.array` of :obj:`int`
+        '''
+        return self.hospitalized[self.hospitalized != NULL_ID]
+
     def get_quarantined(self):
         return self.quarantined[self.quarantined != NULL_ID]
 
@@ -220,13 +229,40 @@ class Population:
         return infStudents
 
     def count_recovered(self):
+        '''Method to count the number of people recovered.
+
+        Returns
+        -------
+        np.count_nonzero(self.recovered != NULL_ID): :obj:`np.array` of :obj:`int`
+        '''
         return np.count_nonzero(self.recovered != NULL_ID)
 
     def count_dead(self):
+        '''Method to count the number of people dead.
+
+        Returns
+        -------
+        np.count_nonzero(self.dead != NULL_ID): :obj:`np.array` of :obj:`int`
+        '''
         return np.count_nonzero(self.dead != NULL_ID)
 
     def count_hospitalized(self):
+        '''Method to count the number of people in the hospital.
+
+        Returns
+        -------
+        np.count_nonzero(self.hospitalized != NULL_ID): :obj:`np.array` of :obj:`int`
+        '''
         return np.count_nonzero(self.hospitalized != NULL_ID)
+
+    def count_ICU(self):
+        '''Method to count the number of people in the ICU.
+
+        Returns
+        -------
+        np.count_nonzero(self.ICU != NULL_ID): :obj:`np.array` of :obj:`int`
+        '''
+        return np.count_nonzero(self.ICU != NULL_ID)
 
     def count_quarantined(self):
         return np.count_nonzero(self.quarantined != NULL_ID)
@@ -252,6 +288,8 @@ class Population:
             self.susceptible[index] = NULL_ID
             if self.population[index].hospitalized:
                 self.hospitalized[index] = index
+                if self.population[index].ICU:
+                self.ICU[index] = index
 
         return didWork
 
@@ -280,6 +318,7 @@ class Population:
         self.infected[index] = NULL_ID
         self.recovered[index] = index
         self.hospitalized[index] = NULL_ID
+        self.ICU[index] = NULL_ID
         return True
 
     def die(self, index, day):
@@ -296,6 +335,7 @@ class Population:
         self.infected[index] = NULL_ID
         self.recovered[index] = NULL_ID
         self.hospitalized[index] = NULL_ID
+        self.ICU[index] = NULL_ID
         self.dead[index] = index
         return True
 
