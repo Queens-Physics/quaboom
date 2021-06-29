@@ -26,7 +26,7 @@ class Population:
         self.set_demographic_parameters()
 
         self.nPop = sim_obj.nPop  # total population
-        self.n0 = sim_obj.n0  # initial infected
+        #self.n0 = sim_obj.n0  # initial infected
 
         self.population = [0] * self.nPop  # The list of all people
         self.household = [0] * self.nPop  # list of all houses (list that contains all lists of the people in the house)
@@ -113,11 +113,11 @@ class Population:
         self.new_quarantined_num = 0  # new people in quarantine
 
         # Infect first n0 people
-        for i in range(self.n0):
-            self.infect(index=i, day=0, virus_type="general")
-           
-        for i in range(self.n0,(self.n0)+1):
-            self.infect(index=i, day=0, virus_type="B117") 
+        count = 0
+        for key in sim_obj.infections.keys():
+            for _ in range(sim_obj.infections[key]):
+                self.infect(index=count, day=0, virus_type=key)
+                count += 1
 
     def load_attributes_from_sim_obj(self, sim_obj):
         attributes = sim_obj.parameters["population_data"].keys()
@@ -309,6 +309,7 @@ class Population:
         self.infected[index] = NULL_ID
         self.recovered[index] = NULL_ID
         self.hospitalized[index] = NULL_ID
+        self.virus_type[index] = "None"
         self.dead[index] = index
         return True
 

@@ -4,7 +4,11 @@
         "disease_config_file":"./config_files/disease.json",
         "nDays":100,
         "nPop":10000,
-        "n0":10,
+        "infections":{
+            "general":8, 
+            "alpha":1,
+            "delta":1
+            },
         "will_go_prob":{"A":0.05, "B":0.2, "C":0.7, "LECT":0.8, "STUDY":0.2, "FOOD":0.1},
         "N_VIS_OPTION":[ 0, 1, 2, 3 ],
         "N_VIS_PROB":[ 0.7, 0.17, 0.08, 0.05],

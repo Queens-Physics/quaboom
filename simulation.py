@@ -46,7 +46,8 @@ class simulation():
         self.track_virus_type = np.zeros(self.nDays, dtype=object)
         self.track_virus_type_none = np.zeros(self.nDays, dtype=object)
         self.track_virus_type_general = np.zeros(self.nDays, dtype=object)
-        self.track_virus_type_B117 = np.zeros(self.nDays, dtype=object)
+        self.track_virus_type_alpha = np.zeros(self.nDays, dtype=object)
+        self.track_virus_type_delta = np.zeros(self.nDays, dtype=object)
 
         self.track_time = np.zeros(self.nDays, dtype=float) # time elapsed (in seconds) since start of simulation
 
@@ -174,9 +175,11 @@ class simulation():
             self.track_inf_students[day] = self.pop.count_infected_students()
             
             self.track_virus_type[day] = self.pop.count_virus_types()
+            #print(self.pop.count_virus_types())
             self.track_virus_type_none[day] = self.pop.count_virus_types()["None"]
             self.track_virus_type_general[day] = self.pop.count_virus_types()["gene"]
-            self.track_virus_type_B117[day] = self.pop.count_virus_types()["B117"]
+            self.track_virus_type_alpha[day] = self.pop.count_virus_types()["alph"]
+            self.track_virus_type_delta[day] = self.pop.count_virus_types()["delt"]
 
             self.new_tests = 0
 
@@ -219,7 +222,7 @@ class simulation():
                                  quarantined=False, quarantined_day=None, infected_day=None, recovered_day=None,
                                  death_day=None, others_infected=None, cure_days=None, recent_infections=None,
                                  age=vis_age, job=None,house_index=None, isolation_tendencies=0.2, case_severity='Mild',
-                                 has_mask=True, virus_type="B117")
+                                 has_mask=True, virus_type="alpha")
                 self.pop.population.append(visitor)
 
             ############### INTERACTION SITES STUFF ###############
@@ -353,7 +356,7 @@ class simulation():
     def plot(self, plot_infected=True, plot_susceptible=True, plot_dead=True, plot_recovered=True, plot_new_infected=True,
              plot_tested=True, plot_quarantined=True, plot_new_tests=True, plot_new_quarantined=True, plot_masks=True,
              plot_hospitalized=False, plot_lockdown=True, plot_testing=True, plot_students=True,
-             plot_virus_type_none=True, plot_virus_type_general=True, plot_virus_type_B117=True,
+             plot_virus_type_none=False, plot_virus_type_general=True, plot_virus_type_alpha=True, plot_virus_type_delta=True,
              log=False):
 
         self.check_has_run(check=True, information="Cannot make plots.", fail=True)
@@ -388,8 +391,10 @@ class simulation():
             plt.plot(days, self.track_virus_type_none, label="not infected")
         if plot_virus_type_general: 
             plt.plot(days, self.track_virus_type_general, label="general")
-        if plot_virus_type_B117: 
-            plt.plot(days, self.track_virus_type_B117, label="B117")  
+        if plot_virus_type_alpha: 
+            plt.plot(days, self.track_virus_type_alpha, label="alpha")
+        if plot_virus_type_delta: 
+            plt.plot(days, self.track_virus_type_delta, label="delta")    
 
         # Indicate when certain mandates were in place
         if plot_masks:
