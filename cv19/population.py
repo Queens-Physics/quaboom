@@ -166,8 +166,13 @@ class Population:
         # Cast this so they can be used as ints
         self.house_options = [int(x) for x in constants.HOUSE_OPTIONS]
 
-    #returns the population
     def get_population_size(self):
+        '''Method to return population size.
+
+        Returns
+        -------
+        self.nPop: :obj:`int`
+        '''
         return self.nPop
 
     def get_population(self):
@@ -177,21 +182,38 @@ class Population:
         for i in indices:
             np.delete(self.population, i)
 
-    # Properly return the actual indices of each bin of people
     def get_susceptible(self):
+        '''Method to retrieve indicies of people suseptible.
+
+        Returns
+        -------
+        self.suseptible[self.suseptible != NULL_ID]: :obj:`np.array` of :obj:`int`
+        '''
         return self.susceptible[self.susceptible != NULL_ID]
 
     def get_infected(self):
+        '''Method to retrieve indicies of people infected.
+
+        Returns
+        -------
+        self.infected[self.infected != NULL_ID]: :obj:`np.array` of :obj:`int`
+        '''
         return self.infected[self.infected != NULL_ID]
 
     def get_recovered(self):
+        '''Method to retrieve indicies of people recovered.
+
+        Returns
+        -------
+        self.recovered[self.recovered != NULL_ID]: :obj:`np.array` of :obj:`int`
+        '''
         return self.recovered[self.recovered != NULL_ID]
 
     def get_dead(self):
         return self.dead[self.dead != NULL_ID]
 
     def get_hospitalized(self):
-        '''Method to retrieve the people hospitalized.
+        '''Method to retrieve indicies of the people hospitalized.
 
         Returns
         -------
@@ -200,25 +222,42 @@ class Population:
         return self.hospitalized[self.hospitalized != NULL_ID]
 
     def get_ICU(self):
-        '''Method to retrieve the people in the ICU.
+        '''Method to retrieve indicies of the people in the ICU.
 
         Returns
         -------
         self.ICU[self.ICU != NULL_ID]: :obj:`np.array` of :obj:`int`
         '''
-        return self.hospitalized[self.hospitalized != NULL_ID]
+        return self.ICU[self.ICU != NULL_ID]
 
     def get_quarantined(self):
+        '''Method to retrieve indicies of the people in quarantining.
+
+        Returns
+        -------
+        self.quarantined[self.quarantined != NULL_ID]: :obj:`np.array` of :obj:`int`
+        '''
         return self.quarantined[self.quarantined != NULL_ID]
 
     def get_students(self):  # change this to look thru job == 'Student' ?
         return self.students[self.students != NULL_ID]
 
-    # Count the number of people in each bin
     def count_susceptible(self):
+         '''Method to count the number of people susceptible.
+
+        Returns
+        -------
+        np.count_nonzero(self.suseptible != NULL_ID): :obj:`np.array` of :obj:`int`
+        '''
         return np.count_nonzero(self.susceptible != NULL_ID)
 
     def count_infected(self):
+         '''Method to count the number of people infected.
+
+        Returns
+        -------
+        np.count_nonzero(self.infetced != NULL_ID): :obj:`np.array` of :obj:`int`
+        '''
         return np.count_nonzero(self.infected != NULL_ID)
 
     def count_infected_students(self):
