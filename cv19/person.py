@@ -82,7 +82,7 @@ class Person(object):
         self.has_mask = has_mask
         self.test_day = None
         self.has_cold = False
-        self.goodness = None
+        self.protocol_compliance = None
         self.days_in_lockdown = 0
         # Set the simulaiton object to access the variables
         self.sim_obj = sim_obj
@@ -400,7 +400,7 @@ class Person(object):
         mask_options = np.random.uniform()
 
         if self.has_mask:
-            if mask_options/self.goodness > self.sim_obj.wear_mask_properly:
+            if mask_options/self.protocol_compliance > self.sim_obj.wear_mask_properly:
                 return False  #False = not wearing a mask
             else:
                 return True  #True = wearing a mask
@@ -422,8 +422,8 @@ class Person(object):
         else:
             return 1, 1  #Not wearing a mask so this will function will not effect their change of getting the virus
 
-    def set_goodness(self, house_size):
-        '''Method to set the initial goodness value of a person.
+    def set_protocol_compliance(self, house_size):
+        '''Method to set the initial protocol compliance value of a person.
 
         Parameters
         ----------
@@ -432,26 +432,26 @@ class Person(object):
 
         Returns
         -------
-        self.goodness: :obj:'float'
+        self.protocol_compliance: :obj:'float'
         '''
 
-        if self.goodness is None: #If no goodness score is defined
-            self.goodness = self.sim_obj.goodness
+        if self.protocol_compliance is None: #If no protocol compliance score is defined
+            self.protocol_compliance = self.sim_obj.goodness
 
-        if house_size > len(self.sim_obj.prob_house_goodness): #Sets the house size to the largest house size probability if the house size is larger than that number
-            house_size = len(self.sim_obj.prob_house_goodness)
-        if random.random() < self.sim_obj.prob_house_goodness[house_size - 1]:
-            self.goodness *= self.sim_obj.house_reduction[house_size - 1] # changes the persons goodness based on house size
+        if house_size > len(self.sim_obj.protocol_compliance_house_prob): #Sets the house size to the largest house size probability if the house size is larger than that number
+            house_size = len(self.sim_obj.protocol_compliance_house_prob)
+        if random.random() < self.sim_obj.protocol_compliance_house_prob[house_size - 1]:
+            self.protocol_compliance *= self.sim_obj.protocol_compliance_house_reduction[house_size - 1] # changes the persons protocol compliance based on house size
 
-        if random.random() < self.sim_obj.prob_age_goodness[self.age]:
-            self.goodness *= self.sim_obj.age_goodness_reduction[self.age]
+        if random.random() < self.sim_obj.protocol_compliance_age_prob[self.age]:
+            self.protocol_compliance *= self.sim_obj.protocol_compliance_age_reduction[self.age]
 
-        if random.random() < self.sim_obj.prob_case_severity_goodness[self.case_severity]:
-            self.goodness *= self.sim_obj.age_case_severity_reduction[self.case_severity] #changes goodness based on how severity of a potential case
-        return self.goodness
+        if random.random() < self.sim_obj.protocol_compliance_case_severity_prob[self.case_severity]:
+            self.protocol_compliance *= self.sim_obj.protocol_compliance_case_severity_reduction[self.case_severity] #changes protocol compliance based on how severity of a potential case
+        return self.protocol_compliance
 
-    def update_goodness(self, lockdown_level, old_lockdown_mandate):
-        '''Method to update the goodness value of a person.
+    def update_protocol_compliance(self, lockdown_level, old_lockdown_mandate):
+        '''Method to update the protocol compliance value of a person.
 
         Parameters
         -------
@@ -461,31 +461,31 @@ class Person(object):
             Paramter to check what the lockdown was the day before the current one
         Returns
         -------
-        self.goodness: :obj:'float'
+        self.protocol_compliance: :obj:'float'
         '''
-        if self.goodness is None: #If no goodness score is defined
-            self.goodness =  self.sim_obj.goodness
+        if self.protocol_compliance is None: #If no protocol compliance it is defined
+            self.protocol_compliance =  self.sim_obj.protocol_compliance
 
-        if self.days_in_lockdown > self.sim_obj.quarantine_threshold and random.random() < self.sim_obj.prob_quarantine_threshold: #as the lockdown length increases decrease the goodness of the person
-            self.goodness /= self.sim_obj.lockdown_threshold_reduction
+        if self.days_in_lockdown > self.sim_obj.protocol_compliance_lockdown_length_threshold and random.random() < self.sim_obj.protocol_compliance_lockdown_prob: #as the lockdown length increases decrease the protocol compliance
+            self.protocol_compliance *= self.sim_obj.protocol_compliance_lockdown_length_reduction
 
         if lockdown_level != old_lockdown_mandate:
-            # when the lockdown starts increase the goodness of a person
-            if lockdown_level and random.random() < self.sim_obj.prob_lockdown_goodness:
-                self.goodness *= self.sim_obj.lockdown_reduction
-            # when the lockdown ends decerase the goodness of a person
-            elif lockdown_level is False and random.random() < self.sim_obj.prob_lockdown_goodness:
-                self.goodness /= self.sim_obj.lockdown_reduction
-        return self.goodness
+            # when the lockdown starts increase the protocol compliance of a person
+            if lockdown_level and random.random() < self.sim_obj.protocol_compliance_lockdown_prob:
+                self.protocol_compliance *= self.sim_obj.protocol_compliance_lockdown_reduction
+            # when the lockdown ends decerase the protocol compliance of a person
+            elif lockdown_level is False and random.random() < self.sim_obj.protocol_compliance_lockdown_prob:
+                self.protocol_compliance /= self.sim_obj.protocol_compliance_lockdown_reduction
+        return self.protocol_compliance
 
-    def get_goodness(self):
-        '''Method to retrieve the goodness value of a person.
+    def get_protocol_compliance(self):
+        '''Method to retrieve the protocol compliance value of a person.
 
         Returns
         -------
-        self.goodness: :obj:'float'
+        self.protocol_compliance: :obj:'float'
         '''
-        return self.goodness
+        return self.protocol_compliance
 
     def update_lockdown_days(self, lockdown_level):
         '''Method to change the number of days a person is in a lockdown or quarantine.

@@ -335,7 +335,7 @@ class Population:
 
                 if i not in self.testing and self.have_been_tested[i] != 1: # if person is not already in testing function
                     infected_person = self.population[i] #gets the infected person from the population list
-                    if random.random()*self.population[i].get_goodness() < self.prob_of_test:
+                    if random.random()/self.population[i].get_protocol_compliance() < self.prob_of_test:
                         if infected_person.show_symptoms and not infected_person.knows_infected:
                             self.testing.append(i) #adds the person to the testing list
                             self.population[i].knows_infected = True
