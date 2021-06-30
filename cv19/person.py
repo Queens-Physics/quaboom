@@ -133,7 +133,7 @@ class Person(object):
         -------
         self.ICU: :obj:`bool`
         '''
-        return self.quarantined
+        return self.ICU
 
     def is_hospitalzied(self):
         '''Method to retrieve if a person is hospitalized. Returns True if in hospital,

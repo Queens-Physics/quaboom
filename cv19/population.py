@@ -52,7 +52,7 @@ class Population:
         for i in range(0, self.nPop-self.nStudents):
             # MAKE A PERSON
             newPerson = Person(index=i, sim_obj=sim_obj, infected=False, recovered=False,
-                               dead=False, hospitalized=False, ICU = False,
+                               dead=False, hospitalized=False, ICU=False,
                                quarantined=False, quarantined_day=None,
                                infected_day=None, recovered_day=None, death_day=None,
                                others_infected=None, cure_days=None, recent_infections=None,
@@ -103,6 +103,7 @@ class Population:
         self.have_been_tested = np.zeros(self.nPop, dtype=int) + NULL_ID  # list of people who have been tested
         self.knows_infected = np.zeros(self.nPop, dtype=int) + NULL_ID  # list of people with positive test and still infected
         self.hospitalized = np.zeros(self.nPop, dtype=int) + NULL_ID  # list of people hospitalized and in the ICU
+        self.ICU = np.zeros(self.nPop, dtype=int) + NULL_ID  # list of people in the ICU
         self.quarantined = np.zeros(self.nPop, dtype=int) + NULL_ID  #list of people who are currently in quarantine
 
         self.testing = []  # list of people waiting to be others_infected
@@ -243,7 +244,7 @@ class Population:
         return self.students[self.students != NULL_ID]
 
     def count_susceptible(self):
-         '''Method to count the number of people susceptible.
+        '''Method to count the number of people susceptible.
 
         Returns
         -------
@@ -252,7 +253,7 @@ class Population:
         return np.count_nonzero(self.susceptible != NULL_ID)
 
     def count_infected(self):
-         '''Method to count the number of people infected.
+        '''Method to count the number of people infected.
 
         Returns
         -------
