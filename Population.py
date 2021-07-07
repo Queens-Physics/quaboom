@@ -105,7 +105,7 @@ class Population:
         self.hospitalized = np.zeros(self.nPop, dtype=int) + NULL_ID  # list of people hospitalized and in the ICU
         self.quarantined = np.zeros(self.nPop, dtype=int) + NULL_ID  #list of people who are currently in quarantine
         
-        self.virus_type = np.array(["None" for i in range(self.nPop)]) #list of individuals with None as virus type
+        self.virus_type = np.array(["None" for i in range(self.nPop)], dtype=object) #list of individuals with None as virus type
 
         self.testing = []  # list of people waiting to be others_infected
         self.test_sum = 0  # total number of tests that have been run
@@ -123,6 +123,8 @@ class Population:
         attributes = sim_obj.parameters["population_data"].keys()
         for attr in attributes:
             setattr(self, attr, sim_obj.parameters["population_data"][attr])
+        
+        self.virus_types = list(sim_obj.parameters["simulation_data"]["infections"].keys())
 
         # case severity from disease params #
         self.severity_weights = np.array([sim_obj.disease_parameters["case_severity"][key]
@@ -245,7 +247,7 @@ class Population:
 
     def count_virus_types(self):
         counts={}
-        for virus_type in np.unique(self.virus_type):
+        for virus_type in self.virus_types + ["None"]:
             counts[virus_type] = np.count_nonzero(self.virus_type==virus_type)
         return counts    
     

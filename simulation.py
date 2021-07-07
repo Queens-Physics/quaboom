@@ -177,9 +177,9 @@ class simulation():
             self.track_virus_type[day] = self.pop.count_virus_types()
             #print(self.pop.count_virus_types())
             self.track_virus_type_none[day] = self.pop.count_virus_types()["None"]
-            self.track_virus_type_general[day] = self.pop.count_virus_types()["gene"]
-            self.track_virus_type_alpha[day] = self.pop.count_virus_types()["alph"]
-            self.track_virus_type_delta[day] = self.pop.count_virus_types()["delt"]
+            self.track_virus_type_general[day] = self.pop.count_virus_types()["general"]
+            self.track_virus_type_alpha[day] = self.pop.count_virus_types()["alpha"]
+            self.track_virus_type_delta[day] = self.pop.count_virus_types()["delta"]
 
             self.new_tests = 0
 

@@ -10,7 +10,7 @@
             "delta":1
             },
         "will_go_prob":{"A":0.05, "B":0.2, "C":0.7, "LECT":0.8, "STUDY":0.2, "FOOD":0.1},
-        "N_VIS_OPTION":[ 0, 1, 2, 3 ],
+        "N_VIS_OPTION":[ 20, 25, 30, 35 ],
         "N_VIS_PROB":[ 0.7, 0.17, 0.08, 0.05],
         "vis_age_upper":60,
         "vis_age_lower":16
