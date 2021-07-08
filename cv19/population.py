@@ -146,16 +146,16 @@ class Population:
 
         # PULL DATA FROM THE JSON FILE #
         # age #
-        self.age_weights = np.array((disease_params['age_weights'][age_range]
-                                     for age_range in self.age_options))
+        self.age_weights = np.array([disease_params['age_weights'][age_range]
+                                     for age_range in self.age_options])
 
         # job #
-        self.job_weights = np.array((disease_params['job_weights'][job_type]
-                                     for job_type in self.job_options))
+        self.job_weights = np.array([disease_params['job_weights'][job_type]
+                                     for job_type in self.job_options])
 
         # house #
-        self.house_weights = np.array((disease_params['house_weights'][house_size]
-                                       for house_size in self.house_options))
+        self.house_weights = np.array([disease_params['house_weights'][house_size]
+                                       for house_size in self.house_options])
 
         # Cast this so they can be used as ints
         self.house_options = [int(x) for x in constants.HOUSE_OPTIONS]
