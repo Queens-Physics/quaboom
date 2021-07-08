@@ -126,7 +126,7 @@ class Interaction_Sites:
         '''Method designed to associate members of the population with interaction sites
 
         This method initializes all non-student interaction sites by creating a list
-        of person indexes for each interaction site, for that type of interaction type.
+        of person indices for each interaction site, for that type of interaction type.
 
         Parameters
         ----------
@@ -169,11 +169,11 @@ class Interaction_Sites:
 
         return grade_sites
 
-    def init_uni(self, sites_per_pop, loyalty_mean, loyalty_std):
+    def init_uni(self, grade_pop_size, loyalty_mean, loyalty_std):
         '''Method designed to associate members of the student population with interaction sites
 
         This method initializes all student interaction sites by creating a list
-        of person indexes for each interaction site, for that type of interaction type.
+        of person indices for each interaction site, for that type of interaction type.
 
         Parameters
         ----------
@@ -193,7 +193,7 @@ class Interaction_Sites:
             array holds the index of people that are associated with that site (can visit it)
 
         '''
-        num_sites = round(self.pop.get_student_pop_size()/sites_per_pop)
+        num_sites = round(self.pop.get_student_pop_size()/grade_pop_size)
         grade_sites = [[] for i in range(num_sites)]
 
         for student in self.pop.get_population():
@@ -213,16 +213,16 @@ class Interaction_Sites:
 
         return grade_sites
 
-    def init_res(self, sites_per_pop, loyalty_mean, loyalty_std):
-        '''Method designed to associate members of the student population with interaction sites
+    def init_res(self, grade_pop_size, loyalty_mean, loyalty_std):
+        '''Method designed to associate students with the residence interaction site
 
-        This method initializes all student interaction sites by creating a list
-        of person indexes for each interaction site, for that type of interaction type.
+        This method initializes the residence interaction sites by creating a list
+        of person indices for each interaction site.
 
         Parameters
         ----------
         grade_pop_size : int
-            Number of people per interaction site. Determines how many interaction sites
+            Number of people per residence section. Determines how many interaction sites
             there will be across the population.
         loyalty_mean : float
             The mean number of this type of sites that each person will be associated with.
@@ -237,14 +237,12 @@ class Interaction_Sites:
             array holds the index of people that are associated with that site (can visit it)
 
         '''
-        # FIXE THE ABOVE FOR RES ------------------------------------------
 
-        num_sites = round(self.pop.get_res_size()/sites_per_pop)
+        num_sites = round(self.pop.get_res_size()/grade_pop_size)
         grade_sites = [[] for i in range(num_sites)]
 
-        for i in get_residences():
-            student_i = house_stud_i[i][0]
-            student = self.pop.get_population()[student_i]
+        for room in self.pop.get_residences():
+            student_i = self.stud_house_indices[room][0]
             # Assign people to this specific site
             num_diff_sites = abs(round(np.random.normal(loyalty_mean, loyalty_std)))
             num_diff_sites = num_diff_sites if num_diff_sites <= num_sites else num_sites
@@ -253,6 +251,12 @@ class Interaction_Sites:
             for site in student_sites:
                 # Assign this person to that site
                 grade_sites[site].append(student_i)
+
+        # Convert everything to numpy arrays
+        for i, site in enumerate(grade_sites):
+            grade_sites[i] = np.array(site)
+
+        return grade_sites
 
     def will_visit_site(self, site_array, will_go_prob):
         '''Method to determine who will visit a site on a given day.

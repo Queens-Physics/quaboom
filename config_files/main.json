@@ -45,7 +45,7 @@
 
     "interaction_sites_data":{
 
-        "grade_per_pop":{"A":1000, "B":1000, "C":1000, "LECT":300, "STUDY":10, "FOOD":1000, "RES":70},
+        "grade_per_pop":{"A":1000, "B":1000, "C":1000, "LECT":100, "STUDY":100, "FOOD":10, "RES":40},
         "grade_loyalty_means":{"A":4, "B":1, "C":1, "LECT":4, "STUDY":3, "FOOD":5, "RES":1},
         "grade_loyalty_stds":{"A":2, "B":1, "C":0.2, "LECT":2, "STUDY":2, "FOOD":2, "RES":0},
         "students_participate":{"A":true, "B":true, "C":false},

@@ -115,7 +115,7 @@ class Population:
         ############### STUDENTS ###############
         self.student_indices = np.zeros(self.nPop, dtype=int) + NULL_ID
         self.res_houses = np.zeros(len(self.stud_houses), dtype=int) + NULL_ID # student houses that are in residence will be nonzero
-        
+
         studHouseIndex = 0
         studHouseSize = self.stud_houses[studHouseIndex]
 
@@ -141,7 +141,6 @@ class Population:
             self.population[i] = newStudent
 
             self.student_indices[i] = i  # set their student status
-            studenti = i-self.nPop+self.nStudents
 
             # Increment house info
             studHouseSize -= 1
