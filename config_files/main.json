@@ -3,8 +3,9 @@
     {
         "disease_config_file":"disease.json",
         "nDays":100,
-        "nPop":10000,
-        "num_students":2000,
+        "nPop":100000,
+        "num_students":27000,
+        "max_num_res_students":5000,
         "n0":10,
         "will_go_prob":{"A":0.05, "B":0.2, "C":0.7, "LECT":0.8, "STUDY":0.2, "FOOD":0.1, "RES":1},
         "N_VIS_OPTION":[ 0, 1, 2, 3 ],
@@ -22,7 +23,7 @@
         "mask_trigger":0.3,
         "mask_day_trigger":15,
         "initial_lockdown_mandate":false,
-        "lockdown_on_trigger":0.005,
+        "lockdown_on_trigger":0.001,
         "lockdown_off_trigger":0.1,
         "lockdown_on_day_trigger":null,
         "lockdown_off_day_trigger":null,
@@ -45,7 +46,7 @@
 
     "interaction_sites_data":{
 
-        "grade_per_pop":{"A":1000, "B":1000, "C":1000, "LECT":100, "STUDY":100, "FOOD":10, "RES":40},
+        "grade_per_pop":{"A":1000, "B":1000, "C":1000, "LECT":100, "STUDY":100, "FOOD":5, "RES":15},
         "grade_loyalty_means":{"A":4, "B":1, "C":1, "LECT":4, "STUDY":3, "FOOD":5, "RES":1},
         "grade_loyalty_stds":{"A":2, "B":1, "C":0.2, "LECT":2, "STUDY":2, "FOOD":2, "RES":0},
         "students_participate":{"A":true, "B":true, "C":false},

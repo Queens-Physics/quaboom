@@ -242,15 +242,15 @@ class Interaction_Sites:
         grade_sites = [[] for i in range(num_sites)]
 
         for room in self.pop.get_residences():
-            student_i = self.stud_house_indices[room][0]
-            # Assign people to this specific site
-            num_diff_sites = abs(round(np.random.normal(loyalty_mean, loyalty_std)))
-            num_diff_sites = num_diff_sites if num_diff_sites <= num_sites else num_sites
-            # Get a list of len num_diff_sites for this person to be associated with now
-            student_sites = np.random.choice(num_sites, num_diff_sites, replace=False)
-            for site in student_sites:
-                # Assign this person to that site
-                grade_sites[site].append(student_i)
+            for student_i in self.stud_house_indices[room]:
+                # Assign people to this specific site
+                num_diff_sites = abs(round(np.random.normal(loyalty_mean, loyalty_std)))
+                num_diff_sites = num_diff_sites if num_diff_sites <= num_sites else num_sites
+                # Get a list of len num_diff_sites for this person to be associated with now
+                student_sites = np.random.choice(num_sites, num_diff_sites, replace=False)
+                for site in student_sites:
+                    # Assign this person to that site
+                    grade_sites[site].append(student_i)
 
         # Convert everything to numpy arrays
         for i, site in enumerate(grade_sites):

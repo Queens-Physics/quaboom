@@ -37,6 +37,7 @@ class Population:
         self.stud_houses = [0] * self.nStudents # list of student houses
         self.prob_of_test = self.prob_of_test
         self.prob_has_mask = self.prob_has_mask
+        self.n_students_in_res = 0
 
         houseIndex = 0
         totalHouse = 0
@@ -120,10 +121,6 @@ class Population:
         studHouseSize = self.stud_houses[studHouseIndex]
 
         for i in range(self.nPop-self.nStudents, self.nPop):
-            # If the student house only has 1 person, add it to the residence list
-            if self.stud_houses[studHouseIndex] == 1:
-                self.res_houses[studHouseIndex] = studHouseIndex
-
             # check if the house size is 0 at the beginning
             if studHouseSize == 0:
                 studHouseIndex += 1
@@ -147,6 +144,16 @@ class Population:
 
         # Create the array to hold the indices of people in the house
         self.house_stud_i = [np.tile(-1, size) for size in self.stud_houses]
+
+        # create the residence list
+        for house_size in range(1,3):
+            for i in range(len(self.stud_houses)):
+                # If the student house only has 1 person, add it to the residence list
+                if self.stud_houses[i] == house_size:
+                    if self.n_students_in_res >= sim_obj.max_num_res_students-1: break
+                    self.res_houses[i] = i
+                    self.n_students_in_res += house_size
+            if self.n_students_in_res >= sim_obj.max_num_res_students-1: break
 
         # Add the people indices to the list
         for i in range(self.nPop-self.nStudents, self.nPop):
@@ -325,10 +332,9 @@ class Population:
 
         Returns
         -------
-        res_students: :obj:`int`
+        self.n_students_in_res: :obj:`int`
         '''
-        res_students = len(self.res_houses)
-        return res_students
+        return n_students_in_res
 
     # Count the number of people in each bin
     def count_susceptible(self):
