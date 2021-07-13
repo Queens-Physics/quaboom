@@ -281,7 +281,7 @@ class simulation():
             self.inter_sites.house_interact(day)
             self.inter_sites.student_house_interact(day)
             # Residence interactions
-            if self.inter_sites.students_on and False:
+            if self.inter_sites.students_on:
                 will_visit_res = self.inter_sites.will_visit_site(self.inter_sites.get_res_sites(), self.will_go_prob["RES"])
                 self.inter_sites.site_interaction(will_visit_res, day)
 
