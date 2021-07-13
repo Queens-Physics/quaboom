@@ -3,9 +3,9 @@
     {
         "disease_config_file":"disease.json",
         "nDays":100,
-        "nPop":100000,
-        "num_students":27000,
-        "max_num_res_students":5000,
+        "nPop":10000,
+        "num_students":2000,
+        "max_num_res_students":500,
         "n0":10,
         "will_go_prob":{"A":0.05, "B":0.2, "C":0.7, "LECT":0.8, "STUDY":0.2, "FOOD":0.1, "RES":1},
         "N_VIS_OPTION":[ 0, 1, 2, 3 ],
