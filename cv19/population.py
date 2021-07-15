@@ -146,14 +146,17 @@ class Population:
         self.house_stud_i = [np.tile(-1, size) for size in self.stud_houses]
 
         # create the residence list
+        # this is probably not the most efficient it could be
         for house_size in range(1,3):
-            for i in range(len(self.stud_houses)):
+            for i, stud_house_size in enumerate(self.stud_houses):
                 # If the student house only has 1 person, add it to the residence list
-                if self.stud_houses[i] == house_size:
-                    if self.n_students_in_res >= sim_obj.max_num_res_students-1: break
+                if stud_house_size == house_size:
+                    if self.n_students_in_res >= (sim_obj.max_num_res_students-1):
+                        break
                     self.res_houses[i] = i
                     self.n_students_in_res += house_size
-            if self.n_students_in_res >= sim_obj.max_num_res_students-1: break
+            if self.n_students_in_res >= (sim_obj.max_num_res_students-1):
+                break
 
         # Add the people indices to the list
         for i in range(self.nPop-self.nStudents, self.nPop):
@@ -334,7 +337,7 @@ class Population:
         -------
         self.n_students_in_res: :obj:`int`
         '''
-        return n_students_in_res
+        return self.n_students_in_res
 
     # Count the number of people in each bin
     def count_susceptible(self):
