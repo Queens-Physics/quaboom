@@ -147,22 +147,16 @@ class Population:
 
         # PULL DATA FROM THE JSON FILE #
         # age #
-        self.age_weights = np.zeros(len(self.age_options))
-        for iage in range(len(self.age_weights)):
-            string = str(iage*10)+'-'+str(iage*10+9)
-            self.age_weights[iage]= disease_params['age_weights'][string]
+        self.age_weights = np.array([disease_params['age_weights'][age_range]
+                                     for age_range in self.age_options])
 
         # job #
-        self.job_weights = np.zeros(len(self.job_options))
-        for ijob in range (len(self.job_weights)):
-            string = self.job_options[ijob]
-            self.job_weights[ijob]= disease_params['job_weights'][string]
+        self.job_weights = np.array([disease_params['job_weights'][job_type]
+                                     for job_type in self.job_options])
 
         # house #
-        self.house_weights = np.zeros(len(self.house_options))
-        for ihouse in range(len(self.house_weights)):
-            string = str(ihouse+1)
-            self.house_weights[ihouse]= disease_params['house_weights'][string]
+        self.house_weights = np.array([disease_params['house_weights'][house_size]
+                                       for house_size in self.house_options])
 
         # Cast this so they can be used as ints
         self.house_options = [int(x) for x in constants.HOUSE_OPTIONS]
@@ -394,8 +388,8 @@ class Population:
 
     # Causes random people to get the cold
     def random_symptomatic(self):
-        for i in range (len(self.population)):
-            self.population[i].not_infected_symptoms()
+        for person in self.population:
+            person.not_infected_symptoms()
 
     # updates the list of symptomatic people and adds the people who are symtomatic to the testing array
     def update_symptomatic(self, day):
