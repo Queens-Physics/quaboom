@@ -379,9 +379,9 @@ class simulation():
 
         return self.has_run
 
-    def plot(self, plot_infected=False, plot_susceptible=False, plot_dead=True, plot_recovered=False, plot_new_infected=False,
-             plot_tested=False, plot_quarantined=False, plot_new_tests=False, plot_new_quarantined=False, plot_masks=True,
-             plot_hospitalized=True, plot_ICU=True, plot_lockdown=False, plot_testing=False, plot_students=False, log=False):
+    def plot(self, plot_infected=True, plot_susceptible=True, plot_dead=True, plot_recovered=True, plot_new_infected=True,
+             plot_tested=True, plot_quarantined=True, plot_new_tests=True, plot_new_quarantined=True, plot_masks=True,
+             plot_hospitalized=True, plot_ICU=True, plot_lockdown=True, plot_testing=True, plot_students=True, log=False):
 
         self.check_has_run(check=True, information="Cannot make plots.", fail=True)
 
