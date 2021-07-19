@@ -172,7 +172,7 @@ class Population:
 
         Returns
         -------
-        self.nPop: :obj:`int`
+        self.nPop: `int`
         '''
         return self.nPop
 
@@ -326,10 +326,10 @@ class Population:
         if didWork:
             self.infected[index] = index
             self.susceptible[index] = NULL_ID
-            if self.population[index].hospitalized:
+            if self.population[index].ICU:
+                self.ICU[index] = index
+            elif self.population[index].hospitalized:
                 self.hospitalized[index] = index
-                if self.population[index].ICU:
-                    self.ICU[index] = index
 
         return didWork
 

@@ -131,7 +131,7 @@ class Person(object):
 
         Returns
         -------
-        self.ICU: :obj:`bool`
+        self.ICU: `bool`
         '''
         return self.ICU
 
@@ -249,10 +249,12 @@ class Person(object):
                 self.cure_days = np.random.randint(d_params["ICU_days"]["min"],
                                                    d_params["ICU_days"]["max"]) if cure_days is None else cure_days
                 self.hospitalized = True
+                self.ICU = True
             elif self.case_severity == 'Death':
                 self.cure_days = np.random.randint(d_params["die_days"]["min"],
                                                    d_params["die_days"]["max"]) if cure_days is None else cure_days
                 self.hospitalized = True
+                self.ICU = True
 
             return True
 
@@ -306,6 +308,7 @@ class Person(object):
                 self.days_until_symptoms = None
                 self.show_symptoms = False
                 self.hospitalized = False
+                self.ICU = False
 
                 return True
         return False
