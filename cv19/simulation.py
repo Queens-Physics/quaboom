@@ -35,6 +35,7 @@ class simulation():
         self.track_recovered = np.zeros(self.nDays, dtype=int)    # total recovered
         self.track_dead = np.zeros(self.nDays, dtype=int)         # total deaths
         self.track_hospitalized = np.zeros(self.nDays, dtype=int) # total hospitalizations
+        self.track_ICU = np.zeros(self.nDays, dtype=int)          # total ICU
         self.track_quarantined = np.zeros(self.nDays, dtype=int)  # population currently in quarantine
         self.track_new_quarantined = np.zeros(self.nDays, dtype=int)
         self.track_tested = np.zeros(self.nDays, dtype=int)       # total tested individuals
@@ -194,6 +195,7 @@ class simulation():
             self.track_recovered[day] = self.pop.count_recovered()
             self.track_dead[day] = self.pop.count_dead()
             self.track_hospitalized[day] = self.pop.count_hospitalized()
+            self.track_ICU[day] = self.pop.count_ICU()
             self.track_tested[day] = self.pop.count_tested()
             self.track_quarantined[day] = self.pop.count_quarantined()
             self.track_testing_wait_list[day] = self.pop.get_testing_wait_list()
@@ -242,7 +244,7 @@ class simulation():
             for i in range(0, num_vis):
                 vis_age = np.random.randint(self.vis_age_lower, self.vis_age_upper)
 
-                visitor = Person(index=i+self.nPop, sim_obj=self, infected=True, recovered=False, dead=False,
+                visitor = Person(index=i+self.nPop, sim_obj=self, infected=True, recovered=False, dead=False, hospitalized=False, ICU=False,
                                  quarantined=False, quarantined_day=None, infected_day=None, recovered_day=None,
                                  death_day=None, others_infected=None, cure_days=None, recent_infections=None,
                                  age=vis_age, job=None,house_index=None, isolation_tendencies=0.2, case_severity='Mild',
@@ -310,6 +312,7 @@ class simulation():
                        "suceptible: {}, "
                        "dead: {}, "
                        "hospitalized: {}, "
+                       "ICU: {}, "
                        "tested: {}, "
                        "total quarantined: {}, "
                        "infected students: {}").format(day,
@@ -318,6 +321,7 @@ class simulation():
                                                        self.track_susceptible[day],
                                                        self.track_dead[day],
                                                        self.track_hospitalized[day],
+                                                       self.track_ICU[day],
                                                        self.track_tested[day],
                                                        self.track_quarantined[day],
                                                        self.track_inf_students[day]))
@@ -378,7 +382,7 @@ class simulation():
 
     def plot(self, plot_infected=True, plot_susceptible=True, plot_dead=True, plot_recovered=True, plot_new_infected=True,
              plot_tested=True, plot_quarantined=True, plot_new_tests=True, plot_new_quarantined=True, plot_masks=True,
-             plot_hospitalized=False, plot_lockdown=True, plot_testing=True, plot_students=True, log=False):
+             plot_hospitalized=True, plot_ICU=True, plot_lockdown=True, plot_testing=True, plot_students=True, log=False):
 
         self.check_has_run(check=True, information="Cannot make plots.", fail=True)
 
@@ -396,6 +400,8 @@ class simulation():
             plt.plot(days, self.track_dead, label='dead')
         if plot_hospitalized:
             plt.plot(days, self.track_hospitalized, label='hospitalized')
+        if plot_ICU:
+            plt.plot(days, self.track_ICU, label='ICU')
         if plot_new_infected:
             plt.plot(days, self.track_new_infected, label='new infections')
         if plot_quarantined:
@@ -438,7 +444,8 @@ class simulation():
                       "dead":self.track_dead, "quarantined":self.track_quarantined,
                       "inf_students":self.track_inf_students, "total_tested":self.track_tested,
                       "new_tested":self.track_new_tested, "hospitalized":self.track_hospitalized,
-                      "testing_enforced":self.track_testing, "masks_enforced":self.track_masks,
-                      "lockdown_enforced":self.track_lockdown, "time_elapsed":self.track_time}
+                      "ICU":self.track_ICU, "testing_enforced":self.track_testing,
+                      "masks_enforced":self.track_masks, "lockdown_enforced":self.track_lockdown,
+                      "time_elapsed":self.track_time}
 
         return returnDict

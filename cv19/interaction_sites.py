@@ -352,16 +352,13 @@ class Interaction_Sites:
         '''
 
         house_count = 0
-        for i in range(len(self.house_sites)):
+        for house_size in self.house_sites:
             # Get ppl in house
-            house_size = self.house_sites[i]
             housemembers = self.pop.get_population()[house_count:house_count+house_size]
             house_count += house_size
 
             # Check if anyone in the house is infected
-            infected_housemembers = [i for i in range(house_size) if housemembers[i].is_infected()]
-
-            if len(infected_housemembers) > 0:
+            if any(housemembers[i].is_infected() for i in range(house_size)):
                 healthy_housemembers = [i for i in range(house_size) if not housemembers[i].is_infected()]
 
                 for person in healthy_housemembers:
