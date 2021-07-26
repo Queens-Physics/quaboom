@@ -52,7 +52,7 @@ class Population:
         for i in range(0, self.nPop-self.nStudents):
             # MAKE A PERSON
             newPerson = Person(index=i, sim_obj=sim_obj, infected=False, recovered=False,
-                               dead=False, hospitalized=False,
+                               dead=False, hospitalized=False, ICU=False,
                                quarantined=False, quarantined_day=None,
                                infected_day=None, recovered_day=None, death_day=None,
                                others_infected=None, cure_days=None, recent_infections=None,
@@ -76,7 +76,7 @@ class Population:
         student_age =  np.random.choice(a=['10-19', '20-29'], p=[0.5,0.5], size = self.nPop) #students are between age ranges 10-19 and 20-29
         for i in range(self.nPop-self.nStudents, self.nPop):
             newStudent = Person(index=i, sim_obj=sim_obj, infected=False, recovered=False,
-                                dead=False, quarantined=False, quarantined_day=None,
+                                dead=False, hospitalized=False,ICU=False,quarantined=False,quarantined_day=None,
                                 infected_day=None, recovered_day=None, death_day=None,
                                 others_infected=None, cure_days=None, recent_infections=None,
                                 age=student_age[i], job='Student', house_index=0,
@@ -102,6 +102,7 @@ class Population:
         self.have_been_tested = np.zeros(self.nPop, dtype=int) + NULL_ID  # list of people who have been tested
         self.knows_infected = np.zeros(self.nPop, dtype=int) + NULL_ID  # list of people with positive test and still infected
         self.hospitalized = np.zeros(self.nPop, dtype=int) + NULL_ID  # list of people hospitalized and in the ICU
+        self.ICU = np.zeros(self.nPop, dtype=int) + NULL_ID  # list of people in the ICU
         self.quarantined = np.zeros(self.nPop, dtype=int) + NULL_ID  #list of people who are currently in quarantine
 
         self.testing = []  # list of people waiting to be others_infected
@@ -145,28 +146,27 @@ class Population:
 
         # PULL DATA FROM THE JSON FILE #
         # age #
-        self.age_weights = np.zeros(len(self.age_options))
-        for iage in range(len(self.age_weights)):
-            string = str(iage*10)+'-'+str(iage*10+9)
-            self.age_weights[iage]= disease_params['age_weights'][string]
+        self.age_weights = np.array([disease_params['age_weights'][age_range]
+                                     for age_range in self.age_options])
 
         # job #
-        self.job_weights = np.zeros(len(self.job_options))
-        for ijob in range (len(self.job_weights)):
-            string = self.job_options[ijob]
-            self.job_weights[ijob]= disease_params['job_weights'][string]
+        self.job_weights = np.array([disease_params['job_weights'][job_type]
+                                     for job_type in self.job_options])
 
         # house #
-        self.house_weights = np.zeros(len(self.house_options))
-        for ihouse in range(len(self.house_weights)):
-            string = str(ihouse+1)
-            self.house_weights[ihouse]= disease_params['house_weights'][string]
+        self.house_weights = np.array([disease_params['house_weights'][house_size]
+                                       for house_size in self.house_options])
 
         # Cast this so they can be used as ints
         self.house_options = [int(x) for x in constants.HOUSE_OPTIONS]
 
-    #returns the population
     def get_population_size(self):
+        '''Method to return population size.
+
+        Returns
+        -------
+        self.nPop: `int`
+        '''
         return self.nPop
 
     def get_population(self):
@@ -176,21 +176,38 @@ class Population:
         for i in indices:
             np.delete(self.population, i)
 
-    # Properly return the actual indices of each bin of people
     def get_susceptible(self):
+        '''Method to retrieve indicies of people suseptible.
+
+        Returns
+        -------
+        self.suseptible[self.suseptible != NULL_ID]: :obj:`np.array` of :obj:`int`
+        '''
         return self.susceptible[self.susceptible != NULL_ID]
 
     def get_infected(self):
+        '''Method to retrieve indicies of people infected.
+
+        Returns
+        -------
+        self.infected[self.infected != NULL_ID]: :obj:`np.array` of :obj:`int`
+        '''
         return self.infected[self.infected != NULL_ID]
 
     def get_recovered(self):
+        '''Method to retrieve indicies of people recovered.
+
+        Returns
+        -------
+        self.recovered[self.recovered != NULL_ID]: :obj:`np.array` of :obj:`int`
+        '''
         return self.recovered[self.recovered != NULL_ID]
 
     def get_dead(self):
         return self.dead[self.dead != NULL_ID]
 
     def get_hospitalized(self):
-        '''Method to retrieve the people hospitalized.
+        '''Method to retrieve indicies of the people hospitalized.
 
         Returns
         -------
@@ -198,17 +215,43 @@ class Population:
         '''
         return self.hospitalized[self.hospitalized != NULL_ID]
 
+    def get_ICU(self):
+        '''Method to retrieve indicies of the people in the ICU.
+
+        Returns
+        -------
+        self.ICU[self.ICU != NULL_ID]: :obj:`np.array` of :obj:`int`
+        '''
+        return self.ICU[self.ICU != NULL_ID]
+
     def get_quarantined(self):
+        '''Method to retrieve indicies of the people in quarantining.
+
+        Returns
+        -------
+        self.quarantined[self.quarantined != NULL_ID]: :obj:`np.array` of :obj:`int`
+        '''
         return self.quarantined[self.quarantined != NULL_ID]
 
     def get_students(self):  # change this to look thru job == 'Student' ?
         return self.students[self.students != NULL_ID]
 
-    # Count the number of people in each bin
     def count_susceptible(self):
+        '''Method to count the number of people susceptible.
+
+        Returns
+        -------
+        np.count_nonzero(self.suseptible != NULL_ID): :obj:`np.array` of :obj:`int`
+        '''
         return np.count_nonzero(self.susceptible != NULL_ID)
 
     def count_infected(self):
+        '''Method to count the number of people infected.
+
+        Returns
+        -------
+        np.count_nonzero(self.infetced != NULL_ID): :obj:`np.array` of :obj:`int`
+        '''
         return np.count_nonzero(self.infected != NULL_ID)
 
     def count_infected_students(self):
@@ -219,13 +262,40 @@ class Population:
         return infStudents
 
     def count_recovered(self):
+        '''Method to count the number of people recovered.
+
+        Returns
+        -------
+        np.count_nonzero(self.recovered != NULL_ID): :obj:`np.array` of :obj:`int`
+        '''
         return np.count_nonzero(self.recovered != NULL_ID)
 
     def count_dead(self):
+        '''Method to count the number of people dead.
+
+        Returns
+        -------
+        np.count_nonzero(self.dead != NULL_ID): :obj:`np.array` of :obj:`int`
+        '''
         return np.count_nonzero(self.dead != NULL_ID)
 
     def count_hospitalized(self):
+        '''Method to count the number of people in the hospital.
+
+        Returns
+        -------
+        np.count_nonzero(self.hospitalized != NULL_ID): :obj:`np.array` of :obj:`int`
+        '''
         return np.count_nonzero(self.hospitalized != NULL_ID)
+
+    def count_ICU(self):
+        '''Method to count the number of people in the ICU.
+
+        Returns
+        -------
+        np.count_nonzero(self.ICU != NULL_ID): :obj:`np.array` of :obj:`int`
+        '''
+        return np.count_nonzero(self.ICU != NULL_ID)
 
     def count_quarantined(self):
         return np.count_nonzero(self.quarantined != NULL_ID)
@@ -249,7 +319,9 @@ class Population:
         if didWork:
             self.infected[index] = index
             self.susceptible[index] = NULL_ID
-            if self.population[index].hospitalized:
+            if self.population[index].ICU:
+                self.ICU[index] = index
+            elif self.population[index].hospitalized:
                 self.hospitalized[index] = index
 
         return didWork
@@ -279,6 +351,7 @@ class Population:
         self.infected[index] = NULL_ID
         self.recovered[index] = index
         self.hospitalized[index] = NULL_ID
+        self.ICU[index] = NULL_ID
         return True
 
     def die(self, index, day):
@@ -295,6 +368,7 @@ class Population:
         self.infected[index] = NULL_ID
         self.recovered[index] = NULL_ID
         self.hospitalized[index] = NULL_ID
+        self.ICU[index] = NULL_ID
         self.dead[index] = index
         return True
 
@@ -318,9 +392,11 @@ class Population:
 
     # Causes random people to get the cold
     def random_symptomatic(self):
+
         '''Method that causes a random sample of people to develop cold like symptoms.'''
-        for i in range (len(self.population)):
-            self.population[i].not_infected_symptoms()
+        for person in self.population:
+            person.not_infected_symptoms()
+
 
     def update_symptomatic(self, day):
         '''Method to add people to the testing waitlist based on their symtoms.
