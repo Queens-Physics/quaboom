@@ -82,10 +82,10 @@ class Person(object):
         self.has_mask = has_mask
         self.test_day = None
         self.has_cold = False
-        self.protocol_compliance = None
         self.days_in_lockdown = 0
         # Set the simulaiton object to access the variables
         self.sim_obj = sim_obj
+        self.protocol_compliance = self.sim_obj.protocol_compliance
 
     def is_infected(self):
         '''Method to retrieve if a person is infected. Returns True if infected, False if
