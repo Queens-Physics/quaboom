@@ -114,6 +114,8 @@ class Population:
             self.house_ppl_i[housei][where] = i
 
         ############### STUDENTS ###############
+        student_age = np.random.choice(a=['10-19', '20-29'], p=[0.5,0.5], size = self.nPop) # students are in age ranges 10-19 and 20-29
+
         self.student_indices = np.zeros(self.nPop, dtype=int) + NULL_ID
         self.res_houses = np.zeros(len(self.stud_houses), dtype=int) + NULL_ID # student houses that are in residence will be nonzero
 
@@ -126,12 +128,11 @@ class Population:
                 studHouseIndex += 1
                 studHouseSize = self.stud_houses[studHouseIndex]
 
-            student_age = random.randint(18,23)
             newStudent = Person(index=i, sim_obj=sim_obj, infected=False, recovered=False,
                                 dead=False, hospitalized=False,ICU=False,quarantined=False,quarantined_day=None,
                                 infected_day=None, recovered_day=None, death_day=None,
                                 others_infected=None, cure_days=None, recent_infections=None,
-                                age=student_age, job='Student', house_index=studHouseIndex,
+                                age=student_age[i], job='Student', house_index=studHouseIndex,
                                 isolation_tendencies=isolation_tend_arr[i],
                                 case_severity=case_severity_arr[i],
                                 has_mask=has_mask_arr[i])
@@ -191,7 +192,7 @@ class Population:
         for attr in attributes:
             setattr(self, attr, sim_obj.parameters["population_data"][attr])
 
-        # case severity from disease params #
+        # case severity from disease params
         self.severity_weights = np.array([sim_obj.disease_parameters["case_severity"][key]
                                           for key in constants.SEVERITY_OPTIONS])
         self.severity_options = constants.SEVERITY_OPTIONS
@@ -523,23 +524,35 @@ class Population:
         return self.new_quarantined_num
 
     def count_tested(self):
+        '''Method that retreves the total number of people tested.
+        Returns
+        -------
+        self.test_sum: :obj:'int'
+        '''
         return self.test_sum
 
     # Causes random people to get the cold
     def random_symptomatic(self):
+
+        '''Method that causes a random sample of people to develop cold like symptoms.'''
         for person in self.population:
             person.not_infected_symptoms()
 
-    # updates the list of symptomatic people and adds the people who are symtomatic to the testing array
-    def update_symptomatic(self, day):
 
+    def update_symptomatic(self, day):
+        '''Method to add people to the testing waitlist based on their symtoms.
+        Parameters
+        ----------
+        day: int
+            The current day the simulation is on.
+        '''
         #updates everyone's symptoms
         for i in range (len(self.infected)):
             if self.population[i].check_symptoms(day):
 
                 if i not in self.testing and self.have_been_tested[i] != 1: # if person is not already in testing function
                     infected_person = self.population[i] #gets the infected person from the population list
-                    if random.random() < self.prob_of_test:
+                    if random.random()/self.population[i].get_protocol_compliance() < self.prob_of_test:
                         if infected_person.show_symptoms and not infected_person.knows_infected:
                             self.testing.append(i) #adds the person to the testing list
                             self.population[i].knows_infected = True
@@ -552,7 +565,15 @@ class Population:
         return len(self.testing)
 
     def get_tested(self, tests_per_day, day):
+        '''Method to test people in the testing waitlist.
 
+        Parameters
+        ----------
+        tests_per_day: int
+            Paramter gives the number of tests run.
+        day: int
+            The day the testing is being done on
+        '''
         # if less people are in the list than testing capacity test everyone in the list
         if len(self.testing) < tests_per_day:
             tests_per_day = len(self.testing)

@@ -44,7 +44,8 @@ class Person(object):
         death_day :
         others_infected :
         recent_infections :
-        age :
+        age : string
+            Is an age range the person belongs to
         job :
         house_index :
         isolation_tendencies :
@@ -53,6 +54,9 @@ class Person(object):
             Determines type of mask worn by person, defaults to None
         has_mask : bool
             Determines if a person will wear a mask or not, defaults to True
+        goodness : float
+        days_in_lockdown : int
+            Records the number of days a person has been under lockdown
         '''
 
         self.infected = infected
@@ -82,9 +86,10 @@ class Person(object):
         self.has_mask = has_mask
         self.test_day = None
         self.has_cold = False
-
+        self.days_in_lockdown = 0
         # Set the simulaiton object to access the variables
         self.sim_obj = sim_obj
+        self.protocol_compliance = self.sim_obj.protocol_compliance
 
     def is_infected(self):
         '''Method to retrieve if a person is infected. Returns True if infected, False if
@@ -145,25 +150,60 @@ class Person(object):
         '''
         return self.hospitalized
 
-    #Puts person in quarantine
     def set_quarantine(self, day):
+        '''Method to set a person to be in quarantine. Sets the day the quarantine begins to the day inputted.
+        Parameters
+        ----------
+        day: int
+            The day in the simulation when a person is put into quarantine.
+        Returns
+        -------
+        self.quarantined: :obj:`bool`
+        '''
+
         self.quarantined_day = day
         self.quarantined = True
+        return self.quarantined
 
-    #Allows recovered individuals to leave quarantine
     def leave_quarantine(self, day):
+        ''' Method to determine if a person is done quarantining based on an inputted day.
+        Will return True if person is recovered, dead or the inputted day is greater than
+        self.sim_obj.quarantine_time.
+        Will return False otherwise
+
+        Parameters
+        ----------
+        day: int
+            The current day in the simulation to check agaisnt the day when a person went into quarantine.
+
+        Returns
+        -------
+        not self.quarantined: :obj:`bool`
+        '''
         if self.quarantined_day is None:
             self.quarantined_day = 0
         if self.recovered or self.dead or (day - self.quarantined_day) >= self.sim_obj.quarantine_time:
             self.quarantined = False
             self.show_symptoms = False
-            return True
-        return False
+            return not self.quarantined
+        return not self.quarantined
 
     def get_quarantine_day(self):
+        '''Method to retrieve the day a person is put into quarantine.
+
+        Returns
+        -------
+        self.quarantined_day: :obj:`int`
+        '''
         return self.quarantined_day
 
     def not_infected_symptoms(self):
+        '''Method to randomly infect a person with non COVID19 symptoms.
+
+        Returns
+        -------
+        self.show_symptoms: :obj:`bool`
+        '''
         prob_of_symptom = random.random()
         if prob_of_symptom <= self.sim_obj.cold_prob:
             self.show_symptoms = True
@@ -171,12 +211,37 @@ class Person(object):
         return self.show_symptoms
 
     def set_test_day(self,day):
+        '''Method to set the day a person is tested.
+
+        Parameters
+        ----------
+        day: int
+            The day in the simulation when the person was tested.
+        '''
         self.test_day = day
 
     def get_test_day(self):
+        '''Method to retrieve the day a person is tested.
+
+        Returns
+        -------
+        self.test_day: :obj:'int'
+        '''
         return self.test_day
 
     def check_test_day (self, day):
+        '''Method to check if the person has been tested in the quarantine time range.
+        If the day is greater than the test day is removed.
+        If the person had a cold it is also removed.
+
+        Parameters
+        ----------
+        day: int
+            The current day in the simulation to compare against  when the person was tested.
+        Returns
+        -------
+        True if the quarantine time range has passed since they have been last tested, False otherwise
+        '''
         if self.test_day is None:
             return False
         elif (day - self.test_day) >= self.quarantine_time:
@@ -185,8 +250,18 @@ class Person(object):
             return True
         return False
 
-    #checks to see if person shows symptoms on the current day
-    def check_symptoms (self,day):
+    def check_symptoms (self, day):
+        '''Method to check a persons symtoms based on if they are infected with COVID19 or a cold.
+
+        Parameters
+        ----------
+        day: int
+            The current day in the simulation to compare against  when the person was tested.
+
+        Returns
+        -------
+        self.show_symptoms: :obj:'bool'
+        '''
         if self.will_get_symptoms and (day - self.infected_day) >= self.days_until_symptoms and self.infected or self.has_cold:
             self.show_symptoms = True
         elif not self.infected and not self.has_cold:
@@ -389,7 +464,7 @@ class Person(object):
         mask_options = np.random.uniform()
 
         if self.has_mask:
-            if mask_options > self.sim_obj.wear_mask_properly:
+            if mask_options/self.protocol_compliance > self.sim_obj.wear_mask_properly:
                 return False  #False = not wearing a mask
             else:
                 return True  #True = wearing a mask
@@ -410,3 +485,81 @@ class Person(object):
             return self.sim_obj.nonsurgical_inward_eff, self.sim_obj.nonsurgical_outward_eff
         else:
             return 1, 1  #Not wearing a mask so this will function will not effect their change of getting the virus
+
+    def set_protocol_compliance(self, house_size):
+        '''Method to set the initial protocol compliance value of a person.
+
+        Parameters
+        ----------
+        house_size: int
+            Number of people living in said persons house.
+
+        Returns
+        -------
+        self.protocol_compliance: :obj:'float'
+        '''
+
+        if self.protocol_compliance is None: #If no protocol compliance score is defined
+            self.protocol_compliance = self.sim_obj.goodness
+
+        if house_size > len(self.sim_obj.protocol_compliance_house_prob): #Sets the house size to the largest house size probability if the house size is larger than that number
+            house_size = len(self.sim_obj.protocol_compliance_house_prob)
+        if random.random() < self.sim_obj.protocol_compliance_house_prob[house_size - 1]:
+            self.protocol_compliance *= self.sim_obj.protocol_compliance_house_reduction[house_size - 1] # changes the persons protocol compliance based on house size
+
+        if random.random() < self.sim_obj.protocol_compliance_age_prob[self.age]:
+            self.protocol_compliance *= self.sim_obj.protocol_compliance_age_reduction[self.age]
+
+        if random.random() < self.sim_obj.protocol_compliance_case_severity_prob[self.case_severity]:
+            self.protocol_compliance *= self.sim_obj.protocol_compliance_case_severity_reduction[self.case_severity] #changes protocol compliance based on how severity of a potential case
+        return self.protocol_compliance
+
+    def update_protocol_compliance(self, lockdown_level, old_lockdown_mandate):
+        '''Method to update the protocol compliance value of a person.
+
+        Parameters
+        -------
+        lockdown_level: bool
+            Paramter to check if the lockdown is on (True)
+        old_lockdown_mandate: bool
+            Paramter to check what the lockdown was the day before the current one
+        Returns
+        -------
+        self.protocol_compliance: :obj:'float'
+        '''
+        if self.protocol_compliance is None: #If no protocol compliance it is defined
+            self.protocol_compliance =  self.sim_obj.protocol_compliance
+
+        if self.days_in_lockdown > self.sim_obj.protocol_compliance_lockdown_length_threshold and random.random() < self.sim_obj.protocol_compliance_lockdown_prob: #as the lockdown length increases decrease the protocol compliance
+            self.protocol_compliance *= self.sim_obj.protocol_compliance_lockdown_length_reduction
+
+        if lockdown_level != old_lockdown_mandate:
+            # when the lockdown starts increase the protocol compliance of a person
+            if lockdown_level and random.random() < self.sim_obj.protocol_compliance_lockdown_prob:
+                self.protocol_compliance *= self.sim_obj.protocol_compliance_lockdown_reduction
+            # when the lockdown ends decerase the protocol compliance of a person
+            elif lockdown_level is False and random.random() < self.sim_obj.protocol_compliance_lockdown_prob:
+                self.protocol_compliance /= self.sim_obj.protocol_compliance_lockdown_reduction
+        return self.protocol_compliance
+
+    def get_protocol_compliance(self):
+        '''Method to retrieve the protocol compliance value of a person.
+
+        Returns
+        -------
+        self.protocol_compliance: :obj:'float'
+        '''
+        return self.protocol_compliance
+
+    def update_lockdown_days(self, lockdown_level):
+        '''Method to change the number of days a person is in a lockdown or quarantine.
+
+        Returns
+        -------
+        self.days_in_lockdown: :obj:'int'
+        '''
+        if lockdown_level or self.quarantined:
+            self.days_in_lockdown += 1
+        elif self.days_in_lockdown != 0:
+            self.days_in_lockdown -= 1
+        return self.days_in_lockdown
