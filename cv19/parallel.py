@@ -352,12 +352,13 @@ def peak(data):
 
     Returns
     -------
-    float
-        number of people infected at the peak, averaged over the simulations that
-        were run.
+    tuple of float
+        Number of people infected at the peak, averaged over the simulations that
+        were run, and uncertainty.
     """
-    infections = data['infected']
-    return infections.apply(max).mean()
+    peak_infections = data['infected'].apply(max)
+    return (peak_infections.mean(),
+            peak_infections.std() / np.sqrt(len(peak_infections)))
 
 def peak_date(data):
     """Calculates the date of the peak, averaged over the simulations that were
@@ -370,11 +371,12 @@ def peak_date(data):
 
     Returns
     -------
-    float
-        date of the peak, averaged over the simulations that were run.
+    tuple of float
+        Date of the peak, averaged over the simulations that were run, and uncertainty.
     """
-    infections = data['infected']
-    return infections.apply(np.argmax).mean()
+    peak_infections_dates = data['infected'].apply(np.argmax)
+    return (peak_infections_dates.mean(),
+            peak_infections_dates.std() / np.sqrt(len(peak_infections_dates)))
 
 def hospitalizations(data):
     """Calculates the number of hospitalizations at the peak, averaged over the
@@ -387,12 +389,13 @@ def hospitalizations(data):
 
     Returns
     -------
-    float
-        number of hospitalizations at the peak, averaged over the simulations that
-        were run.
+    tuple of float
+        Number of hospitalizations at the peak, averaged over the simulations that
+        were run, and uncertainty.
     """
-
-    return data['hospitalized'].apply(max).mean()
+    peak_hospitalizations = data['hospitalized'].apply(max)
+    return (peak_hospitalizations.mean(),
+            peak_hospitalizations.std() / np.sqrt(len(peak_hospitalizations)))
 
 def deaths(data):
     """The average number of total deaths over all simulations that were run.
@@ -403,11 +406,13 @@ def deaths(data):
         Output from running a simulation.
     Returns
     -------
-    float
-        average number of total deaths over all simulation that were run.
+    tuple of float
+        Average number of total deaths over all simulations that were run
+        and uncertainty.
     """
-
-    return data['dead'].apply(max).mean()
+    total_deaths = data['dead'].apply(max)
+    return (total_deaths.mean(),
+            total_deaths.std() / np.sqrt(len(total_deaths)))
 
 def peak_quarantine(data):
     """The number of people in quarantine at the peak, averaged over the simulations
@@ -420,11 +425,13 @@ def peak_quarantine(data):
 
     Returns
     -------
-    float
-        number of people in quarantine at the peak, averaged over the simulations
-        that were run.
+    tuple of float
+        Number of people in quarantine at the peak, averaged over the simulations
+        that were run, and uncertainty.
     """
-    return data['quarantined'].apply(max).mean()
+    peak_quarantined = data['quarantined'].apply(max)
+    return (peak_quarantined.mean(),
+            peak_quarantined.std() / np.sqrt(len(peak_quarantined)))
 
 
 # Sample usage
