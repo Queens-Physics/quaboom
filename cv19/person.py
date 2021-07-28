@@ -284,7 +284,7 @@ class Person(object):
         return self.case_severity
 
     def get_mask(self):
-        '''Method to retrive if a person is wearing a mask.
+        '''Method to retrieve if a person is wearing a mask.
 
         Returns
         -------
@@ -338,6 +338,19 @@ class Person(object):
     # check if someone is quarantined, and if they can come out
     # (if they've quarantined for 14 days)
     def check_quarantine(self, day):
+        '''Method to check if a person should be quarantined.
+        If they're quarantined and their quarantine time has ended, let them out of quarantine.
+        If they're not quarantined but they have severe symptoms, set self.quarantined to be True.
+
+        Parameters
+        ----------
+        day : int
+            The day value that this function is being called on in the encompassing simulation class.
+
+        Returns
+        -------
+        True if quarantined and False if not
+        '''
         if self.quarantined:
             days_since_quarantined = day - self.quarantined_day
             if days_since_quarantined >= self.sim_obj.quarantine_time:
