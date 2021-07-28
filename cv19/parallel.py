@@ -204,6 +204,25 @@ def tabular_mode(base_config_file, independent, dependent, num_runs=8, num_cores
     # Convert results to a dataframe
     results = pd.DataFrame(results, index=list(independent.values())[0], columns=dependent.keys())
 
+    # Handle the case of multiple return values from the functions.
+    # Checks that each function returns a value of the same length.
+    # If single return value, just return the dataframe.
+    if results.applymap(lambda x: isinstance(x, (float, int))).all(axis=None):
+        return results
+    # If multiple return values, return a tuple of dataframes.
+    elif results.applymap(lambda x: isinstance(x, (tuple, list))).all(axis=None):
+        resultslen = results.applymap(len)
+        tuplelen = resultslen.iloc[0, 0]
+
+        if (resultslen == tuplelen).all(axis=None):
+            results_tuple = tuple(results.applymap(lambda x, index=j: x[index])
+                                  for j in range(tuplelen))
+            return results_tuple
+        else:
+            raise ValueError("Length of each element in DataFrame is not consistent.")
+    else:
+        raise ValueError("Type of each element in DataFrame is not consistent.")
+
     return results
 
 def confidence_interval(config, num_runs=8, confidence=0.80, num_cores=-1, save_name=None, verbose=False):
