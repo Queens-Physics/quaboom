@@ -433,6 +433,22 @@ def peak_quarantine(data):
     return (peak_quarantined.mean(),
             peak_quarantined.std() / np.sqrt(len(peak_quarantined)))
 
+def time_elapsed(data):
+    """Time elapsed for the simulation.
+
+    Parameters
+    ----------
+    data : pandas.DataFrame
+        Output from running a simulation.
+
+    Returns
+    -------
+    tuple of float
+        Average elapsed time of the simulations and uncertainty.
+    """
+    simulation_times = data['time_elapsed'].apply(max)
+    return (simulation_times.mean(),
+            simulation_times.std() / np.sqrt(len(simulation_times)))
 
 # Sample usage
 if __name__ == "__main__":
