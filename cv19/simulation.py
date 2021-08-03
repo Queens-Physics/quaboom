@@ -236,18 +236,22 @@ class simulation():
                 print("Day: {}, Uni Mandate: {}".format(day, students_go))
             old_student_mandate = students_go
 
+            #infect random students on the day they come in
+            if self.inter_sites.students_on and day == self.policy.student_day_trigger:
+                infStudents = np.random.randint(self.inf_students_lower, self.inf_students_upper)
+                indices = np.random.choice(self.pop.get_student_indices(), infStudents, replace=False)
+                self.pop.infect_incoming_students(indices=indices, day=day)
+
             ############### VISITOR STUFF ###############
             #add a random number of visitors to the population
             num_vis = np.random.choice(a=self.N_VIS_OPTION, p=self.N_VIS_PROB)
             visitors_ind = [x for x in range(self.nPop, self.nPop+num_vis-1)]
-
+            vis_age = np.random.choice(a=self.pop.age_options, p=self.pop.age_weights, size=num_vis)
             for i in range(0, num_vis):
-                vis_age = np.random.randint(self.vis_age_lower, self.vis_age_upper)
-
                 visitor = Person(index=i+self.nPop, sim_obj=self, infected=True, recovered=False, dead=False, hospitalized=False, ICU=False,
                                  quarantined=False, quarantined_day=None, infected_day=None, recovered_day=None,
                                  death_day=None, others_infected=None, cure_days=None, recent_infections=None,
-                                 age=vis_age, job=None,house_index=None, isolation_tendencies=0.2, case_severity='Mild',
+                                 age=vis_age[i], job=None,house_index=None, isolation_tendencies=0.2, case_severity='Mild',
                                  has_mask=True)
                 self.pop.population.append(visitor)
 
@@ -259,7 +263,7 @@ class simulation():
                 self.inter_sites.site_interaction(will_visit_B, day)
                 will_visit_C = self.inter_sites.will_visit_site(self.inter_sites.get_grade_C_sites(), self.will_go_prob["C"])
                 self.inter_sites.site_interaction(will_visit_C, day)
-            if students_go:
+            if self.inter_sites.students_on and students_go:
                 will_visit_study = self.inter_sites.will_visit_site(self.inter_sites.get_study_sites(),
                                                                     self.will_go_prob["STUDY"])
                 self.inter_sites.site_interaction(will_visit_study, day)
@@ -273,7 +277,11 @@ class simulation():
 
             # Manage at home interactions
             self.inter_sites.house_interact(day)
-            #-------------------- ADD ANOTHER LINE HERE FOR RESIDENCE/STUDENT HOUSING --------------------#
+            self.inter_sites.student_house_interact(day)
+            # Residence interactions
+            if self.inter_sites.students_on and students_go:
+                will_visit_res = self.inter_sites.will_visit_site(self.inter_sites.get_res_sites(), self.will_go_prob["RES"])
+                self.inter_sites.site_interaction(will_visit_res, day)
 
             # Manage testing sites
             if testing_ON:
