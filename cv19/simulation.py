@@ -186,7 +186,7 @@ class simulation():
         old_student_mandate = self.policy.initial_student_mandate
         # Loop over the number of days
         for day in range(self.nDays):
-            
+
             ############### TRACKING STUFF ###############
 
             #Count all the different states of people

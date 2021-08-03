@@ -436,12 +436,6 @@ class Population:
                 self.hospitalized[index] = index
 
         return didWork
-    
-    def infect_incoming_students(self, indices, day):
-        for i in indices:
-            daysAgo = np.random.randint(13)
-            self.infect(index=i, day=day-daysAgo)
-        return True
 
     def infect_incoming_students(self, indices, day):
         for i in indices:

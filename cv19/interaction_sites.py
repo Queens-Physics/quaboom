@@ -6,9 +6,6 @@ from copy import deepcopy
 
 import numpy as np
 
-# ratio of queen's students to go to the main interaction sites
-ST_RATIO = 2
-
 class Interaction_Sites:
     '''A class designed to host interactions between persons within specific locations.
 
@@ -342,7 +339,7 @@ class Interaction_Sites:
                 # Get the actual people at these indexes
                 person_1_index = ppl_going[person_1]
                 person_2_index = ppl_going[person_2]
-                
+
                 # Check to make sure one is infected
                 person_1_infected = self.pop.get_person(person_1_index).is_infected()
                 person_2_infected = self.pop.get_person(person_2_index).is_infected()
@@ -482,7 +479,6 @@ class Interaction_Sites:
                     if caught_infection:
                         self.pop.infect(index=housemembers[person].get_index(), day=day)
 
->>>>>>> upstream/master
     # Function thats tests the symtomatic individuals as well as brining them in and out of quarantine
     def testing_site (self, tests_per_day, day):
         '''Method to update status of symptoms and run the testing sites code.
