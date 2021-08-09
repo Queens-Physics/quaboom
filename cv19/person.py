@@ -604,7 +604,7 @@ class Person(object):
 
         Returns
         -------
-        self.days_in_lockdown: :obj`int`
+        self.days_in_lockdown: :obj:`int`
         '''
         if lockdown_level or self.quarantined:
             self.days_in_lockdown += 1
