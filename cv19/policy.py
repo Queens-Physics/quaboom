@@ -22,7 +22,7 @@ class Policy:
         Parameters
         ----------
         sim_obj : :obj:`simulation.simulation`
-            The encompassing simulation obejct hosting the simulation.
+            The encompassing simulation object hosting the simulation.
 
         '''
 
