@@ -256,7 +256,7 @@ class Person(object):
         Returns
         -------
         : :obj:`bool`
-        True if the quarantine time range has passed since they have been last tested and False if not.
+            True if the quarantine time range has passed since they have been last tested and False if not.
         '''
         if self.test_day is None:
             return False
@@ -344,7 +344,7 @@ class Person(object):
         Returns
         -------
         : :obj:`bool`
-        True if infected and False if not.
+            True if infected and False if not.
         '''
         d_params = self.sim_obj.disease_parameters
 
@@ -400,7 +400,7 @@ class Person(object):
         Returns
         -------
         : :obj:`bool`
-        True if quarantined and False if not.
+            True if quarantined and False if not.
         '''
         if self.quarantined:
             days_since_quarantined = day - self.quarantined_day
@@ -432,7 +432,7 @@ class Person(object):
         Returns
         -------
         : :obj:`bool`
-        True if they were cured, False if not.
+            True if they were cured, False if not.
         '''
         if self.infected and not self.recovered:
 
@@ -465,7 +465,7 @@ class Person(object):
         Returns
         -------
         : :obj:`bool`
-        True they died and False if not.
+            True they died and False if not.
         '''
         if self.infected:
 
@@ -485,7 +485,7 @@ class Person(object):
         Returns
         -------
         : :obj:`bool`
-        True if hospitalized and False if not.
+            True if hospitalized and False if not.
         '''
         if self.infected:
             if self.case_severity == 'Hospitalization' or self.case_severity == 'ICU' or self.case_severity == 'Death':
@@ -515,7 +515,7 @@ class Person(object):
         Returns
         -------
         : :obj:`bool`
-        True if wearing a mask and False if not.
+            True if wearing a mask and False if not.
         '''
         mask_options = np.random.uniform()
 
