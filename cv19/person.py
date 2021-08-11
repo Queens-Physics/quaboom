@@ -63,9 +63,9 @@ class Person(object):
         case_severity : string
             Case severity of covid when infected, defaults None.
         mask_type : string
-            Determines type of mask worn by person, defaults to None
+            Determines type of mask worn by person, defaults to None.
         has_mask : bool
-            Determines if a person will wear a mask or not, defaults to True
+            Determines if a person will wear a mask or not, defaults to True.
         goodness : float
         days_in_lockdown : int
             Records the number of days a person has been under lockdown
@@ -255,7 +255,8 @@ class Person(object):
 
         Returns
         -------
-        True if the quarantine time range has passed since they have been last tested, False otherwise
+        : :obj:`bool`
+        True if the quarantine time range has passed since they have been last tested and False if not.
         '''
         if self.test_day is None:
             return False
@@ -342,6 +343,7 @@ class Person(object):
 
         Returns
         -------
+        : :obj:`bool`
         True if infected and False if not.
         '''
         d_params = self.sim_obj.disease_parameters
@@ -397,6 +399,7 @@ class Person(object):
 
         Returns
         -------
+        : :obj:`bool`
         True if quarantined and False if not.
         '''
         if self.quarantined:
@@ -428,6 +431,7 @@ class Person(object):
 
         Returns
         -------
+        : :obj:`bool`
         True if they were cured, False if not.
         '''
         if self.infected and not self.recovered:
@@ -460,6 +464,7 @@ class Person(object):
 
         Returns
         -------
+        : :obj:`bool`
         True they died and False if not.
         '''
         if self.infected:
@@ -479,6 +484,7 @@ class Person(object):
 
         Returns
         -------
+        : :obj:`bool`
         True if hospitalized and False if not.
         '''
         if self.infected:
@@ -493,6 +499,7 @@ class Person(object):
 
         Returns
         -------
+        : :obj:`bool`
         True if person goes to ICU and False if not.
         '''
         if self.infected:
@@ -507,6 +514,7 @@ class Person(object):
 
         Returns
         -------
+        : :obj:`bool`
         True if wearing a mask and False if not.
         '''
         mask_options = np.random.uniform()
