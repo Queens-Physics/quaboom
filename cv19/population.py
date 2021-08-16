@@ -22,8 +22,8 @@ class Population:
 
         Parameters
         ----------
-        sim_obj : :obj:`simulation class`
-            The encompassing simulation object hosting the simulation.
+        sim_obj : :obj:`population class`
+            The encompassing simulation object hosting the population class.
         '''
 
         # Set attributes from sim_obj file
@@ -325,7 +325,7 @@ class Population:
 
         Returns
         -------
-        self.dead[self.deadd != NULL_ID]: :obj:`np.array` of :obj:`int`
+        self.dead[self.dead != NULL_ID]: :obj:`np.array` of :obj:`int`
         '''
         return self.dead[self.dead != NULL_ID]
 
