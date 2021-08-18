@@ -92,8 +92,6 @@ class Interaction_Sites:
         self.stud_house_sites = deepcopy(self.pop.stud_houses)
         self.stud_house_indices = deepcopy(self.pop.house_stud_i)
 
-
-
     def load_attributes_from_sim_obj(self, sim_obj):
         '''Method to load in attributes from the provided simulation class object.
 
@@ -269,16 +267,16 @@ class Interaction_Sites:
         Parameters
         ----------
         site_array : :obj:`np.array` of :obj:`np.array` of :obj:`int`
-            An array holding lists (one for each interaction site) of the index of each person assoicated
-            with each of the individual sites.
+            An array holding lists (one for each interaction site) of the index of each person
+            associated with each of the individual sites.
         will_go_prob : float
             The probability that any given person in site_array will visit this type of site.
 
         Returns
         -------
         will_visit_grade : :obj:`np.array` of :obj:`np.array` of :obj:`int`
-            An array holding an array for each site of this interaction site type. Each individual list
-            holds the indexes of people that will visit that site for this day.
+            An array holding an array for each site of this interaction site type.
+            Each individual list holds the indexes of people that will visit that site for this day.
         '''
 
         # Could add something here that limits how many sites one person can visit (not real to visit 11 sites a day)
@@ -384,9 +382,22 @@ class Interaction_Sites:
 
         return number_of_interactions
 
-
     def interact(self, person_1, person_2):
-        # Function that models the interaction between two people, and will return if interaction spread
+        '''Method that models the interaction between two people.
+
+        Parameters
+        ----------
+        person_1 : :obj:`person.Person`
+            First person in the two-way interaction.
+        person_2 : :obj:`person.Person`
+            Second person in the two-way interaction.
+
+        Returns
+        -------
+        : :obj:`bool`
+            Whether or not the interaction caused the spread of the infection.
+
+        '''
         if not self.policy.get_mask_mandate:
             spread_prob = self.base_infection_spread_prob
         else:
@@ -479,8 +490,7 @@ class Interaction_Sites:
                     if caught_infection:
                         self.pop.infect(index=housemembers[person].get_index(), day=day)
 
-    # Function thats tests the symtomatic individuals as well as brining them in and out of quarantine
-    def testing_site (self, tests_per_day, day):
+    def testing_site(self, tests_per_day, day):
         '''Method to update status of symptoms and run the testing sites code.
 
         Parameters
@@ -522,7 +532,6 @@ class Interaction_Sites:
         self.grade_C_sites.copy() : :obj:`np.array` of :obj:`list` of :obj:`np.array` of :obj:`int`
         '''
         return deepcopy(self.grade_C_sites)
-
 
     def get_lect_sites(self):
         '''Method to return a copy of the lect_sites attribute.
