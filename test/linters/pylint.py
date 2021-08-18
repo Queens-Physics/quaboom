@@ -7,6 +7,10 @@ from pathlib import Path
 from cv19 import CV19ROOT
 
 def run_pylint():
+    '''
+    Run the Pylint test on the module and some other files in the repository.
+    Automatically ran on every pull request via GitHub actions.
+    '''
     # Messages/warnings/errors to enable and disable.
     messages_enable = ['all']
     messages_disable = ['R',
