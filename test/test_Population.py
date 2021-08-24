@@ -32,7 +32,6 @@ class TestPopulation(unittest.TestCase):
 
         Currently not used, this function is called after all unit tests have been run.
         '''
-        pass
 
     def test_init(self):
         ''' Method to test the initilization function of the population class.

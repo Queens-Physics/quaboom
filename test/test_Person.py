@@ -32,7 +32,6 @@ class TestPerson(unittest.TestCase):
 
         Currently not used, this function is called after all unit tests have been run.
         '''
-        pass
 
     def test_check_cured(self):
         ''' Method used to test the check_cured method to ensure it is behaving correctly.
