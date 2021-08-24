@@ -125,7 +125,7 @@ class simulation():
         '''
 
         if isinstance(data_file, str):
-            with open(data_file) as file:
+            with open(data_file, encoding='utf-8') as file:
                 self.parameters = json.load(file)
 
             self.config_dir = Path(data_file).parent
@@ -160,7 +160,7 @@ class simulation():
 
         # If path is absolute, use it.
         if Path(filename).is_absolute():
-            with open(filename) as file:
+            with open(filename, encoding='utf-8') as file:
                 self.disease_parameters = json.load(file)
 
         # Assume that the configuration filename is relative to path of main config.
@@ -169,7 +169,7 @@ class simulation():
         else:
             filepath = Path(self.config_dir, filename)
             try:
-                with open(filepath) as file:
+                with open(filepath, encoding='utf-8') as file:
                     self.disease_parameters = json.load(file)
 
                 return
@@ -180,7 +180,7 @@ class simulation():
                                "Attempting read relative to CV19ROOT directory.").format(filepath))
 
                 filepath = Path(CV19ROOT, filename)
-                with open(filepath) as file:
+                with open(filepath, encoding='utf-8') as file:
                     self.disease_parameters = json.load(file)
 
     def init_classes(self):
