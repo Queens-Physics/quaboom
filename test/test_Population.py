@@ -9,15 +9,38 @@ from cv19.simulation import simulation
 
 
 class TestPopulation(unittest.TestCase):
-
-    def setUp(self):       # Code that will be run before every test function is executed
+    ''' Class used to test specific aspects of the Population class. 
+    
+    This code is run for each new pull request within the CV19 repository. 
+    
+    Note
+    ----
+    The TestPopulation class has not been updated recently, and covers a limited amount of the 
+    population class funcitonality. Keep this in mind when adding new functionality. 
+    '''
+    def setUp(self):
+        ''' Set up method for testing the population class. 
+        
+        This function is called every time the class is initalized, and creates a single
+        simulation object that is used in all of the tests. 
+        '''
         config_file = str(Path(Path(__file__).parent, "../config_files/main.json").resolve())
         self.sim_obj = simulation(config_file)
 
-    def tearDown(self):    # Code that will be run after every test function is executed
+    def tearDown(self):
+        ''' Tear down method for testing the person class.
+        
+        Currently not used, this function is called after all unit tests have been run. 
+        '''
         pass
 
     def test_init(self):
+        ''' Method to test the initilization function of the population class.
+        
+        This funciton tests the __init__ method for the population class to make sure that
+        it returns proper values when initialized with different numbers of infected
+        individuals. 
+        '''
         nPop, n0 = self.sim_obj.nPop, self.sim_obj.n0
         pop = Population(self.sim_obj)
 
@@ -27,6 +50,11 @@ class TestPopulation(unittest.TestCase):
         self.assertEqual(pop.count_susceptible(), nPop-n0)
 
     def test_get_count_functions(self):
+        ''' Method to test the counting methods of the person class. 
+        
+        This function focuses on testing the counting functions that are used to return 
+        tracking values of the population in the simulation on a given day. 
+        '''
         nPop = self.sim_obj.nPop
         pop = Population(self.sim_obj)
 
@@ -44,6 +72,11 @@ class TestPopulation(unittest.TestCase):
         self.assertEqual(pop.get_person(index=i).get_index(), i)
 
     def test_globals(self):
+        ''' Method to test the global variables used in the population class. 
+        
+        This function ensures that the global variables (related to population
+        demographics) make sense by checking that they sum to 1. 
+        '''
         pop = Population(self.sim_obj)
 
         # Make sure weights and options line up - basically just checks config file
@@ -61,6 +94,12 @@ class TestPopulation(unittest.TestCase):
         self.assertEqual(round(sum(pop.isolation_weights), roundLevel), 1)
 
     def test_infect(self):
+        ''' Method to test the infect function of the population class. 
+        
+        This function ensures that the infection mechanics held in the infect method
+        perform as expected. Specifically, it tests that their status is updated correctly 
+        both in the person class attributes, as well as the population class arrays. 
+        '''
         pop = Population(self.sim_obj)
 
         # Infect a susceptible person
@@ -87,6 +126,13 @@ class TestPopulation(unittest.TestCase):
         self.assertFalse(pop.update_infected(index=index))
 
     def test_cure(self):
+        ''' Method to test the cure functionality of the population class. 
+        
+        This function makes sure that individuals within the population are
+        being cured correctly using this function. It tests that all the 
+        required attributes are changed when cured, and that curing only works
+        when the day supplied is past the predetermined length of the infection. 
+        '''
         pop = Population(self.sim_obj)
         infected_id = pop.get_infected()[0]
 
