@@ -179,7 +179,7 @@ def tabular_mode(base_config_file, independent, dependent, num_runs=8, num_cores
     for i, values in enumerate(zip(*mesh)):
 
         # Load the json file
-        with open(base_config_file) as f:
+        with open(base_config_file, encoding='utf-8') as f:
             temp_config = json.load(f)
 
         config_dir = Path(base_config_file).parent

@@ -223,7 +223,7 @@ class Population:
 
         Sets all constants in the population class as self attributes of the population class.
         '''
-        with open(self.demographics_file) as json_file:
+        with open(self.demographics_file, encoding='utf-8') as json_file:
             disease_params = json.load(json_file)
 
         self.age_options = constants.AGE_OPTIONS

@@ -8,19 +8,38 @@ from cv19.simulation import simulation
 
 
 class TestPerson(unittest.TestCase):
+    ''' Class used to test specific aspects of the Person class.
 
-    def setUp(self):       # Code that will be run before every test function is executed
+    This code is run for each new pull request within the CV19 repository.
+
+    Note
+    ----
+    The TestPerson class has not been updated recently, and covers a limited amount of the
+    person class funcitonality. Keep this in mind when adding new functionality.
+    '''
+
+    def setUp(self):
+        ''' Set up method for testing the person class.
+
+        This function is called every time the class is initalized, and creates a single
+        simulation object that is used in all of the tests.
+        '''
         config_file = str(Path(Path(__file__).parent, "../config_files/main.json").resolve())
         self.sim_obj = simulation(config_file)
 
-    def tearDown(self):    # Code that will be run after every test function is executed
-        pass
+    def tearDown(self):
+        ''' Tear down method for testing the person class.
 
-#     def test_init(self):
-#         # Should have some exceptions in the init to prohibit bad values
-#         pass
+        Currently not used, this function is called after all unit tests have been run.
+        '''
 
     def test_check_cured(self):
+        ''' Method used to test the check_cured method to ensure it is behaving correctly.
+
+        This method goes through various scenarios related to curing individuals in the
+        simulation to check that they are either cured or not cured correctly. It also
+        checks that values such as recovery day and infected day are set properly.
+        '''
 
         infected_day, cure_days = 10, 5
         person1 = Person(1, infected=True, sim_obj=self.sim_obj, infected_day=infected_day, cure_days=cure_days)
@@ -49,6 +68,12 @@ class TestPerson(unittest.TestCase):
         self.assertEqual(person3.recovered_day, day)      # Should have the right recovery day
 
     def test_infect(self):
+        ''' Method used to test the infect method to ensure it is behaving correctly.
+
+        This method looks to test for proper performance of the infect function in the person
+        class. Specifically, it looks at people who should not be able to get infected, that cure
+        days is set properly, and that default parameters work.
+        '''
 
         infected_day, cure_days = 10, 5
         person1 = Person(1, sim_obj=self.sim_obj, infected=False, recovered=False)
