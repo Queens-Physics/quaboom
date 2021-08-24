@@ -15,8 +15,6 @@ def run_pylint():
     messages_enable = ['all']
     messages_disable = ['R',
                         'line-too-long',
-                        'missing-function-docstring',
-                        'missing-class-docstring',
                         'missing-module-docstring',
                         'invalid-name',
                         'attribute-defined-outside-init',
