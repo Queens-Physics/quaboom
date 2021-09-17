@@ -18,8 +18,9 @@ class Person(object):
 
     def __init__(self, index, sim_obj, infected=False, recovered=False, dead=False, hospitalized=False, ICU=False, quarantined=False,
                  quarantined_day=None, infected_day=None, recovered_day=None, death_day=None, others_infected=None,
-                 cure_days=None, recent_infections=None, age=None, job=None, house_index=0, isolation_tendencies=None,
-                 case_severity=None, mask_type=None, has_mask=True):
+                 cure_days=None, recent_infections=None, vaccinated=False, vaccinated_day=None, vaccine_type=None, 
+                 age=None, job=None, house_index=0, isolation_tendencies=None, case_severity=None, mask_type=None,
+                 has_mask=True):
         '''Method to load in attributes from the provided simulation class object.
 
         Sets all objects in the "person_data" dictionary key as self attributes of the
@@ -84,6 +85,9 @@ class Person(object):
         self.others_infected = [] if others_infected is None else others_infected
         self.cure_days = cure_days
         self.recent_infections = recent_infections
+        self.vaccinated = vaccinated
+        self.vaccinated = vaccinated
+        self.vaccine_type = vaccine_type
         self.index = index
         self.age = age
         self.job = job
@@ -161,6 +165,16 @@ class Person(object):
         self.hospitalized: :obj:`bool`
         '''
         return self.hospitalized
+    
+    def is_vaccinated(self):
+        return self.vaccinated
+    
+    def set_vaccinated(self, day):
+        self.vaccinated_day = day
+        self.vaccinated = True
+        
+    def get vaccinated_day(self):
+        return self.vaccinated_day
 
     def set_quarantine(self, day):
         '''Method to set a person to be in quarantine. Sets the day the quarantine begins to the day inputted.
@@ -619,3 +633,13 @@ class Person(object):
         elif self.days_in_lockdown != 0:
             self.days_in_lockdown -= 1
         return self.days_in_lockdown
+    
+    def vaccine_type_efficiency(self):
+        if self.vaccinated == True and self.vaccine_type == "Pfizer":
+            return self.sim_obj.Pfizer_eff
+        elif self.vaccinated == True and self.vaccine_type == "Moderna":
+            return self.sim_obj.Moderna_eff
+        elif self.vaccinated == True and self.vaccine_type == "AZ":
+            return self.sim_obj.AZ_eff
+        else:
+            return 1

@@ -107,6 +107,8 @@ class simulation():
         self.track_masks = np.zeros(self.nDays, dtype=bool)
         self.track_lockdown = np.zeros(self.nDays, dtype=bool)
         self.track_testing = np.zeros(self.nDays, dtype=bool)
+        
+        self.track_vaccinated = np.zeros(self.nDays, dtype=int)
 
         self.track_time = np.zeros(self.nDays, dtype=float) # time elapsed (in seconds) since start of simulation
 
@@ -306,6 +308,8 @@ class simulation():
 
             self.track_new_quarantined[day] = self.pop.get_new_quarantined()
             self.track_inf_students[day] = self.pop.count_infected_students()
+            
+            self.track_vaccinated[day] = self.pop.count_vaccinated()
 
             self.new_tests = 0
 
@@ -350,7 +354,8 @@ class simulation():
             for i in range(0, num_vis):
                 visitor = Person(index=i+self.nPop, sim_obj=self, infected=True, recovered=False, dead=False, hospitalized=False, ICU=False,
                                  quarantined=False, quarantined_day=None, infected_day=None, recovered_day=None,
-                                 death_day=None, others_infected=None, cure_days=None, recent_infections=None,
+                                 death_day=None, others_infected=None, cure_days=None, recent_infections=None, 
+                                 vaccinated=False, vaccinated_day=None, 
                                  age=vis_age[i], job=None,house_index=None, isolation_tendencies=0.2, case_severity='Mild',
                                  has_mask=True)
                 self.pop.population.append(visitor)
@@ -390,6 +395,9 @@ class simulation():
 
             # Manage Quarantine
             self.pop.update_quarantine(day)
+            
+            # Manage Vaccines
+            self.pop.update_vaccinated(day)
 
             ############### UPDATE POPULATION ###############
             # remove the guest visitors
@@ -423,7 +431,8 @@ class simulation():
                        "ICU: {}, "
                        "tested: {}, "
                        "total quarantined: {}, "
-                       "infected students: {}").format(day,
+                       "infected students: {}, "
+                       "vaccinated: {}"                ).format(day,
                                                        self.track_infected[day],
                                                        self.track_recovered[day],
                                                        self.track_susceptible[day],
@@ -432,7 +441,8 @@ class simulation():
                                                        self.track_ICU[day],
                                                        self.track_tested[day],
                                                        self.track_quarantined[day],
-                                                       self.track_inf_students[day]))
+                                                       self.track_inf_students[day],
+                                                       self.track_vaccinated[day]))
 
         if self.verbose:
             print('{:-<80}'.format(''))
@@ -447,6 +457,8 @@ class simulation():
             print(np.max(self.track_quarantined), "were in quarantine at the peak")
             print(np.max(self.track_hospitalized), "at peak hospitalizations")
             print(np.max(self.track_dead[-1]), "at peak deaths")
+            print(self.track_vaccinated[day], "people were vaccinated")
+            print(self.track_vaccinated[day]/self.nPop*100, "% of population was vaccinated")
 
         self.has_run = True
 
@@ -490,7 +502,8 @@ class simulation():
 
     def plot(self, plot_infected=True, plot_susceptible=True, plot_dead=True, plot_recovered=True, plot_new_infected=True,
              plot_tested=True, plot_quarantined=True, plot_new_tests=True, plot_new_quarantined=True, plot_masks=True,
-             plot_hospitalized=True, plot_ICU=True, plot_lockdown=True, plot_testing=True, plot_students=True, log=False):
+             plot_hospitalized=True, plot_ICU=True, plot_lockdown=True, plot_testing=True, plot_students=True, 
+             plot_vaccinated=True, log=False):
         ''' Method used to plot simulation results.
 
         Will return a warning or error if the simulation has not been run yet.
@@ -535,6 +548,8 @@ class simulation():
             plt.plot(days, self.track_new_quarantined, label='new quarantined')
         if plot_students:
             plt.plot(days, self.track_inf_students, label="infected students")
+        if plot_vaccinated:
+            plt.plot(days, self.track_vaccinated, label='vaccinated')
 
         # Indicate when certain mandates were in place
         if plot_masks:
@@ -574,6 +589,6 @@ class simulation():
                       "new_tested":self.track_new_tested, "hospitalized":self.track_hospitalized,
                       "ICU":self.track_ICU, "testing_enforced":self.track_testing,
                       "masks_enforced":self.track_masks, "lockdown_enforced":self.track_lockdown,
-                      "time_elapsed":self.track_time}
+                      "time_elapsed":self.track_time, "vaccinated":self.track_vaccinated}
 
         return returnDict
