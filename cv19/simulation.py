@@ -187,6 +187,9 @@ class simulation():
         ''' Method that links the policy, population, and interaction sites class objects with
         the simulation class (serves as pointer variables).
         '''
+        # Initalize the person class
+        #self.person = Person(self)
+
         # Initalize the policy class
         self.policy = Policy(self)
 
@@ -374,6 +377,10 @@ class simulation():
                     will_visit_lects = self.inter_sites.will_visit_site(self.inter_sites.get_lect_sites(),
                                                                         self.will_go_prob["LECT"])
                     self.inter_sites.site_interaction(will_visit_lects, day)
+
+            # Manage masks
+            if mask_mandate:
+                self.pop.change_mask_wearing(index=index)
 
             # Manage at home interactions
             self.inter_sites.house_interact(day)
