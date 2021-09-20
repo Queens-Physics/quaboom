@@ -187,9 +187,6 @@ class simulation():
         ''' Method that links the policy, population, and interaction sites class objects with
         the simulation class (serves as pointer variables).
         '''
-        # Initalize the person class
-        #self.person = Person(self)
-
         # Initalize the policy class
         self.policy = Policy(self)
 
