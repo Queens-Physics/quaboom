@@ -717,7 +717,7 @@ class Population:
             else:
                 person.knows_infected = False
 
-    def change_mask_wearing(self, index):
+    def change_mask_wearing(self):
         '''Method to mandate wearing a mask.
 
         Parameters

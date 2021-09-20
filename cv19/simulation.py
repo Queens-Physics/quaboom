@@ -377,7 +377,7 @@ class simulation():
 
             # Manage masks
             if mask_mandate:
-                self.pop.change_mask_wearing(index=index)
+                self.pop.change_mask_wearing()
 
             # Manage at home interactions
             self.inter_sites.house_interact(day)
