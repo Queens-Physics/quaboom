@@ -26,7 +26,6 @@ class Population:
         self.set_demographic_parameters()
 
         self.nPop = sim_obj.nPop  # total population
-        #self.n0 = sim_obj.n0  # initial infected
 
         self.population = [0] * self.nPop  # The list of all people
         self.household = [0] * self.nPop  # list of all houses (list that contains all lists of the people in the house)
@@ -105,7 +104,7 @@ class Population:
         self.hospitalized = np.zeros(self.nPop, dtype=int) + NULL_ID  # list of people hospitalized and in the ICU
         self.quarantined = np.zeros(self.nPop, dtype=int) + NULL_ID  #list of people who are currently in quarantine
         
-        self.virus_type = np.array(["None" for i in range(self.nPop)], dtype=object) #list of individuals with None as virus type
+        self.virus_types = np.zeros(self.nPop, dtype=int) + NULL_ID #list of individuals with None as virus type
 
         self.testing = []  # list of people waiting to be others_infected
         self.test_sum = 0  # total number of tests that have been run
@@ -114,9 +113,10 @@ class Population:
 
         # Infect first n0 people
         count = 0
-        for key in sim_obj.infections.keys():
-            for _ in range(sim_obj.infections[key]):
-                self.infect(index=count, day=0, virus_type=key)
+        for virus_name in sim_obj.variants.keys():
+            virus_code = sim_obj.variant_codes[virus_name]
+            for _ in range(sim_obj.variants[virus_name]):
+                self.infect(index=count, day=0, virus_type=virus_code)
                 count += 1
 
     def load_attributes_from_sim_obj(self, sim_obj):
@@ -124,7 +124,7 @@ class Population:
         for attr in attributes:
             setattr(self, attr, sim_obj.parameters["population_data"][attr])
         
-        self.virus_types = list(sim_obj.parameters["simulation_data"]["infections"].keys())
+        self.variant_codes = sim_obj.variant_codes
 
         # case severity from disease params #
         self.severity_weights = np.array([sim_obj.disease_parameters["case_severity"][key]
@@ -246,9 +246,8 @@ class Population:
         return np.count_nonzero(self.has_mask > 0)
 
     def count_virus_types(self):
-        counts={}
-        for virus_type in self.virus_types + ["None"]:
-            counts[virus_type] = np.count_nonzero(self.virus_type==virus_type)
+        counts = {virus_type: np.count_nonzero(self.virus_types==virus_code) 
+                  for virus_type, virus_code in self.variant_codes.items()}
         return counts    
     
     #returns an individual based on their index
@@ -262,7 +261,7 @@ class Population:
         if didWork:
             self.infected[index] = index
             self.susceptible[index] = NULL_ID
-            self.virus_type[index] = virus_type
+            self.virus_types[index] = virus_type
             if self.population[index].hospitalized:
                 self.hospitalized[index] = index
 
@@ -279,7 +278,6 @@ class Population:
 
     # Cure a person
     def cure(self, index, day):
-        print("cure")
         didWork = self.population[index].check_cured(day)
         if didWork:
             self.infected[index] = NULL_ID
@@ -294,7 +292,7 @@ class Population:
         self.infected[index] = NULL_ID
         self.recovered[index] = index
         self.hospitalized[index] = NULL_ID
-        self.virus_type[index] = "None"
+        self.virus_types[index] = NULL_ID
         return True
 
     def die(self, index, day):
@@ -311,7 +309,7 @@ class Population:
         self.infected[index] = NULL_ID
         self.recovered[index] = NULL_ID
         self.hospitalized[index] = NULL_ID
-        self.virus_type[index] = "None"
+        self.virus_types[index] = NULL_ID
         self.dead[index] = index
         return True
 

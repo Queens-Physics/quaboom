@@ -46,12 +46,6 @@ class simulation():
         self.track_lockdown = np.zeros(self.nDays, dtype=bool)
         self.track_testing = np.zeros(self.nDays, dtype=bool)
         
-        self.track_virus_type = np.zeros(self.nDays, dtype=object)
-        self.track_virus_type_none = np.zeros(self.nDays, dtype=object)
-        self.track_virus_type_general = np.zeros(self.nDays, dtype=object)
-        self.track_virus_type_alpha = np.zeros(self.nDays, dtype=object)
-        self.track_virus_type_delta = np.zeros(self.nDays, dtype=object)
-
         self.track_time = np.zeros(self.nDays, dtype=float) # time elapsed (in seconds) since start of simulation
 
         self.has_run = False                                 # Indicates if the sim has run yet
@@ -78,6 +72,11 @@ class simulation():
         person_attributes = self.parameters["person_data"].keys()
         for attr in person_attributes:
             setattr(self, attr, self.parameters["person_data"][attr])
+            
+        #### Load in the virus types tracking arrays ####
+        self.virus_names = np.array(list(self.variant_codes.keys()))
+        self.track_virus_types = {virus_name:np.zeros(self.nDays, dtype=int) for virus_name in self.virus_names}
+        
 
     def load_disease_parameters(self, filename):
         # If path is absolute, use it.
@@ -211,12 +210,9 @@ class simulation():
             self.track_new_quarantined[day] = self.pop.get_new_quarantined()
             self.track_inf_students[day] = self.pop.count_infected_students()
             
-            self.track_virus_type[day] = self.pop.count_virus_types()
-            #print(self.pop.count_virus_types())
-            self.track_virus_type_none[day] = self.pop.count_virus_types()["None"]
-            self.track_virus_type_general[day] = self.pop.count_virus_types()["general"]
-            self.track_virus_type_alpha[day] = self.pop.count_virus_types()["alpha"]
-            self.track_virus_type_delta[day] = self.pop.count_virus_types()["delta"]
+            daily_variant_counts = self.pop.count_virus_types()
+            for virus_name in self.virus_names:
+                self.track_virus_types[virus_name][day] = daily_variant_counts[virus_name]
 
             self.new_tests = 0
 
@@ -391,11 +387,10 @@ class simulation():
 
         return self.has_run
 
-    def plot(self, plot_infected=True, plot_susceptible=True, plot_dead=True, plot_recovered=True, plot_new_infected=True,
-             plot_tested=True, plot_quarantined=True, plot_new_tests=True, plot_new_quarantined=True, plot_masks=True,
-             plot_hospitalized=False, plot_lockdown=True, plot_testing=True, plot_students=True,
-             plot_virus_type_none=False, plot_virus_type_general=True, plot_virus_type_alpha=True, plot_virus_type_delta=True,
-             log=False):
+    def plot(self, plot_infected=True, plot_susceptible=True, plot_dead=True, plot_recovered=False, plot_new_infected=False,
+             plot_tested=False, plot_quarantined=True, plot_new_tests=False, plot_new_quarantined=False, plot_masks=False,
+             plot_hospitalized=False, plot_lockdown=False, plot_testing=False, plot_students=False,
+             plot_virus_types={}, log=False):
 
         self.check_has_run(check=True, information="Cannot make plots.", fail=True)
 
@@ -425,14 +420,10 @@ class simulation():
             plt.plot(days, self.track_new_quarantined, label='new quarantined')
         if plot_students:
             plt.plot(days, self.track_inf_students, label="infected students")
-        if plot_virus_type_none: 
-            plt.plot(days, self.track_virus_type_none, label="not infected")
-        if plot_virus_type_general: 
-            plt.plot(days, self.track_virus_type_general, label="general")
-        if plot_virus_type_alpha: 
-            plt.plot(days, self.track_virus_type_alpha, label="alpha")
-        if plot_virus_type_delta: 
-            plt.plot(days, self.track_virus_type_delta, label="delta")    
+            
+        for key in plot_virus_types:
+            if plot_virus_types[key]:
+                plt.plot(days, self.track_virus_types[key], label=str(key))
 
         # Indicate when certain mandates were in place
         if plot_masks:
@@ -464,7 +455,9 @@ class simulation():
                       "inf_students":self.track_inf_students, "total_tested":self.track_tested,
                       "new_tested":self.track_new_tested, "hospitalized":self.track_hospitalized,
                       "testing_enforced":self.track_testing, "masks_enforced":self.track_masks,
-                      "lockdown_enforced":self.track_lockdown, "time_elapsed":self.track_time,
-                      "virus_type":self.track_virus_type}
+                      "lockdown_enforced":self.track_lockdown, "time_elapsed":self.track_time}
+        # Unpack the virus types
+        for virus_type in self.track_virus_types.keys():
+            returnDict[str(virus_type)] = self.track_virus_types[virus_type]
 
         return returnDict

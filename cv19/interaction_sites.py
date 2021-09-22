@@ -98,6 +98,9 @@ class Interaction_Sites:
         d_attributes = sim_obj.disease_parameters["spread_data"].keys()
         for attr in d_attributes:
             setattr(self, attr, sim_obj.disease_parameters["spread_data"][attr])
+            
+        # Get the virus type names
+        self.virus_names = sim_obj.variant_codes
 
         # Set the actual objects now
         self.pop = sim_obj.pop
@@ -226,7 +229,7 @@ class Interaction_Sites:
 
         '''
         new_infections = np.zeros(self.pop.get_population_size(), dtype=bool)
-        new_infection_type = np.zeros(self.pop.get_population_size(), dtype=object)
+        new_infection_type = np.zeros(self.pop.get_population_size(), dtype=int)
 
         for ppl_going in will_go_array:
 
@@ -273,8 +276,8 @@ class Interaction_Sites:
         #  Update people who get infected only at the end (if i get CV19 at work, prolly wont spread at the store that night ?)
         new_infection_indexes = np.where(new_infections)[0]
         new_infection_type_indexes = np.where(new_infection_type)[0]
-        for new_infection, new_infection_type_i in zip(new_infection_indexes, new_infection_type_indexes):
-            self.pop.infect(index=new_infection, day=day, virus_type=new_infection_type[new_infection_type_i])            
+        for new_infection in new_infection_indexes:
+            self.pop.infect(index=new_infection, virus_type=new_infection_type[new_infection], day=day)            
             
     def calc_interactions(self):
         '''Method to determine how many interactions a person will have.
@@ -313,8 +316,8 @@ class Interaction_Sites:
                 virus_type = self.pop.get_person(person_1).get_virus_type()
             else:
                 virus_type = self.pop.get_person(person_2).get_virus_type()
-            base_infection_spread_prob = self.base_infection_spread_prob[virus_type]
-            
+            virus_name = list(self.virus_names.keys())[list(self.virus_names.values()).index(virus_type)]
+            base_infection_spread_prob = self.base_infection_spread_prob[virus_name]
 
             if p1Infected:
 
@@ -371,15 +374,16 @@ class Interaction_Sites:
                     
 
                 for person in healthy_housemembers:
-                    virus_type=np.random.choice(a=virus_types)
+                    virus_type = np.random.choice(a=virus_types)
+                    virus_name = list(self.virus_names.keys())[list(self.virus_names.values()).index(virus_type)]
                     
                     # This should be more complicated and depend on len(infectpplinhouse)
-                    infection_chance = self.base_infection_spread_prob[virus_type] * self.house_infection_spread_factor
+                    infection_chance = self.base_infection_spread_prob[virus_name] * self.house_infection_spread_factor
                     caught_infection = random.random()<infection_chance
                     if caught_infection:
                         
                         if virus_type is None:
-                            print("House infection virus type error")
+                            raise ValueError("House infection has incorrect virus type.")
                         self.pop.infect(index=housemembers[person].get_index(), day=day, virus_type=virus_type)
 
 

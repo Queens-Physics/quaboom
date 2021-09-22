@@ -4,16 +4,22 @@
         "disease_config_file":"disease.json",
         "nDays":100,
         "nPop":10000,
-        "infections":{
+        "variants":{
             "general":8, 
-            "alpha":1,
-            "delta":1
+            "alpha":8,
+            "delta":8
+            },
+        "variant_codes":{
+            "general":0,
+            "alpha":1, 
+            "delta":2
             },
         "will_go_prob":{"A":0.05, "B":0.2, "C":0.7, "LECT":0.8, "STUDY":0.2, "FOOD":0.1},
         "N_VIS_OPTION":[ 20, 25, 30, 35 ],
         "N_VIS_PROB":[ 0.7, 0.17, 0.08, 0.05],
         "vis_age_upper":60,
-        "vis_age_lower":16
+        "vis_age_lower":16,
+        "vis_default_virus_type":"alpha"
     },
 
     "policy_data":
