@@ -588,7 +588,7 @@ class Person(object):
         """
 
         end = day + 1
-        beginning = end - 2 #TODO Add the variable "CT_LENGTH"
+        beginning = end - self.sim_obj.ct_length
 
         def get_contacts(log):
             contacts = set()
@@ -603,7 +603,7 @@ class Person(object):
 
         # Notify all personal contacts
         for contact in personal_contacts:
-            if random.random() < 1: #TODO Add the variable "CT_PROB_REMEMBERING_PERSONAL_CONTACTS"
+            if random.random() < self.sim_obj.ct_prob_remember_personal_contacts:
                 contact.positive_contact(day)
                 remembered_contacts.add(contact)
 

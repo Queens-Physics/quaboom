@@ -711,7 +711,7 @@ class Population:
             person = self.population[person_index]
             person.set_test_day(day)
             self.have_been_tested[person_index] = person_index
-            if self.CT_ENABLED and num_contacts_traced < self.CT_CAPACITY:
+            if self.ct_enabled and num_contacts_traced < self.ct_capacity:
                 person.contact_tracing(day=day)
                 num_contacts_traced += 1
 
