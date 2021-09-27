@@ -127,3 +127,10 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Pickle files
+*.pkl
+
+# Environment files
+env.sh
+cv19.env
