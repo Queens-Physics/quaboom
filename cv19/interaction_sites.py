@@ -34,10 +34,16 @@ class Interaction_Sites:
     lect_sites : :obj:`np.array` of :obj:`list` of :obj:`np.array` of :obj:`int`
         Designed to replicate university lecture hall interactions. They are only visited by students.
     study_sites : :obj:`np.array` of :obj:`list` of :obj:`np.array` of :obj:`int`
-        Designed to replicate study enviorments at univesity, on-campus (library, bookable rooms,
-        resturaunt tables, ...). They are only visited by students.
+        Designed to replicate study environments at university, on-campus (library, bookable rooms, ...).
+        They are only visited by students.
     food_sites : :obj:`np.array` of :obj:`list` of :obj:`np.array` of :obj:`int`
-        Designed to replicate caffeteria interactions on-campus. Only visited by students.
+        Designed to replicate cafeteria and restaurant interactions on-campus. Only visited by students.
+    res_sites : :obj:`list` of :obj:`np.array` of :obj:`int`
+        Designed to replicate the student residences on campus. They are only visited by first year students.
+    stud_house_sites : :obj:`np.array` of :obj:`list` of :obj:`int`
+        Visited by every student each day, and hosts interactions between members
+        of the same household. Infection spread at home is not defined by explicit contacts,
+        but by a known spread factor.
     '''
 
     def __init__(self, sim_obj):
@@ -45,8 +51,8 @@ class Interaction_Sites:
 
         Parameters
         ----------
-        sim_obj : simulation class object
-            The encompassing simulation obejct hosting the simulation
+        sim_obj : :obj:`simulation class`
+            The encompassing simulation obejct hosting the simulation.
 
         '''
 
@@ -57,14 +63,18 @@ class Interaction_Sites:
         # len(grade_X_sites) is how many sites there are; len(grade_X_sites[i]) is how many ppl go to that site
         self.grade_A_sites = self.init_grade(self.grade_per_pop["A"],
                                              self.grade_loyalty_means["A"],
-                                             self.grade_loyalty_stds["A"])
+                                             self.grade_loyalty_stds["A"],
+                                             self.students_participate["A"])
         self.grade_B_sites = self.init_grade(self.grade_per_pop["B"],
                                              self.grade_loyalty_means["B"],
-                                             self.grade_loyalty_stds["B"])
+                                             self.grade_loyalty_stds["B"],
+                                             self.students_participate["B"])
         self.grade_C_sites = self.init_grade(self.grade_per_pop["C"],
                                              self.grade_loyalty_means["C"],
-                                             self.grade_loyalty_stds["C"])
+                                             self.grade_loyalty_stds["C"],
+                                             self.students_participate["C"])
         self.house_sites = deepcopy(self.pop.household)
+        self.house_indices = deepcopy(self.pop.house_ppl_i)
 
         # Students Stuff #
         self.lect_sites = self.init_uni(self.grade_per_pop["LECT"],
@@ -76,6 +86,11 @@ class Interaction_Sites:
         self.food_sites = self.init_uni(self.grade_per_pop["FOOD"],
                                         self.grade_loyalty_means["FOOD"],
                                         self.grade_loyalty_stds["FOOD"])
+        self.res_sites = self.init_uni(self.grade_per_pop["RES"],
+                                       self.grade_loyalty_means["RES"],
+                                       self.grade_loyalty_stds["RES"])
+        self.stud_house_sites = deepcopy(self.pop.stud_houses)
+        self.stud_house_indices = deepcopy(self.pop.house_stud_i)
 
     def load_attributes_from_sim_obj(self, sim_obj):
         '''Method to load in attributes from the provided simulation class object.
@@ -85,8 +100,8 @@ class Interaction_Sites:
 
         Parameters
         ----------
-        sim_obj : simulation class object
-            The encompassing simulation obejct hosting the simulation
+        sim_obj : :obj:`simulation class`
+            The encompassing simulation obejct hosting the simulation.
 
         '''
 
@@ -105,11 +120,58 @@ class Interaction_Sites:
         self.pop = sim_obj.pop
         self.policy = sim_obj.policy
 
-    def init_grade(self, grade_pop_size, loyalty_mean, loyalty_std):
+    def init_grade(self, grade_pop_size, loyalty_mean, loyalty_std, students_interact):
         '''Method designed to associate members of the population with interaction sites
 
         This method initializes all non-student interaction sites by creating a list
-        of person indexes for each interaction site, for that type of interaction type.
+        of person indices for each interaction site, for that type of interaction type.
+
+        Parameters
+        ----------
+        grade_pop_size : int
+            Number of people per interaction site. Determines how many interaction sites
+            there will be across the population.
+        loyalty_mean : float
+            The mean number of this type of sites that each person will be associated with.
+        loyalty_std : float
+            The standard deviation in the number of sites of this type a person will be
+            associated with.
+        students_interact : boolean
+            Whether or not students will attend the interaction site being initialized
+
+        Returns
+        -------
+        grade_sites : :obj:`np.array` of :obj:`np.array` of :obj:`int`
+            An array holding one array for each interaction site of this type. Each nested
+            array holds the index of people that are associated with that site (can visit it).
+
+        '''
+        # Find out how many sites there should be - guessing right now
+        num_sites = round(self.pop.get_population_size()/grade_pop_size)
+        grade_sites = [[] for _ in range(num_sites)]
+
+        for person in self.pop.get_population():
+            if students_interact or not (self.students_on and person.job == 'Student'):
+                #if students are meant to go to this site
+                # Assign people to this specific site
+                num_diff_sites = abs(round(np.random.normal(loyalty_mean, loyalty_std)))
+                num_diff_sites = num_diff_sites if num_diff_sites <= num_sites else num_sites
+                # Get a list of len num_diff_sites for this person to be associated with now
+                person_sites = np.random.choice(num_sites, num_diff_sites, replace=False)
+                for site in person_sites:
+                    # Assign this person to that site
+                    grade_sites[site].append(person.get_index())
+
+        # Convert everything to numpy arrays
+        grade_sites = [np.asarray(site) for site in grade_sites]
+
+        return grade_sites
+
+    def init_uni(self, grade_pop_size, loyalty_mean, loyalty_std):
+        '''Method designed to associate members of the student population with interaction sites
+
+        This method initializes all student interaction sites by creating a list
+        of person indices for each interaction site, for that type of interaction type.
 
         Parameters
         ----------
@@ -129,28 +191,7 @@ class Interaction_Sites:
             array holds the index of people that are associated with that site (can visit it)
 
         '''
-        # Find out how many sites there should be - guessing right now
-        num_sites = round(self.pop.get_population_size()/grade_pop_size)
-        grade_sites = [[] for _ in range(num_sites)]
-
-        for person in self.pop.get_population():
-            # if (person.job != 'Student'):
-            # Assign people to this specific site
-            num_diff_sites = abs(round(np.random.normal(loyalty_mean, loyalty_std)))
-            num_diff_sites = num_diff_sites if num_diff_sites <= num_sites else num_sites
-            # Get a list of len num_diff_sites for this person to be associated with now
-            person_sites = np.random.choice(num_sites, num_diff_sites, replace=False)
-            for site in person_sites:
-                # Assign this person to that site
-                grade_sites[site].append(person.get_index())
-
-        # Convert everything to numpy arrays
-        grade_sites = [np.asarray(site) for site in grade_sites]
-
-        return grade_sites
-
-    def init_uni(self, sites_per_pop, loyalty_mean, loyalty_std):
-        num_sites = round(self.pop.get_population_size()/sites_per_pop)
+        num_sites = round(self.pop.get_student_pop_size()/grade_pop_size)
         grade_sites = [[] for i in range(num_sites)]
 
         for student in self.pop.get_population():
@@ -170,6 +211,51 @@ class Interaction_Sites:
 
         return grade_sites
 
+    def init_res(self, grade_pop_size, loyalty_mean, loyalty_std):
+        '''Method designed to associate students with the residence interaction site
+
+        This method initializes the residence interaction sites by creating a list
+        of person indices for each interaction site.
+
+        Parameters
+        ----------
+        grade_pop_size : int
+            Number of people per residence section. Determines how many interaction sites
+            there will be across the population.
+        loyalty_mean : float
+            The mean number of this type of sites that each person will be associated with.
+        loyalty_std : float
+            The standard deviation in the number of sites of this type a person will be
+            associated with.
+
+        Returns
+        -------
+        grade_sites : :obj:`np.array` of :obj:`np.array` of :obj:`int`
+            An array holding one array for each interaction site of this type. Each nested
+            array holds the index of people that are associated with that site (can visit it)
+
+        '''
+
+        num_sites = round(self.pop.get_res_size()/grade_pop_size)
+        grade_sites = [[] for i in range(num_sites)]
+
+        for room in self.pop.get_residences():
+            for student_i in self.stud_house_indices[room]:
+                # Assign people to this specific site
+                num_diff_sites = abs(round(np.random.normal(loyalty_mean, loyalty_std)))
+                num_diff_sites = num_diff_sites if num_diff_sites <= num_sites else num_sites
+                # Get a list of len num_diff_sites for this person to be associated with now
+                student_sites = np.random.choice(num_sites, num_diff_sites, replace=False)
+                for site in student_sites:
+                    # Assign this person to that site
+                    grade_sites[site].append(student_i)
+
+        # Convert everything to numpy arrays
+        for i, site in enumerate(grade_sites):
+            grade_sites[i] = np.array(site)
+
+        return grade_sites
+
     def will_visit_site(self, site_array, will_go_prob):
         '''Method to determine who will visit a site on a given day.
 
@@ -181,16 +267,16 @@ class Interaction_Sites:
         Parameters
         ----------
         site_array : :obj:`np.array` of :obj:`np.array` of :obj:`int`
-            An array holding lists (one for each interaction site) of the index of each person assoicated
-            with each of the individual sites.
+            An array holding lists (one for each interaction site) of the index of each person
+            associated with each of the individual sites.
         will_go_prob : float
             The probability that any given person in site_array will visit this type of site.
 
         Returns
         -------
         will_visit_grade : :obj:`np.array` of :obj:`np.array` of :obj:`int`
-            An array holding an array for each site of this interaction site type. Each individual list
-            holds the indexes of people that will visit that site for this day.
+            An array holding an array for each site of this interaction site type.
+            Each individual list holds the indexes of people that will visit that site for this day.
         '''
 
         # Could add something here that limits how many sites one person can visit (not real to visit 11 sites a day)
@@ -302,9 +388,22 @@ class Interaction_Sites:
 
         return number_of_interactions
 
-
     def interact(self, person_1, person_2):
-        # Function that models the interaction between two people, and will return if interaction spread
+        '''Method that models the interaction between two people.
+
+        Parameters
+        ----------
+        person_1 : :obj:`person.Person`
+            First person in the two-way interaction.
+        person_2 : :obj:`person.Person`
+            Second person in the two-way interaction.
+
+        Returns
+        -------
+        : :obj:`bool`
+            Whether or not the interaction caused the spread of the infection.
+
+        '''
         if not self.policy.get_mask_mandate:
             spread_prob = self.base_infection_spread_prob
         else:
@@ -350,12 +449,10 @@ class Interaction_Sites:
 
         '''
 
-        house_count = 0
-        for i in range(len(self.house_sites)):
+        for house_indices in self.house_indices:
             # Get ppl in house
-            house_size = self.house_sites[i]
-            housemembers = self.pop.get_population()[house_count:house_count+house_size]
-            house_count += house_size
+            house_size = len(house_indices)
+            housemembers = [self.pop.get_population()[ind] for ind in house_indices]
 
             # Do interactions between the housemates
             for member in housemembers:
@@ -364,9 +461,7 @@ class Interaction_Sites:
                         member.log_contact(other, day, personal=True)
 
             # Check if anyone in the house is infected
-            infected_housemembers = [i for i in range(house_size) if housemembers[i].is_infected()]
-
-            if len(infected_housemembers) > 0:
+            if any(housemembers[i].is_infected() for i in range(house_size)):
                 healthy_housemembers = [i for i in range(house_size) if not housemembers[i].is_infected()]
 
                 for person in healthy_housemembers:
@@ -376,9 +471,38 @@ class Interaction_Sites:
                     if caught_infection:
                         self.pop.infect(index=housemembers[person].get_index(), day=day)
 
+    def student_house_interact(self, day):
+        '''Method to manage interactions between members of the same student household.
 
-    # Function thats tests the symtomatic individuals as well as brining them in and out of quarantine
-    def testing_site (self, tests_per_day, day):
+        Determines if any infection will spread among members of the same household. Different
+        from interaction sites in the fact that contacts are not calculated, but assumed to happen
+        between all house members. Does not have a return value, infections are managed internally.
+
+        Parameters
+        ----------
+        day : int
+            The day value that this function is being called on in the encompassing simulation class.
+            Used as input to the infect function after infections have been determined.
+
+        '''
+
+        for house_indices in self.stud_house_indices:
+            # Get ppl in house
+            house_size = len(house_indices)
+            housemembers = [self.pop.get_population()[ind] for ind in house_indices]
+
+            # Check if anyone in the house is infected
+            if any(housemembers[i].is_infected() for i in range(house_size)):
+                healthy_housemembers = [i for i in range(house_size) if housemembers[i].is_infected()]
+
+                for person in healthy_housemembers:
+                    # This should be more complicated and depend on len(infectpplinhouse)
+                    infection_chance = self.house_infection_spread_prob
+                    caught_infection = random.random()<infection_chance
+                    if caught_infection:
+                        self.pop.infect(index=housemembers[person].get_index(), day=day)
+
+    def testing_site(self, tests_per_day, day):
         '''Method to update status of symptoms and run the testing sites code.
 
         Parameters
@@ -421,12 +545,38 @@ class Interaction_Sites:
         '''
         return deepcopy(self.grade_C_sites)
 
-
     def get_lect_sites(self):
+        '''Method to return a copy of the lect_sites attribute.
+
+        Returns
+        -------
+        self.lect_sites.copy() : :obj:`np.array` of :obj:`list` of :obj:`np.array` of :obj:`int`
+        '''
         return deepcopy(self.lect_sites)
 
     def get_study_sites(self):
+        '''Method to return a copy of the study_sites attribute.
+
+        Returns
+        -------
+        self.study_sites.copy() : :obj:`np.array` of :obj:`list` of :obj:`np.array` of :obj:`int`
+        '''
         return deepcopy(self.study_sites)
 
     def get_food_sites(self):
+        '''Method to return a copy of the food_sites attribute.
+
+        Returns
+        -------
+        self.food_sites.copy() : :obj:`np.array` of :obj:`list` of :obj:`np.array` of :obj:`int`
+        '''
         return deepcopy(self.food_sites)
+
+    def get_res_sites(self):
+        '''Method to return a copy of the res_sites attribute.
+
+        Returns
+        -------
+        self.res_sites.copy() : :obj:`np.array` of :obj:`list` of :obj:`np.array` of :obj:`int`
+        '''
+        return deepcopy(self.res_sites)
