@@ -104,8 +104,8 @@ class Person(object):
         self.protocol_compliance = self.sim_obj.protocol_compliance
 
         # Dictionary of sets that stores all the contacts on a given day
-        self.all_contacts = dict()
-        self.personal_contacts = dict()
+        self.all_contacts = {}
+        self.personal_contacts = {}
 
         # Whether this person uses a contact tracing app
         self.has_ct_app = random.random() < 1 #TODO add the "CT_APP_PROB" variable here
