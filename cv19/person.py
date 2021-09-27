@@ -555,7 +555,7 @@ class Person(object):
 
     def log_contact(self, other, day: int, personal: bool = False) -> None:
         """Logs a contact between two individuals.
-        
+
         Parameters
         ----------
         other : Person
@@ -568,7 +568,7 @@ class Person(object):
 
         def add_contact(log):
             if day in log.keys():
-                log[day].add(other)                
+                log[day].add(other)
             else:
                 log[day] = set([other])
 
@@ -578,13 +578,13 @@ class Person(object):
 
 
     def contact_tracing(self, day: int) -> None:
-        """Contacts everyone that they have had contact with. 
-        
+        """Contacts everyone that they have had contact with.
+
         Parameters
         ----------
         day : int
             Current day in the simulation
-            
+
         """
 
         end = day + 1
@@ -601,7 +601,7 @@ class Person(object):
         personal_contacts = get_contacts(self.personal_contacts)
         remembered_contacts = set()
 
-        # Notify all personal contacts   
+        # Notify all personal contacts
         for contact in personal_contacts:
             if random.random() < 1: #TODO Add the variable "CT_PROB_REMEMBERING_PERSONAL_CONTACTS"
                 contact.positive_contact(day)
@@ -609,7 +609,7 @@ class Person(object):
 
         # CT apps
         if self.has_ct_app:
-            # Gets all contacts that are from the CT app, minus those 
+            # Gets all contacts that are from the CT app, minus those
             # already contacted because they were personal contacts
             impersonal_contacts = get_contacts(self.all_contacts).difference(remembered_contacts)
 
@@ -621,7 +621,7 @@ class Person(object):
         covid case. '''
 
         #NOTE: Is this what we want to happen when a positive contact occurs?
-        self.set_quarantine(day) 
+        self.set_quarantine(day)
 
     def set_protocol_compliance(self, house_size):
         '''Method to set the initial protocol compliance value of a person.
