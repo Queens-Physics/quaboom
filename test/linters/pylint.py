@@ -19,6 +19,7 @@ def run_pylint():
                         'invalid-name',
                         'attribute-defined-outside-init',
                         'access-member-before-definition',
+                        'consider-using-f-string',
                         'fixme']
 
     # List of files or directories to run the linter on.
