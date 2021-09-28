@@ -103,8 +103,8 @@ class Population:
                                dead=False, hospitalized=False, ICU=False,
                                quarantined=False, quarantined_day=None,
                                infected_day=None, recovered_day=None, death_day=None,
-                               others_infected=None, cure_days=None, recent_infections=None, vaccinated=False,
-                               vaccinated_day=None, vaccine_type=vaccine_type_arr[i],
+                               others_infected=None, cure_days=None, recent_infections=None, 
+                               vaccinated=False, vaccine_type=vaccine_type_arr[i],
                                age=age_arr[i], job=job_arr[i], house_index=houseIndex,
                                isolation_tendencies=isolation_tend_arr[i],
                                case_severity=case_severity_arr[i], mask_type=mask_type_arr[i],
@@ -144,7 +144,7 @@ class Population:
                                 dead=False, hospitalized=False,ICU=False,quarantined=False,quarantined_day=None,
                                 infected_day=None, recovered_day=None, death_day=None,
                                 others_infected=None, cure_days=None, recent_infections=None,
-                                vaccinated=False, vaccinated_day=None, vaccine_type=vaccine_type_arr[i],
+                                vaccinated=False, vaccine_type=vaccine_type_arr[i],
                                 age=student_age[i], job='Student', house_index=studHouseIndex,
                                 isolation_tendencies=isolation_tend_arr[i],
                                 case_severity=case_severity_arr[i],
@@ -733,9 +733,6 @@ class Population:
         
     def count_vaccinated(self):
         return np.count_nonzero(self.vaccinated != NULL_ID)
-    
-    def count_vaccine_type(self):
-        return np.count_nonzero(self.vaccine_type != NULL_ID)
     
     def update_vaccinated(self, day):
         
