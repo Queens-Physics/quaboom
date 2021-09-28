@@ -355,7 +355,7 @@ class simulation():
                 visitor = Person(index=i+self.nPop, sim_obj=self, infected=True, recovered=False, dead=False, hospitalized=False, ICU=False,
                                  quarantined=False, quarantined_day=None, infected_day=None, recovered_day=None,
                                  death_day=None, others_infected=None, cure_days=None, recent_infections=None, 
-                                 vaccinated=False, vaccinated_day=None, 
+                                 vaccinated=False, #vaccinated_day=None, 
                                  age=vis_age[i], job=None,house_index=None, isolation_tendencies=0.2, case_severity='Mild',
                                  has_mask=True)
                 self.pop.population.append(visitor)
@@ -396,7 +396,7 @@ class simulation():
             # Manage Quarantine
             self.pop.update_quarantine(day)
             
-            # Manage Vaccines
+             #Manage Vaccines
             self.pop.update_vaccinated(day)
 
             ############### UPDATE POPULATION ###############

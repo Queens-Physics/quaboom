@@ -18,7 +18,7 @@ class Person(object):
 
     def __init__(self, index, sim_obj, infected=False, recovered=False, dead=False, hospitalized=False, ICU=False, quarantined=False,
                  quarantined_day=None, infected_day=None, recovered_day=None, death_day=None, others_infected=None,
-                 cure_days=None, recent_infections=None, vaccinated=False, vaccinated_day=None, vaccine_type=None, 
+                 cure_days=None, recent_infections=None, vaccinated=False, vaccinated_day=None, vaccine_type=None,
                  age=None, job=None, house_index=0, isolation_tendencies=None, case_severity=None, mask_type=None,
                  has_mask=True):
         '''Method to load in attributes from the provided simulation class object.
@@ -44,6 +44,10 @@ class Person(object):
             Determines if person is quarentined or not, defaults False.
         quarantined_day : int
             The day a person is put into quarantine, defaults None.
+        vaccinated : bool
+            Determines if a person is vaccinated or not, defaults to True.
+        vaccine_type : string
+            Determines type of vaccine received by person, defaults to None.
         infected_day : int
             The day a person is infected, defaults None.
         recovered_day : int
@@ -86,7 +90,7 @@ class Person(object):
         self.cure_days = cure_days
         self.recent_infections = recent_infections
         self.vaccinated = vaccinated
-        self.vaccinated = vaccinated
+        self.vaccinated_day = vaccinated_day
         self.vaccine_type = vaccine_type
         self.index = index
         self.age = age
@@ -165,16 +169,6 @@ class Person(object):
         self.hospitalized: :obj:`bool`
         '''
         return self.hospitalized
-    
-    def is_vaccinated(self):
-        return self.vaccinated
-    
-    def set_vaccinated(self, day):
-        self.vaccinated_day = day
-        self.vaccinated = True
-        
-    def get vaccinated_day(self):
-        return self.vaccinated_day
 
     def set_quarantine(self, day):
         '''Method to set a person to be in quarantine. Sets the day the quarantine begins to the day inputted.
@@ -633,7 +627,25 @@ class Person(object):
         elif self.days_in_lockdown != 0:
             self.days_in_lockdown -= 1
         return self.days_in_lockdown
+
+    #def is_vaccinated(self):
+        #return self.vaccinated
+        
+    def is_vaccinated(self):
+        vaccine_options = np.random.uniform()
+
+        if self.vaccinated:
+            return True  #True = vaccinated
+        else:
+            return False
     
+    def set_vaccinated(self, day):
+        self.vaccinated_day = day
+        self.vaccinated = True
+        
+    def get_vaccinated_day(self):
+        return self.vaccinated_day
+        
     def vaccine_type_efficiency(self):
         if self.vaccinated == True and self.vaccine_type == "Pfizer":
             return self.sim_obj.Pfizer_eff
