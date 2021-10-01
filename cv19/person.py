@@ -635,6 +635,10 @@ class Person(object):
         else:
             return False
         
+    def set_vaccinated(self, day):
+        self.vaccinated_day = day
+        self.vaccinated = True
+        
     def vaccine_type_efficiency(self):
         if self.vaccinated == True and self.vaccine_type == "Pfizer":
             return self.sim_obj.Pfizer_eff

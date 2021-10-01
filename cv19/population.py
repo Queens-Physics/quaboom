@@ -34,7 +34,8 @@ class Population:
 
         self.nPop = sim_obj.nPop  # total population
         self.n0 = sim_obj.n0  # initial infected
-        self.v0 = sim_obj.v0 # initial vaccinated
+        #self.v0 = sim_obj.v0 # initial vaccinated
+        #self.vPop = sim_obj.vPop
 
         # Student parameter
         self.nStudents = sim_obj.num_students # full capacity ~ 24k students
@@ -203,8 +204,8 @@ class Population:
             self.susceptible[i] = NULL_ID
             
         # Vaccinate first v0 people
-        for i in range(self.v0):
-            self.vaccinated[i] = i
+        #for i in range(self.v0):
+            #self.vaccinated[i] = i
             
     def load_attributes_from_sim_obj(self, sim_obj):
         '''Method to load in attributes from the provided simulation class object.
