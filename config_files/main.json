@@ -41,8 +41,8 @@
         "prob_has_mask":0.8,
         "prob_of_test":1,
         "mask_type": {"Surgical": 0.2, "Non-surgical": 0.8},
-        "num_vaccinations":7600,
-        "max_vaccinations":7600,
+        "num_vaccinations":0,
+        "max_vaccinations":0,
         "vaccine_type": {"Pfizer":0.5, "Moderna":0.5, "AZ":0}
     },
 
