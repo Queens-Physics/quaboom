@@ -3,6 +3,7 @@ This file holds the interaction sites class used in simulation.py.
 '''
 import random
 from copy import deepcopy
+from itertools import combinations
 
 import numpy as np
 
@@ -295,7 +296,7 @@ class Interaction_Sites:
 
         return will_visit_grade
 
-    def site_interaction(self, will_go_array, day):
+    def site_interaction(self, will_go_array, day, personal):
         '''Method that hosts interactions between people for an interaction site type.
 
         This method manages interactions between people going to the same interaction
@@ -338,9 +339,15 @@ class Interaction_Sites:
                 person_1_index = ppl_going[person_1]
                 person_2_index = ppl_going[person_2]
 
+                # Getting the Person objects and logging the contacts
+                p1_obj = self.pop.get_person(person_1_index)
+                p2_obj = self.pop.get_person(person_2_index)
+                p1_obj.log_contact(p2_obj, day=day, personal=personal)
+                p2_obj.log_contact(p1_obj, day=day, personal=personal)
+
                 # Check to make sure one is infected
-                person_1_infected = self.pop.get_person(person_1_index).is_infected()
-                person_2_infected = self.pop.get_person(person_2_index).is_infected()
+                person_1_infected = p1_obj.is_infected()
+                person_2_infected = p2_obj.is_infected()
 
                 if person_1_infected != person_2_infected:
                     # Have an interaction between those people
@@ -447,6 +454,11 @@ class Interaction_Sites:
             # Get ppl in house
             house_size = len(house_indices)
             housemembers = [self.pop.get_population()[ind] for ind in house_indices]
+
+            # Do interactions between the housemates
+            for member1, member2 in combinations(housemembers, 2):
+                member1.log_contact(member2, day=day, personal=True)
+                member2.log_contact(member1, day=day, personal=True)
 
             # Check if anyone in the house is infected
             if any(housemembers[i].is_infected() for i in range(house_size)):

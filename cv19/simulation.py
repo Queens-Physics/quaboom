@@ -357,23 +357,27 @@ class simulation():
 
             ############### INTERACTION SITES STUFF ###############
             will_visit_A = self.inter_sites.will_visit_site(self.inter_sites.get_grade_A_sites(), self.will_go_prob["A"])
-            self.inter_sites.site_interaction(will_visit_A, day)
+            self.inter_sites.site_interaction(will_visit_A, day, personal=True)
             if not lockdown:
                 will_visit_B = self.inter_sites.will_visit_site(self.inter_sites.get_grade_B_sites(), self.will_go_prob["B"])
-                self.inter_sites.site_interaction(will_visit_B, day)
+                self.inter_sites.site_interaction(will_visit_B, day, personal=False)
                 will_visit_C = self.inter_sites.will_visit_site(self.inter_sites.get_grade_C_sites(), self.will_go_prob["C"])
-                self.inter_sites.site_interaction(will_visit_C, day)
+                self.inter_sites.site_interaction(will_visit_C, day, personal=False)
+
             if self.inter_sites.students_on and students_go:
                 will_visit_study = self.inter_sites.will_visit_site(self.inter_sites.get_study_sites(),
                                                                     self.will_go_prob["STUDY"])
-                self.inter_sites.site_interaction(will_visit_study, day)
+                #NOTE: Should a study site be a personal interaction?
+                self.inter_sites.site_interaction(will_visit_study, day, personal=True)
                 will_visit_food = self.inter_sites.will_visit_site(self.inter_sites.get_food_sites(),
                                                                    self.will_go_prob["FOOD"])
-                self.inter_sites.site_interaction(will_visit_food, day)
+
+                self.inter_sites.site_interaction(will_visit_food, day, personal=True)
                 if not lockdown:
                     will_visit_lects = self.inter_sites.will_visit_site(self.inter_sites.get_lect_sites(),
                                                                         self.will_go_prob["LECT"])
-                    self.inter_sites.site_interaction(will_visit_lects, day)
+
+                    self.inter_sites.site_interaction(will_visit_lects, day, personal=True)
 
             # Manage at home interactions
             self.inter_sites.house_interact(day)
@@ -381,7 +385,7 @@ class simulation():
             # Residence interactions
             if self.inter_sites.students_on and students_go:
                 will_visit_res = self.inter_sites.will_visit_site(self.inter_sites.get_res_sites(), self.will_go_prob["RES"])
-                self.inter_sites.site_interaction(will_visit_res, day)
+                self.inter_sites.site_interaction(will_visit_res, day, personal=True)
 
             # Manage testing sites
             if testing_ON:
