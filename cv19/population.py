@@ -723,3 +723,13 @@ class Population:
                 self.new_quarantined_num += 1
             else:
                 person.knows_infected = False
+
+    def change_mask_wearing(self):
+        '''Method to mandate wearing a mask.
+
+        Parameters
+        ----------
+        has_mask: bool
+        '''
+        for person in self.population:
+            person.has_mask = True

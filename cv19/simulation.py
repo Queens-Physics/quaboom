@@ -379,6 +379,10 @@ class simulation():
 
                     self.inter_sites.site_interaction(will_visit_lects, day, personal=True)
 
+            # Manage masks
+            if mask_mandate:
+                self.pop.change_mask_wearing()
+
             # Manage at home interactions
             self.inter_sites.house_interact(day)
             self.inter_sites.student_house_interact(day)
