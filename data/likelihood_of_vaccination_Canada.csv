@@ -1,0 +1,24 @@
+"Canadians' health and COVID-19, by region, age, gender and other characteristics"
+"Frequency: Occasional"
+"Table: 13-10-0809-01"
+"Release date: 2021-07-14"
+"Geography: Canada, Geographical region of Canada, Province or territory"
+""
+""
+
+,,"Canada (excluding territories)",,,,,,,,,
+,,"Total, 18 years and over",,"18 to 34 years",,"35 to 49 years",,"50 to 69 years",,"70 years and over",
+,,"Total, gender of person ",,"Total, gender of person ",,"Total, gender of person ",,"Total, gender of person ",,"Total, gender of person ",
+,,"Likelihood to get COVID-19 vaccine, very likely or somewhat likely ",,"Likelihood to get COVID-19 vaccine, very likely or somewhat likely ",,"Likelihood to get COVID-19 vaccine, very likely or somewhat likely ",,"Likelihood to get COVID-19 vaccine, very likely or somewhat likely ",,"Likelihood to get COVID-19 vaccine, very likely or somewhat likely ",
+,,"Number of persons ","Percentage of persons ","Number of persons ","Percentage of persons ","Number of persons ","Percentage of persons ","Number of persons ","Percentage of persons ","Number of persons ","Percentage of persons "
+"Collection period ","Population group","2020 to 2021","2020 to 2021","2020 to 2021","2020 to 2021","2020 to 2021","2020 to 2021","2020 to 2021","2020 to 2021","2020 to 2021","2020 to 2021"
+"January to April 2021","Has an underlying health condition ","9,732,900","88.2","1,200,900","81.2","2,050,800","87.4","3,894,000","87.7","2,587,200","93.7"
+,"Does not have an underlying health condition ","15,045,800","85.1","5,328,500","81.4","4,104,300","85.9","4,339,300","87.7","1,273,700","91.1"
+"September to December 2020","Has an underlying health condition ","8,418,000","78.6","1,124,400","75.2","1,509,500","72.2","3,572,700","80.6","2,211,400","82.4"
+,"Does not have an underlying health condition ","13,450,600","76.4","5,079,100","77.2","3,659,500","73.2","3,594,300","76.8","1,117,700","83.1"
+"September to October 2020","Has an underlying health condition ","8,227,300","76.8","1,134,500","73.9","1,447,900","70.6","3,441,000","77.6","2,203,900","81.7"
+,"Does not have an underlying health condition ","13,109,700","74.7","4,994,700","76.0","3,587,300","71.0","3,424,300","75.1","1,103,400","81.2"
+
+
+
+Source: https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1310080901
