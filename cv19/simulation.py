@@ -15,8 +15,69 @@ from .interaction_sites import Interaction_Sites
 
 
 class simulation():
+    '''
+    A class designed to host the actual monte-carlo simulation and to track the results.
+
+    Holds all of the attributes outlined in the simulation_data section of the
+    main.json configuration file, in addition to the ones listed below.
+
+    Attributes
+    ----------
+    verbose : bool
+        A variable indicating whether to print updates with simulation information while running.
+    track_new_infected : :obj:`np.array` of int
+        Holds the number of new infections for each day of the simulation.
+    track_infected : :obj:`np.array` of int
+        Holds the number of infected people for each day of the simulation.
+    track_susceptible : :obj:`np.array` of int
+        Holds the number of susceptible people for each day of the simulation.
+    track_recovered : :obj:`np.array` of int
+        Holds the number of recovered people for each day of the simulation.
+    track_dead : :obj:`np.array` of int
+        Holds the number of dead people for each day of the simulation.
+    track_hospitalized : :obj:`np.array` of int
+        Holds the number of hospitalized people for each day of the simulation.
+    track_quarantined : :obj:`np.array` of int
+        Holds the number of people currently in quarantine for each day of the simulation.
+    track_new_quarantined : :obj:`np.array` of int
+        Holds the number of newly quarantined people for each day of the simulation.
+    track_tested : :obj:`np.array` of int
+        Holds the total number of tested people, updated for each day of the simulation.
+    track_new_tested : :obj:`np.array` of int
+        Holds the number of people tested that day, for each day of the simulations.
+    track_testing_wait_list : :obj:`np.array` of int
+        Holds the number of people who are waiting to get tested that day, for each day of the simulations.
+    track_inf_students : :obj:`np.array` of int
+        Holds the number of infected students for each day of the simulations.
+    track_masks : :obj:`np.array` of bool
+        A binary array that tracks if masks were required for each day of the simulation.
+    track_lockdown : :obj:`np.array` of bool
+        A binary array that tracks if lockdown was implemented for each day of the simulation.
+    track_testing : :obj:`np.array` of bool
+        A binary array that tracks if testing was implemented for each day of the simulation.
+    track_time : :obj:`np.array` of float
+        An array to track the time taken to run each day of the simulation.
+    has_run : bool
+        A variable indicating if this object has run a simulaiton yet.
+
+    '''
 
     def __init__(self, config_file, config_dir="", verbose=False):
+
+
+        ''' __init__ method docstring.
+
+        Parameters
+        ----------
+        config_file : str
+            The path to the configuration file used by this simulation.
+        config_dir : str
+            Path to the directory that stores the configuration file. Not required if config_file
+            is a complete path.
+        verbose : bool
+            A variable indicating whether to print updates with simulation information while running.
+        '''
+
 
         self.config_dir = config_dir
         self.load_general_parameters(config_file)
@@ -52,8 +113,19 @@ class simulation():
         self.has_run = False                                 # Indicates if the sim has run yet
 
     def load_general_parameters(self, data_file):
+        ''' Method to load in attributes from the general configuration file.
+
+        Parameters are loaded from the simulation_data section of the configuration file.
+        All parameter names are the same as the dictionary keys in the file.
+
+        Parameters
+        ----------
+        data_file : str
+            Path to the general configuration file.
+        '''
+
         if isinstance(data_file, str):
-            with open(data_file) as file:
+            with open(data_file, encoding='utf-8') as file:
                 self.parameters = json.load(file)
 
             self.config_dir = Path(data_file).parent
@@ -75,9 +147,20 @@ class simulation():
             setattr(self, attr, self.parameters["person_data"][attr])
 
     def load_disease_parameters(self, filename):
+        ''' Method to load in attributes from the disease configuration file.
+
+        All parameters in the file are loaded into the object, and parameter names
+        are taken from dictionary keys.
+
+        Parameters
+        ----------
+        filename : str
+            Path to the disease configuration file.
+        '''
+
         # If path is absolute, use it.
         if Path(filename).is_absolute():
-            with open(filename) as file:
+            with open(filename, encoding='utf-8') as file:
                 self.disease_parameters = json.load(file)
 
         # Assume that the configuration filename is relative to path of main config.
@@ -86,7 +169,7 @@ class simulation():
         else:
             filepath = Path(self.config_dir, filename)
             try:
-                with open(filepath) as file:
+                with open(filepath, encoding='utf-8') as file:
                     self.disease_parameters = json.load(file)
 
                 return
@@ -97,10 +180,13 @@ class simulation():
                                "Attempting read relative to CV19ROOT directory.").format(filepath))
 
                 filepath = Path(CV19ROOT, filename)
-                with open(filepath) as file:
+                with open(filepath, encoding='utf-8') as file:
                     self.disease_parameters = json.load(file)
 
     def init_classes(self):
+        ''' Method that links the policy, population, and interaction sites class objects with
+        the simulation class (serves as pointer variables).
+        '''
         # Initalize the policy class
         self.policy = Policy(self)
 
@@ -168,6 +254,20 @@ class simulation():
                 self.code_id += '-dirty'
 
     def run(self, fail_on_rerun=True):
+        ''' Method that runs the monte-carlo simulation.
+
+        This is the main function in the simulation class that generates the tracking data. The
+        fail_on_rerun parameter is added to make sure that data from previous runs is not overwritten
+        by running the simulation again.
+
+        Parameters
+        ----------
+        fail_on_rerun : bool
+            Variable to indicate whether the code should return an error if same object is
+            run multiple times.
+        '''
+
+
         # Check whether the simulation has already been run.
         if fail_on_rerun:
             information = ("When running again, previous results will be overwritten. "
@@ -257,23 +357,31 @@ class simulation():
 
             ############### INTERACTION SITES STUFF ###############
             will_visit_A = self.inter_sites.will_visit_site(self.inter_sites.get_grade_A_sites(), self.will_go_prob["A"])
-            self.inter_sites.site_interaction(will_visit_A, day)
+            self.inter_sites.site_interaction(will_visit_A, day, personal=True)
             if not lockdown:
                 will_visit_B = self.inter_sites.will_visit_site(self.inter_sites.get_grade_B_sites(), self.will_go_prob["B"])
-                self.inter_sites.site_interaction(will_visit_B, day)
+                self.inter_sites.site_interaction(will_visit_B, day, personal=False)
                 will_visit_C = self.inter_sites.will_visit_site(self.inter_sites.get_grade_C_sites(), self.will_go_prob["C"])
-                self.inter_sites.site_interaction(will_visit_C, day)
+                self.inter_sites.site_interaction(will_visit_C, day, personal=False)
+
             if self.inter_sites.students_on and students_go:
                 will_visit_study = self.inter_sites.will_visit_site(self.inter_sites.get_study_sites(),
                                                                     self.will_go_prob["STUDY"])
-                self.inter_sites.site_interaction(will_visit_study, day)
+                #NOTE: Should a study site be a personal interaction?
+                self.inter_sites.site_interaction(will_visit_study, day, personal=True)
                 will_visit_food = self.inter_sites.will_visit_site(self.inter_sites.get_food_sites(),
                                                                    self.will_go_prob["FOOD"])
-                self.inter_sites.site_interaction(will_visit_food, day)
+
+                self.inter_sites.site_interaction(will_visit_food, day, personal=True)
                 if not lockdown:
                     will_visit_lects = self.inter_sites.will_visit_site(self.inter_sites.get_lect_sites(),
                                                                         self.will_go_prob["LECT"])
-                    self.inter_sites.site_interaction(will_visit_lects, day)
+
+                    self.inter_sites.site_interaction(will_visit_lects, day, personal=True)
+
+            # Manage masks
+            if mask_mandate:
+                self.pop.change_mask_wearing()
 
             # Manage at home interactions
             self.inter_sites.house_interact(day)
@@ -281,7 +389,7 @@ class simulation():
             # Residence interactions
             if self.inter_sites.students_on and students_go:
                 will_visit_res = self.inter_sites.will_visit_site(self.inter_sites.get_res_sites(), self.will_go_prob["RES"])
-                self.inter_sites.site_interaction(will_visit_res, day)
+                self.inter_sites.site_interaction(will_visit_res, day, personal=True)
 
             # Manage testing sites
             if testing_ON:
@@ -391,6 +499,19 @@ class simulation():
     def plot(self, plot_infected=True, plot_susceptible=True, plot_dead=True, plot_recovered=True, plot_new_infected=True,
              plot_tested=True, plot_quarantined=True, plot_new_tests=True, plot_new_quarantined=True, plot_masks=True,
              plot_hospitalized=True, plot_ICU=True, plot_lockdown=True, plot_testing=True, plot_students=True, log=False):
+        ''' Method used to plot simulation results.
+
+        Will return a warning or error if the simulation has not been run yet.
+
+        Parameters
+        ----------
+        plot_* : bool
+            Takes in a single variable for each tracking array held in the simulation class object. The
+            variable is of name plot_<tracked value name>, for example plot_hospitalized. Setting this
+            parameter to `True` will plot the array, and `False` will not.
+        log : bool
+            Indicate whether to plot with a log scale on the y-axis.
+        '''
 
         self.check_has_run(check=True, information="Cannot make plots.", fail=True)
 
@@ -443,6 +564,13 @@ class simulation():
         plt.xlabel("Days")
 
     def get_arrays(self):
+        ''' Method to return all of the tracking arrays after the simulation has run.
+
+        Returns
+        -------
+        returnDict : dict of `np.array`
+            A dictionary holding all of the tracking arrays with the raw simulation results.
+        '''
         self.check_has_run(check=True,
                            information="Cannot return zero-initialized arrays.",
                            fail=True)
