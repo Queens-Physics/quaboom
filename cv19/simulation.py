@@ -457,7 +457,20 @@ class simulation():
             print(np.max(self.track_dead[-1]), "at peak deaths")
 
         self.has_run = True
-
+    def R0(self, day):
+        '''Method to calculate daily R0 values.
+        
+        Returns
+        -------
+        daily_R0 : float
+            Daily R0 value
+        '''
+        daily_R0 = self.new_infected[day]/(self.infected[day]-self.new_infected[day])
+        daily_R02 = self.new_infected[]
+        return daily_R0
+    
+    def R0_avg(self, smooth_num=None):
+        
     def check_has_run(self, check, information="", fail=True):
         '''Method to check whether or not the simulation has run.
 
