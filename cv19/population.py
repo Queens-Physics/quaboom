@@ -203,7 +203,7 @@ class Population:
             self.population[i].infect(day=0)
             self.infected[i] = i
             self.susceptible[i] = NULL_ID
- 
+
         # Vaccinate first v0 people
         #for i in range(self.v0):
             #self.vaccinated[i] = i
@@ -739,7 +739,7 @@ class Population:
                 self.new_quarantined_num += 1
             else:
                 person.knows_infected = False
-        
+
     def get_vaccinated(self):
         '''Method to retrieve indicies of people vaccinated.
 

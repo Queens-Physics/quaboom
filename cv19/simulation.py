@@ -307,7 +307,7 @@ class simulation():
 
             self.track_new_quarantined[day] = self.pop.get_new_quarantined()
             self.track_inf_students[day] = self.pop.count_infected_students()
-            
+
             self.track_vaccinated[day] = self.pop.count_vaccinated()
             self.new_tests = 0
 
@@ -350,10 +350,7 @@ class simulation():
             visitors_ind = [x for x in range(self.nPop, self.nPop+num_vis-1)]
             vis_age = np.random.choice(a=self.pop.age_options, p=self.pop.age_weights, size=num_vis)
             for i in range(0, num_vis):
-                visitor = Person(index=i+self.nPop, sim_obj=self, infected=True, recovered=False, dead=False, hospitalized=False, ICU=False,
-                                 quarantined=False, quarantined_day=None, infected_day=None, recovered_day=None,
-                                 death_day=None, others_infected=None, cure_days=None, recent_infections=None, vaccinated=False, 
-                                 age=vis_age[i], job=None,house_index=None, isolation_tendencies=0.2, case_severity='Mild', has_mask=True)
+                visitor = Person(index=i+self.nPop, sim_obj=self, infected=True, recovered=False, dead=False, hospitalized=False, ICU=False, quarantined=False, quarantined_day=None, infected_day=None, recovered_day=None, death_day=None, others_infected=None, cure_days=None, recent_infections=None, vaccinated=False, age=vis_age[i], job=None,house_index=None, isolation_tendencies=0.2, case_severity='Mild', has_mask=True)
                 self.pop.population.append(visitor)
 
             ############### INTERACTION SITES STUFF ###############
@@ -399,7 +396,7 @@ class simulation():
 
             # Manage Quarantine
             self.pop.update_quarantine(day)
-            
+
             # Manage Vaccines
             self.pop.update_vaccinated(day)
             ############### UPDATE POPULATION ###############

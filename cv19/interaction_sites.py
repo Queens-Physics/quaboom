@@ -440,11 +440,11 @@ class Interaction_Sites:
             P2_INFECT_PROB_DOSE_1 = self.pop.get_person(person_2).vaccine_type_efficiency()
 
             if p1Infected:
-                if p2Vaccinated1: 
+                if p2Vaccinated1:
                     spread_prob = spread_prob*P2_INFECT_PROB_DOSE_1
 
             else:
-                if p1Vaccinated1: 
+                if p1Vaccinated1:
                     spread_prob = spread_prob*P1_INFECT_PROB_DOSE_1
 
             return random.random() < spread_prob

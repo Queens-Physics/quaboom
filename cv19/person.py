@@ -715,7 +715,7 @@ class Person(object):
         -------
         self.vaccinated: :obj:`bool`
         '''
-        vaccine_options = np.random.uniform()
+        #vaccine_options = np.random.uniform()
 
         if self.vaccinated:
             return True  #True = vaccinated
