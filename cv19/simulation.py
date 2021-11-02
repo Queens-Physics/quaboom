@@ -107,7 +107,6 @@ class simulation():
         self.track_masks = np.zeros(self.nDays, dtype=bool)
         self.track_lockdown = np.zeros(self.nDays, dtype=bool)
         self.track_testing = np.zeros(self.nDays, dtype=bool)
-        
         self.track_vaccinated = np.zeros(self.nDays, dtype=int)
 
         self.track_time = np.zeros(self.nDays, dtype=float) # time elapsed (in seconds) since start of simulation
@@ -310,7 +309,6 @@ class simulation():
             self.track_inf_students[day] = self.pop.count_infected_students()
             
             self.track_vaccinated[day] = self.pop.count_vaccinated()
-
             self.new_tests = 0
 
             if day != 0:
@@ -355,8 +353,7 @@ class simulation():
                 visitor = Person(index=i+self.nPop, sim_obj=self, infected=True, recovered=False, dead=False, hospitalized=False, ICU=False,
                                  quarantined=False, quarantined_day=None, infected_day=None, recovered_day=None,
                                  death_day=None, others_infected=None, cure_days=None, recent_infections=None, vaccinated=False, 
-                                 age=vis_age[i], job=None,house_index=None, isolation_tendencies=0.2, case_severity='Mild',
-                                 has_mask=True)
+                                 age=vis_age[i], job=None,house_index=None, isolation_tendencies=0.2, case_severity='Mild', has_mask=True)
                 self.pop.population.append(visitor)
 
             ############### INTERACTION SITES STUFF ###############
@@ -397,7 +394,6 @@ class simulation():
             
             # Manage Vaccines
             self.pop.update_vaccinated(day)
-
             ############### UPDATE POPULATION ###############
             # remove the guest visitors
             self.pop.remove_visitors(visitors_ind)
@@ -501,12 +497,10 @@ class simulation():
 
     def plot(self, plot_infected=True, plot_susceptible=True, plot_dead=True, plot_recovered=True, plot_new_infected=True,
              plot_tested=True, plot_quarantined=True, plot_new_tests=True, plot_new_quarantined=True, plot_masks=True,
-             plot_hospitalized=True, plot_ICU=True, plot_lockdown=True, plot_testing=True, plot_students=True, 
-             plot_vaccinated=True, log=False):
+             plot_hospitalized=True, plot_ICU=True, plot_lockdown=True, plot_testing=True, plot_students=True, plot_vaccinated=True, log=False):
         ''' Method used to plot simulation results.
 
         Will return a warning or error if the simulation has not been run yet.
-
         Parameters
         ----------
         plot_* : bool

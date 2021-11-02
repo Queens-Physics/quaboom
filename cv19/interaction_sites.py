@@ -425,19 +425,20 @@ class Interaction_Sites:
                     spread_prob = self.base_infection_spread_prob*P2_OUTWARD_PROB
                 else:
                     spread_prob = self.base_infection_spread_prob
-                 
+
             p1Vaccinated1 = self.pop.get_person(person_1).is_vaccinated()
             p2Vaccinated1 = self.pop.get_person(person_2).is_vaccinated()
             p1Infected = self.pop.get_person(person_1).is_infected()
-            p2Infected = self.pop.get_person(person_2).is_infected()
             P1_INFECT_PROB_DOSE_1 = self.pop.get_person(person_1).vaccine_type_efficiency()
             P2_INFECT_PROB_DOSE_1 = self.pop.get_person(person_2).vaccine_type_efficiency()
 
             if p1Infected:
-                if p2Vaccinated1: spread_prob = spread_prob*P2_INFECT_PROB_DOSE_1
+                if p2Vaccinated1: 
+                    spread_prob = spread_prob*P2_INFECT_PROB_DOSE_1
 
             else:
-                if p1Vaccinated1: spread_prob = spread_prob*P1_INFECT_PROB_DOSE_1
+                if p1Vaccinated1: 
+                    spread_prob = spread_prob*P1_INFECT_PROB_DOSE_1
 
             return random.random() < spread_prob
 

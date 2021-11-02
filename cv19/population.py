@@ -88,7 +88,6 @@ class Population:
         mask_type_arr = np.random.choice(a=self.mask_options, p=self.mask_weights, size=self.nPop)
         has_mask_arr = np.random.uniform(size=self.nPop) < self.prob_has_mask
         vaccine_type_arr = np.random.choice(a=self.vaccine_options, p=self.vaccine_weights, size=self.nPop)
-        
 
         # Initialize the house index and size for the loop
         houseIndex = 0
@@ -105,7 +104,7 @@ class Population:
                                dead=False, hospitalized=False, ICU=False,
                                quarantined=False, quarantined_day=None,
                                infected_day=None, recovered_day=None, death_day=None,
-                               others_infected=None, cure_days=None, recent_infections=None, 
+                               others_infected=None, cure_days=None, recent_infections=None,
                                vaccinated=False, vaccine_type=vaccine_type_arr[i],
                                age=age_arr[i], job=job_arr[i], house_index=houseIndex,
                                isolation_tendencies=isolation_tend_arr[i],
@@ -202,11 +201,11 @@ class Population:
             self.population[i].infect(day=0)
             self.infected[i] = i
             self.susceptible[i] = NULL_ID
-            
+ 
         # Vaccinate first v0 people
         #for i in range(self.v0):
             #self.vaccinated[i] = i
-            
+
     def load_attributes_from_sim_obj(self, sim_obj):
         '''Method to load in attributes from the provided simulation class object.
 
@@ -230,7 +229,7 @@ class Population:
         # format mask weights correctly
         self.mask_weights = np.array([self.mask_type[key] for key in constants.MASK_OPTIONS])
         self.mask_options = constants.MASK_OPTIONS
-        
+
         # format vaccine weights #
         self.vaccine_weights = np.array([self.vaccine_type[key] for key in constants.VACCINE_OPTIONS])
         self.vaccine_options = constants.VACCINE_OPTIONS
@@ -733,32 +732,50 @@ class Population:
                 self.new_quarantined_num += 1
             else:
                 person.knows_infected = False
-                
+        
     def get_vaccinated(self):
+        '''Method to retrieve indicies of people vaccinated.
+
+        Returns
+        -------
+        self.vaccinated[self.vaccinated != NULL_ID]: :obj:`np.array` of :obj:`int`
+        '''
         return self.vaccinated[self.vaccinated != NULL_ID]
-        
+
     def count_vaccinated(self):
+        '''Method to count the number of people vaccinated.
+
+        Returns
+        -------
+        np.count_nonzero(self.vaccinated != NULL_ID): :obj:`np.array` of :obj:`int`
+        '''
         return np.count_nonzero(self.vaccinated != NULL_ID)
-    
-    def update_vaccinated(self, day):
-        
+
+    def update_vaccinated(self, day): #needs docstring
+        '''Method to add people to the list of vaccinated people
+
+        Parameters
+        ----------
+        day : int
+            The day the testing is being done on.
+        '''
         non_vaccinated = []
         for index in range(self.nPop):
-            if self.population[index].is_vaccinated()==False:
+            if not self.population[index].is_vaccinated():
                 non_vaccinated.append(index) #non-vaccinated list = people who are waiting to get vaccine
-                
+
         non_vaccinated = np.array(non_vaccinated)
         if len(non_vaccinated)>=self.num_vaccinations:
             self.to_vaccinate = non_vaccinated[np.random.choice(range(len(non_vaccinated)),
                                                                 self.num_vaccinations, replace=False).astype(int)]
         else:
             self.to_vaccinate = non_vaccinated[np.random.choice(range(len(non_vaccinated)),
-                                                                len(non_vaccinated), replace=False).astype(int)]
+                                                   len(non_vaccinated), replace=False).astype(int)]
         for index in self.to_vaccinate:
             person_to_vaccinate = self.population[index]
-            
+
             person_to_vaccinate.set_vaccinated(day)
             self.vaccinated[index] = index
-            
+
             if len(self.to_vaccinate)<self.max_vaccinations:
                 break

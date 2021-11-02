@@ -626,25 +626,48 @@ class Person(object):
         elif self.days_in_lockdown != 0:
             self.days_in_lockdown -= 1
         return self.days_in_lockdown
-        
+
     def is_vaccinated(self):
+        '''Method to retrieve if a person is vaccinated. Returns True if vaccinated, False if not.
+
+        Returns
+        -------
+        self.vaccinated: :obj:`bool`
+        '''
         vaccine_options = np.random.uniform()
 
         if self.vaccinated:
             return True  #True = vaccinated
         else:
             return False
-        
+
     def set_vaccinated(self, day):
+        '''Method to set a person to be vaccinated.
+
+        Parameters
+        ----------
+        day: int
+            The day in the simulation when a person is vaccinated.
+
+        Returns
+        -------
+        self.vaccinated: :obj:`bool`
+        '''
         self.vaccinated_day = day
         self.vaccinated = True
-        
+
     def vaccine_type_efficiency(self):
-        if self.vaccinated == True and self.vaccine_type == "Pfizer":
+        '''Method to determines what the efficiency of the vaccine based on the type of vaccine administered.
+
+        Returns
+        -------
+        self.sim_obj.Pfizer_eff, self.sim_obj.Moderna_eff, self.sim_obj.AZ_eff : :obj:`float`.
+        '''
+        if self.vaccinated and self.vaccine_type == "Pfizer":
             return self.sim_obj.Pfizer_eff
-        elif self.vaccinated == True and self.vaccine_type == "Moderna":
+        elif self.vaccinated and self.vaccine_type == "Moderna":
             return self.sim_obj.Moderna_eff
-        elif self.vaccinated == True and self.vaccine_type == "AZ":
+        elif self.vaccinated and self.vaccine_type == "AZ":
             return self.sim_obj.AZ_eff
         else:
             return 1
