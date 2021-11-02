@@ -196,8 +196,10 @@ class Population:
         self.quarantined_sum = 0  # total number of people in quarantine (created as the list was having indexing issues)
         self.new_quarantined_num = 0  # new people in quarantine
 
-        # Infect first n0 people
-        for i in range(self.n0):
+        # Selects the indices of the n0 initially infected people
+        # at random, then infects them
+        indices = random.sample(range(self.nPop), self.n0)
+        for i in indices:
             self.population[i].infect(day=0)
             self.infected[i] = i
             self.susceptible[i] = NULL_ID
@@ -717,6 +719,7 @@ class Population:
         self.test_sum += tests_per_day # Add the daily tests to the total number of tests
 
         self.new_quarantined_num = 0 # Reset number of newly quarantined
+        num_contacts_traced = 0
 
         for _ in range(tests_per_day):
             person_index = self.testing[0]  # Gets first person waiting for test
@@ -724,6 +727,10 @@ class Population:
             person = self.population[person_index]
             person.set_test_day(day)
             self.have_been_tested[person_index] = person_index
+            if self.ct_enabled and num_contacts_traced < self.ct_capacity:
+                person.contact_tracing(day=day)
+                num_contacts_traced += 1
+
             if person.infected:
                 person.knows_infected = True
                 # quarantines the person
@@ -779,3 +786,13 @@ class Population:
 
             if len(self.to_vaccinate)<self.max_vaccinations:
                 break
+
+    def change_mask_wearing(self):
+        '''Method to mandate wearing a mask.
+
+        Parameters
+        ----------
+        has_mask: bool
+        '''
+        for person in self.population:
+            person.has_mask = True

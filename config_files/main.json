@@ -43,7 +43,9 @@
         "mask_type": {"Surgical": 0.2, "Non-surgical": 0.8},
         "num_vaccinations":0,
         "max_vaccinations":0,
-        "vaccine_type": {"Pfizer":0.5, "Moderna":0.5, "AZ":0}
+        "vaccine_type": {"Pfizer":0.5, "Moderna":0.5, "AZ":0},
+        "ct_enabled": true,
+        "ct_capacity": 10000
     },
 
     "interaction_sites_data":{
@@ -76,6 +78,8 @@
         "min_ICU_days": 43,
         "max_die_days": 30,
         "min_die_days": 14,
+        "ct_length": 2,
+        "ct_prob_remember_personal_contacts": 0.8,
         "protocol_compliance": 1,
         "protocol_compliance_age_prob":{"0-9": 0, "10-19": 0.5, "20-29": 0.6, "30-39": 0.8, "40-49": 0.8, "50-59": 0.7, "60-69": 0.6, "70-79": 0.9, "80-89": 0.9, "90+": 0.9},
         "protocol_compliance_age_reduction":{"0-9": 1, "10-19": 0.7, "20-29": 0.3, "30-39": 0.7, "40-49": 0.5, "50-59": 0.5, "60-69": 0.4, "70-79": 0.7, "80-89": 0.9, "90+": 0.9},
