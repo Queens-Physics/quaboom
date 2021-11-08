@@ -225,7 +225,7 @@ def tabular_mode(base_config_file, independent, dependent, num_runs=8, num_cores
 
     return results
 
-def confidence_interval(config, num_runs=8, confidence=0.80, num_cores=-1, save_name=None, verbose=False):
+def confidence_interval(config, parameters_to_plot, num_runs=8, confidence=0.80, num_cores=-1, save_name=None, verbose=False):
     """Plots the results of multiple simulations with confidence bands
     to give a better understanding of the trend of a given scenario.
     Displays a plot of the results.
@@ -259,7 +259,7 @@ def confidence_interval(config, num_runs=8, confidence=0.80, num_cores=-1, save_
 
         # If the column is of dtype boolean, then this analysis does
         # not apply
-        if col in ["testing_enforced", "masks_enforced", "lockdown_enforced"]:
+        if col not in parameters_to_plot:
             continue
 
         # Analyze the results
@@ -432,6 +432,63 @@ def peak_quarantine(data):
     peak_quarantined = data['quarantined'].apply(max)
     return (peak_quarantined.mean(),
             peak_quarantined.std() / np.sqrt(len(peak_quarantined)))
+
+def peak_ICU(data):
+    """The number of people in ICU at the peak, averaged over the simulations
+    that were run.
+
+    Parameters
+    ----------
+    data : pandas.DataFrame
+        Output from running a simulation.
+
+    Returns
+    -------
+    tuple of float
+        Number of people in ICU at the peak, averaged over the simulations
+        that were run, and uncertainty.
+    """
+    peak_ICU = data['ICU'].apply(max)
+    return (peak_ICU.mean(),
+            peak_ICU.std() / np.sqrt(len(peak_ICU)))
+
+def peak_deaths(data):
+    """The number of deaths at the peak, averaged over the simulations
+    that were run.
+
+    Parameters
+    ----------
+    data : pandas.DataFrame
+        Output from running a simulation.
+
+    Returns
+    -------
+    tuple of float
+        Number of deaths at the peak, averaged over the simulations
+        that were run, and uncertainty.
+    """
+    peak_deaths = data['dead'].apply(max)
+    return (peak_deaths.mean(),
+            peak_deaths.std() / np.sqrt(len(peak_deaths)))
+
+def peak_hospitalization(data):
+    """The number of people in the hospital at the peak, averaged over the 
+    simulations that were run.
+
+    Parameters
+    ----------
+    data : pandas.DataFrame
+        Output from running a simulation.
+
+    Returns
+    -------
+    tuple of float
+        Number of people in the hospital at the peak, averaged over the simulations
+        that were run, and uncertainty.
+    """
+    peak_hospitalization = data['hospitalized'].apply(max)
+    return (peak_hospitalization.mean(),
+            peak_hospitalization.std() / np.sqrt(len(peak_hospitalization)))
 
 def time_elapsed(data):
     """Time elapsed for the simulation.
