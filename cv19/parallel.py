@@ -529,6 +529,6 @@ if __name__ == "__main__":
     plt.show()
 
     # Confidence interval mode
-    confidence_interval('config_files/main.json', confidence=0.9)
+    confidence_interval('config_files/main.json', parameters_to_plot, confidence=0.9)
 
     input()
