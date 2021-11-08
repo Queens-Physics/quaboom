@@ -225,7 +225,7 @@ def tabular_mode(base_config_file, independent, dependent, num_runs=8, num_cores
 
     return results
 
-def confidence_interval(config, parameters_to_plot=parameters_to_plot, num_runs=8, confidence=0.80, num_cores=-1, save_name=None, verbose=False):
+def confidence_interval(config, parameters_to_plot, num_runs=8, confidence=0.80, num_cores=-1, save_name=None, verbose=False):
     """Plots the results of multiple simulations with confidence bands
     to give a better understanding of the trend of a given scenario.
     Displays a plot of the results.
