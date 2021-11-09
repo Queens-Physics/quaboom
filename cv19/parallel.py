@@ -234,6 +234,8 @@ def confidence_interval(config, parameters_to_plot, num_runs=8, confidence=0.80,
     ----------
     config : str
         filename of the configuration file to use for this simulation
+    parameters_to_plot : list
+        list of parameters to include when plotting with the condifence interval
     num_runs : int, default=8
         number of times to run the simulation
     confidence : float
@@ -529,6 +531,9 @@ if __name__ == "__main__":
     plt.show()
 
     # Confidence interval mode
-    confidence_interval('config_files/main.json', parameters_to_plot, confidence=0.9)
+    parameters_to_plot= ["infected","new_infected","recovered","susceptible","dead","quarantined","inf_students","total_tested","new_tested","hospitalized","ICU","testing_enforced","masks_enforced","lockdown_enforced","time_elapsed"]
+
+    confidence_interval('config_files/main.json', 
+    parameters_to_plot=parameters_to_plot, confidence=0.9)
 
     input()
