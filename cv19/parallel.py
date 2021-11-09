@@ -225,7 +225,7 @@ def tabular_mode(base_config_file, independent, dependent, num_runs=8, num_cores
 
     return results
 
-def confidence_interval(config, parameters_to_plot, num_runs=8, confidence=0.80, num_cores=-1, save_name=None, verbose=False):
+def confidence_interval(config, parameterstoplot, num_runs=8, confidence=0.80, num_cores=-1, save_name=None, verbose=False):
     """Plots the results of multiple simulations with confidence bands
     to give a better understanding of the trend of a given scenario.
     Displays a plot of the results.
@@ -261,7 +261,7 @@ def confidence_interval(config, parameters_to_plot, num_runs=8, confidence=0.80,
 
         # If the column is of dtype boolean, then this analysis does
         # not apply
-        if col not in parameters_to_plot:
+        if col not in parameterstoplot:
             continue
 
         # Analyze the results
@@ -531,9 +531,8 @@ if __name__ == "__main__":
     plt.show()
 
     # Confidence interval mode
-    parameters_to_plot= ["infected","new_infected","recovered","susceptible","dead","quarantined","inf_students","total_tested","new_tested","hospitalized","ICU","testing_enforced","masks_enforced","lockdown_enforced","time_elapsed"]
+    parameters_to_plot=["infected","new_infected","recovered","susceptible","dead","quarantined","inf_students","total_tested","new_tested","hospitalized","ICU","testing_enforced","masks_enforced","lockdown_enforced","time_elapsed"]
 
-    confidence_interval('config_files/main.json', 
-    parameters_to_plot=parameters_to_plot, confidence=0.9)
+    confidence_interval('config_files/main.json', parameterstoplot=parameters_to_plot, confidence=0.9)
 
     input()
