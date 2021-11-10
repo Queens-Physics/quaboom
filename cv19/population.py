@@ -173,6 +173,8 @@ class Population:
             self.house_stud_i[housei][where] = i
 
         # Create person status arrays
+        # A non-negative index indicates that they are the property,
+        # NULL_ID (-1) indicates that they are /not/ the property.
         self.susceptible = np.array(range(self.nPop), dtype=int)  #list of all susceptible individuals
         self.infected = np.zeros(self.nPop, dtype=int) + NULL_ID  # list of all infected people
         self.recovered = np.zeros(self.nPop, dtype=int) + NULL_ID  # list of recovered people
@@ -399,13 +401,9 @@ class Population:
 
         Returns
         -------
-        infStudents: :obj:`int`
+        np.count_nonzero(np.logical_and(self.student_indices != NULL_ID, self.infected != NULL_ID)): :obj:`int`
         '''
-        infStudents = 0
-        for i in range(self.nPop):
-            if (self.student_indices[i] != NULL_ID and self.infected[i] != NULL_ID):
-                infStudents += 1
-        return infStudents
+        return np.count_nonzero(np.logical_and(self.student_indices != NULL_ID, self.infected != NULL_ID))
 
     def count_recovered(self):
         '''Method to count the number of people recovered.
@@ -528,7 +526,7 @@ class Population:
         : :obj:`bool`
             True if the value at the index in the infected list was changed, False if it was not changed.
         '''
-        if self.infected[index] == index or self.susceptible[index] == -1 or not self.population[index].is_infected():
+        if self.infected[index] == index or self.susceptible[index] == NULL_ID or not self.population[index].is_infected():
             # Already infected, or cant be infected
             return False
         self.infected[index] = index
