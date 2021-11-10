@@ -99,6 +99,7 @@ class Person(object):
         self.test_day = None
         self.has_cold = False
         self.days_in_lockdown = 0
+
         # Set the simulaiton object to access the variables
         self.sim_obj = sim_obj
         self.protocol_compliance = self.sim_obj.protocol_compliance
@@ -254,7 +255,7 @@ class Person(object):
         '''
         return self.test_day
 
-    def check_test_day (self, day):
+    def check_test_day(self, day):
         '''Method to check if the person has been tested in the quarantine time range.
         If the day is greater than the test day is removed.
         If the person had a cold it is also removed.
@@ -277,7 +278,7 @@ class Person(object):
             return True
         return False
 
-    def check_symptoms (self, day):
+    def check_symptoms(self, day):
         '''Method to check a persons symtoms based on if they are infected with COVID19 or a cold.
 
         Parameters
@@ -392,12 +393,13 @@ class Person(object):
                                                    d_params["die_days"]["max"]) if cure_days is None else cure_days
                 self.hospitalized = True
                 self.ICU = True
+            else:
+                raise ValueError("'{}' is not a valid case severity.".format(self.case_severity))
 
             return True
+
         return False
 
-    # check if someone is quarantined, and if they can come out
-    # (if they've quarantined for 14 days)
     def check_quarantine(self, day):
         '''Method to check if a person should be quarantined.
         If they're quarantined and their quarantine time has ended, let them out of quarantine.
@@ -575,7 +577,6 @@ class Person(object):
         add_contact(self.all_contacts)
         if personal:
             add_contact(self.personal_contacts)
-
 
     def contact_tracing(self, day: int) -> None:
         """Contacts everyone that they have had contact with.
