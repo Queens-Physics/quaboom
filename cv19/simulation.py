@@ -458,7 +458,7 @@ class simulation():
             print(np.max(self.track_hospitalized), "at peak hospitalizations")
             print(np.max(self.track_dead[-1]), "at peak deaths")
             print(self.track_vaccinated[day], "people were vaccinated")
-            print(self.track_vaccinated[day]/self.nPop*100, "% of population was vaccinated")
+            print("{:.2f}% of population was vaccinated.".format(self.track_vaccinated[day]/self.nPop*100))
 
         self.has_run = True
 

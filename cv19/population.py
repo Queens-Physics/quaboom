@@ -34,8 +34,7 @@ class Population:
 
         self.nPop = sim_obj.nPop  # total population
         self.n0 = sim_obj.n0  # initial infected
-        #self.v0 = sim_obj.v0 # initial vaccinated
-        #self.vPop = sim_obj.vPop
+        self.v0 = sim_obj.v0 # initial vaccinated
 
         # Student parameter
         self.nStudents = sim_obj.num_students # full capacity ~ 24k students
@@ -46,8 +45,6 @@ class Population:
         self.stud_houses = [0] * self.nStudents # list of student houses
         self.prob_of_test = self.prob_of_test
         self.prob_has_mask = self.prob_has_mask
-        self.max_vaccinations = self.max_vaccinations
-        self.num_vaccinations = self.num_vaccinations
         self.n_students_in_res = 0
 
         houseIndex = 0
@@ -205,8 +202,10 @@ class Population:
             self.susceptible[i] = NULL_ID
 
         # Vaccinate first v0 people
-        #for i in range(self.v0):
-            #self.vaccinated[i] = i
+        v_indices = random.sample(range(self.nPop), self.v0)
+        for i in v_indices:
+            self.population[i].set_vaccinated(day=0)
+            self.vaccinated[i] = i
 
     def load_attributes_from_sim_obj(self, sim_obj):
         '''Method to load in attributes from the provided simulation class object.
@@ -219,6 +218,10 @@ class Population:
         sim_obj : :obj:`simulation class`
             The encompassing simulation object hosting the simulation.
         '''
+
+        # making sim_obj accessible
+        self.sim_obj = sim_obj
+
         attributes = sim_obj.parameters["population_data"].keys()
         for attr in attributes:
             setattr(self, attr, sim_obj.parameters["population_data"][attr])
@@ -232,8 +235,8 @@ class Population:
         self.mask_weights = np.array([self.mask_type[key] for key in constants.MASK_OPTIONS])
         self.mask_options = constants.MASK_OPTIONS
 
-        # format vaccine weights #
-        self.vaccine_weights = np.array([self.vaccine_type[key] for key in constants.VACCINE_OPTIONS])
+        # format vaccine weights
+        self.vaccine_weights = np.array([self.sim_obj.vaccine_type[key] for key in constants.VACCINE_OPTIONS])
         self.vaccine_options = constants.VACCINE_OPTIONS
 
     def set_demographic_parameters(self):
@@ -758,7 +761,7 @@ class Population:
         '''
         return np.count_nonzero(self.vaccinated != NULL_ID)
 
-    def update_vaccinated(self, day): #needs docstring
+    def update_vaccinated(self, day):
         '''Method to add people to the list of vaccinated people
 
         Parameters
@@ -766,26 +769,19 @@ class Population:
         day : int
             The day the testing is being done on.
         '''
-        non_vaccinated = []
-        for index in range(self.nPop):
-            if not self.population[index].is_vaccinated():
-                non_vaccinated.append(index) #non-vaccinated list = people who are waiting to get vaccine
+        non_vaccinated = np.array([index for index in range(self.nPop)
+                           if not self.population[index].is_vaccinated()])
+        
+        num_vacc = self.sim_obj.num_vaccinations
+        num_to_vaccinate = num_vacc if len(non_vaccinated) >= num_vacc else len(non_vaccinated)
+        will_vaccinate = np.random.choice(range(len(non_vaccinated)), num_to_vaccinate, replace=False)
+        self.to_vaccinate = non_vaccinated[will_vaccinate.astype(int)]
 
-        non_vaccinated = np.array(non_vaccinated)
-        if len(non_vaccinated)>=self.num_vaccinations:
-            self.to_vaccinate = non_vaccinated[np.random.choice(range(len(non_vaccinated)),
-                                                                self.num_vaccinations, replace=False).astype(int)]
-        else:
-            self.to_vaccinate = non_vaccinated[np.random.choice(range(len(non_vaccinated)),
-                                                   len(non_vaccinated), replace=False).astype(int)]
         for index in self.to_vaccinate:
             person_to_vaccinate = self.population[index]
 
             person_to_vaccinate.set_vaccinated(day)
             self.vaccinated[index] = index
-
-            if len(self.to_vaccinate)<self.max_vaccinations:
-                break
 
     def change_mask_wearing(self):
         '''Method to mandate wearing a mask.

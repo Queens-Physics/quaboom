@@ -715,7 +715,6 @@ class Person(object):
         -------
         self.vaccinated: :obj:`bool`
         '''
-        #vaccine_options = np.random.uniform()
 
         if self.vaccinated:
             return True  #True = vaccinated
@@ -744,11 +743,9 @@ class Person(object):
         -------
         self.sim_obj.Pfizer_eff, self.sim_obj.Moderna_eff, self.sim_obj.AZ_eff : :obj:`float`.
         '''
-        if self.vaccinated and self.vaccine_type == "Pfizer":
-            return self.sim_obj.Pfizer_eff
-        elif self.vaccinated and self.vaccine_type == "Moderna":
-            return self.sim_obj.Moderna_eff
-        elif self.vaccinated and self.vaccine_type == "AZ":
-            return self.sim_obj.AZ_eff
+        if self.vaccinated and self.vaccine_type in self.sim_obj.vaccine_eff.keys():
+            return self.sim_obj.vaccine_eff[self.vaccine_type]
+        elif self.vaccine_type not in self.sim_obj.vaccine_eff.keys():
+            raise ValueError(f"Vaccine Type {self.vaccine_type} does not have associated efficiency.")
         else:
             return 1
