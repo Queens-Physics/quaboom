@@ -771,7 +771,7 @@ class Population:
         '''
         non_vaccinated = np.array([index for index in range(self.nPop)
                            if not self.population[index].is_vaccinated()])
-        
+
         num_vacc = self.sim_obj.num_vaccinations
         num_to_vaccinate = num_vacc if len(non_vaccinated) >= num_vacc else len(non_vaccinated)
         will_vaccinate = np.random.choice(range(len(non_vaccinated)), num_to_vaccinate, replace=False)
