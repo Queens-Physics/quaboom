@@ -1,7 +1,7 @@
 '''
 This file holds the interaction sites class used in simulation.py.
 '''
-import random
+from random import random
 from copy import deepcopy
 from itertools import combinations
 
@@ -431,7 +431,7 @@ class Interaction_Sites:
                 else:
                     spread_prob = self.base_infection_spread_prob
 
-        return random.random() < spread_prob
+        return random() < spread_prob
 
     def house_interact(self, day):
         '''Method to manage interactions between members of the same household.
@@ -465,7 +465,7 @@ class Interaction_Sites:
                 for person in healthy_housemembers:
                     # This should be more complicated and depend on len(infectpplinhouse)
                     infection_chance = self.house_infection_spread_prob
-                    caught_infection = random.random()<infection_chance
+                    caught_infection = random() < infection_chance
                     if caught_infection:
                         self.pop.infect(index=housemembers[person].get_index(), day=day)
 
@@ -496,7 +496,7 @@ class Interaction_Sites:
                 for person in healthy_housemembers:
                     # This should be more complicated and depend on len(infectpplinhouse)
                     infection_chance = self.house_infection_spread_prob
-                    caught_infection = random.random()<infection_chance
+                    caught_infection = random() < infection_chance
                     if caught_infection:
                         self.pop.infect(index=housemembers[person].get_index(), day=day)
 

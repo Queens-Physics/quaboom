@@ -1,6 +1,6 @@
-import random
-import numpy as np
+from random import random
 
+import numpy as np
 
 class Person(object):
     '''A class designed to create individuals to create a population.
@@ -109,7 +109,7 @@ class Person(object):
         self.personal_contacts = {}
 
         # Whether this person uses a contact tracing app
-        self.has_ct_app = random.random() < 1 #TODO add the "CT_APP_PROB" variable here
+        self.has_ct_app = random() < 1 #TODO add the "CT_APP_PROB" variable here
 
     def __str__(self):
         """Useful for debugging purposes. """
@@ -230,7 +230,7 @@ class Person(object):
         -------
         self.show_symptoms: :obj:`bool`
         '''
-        prob_of_symptom = random.random()
+        prob_of_symptom = random()
         if prob_of_symptom <= self.sim_obj.cold_prob:
             self.show_symptoms = True
             self.has_cold = True
@@ -370,7 +370,7 @@ class Person(object):
 
             # If cure days not specified then choose random number inbetween min and max
             if self.case_severity == 'Mild' or self.case_severity is None:  # If severity not specified, choose Mild
-                prob_of_symptom = random.random()
+                prob_of_symptom = random()
                 if prob_of_symptom > d_params["mild_symptom_prob"]:  # probability that the person has mild symtoms
                     # choose number of days after infection when symptoms show
                     self.will_get_symptoms = False
@@ -604,7 +604,7 @@ class Person(object):
 
         # Notify all personal contacts
         for contact in personal_contacts:
-            if random.random() < self.sim_obj.ct_prob_remember_personal_contacts:
+            if random() < self.sim_obj.ct_prob_remember_personal_contacts:
                 contact.positive_contact(day)
                 remembered_contacts.add(contact)
 
@@ -641,13 +641,13 @@ class Person(object):
 
         if house_size > len(self.sim_obj.protocol_compliance_house_prob): #Sets the house size to the largest house size probability if the house size is larger than that number
             house_size = len(self.sim_obj.protocol_compliance_house_prob)
-        if random.random() < self.sim_obj.protocol_compliance_house_prob[house_size - 1]:
+        if random() < self.sim_obj.protocol_compliance_house_prob[house_size - 1]:
             self.protocol_compliance *= self.sim_obj.protocol_compliance_house_reduction[house_size - 1] # changes the persons protocol compliance based on house size
 
-        if random.random() < self.sim_obj.protocol_compliance_age_prob[self.age]:
+        if random() < self.sim_obj.protocol_compliance_age_prob[self.age]:
             self.protocol_compliance *= self.sim_obj.protocol_compliance_age_reduction[self.age]
 
-        if random.random() < self.sim_obj.protocol_compliance_case_severity_prob[self.case_severity]:
+        if random() < self.sim_obj.protocol_compliance_case_severity_prob[self.case_severity]:
             self.protocol_compliance *= self.sim_obj.protocol_compliance_case_severity_reduction[self.case_severity] #changes protocol compliance based on how severity of a potential case
         return self.protocol_compliance
 
@@ -668,15 +668,15 @@ class Person(object):
         if self.protocol_compliance is None: #If no protocol compliance it is defined
             self.protocol_compliance =  self.sim_obj.protocol_compliance
 
-        if self.days_in_lockdown > self.sim_obj.protocol_compliance_lockdown_length_threshold and random.random() < self.sim_obj.protocol_compliance_lockdown_prob: #as the lockdown length increases decrease the protocol compliance
+        if self.days_in_lockdown > self.sim_obj.protocol_compliance_lockdown_length_threshold and random() < self.sim_obj.protocol_compliance_lockdown_prob: #as the lockdown length increases decrease the protocol compliance
             self.protocol_compliance *= self.sim_obj.protocol_compliance_lockdown_length_reduction
 
         if lockdown_level != old_lockdown_mandate:
             # when the lockdown starts increase the protocol compliance of a person
-            if lockdown_level and random.random() < self.sim_obj.protocol_compliance_lockdown_prob:
+            if lockdown_level and random() < self.sim_obj.protocol_compliance_lockdown_prob:
                 self.protocol_compliance *= self.sim_obj.protocol_compliance_lockdown_reduction
-            # when the lockdown ends decerase the protocol compliance of a person
-            elif lockdown_level is False and random.random() < self.sim_obj.protocol_compliance_lockdown_prob:
+            # when the lockdown ends decrease the protocol compliance of a person
+            elif lockdown_level is False and random() < self.sim_obj.protocol_compliance_lockdown_prob:
                 self.protocol_compliance /= self.sim_obj.protocol_compliance_lockdown_reduction
         return self.protocol_compliance
 

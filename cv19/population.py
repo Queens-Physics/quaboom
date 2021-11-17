@@ -1,6 +1,8 @@
 import json
-import random
+from random import random, sample
+
 import numpy as np
+
 from .data import constants
 from .person import Person
 
@@ -192,7 +194,7 @@ class Population:
 
         # Selects the indices of the n0 initially infected people
         # at random, then infects them
-        indices = random.sample(range(self.nPop), self.n0)
+        indices = sample(range(self.nPop), self.n0)
         for i in indices:
             self.population[i].infect(day=0)
             self.infected[i] = i
@@ -668,7 +670,7 @@ class Population:
 
                 if i not in self.testing and self.have_been_tested[i] != 1: # if person is not already in testing function
                     infected_person = self.population[i] #gets the infected person from the population list
-                    if random.random()/self.population[i].get_protocol_compliance() < self.prob_of_test:
+                    if (random() / self.population[i].get_protocol_compliance()) < self.prob_of_test:
                         if infected_person.show_symptoms and not infected_person.knows_infected:
                             self.testing.append(i) #adds the person to the testing list
                             self.population[i].knows_infected = True
