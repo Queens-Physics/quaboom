@@ -102,9 +102,12 @@ class Population:
                                quarantined=False, quarantined_day=None,
                                infected_day=None, recovered_day=None, death_day=None,
                                others_infected=None, cure_days=None, recent_infections=None,
-                               age=age_arr[i], job=job_arr[i], house_index=houseIndex,
+                               age=age_arr[i],
+                               job=job_arr[i],
+                               house_index=houseIndex,
                                isolation_tendencies=isolation_tend_arr[i],
-                               case_severity=case_severity_arr[i], mask_type=mask_type_arr[i],
+                               case_severity=case_severity_arr[i],
+                               mask_type=mask_type_arr[i],
                                has_mask=has_mask_arr[i])
 
             # ADD A PERSON
@@ -141,10 +144,14 @@ class Population:
                                 dead=False, hospitalized=False,ICU=False,quarantined=False,quarantined_day=None,
                                 infected_day=None, recovered_day=None, death_day=None,
                                 others_infected=None, cure_days=None, recent_infections=None,
-                                age=student_age[i], job='Student', house_index=studHouseIndex,
+                                age=student_age[i],
+                                job='Student',
+                                house_index=studHouseIndex,
                                 isolation_tendencies=isolation_tend_arr[i],
                                 case_severity=case_severity_arr[i],
+                                mask_type=mask_type_arr[i],
                                 has_mask=has_mask_arr[i])
+
             self.population[i] = newStudent
 
             self.student_indices[i] = i  # set their student status
