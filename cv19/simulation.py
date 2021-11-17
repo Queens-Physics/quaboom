@@ -420,43 +420,34 @@ class simulation():
             self.track_time[day] = timer() - beg_time
 
             if self.verbose:
-                print(("Day: {}, "
-                       "infected: {}, "
-                       "recovered: {}, "
-                       "susceptible: {}, "
-                       "dead: {}, "
-                       "hospitalized: {}, "
-                       "ICU: {}, "
-                       "tested: {}, "
-                       "total quarantined: {}, "
-                       "infected students: {}, "
-                       "vaccinated: {}"                ).format(day,
-                                                       self.track_infected[day],
-                                                       self.track_recovered[day],
-                                                       self.track_susceptible[day],
-                                                       self.track_dead[day],
-                                                       self.track_hospitalized[day],
-                                                       self.track_ICU[day],
-                                                       self.track_tested[day],
-                                                       self.track_quarantined[day],
-                                                       self.track_inf_students[day],
-                                                       self.track_vaccinated[day]))
+                print((f"Day: {day}, "
+                       f"infected: {self.track_infected[day]}, "
+                       f"recovered: {self.track_recovered[day]}, "
+                       f"susceptible: {self.track_susceptible[day]}, "
+                       f"dead: {self.track_dead[day]}, "
+                       f"hospitalized: {self.track_hospitalized[day]}, "
+                       f"ICU: {self.track_ICU[day]}, "
+                       f"tested: {self.track_tested[day]}, "
+                       f"total quarantined: {self.track_quarantined[day]}, "
+                       f"infected students: {self.track_inf_students[day]}, "
+                       f"vaccinated: {self.track_vaccinated[day]}"))
 
         if self.verbose:
             time_seconds = timer() - beg_time
             m, s = divmod(time_seconds, 60)
             h, m = divmod(m, 60)
             print(f"{'':-<80}")
-            print(f"Time elapsed: {h:02.0f}:{m:02.0f}:{s:02.0f}")
-            print("At the end,", self.track_susceptible[-1], "never got it")
-            print(self.track_dead[-1], "died")
-            print(np.max(self.track_infected), "had it at the peak")
-            print(self.track_tested[day], "have been tested")
-            print(np.max(self.track_quarantined), "were in quarantine at the peak")
-            print(np.max(self.track_hospitalized), "at peak hospitalizations")
-            print(np.max(self.track_dead[-1]), "at peak deaths")
-            print(self.track_vaccinated[day], "people were vaccinated")
-            print("{:.2f}% of population was vaccinated.".format(self.track_vaccinated[day]/self.nPop*100))
+            print("Simulation summary:")
+            print(f"    Time elapsed: {h:02.0f}:{m:02.0f}:{s:02.0f}")
+            print(f"    {self.track_susceptible[-1]} never got it")
+            print(f"    {self.track_dead[-1]} died")
+            print(f"    {np.max(self.track_infected)} had it at the peak")
+            print(f"    {self.track_tested[day]} were tested")
+            print(f"    {np.max(self.track_quarantined)} were in quarantine at the peak")
+            print(f"    {np.max(self.track_hospitalized)} at peak hospitalizations")
+            print(f"    {np.max(self.track_dead[-1])} at peak deaths")
+            print(f"    {self.track_vaccinated[day]} people were vaccinated")
+            print(f"    {self.track_vaccinated[day]/self.nPop*100:.2f}% of population was vaccinated.")
 
         self.has_run = True
 
