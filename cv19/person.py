@@ -394,7 +394,7 @@ class Person(object):
                 self.hospitalized = True
                 self.ICU = True
             else:
-                raise ValueError("'{}' is not a valid case severity.".format(self.case_severity))
+                raise ValueError(f"'{self.case_severity}' is not a valid case severity.")
 
             return True
 
@@ -548,12 +548,15 @@ class Person(object):
         -------
         self.sim_obj.surgical_inward_eff, self.sim_obj.surgical_outward_eff : :obj:`float`.
         '''
-        if self.has_mask and self.mask_type == "Surgical":
-            return self.sim_obj.surgical_inward_eff, self.sim_obj.surgical_outward_eff
-        elif self.has_mask and self.mask_type == "Non-surgical":
-            return self.sim_obj.nonsurgical_inward_eff, self.sim_obj.nonsurgical_outward_eff
+        if self.has_mask:
+            if self.mask_type == "Surgical":
+                return self.sim_obj.surgical_inward_eff, self.sim_obj.surgical_outward_eff
+            elif self.mask_type == "Non-surgical":
+                return self.sim_obj.nonsurgical_inward_eff, self.sim_obj.nonsurgical_outward_eff
+            else:
+                raise ValueError(f"'{self.mask_type}' is not a valid mask type.")
         else:
-            return 1, 1  #Not wearing a mask so this will function will not effect their change of getting the virus
+            return 1, 1  # Not wearing a mask, so no change in chance of infection
 
     def log_contact(self, other, day: int, personal: bool = False) -> None:
         """Logs a contact between two individuals.
@@ -676,8 +679,9 @@ class Person(object):
             if lockdown_level and random() < self.sim_obj.protocol_compliance_lockdown_prob:
                 self.protocol_compliance *= self.sim_obj.protocol_compliance_lockdown_reduction
             # when the lockdown ends decrease the protocol compliance of a person
-            elif lockdown_level is False and random() < self.sim_obj.protocol_compliance_lockdown_prob:
+            elif not lockdown_level and random() < self.sim_obj.protocol_compliance_lockdown_prob:
                 self.protocol_compliance /= self.sim_obj.protocol_compliance_lockdown_reduction
+
         return self.protocol_compliance
 
     def get_protocol_compliance(self):
