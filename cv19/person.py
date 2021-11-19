@@ -118,8 +118,14 @@ class Person(object):
         self.has_ct_app = random.random() < 1 #TODO add the "CT_APP_PROB" variable here
 
     def __str__(self):
-        """Useful for debugging purposes. """
-        return f'Person #{self.index}'
+        '''Prints the person identifier.
+        Useful for debugging purposes.
+
+        Returns
+        -------
+        : :obj:`string`
+        '''
+        return f"Person #{self.index}"
 
     def is_infected(self):
         '''Method to retrieve if a person is infected. Returns True if infected, False if
