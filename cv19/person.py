@@ -554,11 +554,10 @@ class Person(object):
         self.sim_obj.surgical_inward_eff, self.sim_obj.surgical_outward_eff : :obj:`float`.
         '''
         if self.has_mask:
-            if self.mask_type == "Surgical":
-                return self.sim_obj.surgical_inward_eff, self.sim_obj.surgical_outward_eff
-            elif self.mask_type == "Non-surgical":
-                return self.sim_obj.nonsurgical_inward_eff, self.sim_obj.nonsurgical_outward_eff
-            else:
+            try:
+                return (self.sim_obj.mask_inward_eff[self.mask_type],
+                        self.sim_obj.mask_outward_eff[self.mask_type])
+            except KeyError:
                 raise ValueError(f"'{self.mask_type}' is not a valid mask type.")
         else:
             return 1, 1  # Not wearing a mask, so no change in chance of infection
