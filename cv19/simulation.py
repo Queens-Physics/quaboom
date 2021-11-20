@@ -365,19 +365,14 @@ class simulation():
                 self.inter_sites.site_interaction(will_visit_C, day, personal=False)
 
             if self.inter_sites.students_on and students_go:
-                will_visit_study = self.inter_sites.will_visit_site(self.inter_sites.get_study_sites(),
-                                                                    self.will_go_prob["STUDY"])
-                #NOTE: Should a study site be a personal interaction?
-                self.inter_sites.site_interaction(will_visit_study, day, personal=True)
-                will_visit_food = self.inter_sites.will_visit_site(self.inter_sites.get_food_sites(),
-                                                                   self.will_go_prob["FOOD"])
-
+                will_visit_food = self.inter_sites.will_visit_site(self.inter_sites.get_food_sites(), self.will_go_prob["FOOD"])
                 self.inter_sites.site_interaction(will_visit_food, day, personal=True)
                 if not lockdown:
-                    will_visit_lects = self.inter_sites.will_visit_site(self.inter_sites.get_lect_sites(),
-                                                                        self.will_go_prob["LECT"])
-
+                    will_visit_lects = self.inter_sites.will_visit_site(self.inter_sites.get_lect_sites(), self.will_go_prob["LECT"])
                     self.inter_sites.site_interaction(will_visit_lects, day, personal=True)
+
+                    will_visit_study = self.inter_sites.will_visit_site(self.inter_sites.get_study_sites(), self.will_go_prob["STUDY"])
+                    self.inter_sites.site_interaction(will_visit_study, day, personal=True)
 
             # Manage masks
             if mask_mandate:

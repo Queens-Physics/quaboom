@@ -78,6 +78,8 @@ class Interaction_Sites:
         self.house_indices = deepcopy(self.pop.house_ppl_i)
 
         # Students Stuff #
+        self.stud_house_sites = deepcopy(self.pop.stud_houses)
+        self.stud_house_indices = deepcopy(self.pop.house_stud_i)
         self.lect_sites = self.init_uni(self.grade_per_pop["LECT"],
                                         self.grade_loyalty_means["LECT"],
                                         self.grade_loyalty_stds["LECT"])
@@ -87,11 +89,9 @@ class Interaction_Sites:
         self.food_sites = self.init_uni(self.grade_per_pop["FOOD"],
                                         self.grade_loyalty_means["FOOD"],
                                         self.grade_loyalty_stds["FOOD"])
-        self.res_sites = self.init_uni(self.grade_per_pop["RES"],
+        self.res_sites = self.init_res(self.grade_per_pop["RES"],
                                        self.grade_loyalty_means["RES"],
                                        self.grade_loyalty_stds["RES"])
-        self.stud_house_sites = deepcopy(self.pop.stud_houses)
-        self.stud_house_indices = deepcopy(self.pop.house_stud_i)
 
     def load_attributes_from_sim_obj(self, sim_obj):
         '''Method to load in attributes from the provided simulation class object.
