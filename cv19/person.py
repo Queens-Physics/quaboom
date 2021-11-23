@@ -18,8 +18,9 @@ class Person(object):
 
     def __init__(self, index, sim_obj, infected=False, recovered=False, dead=False, hospitalized=False, ICU=False, quarantined=False,
                  quarantined_day=None, infected_day=None, recovered_day=None, death_day=None, others_infected=None,
-                 cure_days=None, recent_infections=None, age=None, job=None, house_index=0, isolation_tendencies=None,
-                 case_severity=None, mask_type=None, has_mask=True):
+                 cure_days=None, recent_infections=None, vaccinated=False, vaccine_type=None,
+                 age=None, job=None, house_index=0, isolation_tendencies=None, case_severity=None, mask_type=None,
+                 has_mask=True):
         '''Method to load in attributes from the provided simulation class object.
 
         Sets all objects in the "person_data" dictionary key as self attributes of the
@@ -43,6 +44,10 @@ class Person(object):
             Determines if person is quarentined or not, defaults False.
         quarantined_day : int
             The day a person is put into quarantine, defaults None.
+        vaccinated : bool
+            Determines if a person is vaccinated or not, defaults to True.
+        vaccine_type : string
+            Determines type of vaccine received by person, defaults to None.
         infected_day : int
             The day a person is infected, defaults None.
         recovered_day : int
@@ -84,6 +89,8 @@ class Person(object):
         self.others_infected = [] if others_infected is None else others_infected
         self.cure_days = cure_days
         self.recent_infections = recent_infections
+        self.vaccinated = vaccinated
+        self.vaccine_type = vaccine_type
         self.index = index
         self.age = age
         self.job = job
@@ -703,3 +710,43 @@ class Person(object):
         elif self.days_in_lockdown != 0:
             self.days_in_lockdown -= 1
         return self.days_in_lockdown
+
+    def is_vaccinated(self):
+        '''Method to retrieve if a person is vaccinated. Returns True if vaccinated, False if not.
+
+        Returns
+        -------
+        self.vaccinated: :obj:`bool`
+        '''
+
+        if self.vaccinated:
+            return self.vaccinated
+
+    def set_vaccinated(self, day):
+        '''Method to set a person to be vaccinated.
+
+        Parameters
+        ----------
+        day: int
+            The day in the simulation when a person is vaccinated.
+
+        Returns
+        -------
+        self.vaccinated: :obj:`bool`
+        '''
+        self.vaccinated_day = day
+        self.vaccinated = True
+
+    def vaccine_type_efficiency(self):
+        '''Method to determines what the efficiency of the vaccine based on the type of vaccine administered.
+
+        Returns
+        -------
+        self.sim_obj.Pfizer_eff, self.sim_obj.Moderna_eff, self.sim_obj.AZ_eff : :obj:`float`.
+        '''
+        if self.vaccinated and self.vaccine_type in self.sim_obj.vaccine_eff.keys():
+            return self.sim_obj.vaccine_eff[self.vaccine_type]
+        elif self.vaccine_type not in self.sim_obj.vaccine_eff.keys():
+            raise ValueError(f"Vaccine Type {self.vaccine_type} does not have associated efficiency.")
+        else:
+            return 1
