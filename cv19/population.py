@@ -215,7 +215,7 @@ class Population:
             self.susceptible[i] = NULL_ID
 
         # Vaccinate first v0 people
-        v_indices = random.sample(range(self.nPop), self.v0)
+        v_indices = sample(range(self.nPop), self.v0)
         for i in v_indices:
             self.population[i].set_vaccinated(day=0)
             self.vaccinated[i] = i
