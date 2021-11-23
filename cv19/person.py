@@ -718,9 +718,7 @@ class Person(object):
         -------
         self.vaccinated: :obj:`bool`
         '''
-
-        if self.vaccinated:
-            return self.vaccinated
+        return self.vaccinated
 
     def set_vaccinated(self, day):
         '''Method to set a person to be vaccinated.
