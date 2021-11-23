@@ -433,21 +433,15 @@ class Interaction_Sites:
                 else:
                     spread_prob = self.base_infection_spread_prob
 
-            p1Vaccinated1 = self.pop.get_person(person_1).is_vaccinated()
-            p2Vaccinated1 = self.pop.get_person(person_2).is_vaccinated()
-            p1Infected = self.pop.get_person(person_1).is_infected()
-            P1_INFECT_PROB_DOSE_1 = self.pop.get_person(person_1).vaccine_type_efficiency()
-            P2_INFECT_PROB_DOSE_1 = self.pop.get_person(person_2).vaccine_type_efficiency()
+        p1Vaccinated1 = self.pop.get_person(person_1).is_vaccinated()
+        p2Vaccinated1 = self.pop.get_person(person_2).is_vaccinated()
 
-            if p1Infected:
-                if p2Vaccinated1:
-                    spread_prob = spread_prob*P2_INFECT_PROB_DOSE_1
+        p1_multiplier = self.pop.get_person(person_1).vaccine_type_efficiency() if p1Vaccinated1 else 1
+        p2_multiplier = self.pop.get_person(person_2).vaccine_type_efficiency() if p2Vaccinated1 else 1
 
-            else:
-                if p1Vaccinated1:
-                    spread_prob = spread_prob*P1_INFECT_PROB_DOSE_1
+        spread_prob *= (p1_multiplier * p2_multiplier)
 
-            return random.random() < spread_prob
+        return random.random() < spread_prob
 
     def house_interact(self, day):
         '''Method to manage interactions between members of the same household.

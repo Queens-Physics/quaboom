@@ -717,9 +717,7 @@ class Person(object):
         '''
 
         if self.vaccinated:
-            return True  #True = vaccinated
-        else:
-            return False
+            return self.vaccinated
 
     def set_vaccinated(self, day):
         '''Method to set a person to be vaccinated.

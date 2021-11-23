@@ -15,8 +15,8 @@
         "vis_age_lower":16,
         "inf_students_upper":20,
         "inf_students_lower":2,
-        "num_vaccinations":50,
-        "vaccine_type": {"Pfizer":0.60, "Moderna":0.40, "AZ":0}
+        "num_vaccinations":0,
+        "vaccine_type": {"Pfizer":0.60, "Moderna":0.35, "AZ":0.05}
     },
 
     "policy_data":
@@ -91,7 +91,7 @@
         "protocol_compliance_lockdown_reduction":0.8,
         "protocol_compliance_lockdown_length_threshold":16,
         "protocol_compliance_lockdown_length_reduction":0.5,
-        "vaccine_eff": {"Pfizer":0, "Moderna":0,"AZ":1}
+        "vaccine_eff": {"Pfizer":0.087, "Moderna":0.059,"AZ":0.24}
     }
 
 }
