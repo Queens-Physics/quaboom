@@ -433,6 +433,14 @@ class Interaction_Sites:
                 else:
                     spread_prob = self.base_infection_spread_prob
 
+        p1Vaccinated1 = self.pop.get_person(person_1).is_vaccinated()
+        p2Vaccinated1 = self.pop.get_person(person_2).is_vaccinated()
+
+        p1_multiplier = self.pop.get_person(person_1).vaccine_type_efficiency() if p1Vaccinated1 else 1
+        p2_multiplier = self.pop.get_person(person_2).vaccine_type_efficiency() if p2Vaccinated1 else 1
+
+        spread_prob *= (p1_multiplier * p2_multiplier)
+
         return random.random() < spread_prob
 
     def house_interact(self, day):

@@ -7,13 +7,16 @@
         "num_students":2000,
         "max_num_res_students":500,
         "n0":10,
+        "v0":0,
         "will_go_prob":{"A":0.05, "B":0.2, "C":0.7, "LECT":0.8, "STUDY":0.2, "FOOD":0.1, "RES":1},
         "N_VIS_OPTION":[ 0, 1, 2, 3 ],
         "N_VIS_PROB":[ 0.7, 0.17, 0.08, 0.05],
         "vis_age_upper":60,
         "vis_age_lower":16,
         "inf_students_upper":20,
-        "inf_students_lower":2
+        "inf_students_lower":2,
+        "num_vaccinations":0,
+        "vaccine_type": {"Pfizer":0.60, "Moderna":0.35, "AZ":0.05}
     },
 
     "policy_data":
@@ -87,7 +90,8 @@
         "protocol_compliance_lockdown_prob":0.99,
         "protocol_compliance_lockdown_reduction":0.8,
         "protocol_compliance_lockdown_length_threshold":16,
-        "protocol_compliance_lockdown_length_reduction":0.5
+        "protocol_compliance_lockdown_length_reduction":0.5,
+        "vaccine_eff": {"Pfizer":0.087, "Moderna":0.059,"AZ":0.24}
     }
 
 }
