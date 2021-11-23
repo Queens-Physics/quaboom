@@ -230,8 +230,7 @@ class Person(object):
         -------
         self.show_symptoms: :obj:`bool`
         '''
-        prob_of_symptom = random()
-        if prob_of_symptom <= self.sim_obj.cold_prob:
+        if random() <= self.sim_obj.cold_prob:
             self.show_symptoms = True
             self.has_cold = True
         return self.show_symptoms
@@ -370,8 +369,7 @@ class Person(object):
 
             # If cure days not specified then choose random number inbetween min and max
             if self.case_severity == 'Mild' or self.case_severity is None:  # If severity not specified, choose Mild
-                prob_of_symptom = random()
-                if prob_of_symptom > d_params["mild_symptom_prob"]:  # probability that the person has mild symtoms
+                if random() > d_params["mild_symptom_prob"]:  # probability that the person has mild symptoms
                     # choose number of days after infection when symptoms show
                     self.will_get_symptoms = False
                     self.days_until_symptoms = None
