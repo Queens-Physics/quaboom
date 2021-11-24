@@ -506,6 +506,7 @@ class simulation():
         ''' Method used to plot simulation results.
 
         Will return a warning or error if the simulation has not been run yet.
+
         Parameters
         ----------
         plot_* : bool
