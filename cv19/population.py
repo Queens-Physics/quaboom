@@ -1,6 +1,8 @@
 import json
-import random
+from random import random, sample
+
 import numpy as np
+
 from .data import constants
 from .person import Person
 
@@ -102,10 +104,14 @@ class Population:
                                quarantined=False, quarantined_day=None,
                                infected_day=None, recovered_day=None, death_day=None,
                                others_infected=None, cure_days=None, recent_infections=None,
-                               vaccinated=False, vaccine_type=vaccine_type_arr[i],
-                               age=age_arr[i], job=job_arr[i], house_index=houseIndex,
+                               age=age_arr[i],
+                               job=job_arr[i],
+                               house_index=houseIndex,
+                               vaccinated=False,
+                               vaccine_type=vaccine_type_arr[i],
                                isolation_tendencies=isolation_tend_arr[i],
-                               case_severity=case_severity_arr[i], mask_type=mask_type_arr[i],
+                               case_severity=case_severity_arr[i],
+                               mask_type=mask_type_arr[i],
                                has_mask=has_mask_arr[i])
 
             # ADD A PERSON
@@ -142,11 +148,16 @@ class Population:
                                 dead=False, hospitalized=False,ICU=False,quarantined=False,quarantined_day=None,
                                 infected_day=None, recovered_day=None, death_day=None,
                                 others_infected=None, cure_days=None, recent_infections=None,
-                                vaccinated=False, vaccine_type=vaccine_type_arr[i],
-                                age=student_age[i], job='Student', house_index=studHouseIndex,
+                                age=student_age[i],
+                                job='Student',
+                                house_index=studHouseIndex,
+                                vaccinated=False,
+                                vaccine_type=vaccine_type_arr[i],
                                 isolation_tendencies=isolation_tend_arr[i],
                                 case_severity=case_severity_arr[i],
+                                mask_type=mask_type_arr[i],
                                 has_mask=has_mask_arr[i])
+
             self.population[i] = newStudent
 
             self.student_indices[i] = i  # set their student status
@@ -177,6 +188,8 @@ class Population:
             self.house_stud_i[housei][where] = i
 
         # Create person status arrays
+        # A non-negative index indicates that they are the property,
+        # NULL_ID (-1) indicates that they are /not/ the property.
         self.susceptible = np.array(range(self.nPop), dtype=int)  #list of all susceptible individuals
         self.infected = np.zeros(self.nPop, dtype=int) + NULL_ID  # list of all infected people
         self.recovered = np.zeros(self.nPop, dtype=int) + NULL_ID  # list of recovered people
@@ -195,14 +208,14 @@ class Population:
 
         # Selects the indices of the n0 initially infected people
         # at random, then infects them
-        indices = random.sample(range(self.nPop), self.n0)
+        indices = sample(range(self.nPop), self.n0)
         for i in indices:
             self.population[i].infect(day=0)
             self.infected[i] = i
             self.susceptible[i] = NULL_ID
 
         # Vaccinate first v0 people
-        v_indices = random.sample(range(self.nPop), self.v0)
+        v_indices = sample(range(self.nPop), self.v0)
         for i in v_indices:
             self.population[i].set_vaccinated(day=0)
             self.vaccinated[i] = i
@@ -418,13 +431,9 @@ class Population:
 
         Returns
         -------
-        infStudents: :obj:`int`
+        np.count_nonzero(np.logical_and(self.student_indices != NULL_ID, self.infected != NULL_ID)): :obj:`int`
         '''
-        infStudents = 0
-        for i in range(self.nPop):
-            if (self.student_indices[i] != NULL_ID and self.infected[i] != NULL_ID):
-                infStudents += 1
-        return infStudents
+        return np.count_nonzero(np.logical_and(self.student_indices != NULL_ID, self.infected != NULL_ID))
 
     def count_recovered(self):
         '''Method to count the number of people recovered.
@@ -547,7 +556,7 @@ class Population:
         : :obj:`bool`
             True if the value at the index in the infected list was changed, False if it was not changed.
         '''
-        if self.infected[index] == index or self.susceptible[index] == -1 or not self.population[index].is_infected():
+        if self.infected[index] == index or self.susceptible[index] == NULL_ID or not self.population[index].is_infected():
             # Already infected, or cant be infected
             return False
         self.infected[index] = index
@@ -689,7 +698,7 @@ class Population:
 
                 if i not in self.testing and self.have_been_tested[i] != 1: # if person is not already in testing function
                     infected_person = self.population[i] #gets the infected person from the population list
-                    if random.random()/self.population[i].get_protocol_compliance() < self.prob_of_test:
+                    if (random() / self.population[i].get_protocol_compliance()) < self.prob_of_test:
                         if infected_person.show_symptoms and not infected_person.knows_infected:
                             self.testing.append(i) #adds the person to the testing list
                             self.population[i].knows_infected = True

@@ -1,7 +1,7 @@
 '''
 This file holds the interaction sites class used in simulation.py.
 '''
-import random
+from random import random
 from copy import deepcopy
 from itertools import combinations
 
@@ -193,7 +193,7 @@ class Interaction_Sites:
 
         '''
         num_sites = round(self.pop.get_student_pop_size()/grade_pop_size)
-        grade_sites = [[] for i in range(num_sites)]
+        grade_sites = [[] for _ in range(num_sites)]
 
         for student in self.pop.get_population():
             if student.job == 'Student':
@@ -207,8 +207,7 @@ class Interaction_Sites:
                     grade_sites[site].append(student.get_index())
 
         # Convert everything to numpy arrays
-        for i, site in enumerate(grade_sites):
-            grade_sites[i] = np.array(site)
+        grade_sites = [np.asarray(site) for site in grade_sites]
 
         return grade_sites
 
@@ -238,7 +237,7 @@ class Interaction_Sites:
         '''
 
         num_sites = round(self.pop.get_res_size()/grade_pop_size)
-        grade_sites = [[] for i in range(num_sites)]
+        grade_sites = [[] for _ in range(num_sites)]
 
         for room in self.pop.get_residences():
             for student_i in self.stud_house_indices[room]:
@@ -252,8 +251,7 @@ class Interaction_Sites:
                     grade_sites[site].append(student_i)
 
         # Convert everything to numpy arrays
-        for i, site in enumerate(grade_sites):
-            grade_sites[i] = np.array(site)
+        grade_sites = [np.asarray(site) for site in grade_sites]
 
         return grade_sites
 
@@ -441,7 +439,7 @@ class Interaction_Sites:
 
         spread_prob *= (p1_multiplier * p2_multiplier)
 
-        return random.random() < spread_prob
+        return random() < spread_prob
 
     def house_interact(self, day):
         '''Method to manage interactions between members of the same household.
@@ -475,7 +473,7 @@ class Interaction_Sites:
                 for person in healthy_housemembers:
                     # This should be more complicated and depend on len(infectpplinhouse)
                     infection_chance = self.house_infection_spread_prob
-                    caught_infection = random.random()<infection_chance
+                    caught_infection = random() < infection_chance
                     if caught_infection:
                         self.pop.infect(index=housemembers[person].get_index(), day=day)
 
@@ -506,7 +504,7 @@ class Interaction_Sites:
                 for person in healthy_housemembers:
                     # This should be more complicated and depend on len(infectpplinhouse)
                     infection_chance = self.house_infection_spread_prob
-                    caught_infection = random.random()<infection_chance
+                    caught_infection = random() < infection_chance
                     if caught_infection:
                         self.pop.infect(index=housemembers[person].get_index(), day=day)
 
