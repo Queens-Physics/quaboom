@@ -551,7 +551,11 @@ class Person(object):
 
         Returns
         -------
-        self.sim_obj.surgical_inward_eff, self.sim_obj.surgical_outward_eff : :obj:`float`.
+        self.sim_obj.mask_inward_eff[self.mask_type]: :obj:`float`
+            Mask inward efficiency for the person's mask type.
+
+        self.sim_obj.mask_outward_eff[self.mask_type]: :obj:`float`
+            Mask outward efficiency for the person's mask type.
         '''
         if self.has_mask:
             try:
