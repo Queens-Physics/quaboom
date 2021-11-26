@@ -83,7 +83,28 @@ class Population:
         age_arr = np.random.choice(a=self.age_options, p=self.age_weights, size=self.nPop)
         job_arr = np.random.choice(a=self.job_options, p=self.job_weights, size=self.nPop)
         isolation_tend_arr = np.random.choice(a=self.isolation_options, p=self.isolation_weights, size=self.nPop)
-        case_severity_arr = np.random.choice(a=self.severity_options, p=self.severity_weights, size=self.nPop)
+        case_severity_arr = np.empty(self.nPop, dtype=object)
+        #############################################################################################################
+        # case severity now changes to depending on the age
+        for i, age in enumerate(age_arr):
+            if age == '0-9' or age == '10-19':
+                case_severity_arr[i] = np.random.choice(a=self.severity_options, p=self.severity_weights_0_19)
+            if age == '20-29':
+                case_severity_arr[i] = np.random.choice(a=self.severity_options, p=self.severity_weights_20_29)
+            if age == '30-39':
+                case_severity_arr[i] = np.random.choice(a=self.severity_options, p=self.severity_weights_30_39)
+            if age == '40-49':
+                case_severity_arr[i] = np.random.choice(a=self.severity_options, p=self.severity_weights_40_49)
+            if age == '50-59':
+                case_severity_arr[i] = np.random.choice(a=self.severity_options, p=self.severity_weights_50_59)
+            if age == '60-69':
+                case_severity_arr[i] = np.random.choice(a=self.severity_options, p=self.severity_weights_60_69)
+            if age == '70-79':
+                case_severity_arr[i] = np.random.choice(a=self.severity_options, p=self.severity_weights_70_79)
+            if age == '80-89' or age == '90-99': #could also be just an else but
+                case_severity_arr[i] = np.random.choice(a=self.severity_options, p=self.severity_weights_80_up)
+           
+        #############################################################################################################
         mask_type_arr = np.random.choice(a=self.mask_options, p=self.mask_weights, size=self.nPop)
         has_mask_arr = np.random.uniform(size=self.nPop) < self.prob_has_mask
         vaccine_type_arr = np.random.choice(a=self.vaccine_options, p=self.vaccine_weights, size=self.nPop)
@@ -131,6 +152,12 @@ class Population:
 
         ############### STUDENTS ###############
         student_age = np.random.choice(a=['10-19', '20-29'], p=[0.5,0.5], size = self.nPop) # students are in age ranges 10-19 and 20-29
+        student_case_severity_arr = np.empty(self.nPop, dtype=object)
+        for i, age in enumerate(student_age):
+            if age == '0-9' or age == '10-19':
+                student_case_severity_arr[i] = np.random.choice(a=self.severity_options, p=self.severity_weights_0_19)
+            if age == '20-29':
+                student_case_severity_arr[i] = np.random.choice(a=self.severity_options, p=self.severity_weights_20_29)
 
         self.student_indices = np.zeros(self.nPop, dtype=int) + NULL_ID
         self.res_houses = np.zeros(len(self.stud_houses), dtype=int) + NULL_ID # student houses that are in residence will be nonzero
@@ -154,7 +181,7 @@ class Population:
                                 vaccinated=False,
                                 vaccine_type=vaccine_type_arr[i],
                                 isolation_tendencies=isolation_tend_arr[i],
-                                case_severity=case_severity_arr[i],
+                                case_severity=student_case_severity_arr[i-(self.nPop-self.nStudents)], #adjust for index inconsistency
                                 mask_type=mask_type_arr[i],
                                 has_mask=has_mask_arr[i])
 
@@ -240,9 +267,33 @@ class Population:
             setattr(self, attr, sim_obj.parameters["population_data"][attr])
 
         # case severity from disease params
-        self.severity_weights = np.array([sim_obj.disease_parameters["case_severity"][key]
-                                          for key in constants.SEVERITY_OPTIONS])
+        #self.severity_weights = np.array([sim_obj.disease_parameters["case_severity"][key]
+        #                                  for key in constants.SEVERITY_OPTIONS])
         self.severity_options = constants.SEVERITY_OPTIONS
+        
+        #############################################################################################################
+        with open(self.case_severity_file, encoding='utf-8') as json_file:
+            severity_params = json.load(json_file)
+            
+        self.severity_weights_0_19 = np.array([severity_params["case_severity_0-19"][key]
+                                          for key in constants.SEVERITY_OPTIONS])
+        self.severity_weights_20_29 = np.array([severity_params["case_severity_20-29"][key]
+                                          for key in constants.SEVERITY_OPTIONS])
+        self.severity_weights_30_39 = np.array([severity_params["case_severity_30-39"][key]
+                                          for key in constants.SEVERITY_OPTIONS])
+        self.severity_weights_40_49 = np.array([severity_params["case_severity_40-49"][key]
+                                          for key in constants.SEVERITY_OPTIONS])
+        self.severity_weights_50_59 = np.array([severity_params["case_severity_50-59"][key]
+                                          for key in constants.SEVERITY_OPTIONS])
+        self.severity_weights_60_69 = np.array([severity_params["case_severity_60-69"][key]
+                                          for key in constants.SEVERITY_OPTIONS])
+        self.severity_weights_70_79 = np.array([severity_params["case_severity_70-79"][key]
+                                          for key in constants.SEVERITY_OPTIONS])
+        self.severity_weights_80_up = np.array([severity_params["case_severity_80+"][key]
+                                          for key in constants.SEVERITY_OPTIONS])
+        
+        
+        #############################################################################################################
 
         # format mask weights correctly
         self.mask_weights = np.array([self.mask_type[key] for key in constants.MASK_OPTIONS])
