@@ -581,7 +581,7 @@ class Person(object):
 
         Parameters
         ----------
-        other : Person
+        other : :obj:`Person`
             Person that self is interacting with
         day : int
             Current day in the simulation

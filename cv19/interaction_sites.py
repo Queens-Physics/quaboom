@@ -52,7 +52,7 @@ class Interaction_Sites:
 
         Parameters
         ----------
-        sim_obj : :obj:`simulation class`
+        sim_obj : :obj:`cv19.simulation.simulation`
             The encompassing simulation obejct hosting the simulation.
 
         '''
@@ -101,7 +101,7 @@ class Interaction_Sites:
 
         Parameters
         ----------
-        sim_obj : :obj:`simulation class`
+        sim_obj : :obj:`cv19.simulation.simulation`
             The encompassing simulation obejct hosting the simulation.
 
         '''
@@ -397,9 +397,9 @@ class Interaction_Sites:
 
         Parameters
         ----------
-        person_1 : :obj:`person.Person`
+        person_1 : :obj:`cv19.person.Person`
             First person in the two-way interaction.
-        person_2 : :obj:`person.Person`
+        person_2 : :obj:`cv19.person.Person`
             Second person in the two-way interaction.
 
         Returns
