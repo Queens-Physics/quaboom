@@ -510,7 +510,7 @@ class Population:
 
     def count_virus_types(self):
         '''Method to count all virus types and return them as a dictionary.
-        
+
         Returns
         -------
         counts : :obj:`dict`
