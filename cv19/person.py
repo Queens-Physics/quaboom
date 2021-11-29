@@ -348,7 +348,7 @@ class Person(object):
         self.has_mask: :obj:`bool`
         '''
         return self.has_mask
-    
+
     def get_virus_type(self):
         return self.virus_type
 
@@ -362,7 +362,7 @@ class Person(object):
         day : int
             The day value that this function is being called on in the encompassing simulation class.
         virus_type : str
-            The type of virus that this person is being infected with. 
+            The type of virus that this person is being infected with.
         cure_days : int
             The day value set for the person to be cured after being infected.
 

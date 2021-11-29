@@ -114,7 +114,7 @@ class Interaction_Sites:
         d_attributes = sim_obj.disease_parameters["spread_data"].keys()
         for attr in d_attributes:
             setattr(self, attr, sim_obj.disease_parameters["spread_data"][attr])
-            
+
         # Get the virus type names
         self.virus_names = sim_obj.variant_codes
 
@@ -366,10 +366,10 @@ class Interaction_Sites:
 
         #  Update people who get infected only at the end (if i get CV19 at work, prolly wont spread at the store that night ?)
         new_infection_indexes = np.where(new_infections)[0]
-        new_infection_type_indexes = np.where(new_infection_type)[0]
+#         new_infection_type_indexes = np.where(new_infection_type)[0]
         for new_infection in new_infection_indexes:
-            self.pop.infect(index=new_infection, virus_type=new_infection_type[new_infection], day=day)            
-            
+            self.pop.infect(index=new_infection, virus_type=new_infection_type[new_infection], day=day)
+
     def calc_interactions(self):
         '''Method to determine how many interactions a person will have.
 
@@ -434,7 +434,7 @@ class Interaction_Sites:
                 spread_prob = base_infection_spread_prob
 
             else:
-                
+
                 if p1Mask and p2Mask:
                     spread_prob = base_infection_spread_prob*P2_OUTWARD_PROB*P1_INWARD_PROB
                 elif p1Mask:
@@ -489,7 +489,7 @@ class Interaction_Sites:
                 for person in healthy_housemembers:
                     virus_type = np.random.choice(a=virus_types)
                     virus_name = list(self.virus_names.keys())[list(self.virus_names.values()).index(virus_type)]
-                    
+
                     infection_chance = self.base_infection_spread_prob[virus_name] * self.house_infection_spread_factor
                     caught_infection = random() < infection_chance
 
@@ -518,7 +518,7 @@ class Interaction_Sites:
             house_size = len(house_indices)
             housemembers = [self.pop.get_population()[ind] for ind in house_indices]
             virus_types = [person.get_virus_type() for person in housemembers]
-            
+
             # Do interactions between the housemates
             for member1, member2 in combinations(housemembers, 2):
                 member1.log_contact(member2, day=day, personal=True)
@@ -533,7 +533,7 @@ class Interaction_Sites:
                 for person in healthy_housemembers:
                     virus_type = np.random.choice(a=virus_types)
                     virus_name = list(self.virus_names.keys())[list(self.virus_names.values()).index(virus_type)]
-                    
+
                     infection_chance = self.base_infection_spread_prob[virus_name] * self.house_infection_spread_factor
                     caught_infection = random() < infection_chance
                     if caught_infection:

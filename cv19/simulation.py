@@ -145,11 +145,11 @@ class simulation():
         person_attributes = self.parameters["person_data"].keys()
         for attr in person_attributes:
             setattr(self, attr, self.parameters["person_data"][attr])
-            
+
         #### Load in the virus types tracking arrays ####
         self.virus_names = np.array(list(self.variant_codes.keys()))
         self.track_virus_types = {virus_name:np.zeros(self.nDays, dtype=int) for virus_name in self.virus_names}
-        
+
 
     def load_disease_parameters(self, filename):
         ''' Method to load in attributes from the disease configuration file.
@@ -311,7 +311,7 @@ class simulation():
 
             self.track_new_quarantined[day] = self.pop.get_new_quarantined()
             self.track_inf_students[day] = self.pop.count_infected_students()
-            
+
             daily_variant_counts = self.pop.count_virus_types()
             for virus_name in self.virus_names:
                 self.track_virus_types[virus_name][day] = daily_variant_counts[virus_name]
@@ -360,10 +360,10 @@ class simulation():
             visitors_ind = [x for x in range(self.nPop, self.nPop+num_vis-1)]
             vis_age = np.random.choice(a=self.pop.age_options, p=self.pop.age_weights, size=num_vis)
             for i in range(0, num_vis):
-                visitor = Person(index=i+self.nPop, sim_obj=self, infected=True, recovered=False, dead=False, 
-                                 hospitalized=False, ICU=False, quarantined=False, quarantined_day=None, infected_day=None, 
-                                 recovered_day=None, death_day=None, others_infected=None, cure_days=None, recent_infections=None, 
-                                 vaccinated=False, age=vis_age[i], job=None,house_index=None, isolation_tendencies=0.2, 
+                visitor = Person(index=i+self.nPop, sim_obj=self, infected=True, recovered=False, dead=False,
+                                 hospitalized=False, ICU=False, quarantined=False, quarantined_day=None, infected_day=None,
+                                 recovered_day=None, death_day=None, others_infected=None, cure_days=None, recent_infections=None,
+                                 vaccinated=False, age=vis_age[i], job=None,house_index=None, isolation_tendencies=0.2,
                                  case_severity='Mild', has_mask=True, virus_type="alpha")
                 self.pop.population.append(visitor)
 
@@ -513,7 +513,7 @@ class simulation():
 
     def plot(self, plot_infected=True, plot_susceptible=True, plot_dead=True, plot_recovered=True, plot_new_infected=True,
              plot_tested=True, plot_quarantined=True, plot_new_tests=True, plot_new_quarantined=True, plot_masks=True,
-             plot_hospitalized=True, plot_ICU=True, plot_lockdown=True, plot_testing=True, plot_students=True, 
+             plot_hospitalized=True, plot_ICU=True, plot_lockdown=True, plot_testing=True, plot_students=True,
              plot_vaccinated=True, plot_virus_types={}, log=False):
         ''' Method used to plot simulation results.
 

@@ -40,13 +40,19 @@ class TestPopulation(unittest.TestCase):
         it returns proper values when initialized with different numbers of infected
         individuals.
         '''
-        nPop, n0 = self.sim_obj.nPop, self.sim_obj.n0
+        nPop = self.sim_obj.nPop
+        variants = self.sim_obj.variants
+        n0 = np.sum([value for key, value in variants.items()])
         pop = Population(self.sim_obj)
 
         # Make sure that there are n0 infected, 0 recovered, nPop-n0 susceptible
         self.assertEqual(pop.count_infected(), n0)
         self.assertEqual(pop.count_recovered(), 0)
         self.assertEqual(pop.count_susceptible(), nPop-n0)
+
+        # Make sure variant counts are correct
+        for key, value in variants.items():
+            self.assertEqual(pop.count_variant_cases(key), value)
 
     def test_get_count_functions(self):
         ''' Method to test the counting methods of the person class.
@@ -103,7 +109,7 @@ class TestPopulation(unittest.TestCase):
 
         # Infect a susceptible person
         index = pop.get_susceptible()[0]
-        self.assertTrue(pop.infect(index=index, day=0))
+        self.assertTrue(pop.infect(index=index, day=0, virus_type='alpha'))
 
         # Check that they are infected
         self.assertTrue(pop.get_person(index=index).is_infected())
@@ -119,7 +125,7 @@ class TestPopulation(unittest.TestCase):
         pop = Population(self.sim_obj)
 
         index = pop.get_infected()[0]
-        self.assertFalse(pop.infect(index=index, day=0))
+        self.assertFalse(pop.infect(index=index, day=0, virus_type='alpha'))
 
         # Now try to falsly update the infected list
         self.assertFalse(pop.update_infected(index=index))
