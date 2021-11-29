@@ -179,7 +179,7 @@ def tabular_mode(base_config_file, independent, dependent, num_runs=8, num_cores
     for i, values in enumerate(zip(*mesh)):
 
         # Load the json file
-        with open(base_config_file) as f:
+        with open(base_config_file, encoding='utf-8') as f:
             temp_config = json.load(f)
 
         config_dir = Path(base_config_file).parent
@@ -204,9 +204,28 @@ def tabular_mode(base_config_file, independent, dependent, num_runs=8, num_cores
     # Convert results to a dataframe
     results = pd.DataFrame(results, index=list(independent.values())[0], columns=dependent.keys())
 
+    # Handle the case of multiple return values from the functions.
+    # Checks that each function returns a value of the same length.
+    # If single return value, just return the dataframe.
+    if results.applymap(lambda x: isinstance(x, (float, int))).all(axis=None):
+        return results
+    # If multiple return values, return a tuple of dataframes.
+    elif results.applymap(lambda x: isinstance(x, (tuple, list))).all(axis=None):
+        resultslen = results.applymap(len)
+        tuplelen = resultslen.iloc[0, 0]
+
+        if (resultslen == tuplelen).all(axis=None):
+            results_tuple = tuple(results.applymap(lambda x, index=j: x[index])
+                                  for j in range(tuplelen))
+            return results_tuple
+        else:
+            raise ValueError("Length of each element in DataFrame is not consistent.")
+    else:
+        raise ValueError("Type of each element in DataFrame is not consistent.")
+
     return results
 
-def confidence_interval(config, num_runs=8, confidence=0.80, num_cores=-1, save_name=None, verbose=False):
+def confidence_interval(config, parameterstoplot, num_runs=8, confidence=0.80, num_cores=-1, save_name=None, verbose=False):
     """Plots the results of multiple simulations with confidence bands
     to give a better understanding of the trend of a given scenario.
     Displays a plot of the results.
@@ -215,6 +234,8 @@ def confidence_interval(config, num_runs=8, confidence=0.80, num_cores=-1, save_
     ----------
     config : str
         filename of the configuration file to use for this simulation
+    parameters_to_plot : list
+        list of parameters to include when plotting with the condifence interval
     num_runs : int, default=8
         number of times to run the simulation
     confidence : float
@@ -240,7 +261,7 @@ def confidence_interval(config, num_runs=8, confidence=0.80, num_cores=-1, save_
 
         # If the column is of dtype boolean, then this analysis does
         # not apply
-        if col in ["testing_enforced", "masks_enforced", "lockdown_enforced"]:
+        if col not in parameterstoplot:
             continue
 
         # Analyze the results
@@ -333,12 +354,13 @@ def peak(data):
 
     Returns
     -------
-    float
-        number of people infected at the peak, averaged over the simulations that
-        were run.
+    tuple of float
+        Number of people infected at the peak, averaged over the simulations that
+        were run, and uncertainty.
     """
-    infections = data['infected']
-    return infections.apply(max).mean()
+    peak_infections = data['infected'].apply(max)
+    return (peak_infections.mean(),
+            peak_infections.std() / np.sqrt(len(peak_infections)))
 
 def peak_date(data):
     """Calculates the date of the peak, averaged over the simulations that were
@@ -351,11 +373,12 @@ def peak_date(data):
 
     Returns
     -------
-    float
-        date of the peak, averaged over the simulations that were run.
+    tuple of float
+        Date of the peak, averaged over the simulations that were run, and uncertainty.
     """
-    infections = data['infected']
-    return infections.apply(np.argmax).mean()
+    peak_infections_dates = data['infected'].apply(np.argmax)
+    return (peak_infections_dates.mean(),
+            peak_infections_dates.std() / np.sqrt(len(peak_infections_dates)))
 
 def hospitalizations(data):
     """Calculates the number of hospitalizations at the peak, averaged over the
@@ -368,12 +391,13 @@ def hospitalizations(data):
 
     Returns
     -------
-    float
-        number of hospitalizations at the peak, averaged over the simulations that
-        were run.
+    tuple of float
+        Number of hospitalizations at the peak, averaged over the simulations that
+        were run, and uncertainty.
     """
-
-    return data['hospitalized'].apply(max).mean()
+    peak_hospitalizations = data['hospitalized'].apply(max)
+    return (peak_hospitalizations.mean(),
+            peak_hospitalizations.std() / np.sqrt(len(peak_hospitalizations)))
 
 def deaths(data):
     """The average number of total deaths over all simulations that were run.
@@ -384,11 +408,13 @@ def deaths(data):
         Output from running a simulation.
     Returns
     -------
-    float
-        average number of total deaths over all simulation that were run.
+    tuple of float
+        Average number of total deaths over all simulations that were run
+        and uncertainty.
     """
-
-    return data['dead'].apply(max).mean()
+    total_deaths = data['dead'].apply(max)
+    return (total_deaths.mean(),
+            total_deaths.std() / np.sqrt(len(total_deaths)))
 
 def peak_quarantine(data):
     """The number of people in quarantine at the peak, averaged over the simulations
@@ -401,12 +427,87 @@ def peak_quarantine(data):
 
     Returns
     -------
-    float
-        number of people in quarantine at the peak, averaged over the simulations
-        that were run.
+    tuple of float
+        Number of people in quarantine at the peak, averaged over the simulations
+        that were run, and uncertainty.
     """
-    return data['quarantined'].apply(max).mean()
+    peak_quarantined = data['quarantined'].apply(max)
+    return (peak_quarantined.mean(),
+            peak_quarantined.std() / np.sqrt(len(peak_quarantined)))
 
+def peak_ICU(data):
+    """The number of people in ICU at the peak, averaged over the simulations
+    that were run.
+
+    Parameters
+    ----------
+    data : pandas.DataFrame
+        Output from running a simulation.
+
+    Returns
+    -------
+    tuple of float
+        Number of people in ICU at the peak, averaged over the simulations
+        that were run, and uncertainty.
+    """
+    peak_ICUs = data['ICU'].apply(max)
+    return (peak_ICUs.mean(),
+            peak_ICUs.std() / np.sqrt(len(peak_ICUs)))
+
+def peak_deaths(data):
+    """The number of deaths at the peak, averaged over the simulations
+    that were run.
+
+    Parameters
+    ----------
+    data : pandas.DataFrame
+        Output from running a simulation.
+
+    Returns
+    -------
+    tuple of float
+        Number of deaths at the peak, averaged over the simulations
+        that were run, and uncertainty.
+    """
+    peak_death = data['dead'].apply(max)
+    return (peak_death.mean(),
+            peak_death.std() / np.sqrt(len(peak_death)))
+
+def peak_hospitalization(data):
+    """The number of people in the hospital at the peak, averaged over the
+    simulations that were run.
+
+    Parameters
+    ----------
+    data : pandas.DataFrame
+        Output from running a simulation.
+
+    Returns
+    -------
+    tuple of float
+        Number of people in the hospital at the peak, averaged over the simulations
+        that were run, and uncertainty.
+    """
+    peak_hospitalized = data['hospitalized'].apply(max)
+    return (peak_hospitalized.mean(),
+            peak_hospitalized.std() / np.sqrt(len(peak_hospitalized)))
+
+def time_elapsed(data):
+    """Time elapsed for the simulation.
+
+    Parameters
+    ----------
+    data : pandas.DataFrame
+        Output from running a simulation.
+
+    Returns
+    -------
+    tuple of float
+        Average elapsed time of the simulations and uncertainty.
+    """
+    simulation_times = data['time_elapsed'].apply(max)
+    return (simulation_times.mean(),
+            simulation_times.std() / np.sqrt(len(simulation_times)))
 
 # Sample usage
 if __name__ == "__main__":
@@ -430,6 +531,8 @@ if __name__ == "__main__":
     plt.show()
 
     # Confidence interval mode
-    confidence_interval('config_files/main.json', confidence=0.9)
+    parameters_to_plot=["infected","new_infected","recovered","susceptible","dead","quarantined","inf_students","total_tested","new_tested","hospitalized","ICU","testing_enforced","masks_enforced","lockdown_enforced","time_elapsed"]
+
+    confidence_interval('config_files/main.json', parameterstoplot=parameters_to_plot, confidence=0.9)
 
     input()

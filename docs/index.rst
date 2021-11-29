@@ -12,8 +12,10 @@ Welcome to CV-19 Simulation's documentation!
 
    introduction
    getting_started
+   person
+   population
    interaction_sites
-
+   simulation
 
 Indices and tables
 ==================

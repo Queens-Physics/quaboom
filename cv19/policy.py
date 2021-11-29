@@ -22,7 +22,7 @@ class Policy:
         Parameters
         ----------
         sim_obj : :obj:`simulation.simulation`
-            The encompassing simulation obejct hosting the simulation.
+            The encompassing simulation object hosting the simulation.
 
         '''
 
@@ -181,9 +181,9 @@ class Policy:
             The number of people on the testing waitlist for this day in the simulation.
         '''
 
-        tests =  (self.testing_rate[0]*self.sim_obj.pop.count_quarantined()
-                  + self.testing_rate[1]*self.sim_obj.pop.get_new_quarantined()
-                  + self.testing_rate[2]*wait_list) # defines the number of tests going to be run
+        tests =  (self.testing_rates[0]*self.sim_obj.pop.count_quarantined()
+                  + self.testing_rates[1]*self.sim_obj.pop.get_new_quarantined()
+                  + self.testing_rates[2]*wait_list) # defines the number of tests going to be run
         if self.testing_baseline is None:
             self.testing_baseline = 0
         elif tests < self.testing_baseline and wait_list > 0:
