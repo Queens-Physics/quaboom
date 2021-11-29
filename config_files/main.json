@@ -14,7 +14,8 @@
             "alpha":1, 
             "delta":2
             },
-        "vis_default_virus_type":"alpha"
+        "vis_default_virus_type":"alpha",
+        "student_default_virus_type":"alpha",
         "num_students":2000,
         "max_num_res_students":500,
         "n0":10,

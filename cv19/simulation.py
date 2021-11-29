@@ -350,7 +350,9 @@ class simulation():
             if self.inter_sites.students_on and day == self.policy.student_day_trigger:
                 infStudents = np.random.randint(self.inf_students_lower, self.inf_students_upper)
                 indices = np.random.choice(self.pop.get_student_indices(), infStudents, replace=False)
-                self.pop.infect_incoming_students(indices=indices, day=day)
+                # Convert virus type to virus code
+                student_default_virus_code = self.variant_codes[self.student_default_virus_type]
+                self.pop.infect_incoming_students(indices=indices, day=day, virus_type=student_default_virus_code)
 
             ############### VISITOR STUFF ###############
             #add a random number of visitors to the population
@@ -449,7 +451,7 @@ class simulation():
                                                        self.track_tested[day],
                                                        self.track_quarantined[day],
                                                        self.track_inf_students[day],
-                                                       self.track_virus_type[day]))
+                                                       self.track_virus_type[day],
                                                        self.track_vaccinated[day]))
 
         if self.verbose:

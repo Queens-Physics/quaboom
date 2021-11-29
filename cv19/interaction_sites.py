@@ -485,19 +485,15 @@ class Interaction_Sites:
                 infected_housemembers = [i for i in range(house_size) if housemembers[i].is_infected()]
                 virus_types = [virus_types[i] for i in infected_housemembers]
                 healthy_housemembers = [i for i in range(house_size) if not housemembers[i].is_infected()]
-                    
 
                 for person in healthy_housemembers:
                     virus_type = np.random.choice(a=virus_types)
                     virus_name = list(self.virus_names.keys())[list(self.virus_names.values()).index(virus_type)]
                     
-                    # This should be more complicated and depend on len(infectpplinhouse)
-
                     infection_chance = self.base_infection_spread_prob[virus_name] * self.house_infection_spread_factor
                     caught_infection = random() < infection_chance
 
                     if caught_infection:
-                        
                         if virus_type is None:
                             raise ValueError("House infection has incorrect virus type.")
                         self.pop.infect(index=housemembers[person].get_index(), day=day, virus_type=virus_type)
@@ -521,17 +517,29 @@ class Interaction_Sites:
             # Get ppl in house
             house_size = len(house_indices)
             housemembers = [self.pop.get_population()[ind] for ind in house_indices]
+            virus_types = [person.get_virus_type() for person in housemembers]
+            
+            # Do interactions between the housemates
+            for member1, member2 in combinations(housemembers, 2):
+                member1.log_contact(member2, day=day, personal=True)
+                member2.log_contact(member1, day=day, personal=True)
 
             # Check if anyone in the house is infected
             if any(housemembers[i].is_infected() for i in range(house_size)):
-                healthy_housemembers = [i for i in range(house_size) if housemembers[i].is_infected()]
+                infected_housemembers = [i for i in range(house_size) if housemembers[i].is_infected()]
+                virus_types = [virus_types[i] for i in infected_housemembers]
+                healthy_housemembers = [i for i in range(house_size) if not housemembers[i].is_infected()]
 
                 for person in healthy_housemembers:
-                    # This should be more complicated and depend on len(infectpplinhouse)
-                    infection_chance = self.house_infection_spread_prob
+                    virus_type = np.random.choice(a=virus_types)
+                    virus_name = list(self.virus_names.keys())[list(self.virus_names.values()).index(virus_type)]
+                    
+                    infection_chance = self.base_infection_spread_prob[virus_name] * self.house_infection_spread_factor
                     caught_infection = random() < infection_chance
                     if caught_infection:
-                        self.pop.infect(index=housemembers[person].get_index(), day=day)
+                        if virus_type is None:
+                            raise ValueError("House infection has incorrect virus type.")
+                        self.pop.infect(index=housemembers[person].get_index(), day=day, virus_type=virus_type)
 
     def testing_site(self, tests_per_day, day):
         '''Method to update status of symptoms and run the testing sites code.

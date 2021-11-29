@@ -535,7 +535,7 @@ class Population:
 
         return didWork
 
-    def infect_incoming_students(self, indices, day):
+    def infect_incoming_students(self, indices, day, virus_type):
         '''Method to infect incoming students to the simulation.
 
         Parameters
@@ -552,7 +552,7 @@ class Population:
         '''
         for i in indices:
             daysAgo = np.random.randint(13)
-            self.infect(index=i, day=day-daysAgo)
+            self.infect(index=i, day=day-daysAgo, virus_type=virus_type)
         return True
 
     def update_infected(self, index):
