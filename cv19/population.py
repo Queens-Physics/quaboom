@@ -542,11 +542,15 @@ class Population:
         -------
         didWork: :obj:`int`
         '''
+        # Convert to virus code if virus type is a string
+        if isinstance(virus_type, str):
+            virus_type = self.virus_codes[virus_type]
+
         didWork = self.population[index].infect(day=day, virus_type=virus_type)
         if didWork:
             self.infected[index] = index
             self.susceptible[index] = NULL_ID
-            self.virus_types[index] = self.virus_codes[virus_type]
+            self.virus_types[index] = virus_type
             if self.population[index].ICU:
                 self.ICU[index] = index
             elif self.population[index].hospitalized:
