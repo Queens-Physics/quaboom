@@ -514,7 +514,7 @@ class simulation():
     def plot(self, plot_infected=True, plot_susceptible=True, plot_dead=True, plot_recovered=True, plot_new_infected=True,
              plot_tested=True, plot_quarantined=True, plot_new_tests=True, plot_new_quarantined=True, plot_masks=True,
              plot_hospitalized=True, plot_ICU=True, plot_lockdown=True, plot_testing=True, plot_students=True,
-             plot_vaccinated=True, plot_virus_types={}, log=False):
+             plot_vaccinated=True, plot_virus_types=None, log=False):
         ''' Method used to plot simulation results.
 
         Will return a warning or error if the simulation has not been run yet.
@@ -558,9 +558,10 @@ class simulation():
             plt.plot(days, self.track_new_quarantined, label='new quarantined')
         if plot_students:
             plt.plot(days, self.track_inf_students, label="infected students")
-        for key in plot_virus_types:
-            if plot_virus_types[key]:
-                plt.plot(days, self.track_virus_types[key], label=str(key))
+        if plot_virus_types is not None:
+            for key in plot_virus_types:
+                if plot_virus_types[key]:
+                    plt.plot(days, self.track_virus_types[key], label=str(key))
         if plot_vaccinated:
             plt.plot(days, self.track_vaccinated, label='vaccinated')
 

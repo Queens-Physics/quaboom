@@ -350,6 +350,11 @@ class Person(object):
         return self.has_mask
 
     def get_virus_type(self):
+        '''Method to return the virus type of a person.
+        Returns
+        -------
+        self.virus_type: :obj:`int`
+        '''
         return self.virus_type
 
     def infect(self, day, virus_type, cure_days=None):

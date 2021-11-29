@@ -509,6 +509,12 @@ class Population:
         return np.count_nonzero(self.has_mask > 0)
 
     def count_virus_types(self):
+        '''Method to count all virus types and return them as a dictionary.
+        
+        Returns
+        -------
+        counts : :obj:`dict`
+        '''
         counts = {virus_type: np.count_nonzero(self.virus_types==virus_code)
                   for virus_type, virus_code in self.variant_codes.items()}
         return counts
