@@ -228,7 +228,7 @@ class Population:
 
         Parameters
         ----------
-        sim_obj : :obj:`simulation class`
+        sim_obj : :obj:`cv19.simulation.simulation`
             The encompassing simulation object hosting the simulation.
         '''
 
