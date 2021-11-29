@@ -193,7 +193,7 @@ def tabular_mode(base_config_file, independent, dependent, num_runs=8, num_cores
         if isinstance(save_name, list):
             scenario_save_name = save_name[i]
         elif isinstance(save_name, str):
-            scenario_save_name = save_name + '{:02}'.format(i)
+            scenario_save_name = save_name + f"{i:02}"
         data = run_async(num_runs, temp_config, num_cores=num_cores,
                          save_name=scenario_save_name, config_dir=config_dir, verbose=verbose)
 

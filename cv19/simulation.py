@@ -176,9 +176,9 @@ class simulation():
                 return
 
             except FileNotFoundError:
-                warnings.warn(("Unable to find file: {} "
+                warnings.warn((f"Unable to find file: {filepath} "
                                "assuming directory is relative to main config. "
-                               "Attempting read relative to CV19ROOT directory.").format(filepath))
+                               "Attempting read relative to CV19ROOT directory."))
 
                 filepath = Path(CV19ROOT, filename)
                 with open(filepath, encoding='utf-8') as file:
@@ -218,9 +218,8 @@ class simulation():
             self.code_id = self.code_id.strip()
 
         except subprocess.CalledProcessError as e:
-            warnings.warn(("Command '{}' returned a non-zero "
-                           "exit code: {}.").format(' '.join(git_version_cmd),
-                                                    e.returncode))
+            warnings.warn((f"Command '{' '.join(git_version_cmd)}' returned a non-zero "
+                           f"exit code: {e.returncode}."))
             print(e.output)
 
         except OSError:
@@ -243,9 +242,8 @@ class simulation():
                         dirty = True
 
             except subprocess.CalledProcessError as e:
-                warnings.warn(("Command '{}' returned a non-zero "
-                               "exit code: {}.").format(' '.join(git_dirty_cmd),
-                                                        e.returncode))
+                warnings.warn((f"Command '{' '.join(git_dirty_cmd)}' returned a non-zero "
+                               f"exit code: {e.returncode}."))
                 print(e.output)
 
             except OSError:
@@ -320,22 +318,22 @@ class simulation():
             ############### POLICY STUFF ###############
             mask_mandate = self.policy.update_mask_mandate(day=day)
             if mask_mandate != old_mask_mandate and self.verbose:
-                print("Day: {}, Mask Mandate: {}".format(day, mask_mandate))
+                print(f"Day: {day}, Mask Mandate: {mask_mandate}")
             old_mask_mandate = mask_mandate
 
             lockdown = self.policy.update_lockdown(day=day)
             if lockdown != old_lockdown_mandate and self.verbose:
-                print("Day: {}, Lockdown: {}".format(day, lockdown))
+                print(f"Day: {day}, Lockdown: {lockdown}")
             old_lockdown_mandate = lockdown
 
             testing_ON = self.policy.update_testing(day)
             if testing_ON != old_testing_mandate and self.verbose:
-                print("Day: {}, Testing: {}".format(day, testing_ON))
+                print(f"Day: {day}, Testing: {testing_ON}")
             old_testing_mandate = testing_ON
 
             students_go = self.policy.check_students(day=day)
             if students_go != old_student_mandate and self.verbose:
-                print("Day: {}, Uni Mandate: {}".format(day, students_go))
+                print(f"Day: {day}, Uni Mandate: {students_go}")
             old_student_mandate = students_go
 
             #infect random students on the day they come in
@@ -416,43 +414,34 @@ class simulation():
             self.track_time[day] = timer() - beg_time
 
             if self.verbose:
-                print(("Day: {}, "
-                       "infected: {}, "
-                       "recovered: {}, "
-                       "suceptible: {}, "
-                       "dead: {}, "
-                       "hospitalized: {}, "
-                       "ICU: {}, "
-                       "tested: {}, "
-                       "total quarantined: {}, "
-                       "infected students: {}, "
-                       "vaccinated: {}"                ).format(day,
-                                                       self.track_infected[day],
-                                                       self.track_recovered[day],
-                                                       self.track_susceptible[day],
-                                                       self.track_dead[day],
-                                                       self.track_hospitalized[day],
-                                                       self.track_ICU[day],
-                                                       self.track_tested[day],
-                                                       self.track_quarantined[day],
-                                                       self.track_inf_students[day],
-                                                       self.track_vaccinated[day]))
+                print((f"Day: {day}, "
+                       f"infected: {self.track_infected[day]}, "
+                       f"recovered: {self.track_recovered[day]}, "
+                       f"susceptible: {self.track_susceptible[day]}, "
+                       f"dead: {self.track_dead[day]}, "
+                       f"hospitalized: {self.track_hospitalized[day]}, "
+                       f"ICU: {self.track_ICU[day]}, "
+                       f"tested: {self.track_tested[day]}, "
+                       f"total quarantined: {self.track_quarantined[day]}, "
+                       f"infected students: {self.track_inf_students[day]}, "
+                       f"vaccinated: {self.track_vaccinated[day]}"))
 
         if self.verbose:
-            print('{:-<80}'.format(''))
             time_seconds = timer() - beg_time
             m, s = divmod(time_seconds, 60)
             h, m = divmod(m, 60)
-            print('Time elapsed: {:02d}:{:02d}:{:02d}'.format(int(h), int(m), int(s)))
-            print("At the end,", self.track_susceptible[-1], "never got it")
-            print(self.track_dead[-1], "died")
-            print(np.max(self.track_infected), "had it at the peak")
-            print(self.track_tested[day], "have been tested")
-            print(np.max(self.track_quarantined), "were in quarantine at the peak")
-            print(np.max(self.track_hospitalized), "at peak hospitalizations")
-            print(np.max(self.track_dead[-1]), "at peak deaths")
-            print(self.track_vaccinated[day], "people were vaccinated")
-            print("{:.2f}% of population was vaccinated.".format(self.track_vaccinated[day]/self.nPop*100))
+            print(f"{'':-<80}")
+            print("Simulation summary:")
+            print(f"    Time elapsed: {h:02.0f}:{m:02.0f}:{s:02.0f}")
+            print(f"    {self.track_susceptible[-1]} never got it")
+            print(f"    {self.track_dead[-1]} died")
+            print(f"    {np.max(self.track_infected)} had it at the peak")
+            print(f"    {self.track_tested[day]} were tested")
+            print(f"    {np.max(self.track_quarantined)} were in quarantine at the peak")
+            print(f"    {np.max(self.track_hospitalized)} at peak hospitalizations")
+            print(f"    {np.max(self.track_dead[-1])} at peak deaths")
+            print(f"    {self.track_vaccinated[day]} people were vaccinated")
+            print(f"    {self.track_vaccinated[day]/self.nPop*100:.2f}% of population was vaccinated.")
 
         self.has_run = True
 
