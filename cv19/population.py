@@ -139,7 +139,7 @@ class Population:
             self.house_ppl_i[housei][where] = i
 
         ############### STUDENTS ###############
-        student_age = np.random.choice(a=['10-19', '20-27'], p=[0.5,0.5], size = self.nStudents) # students age ranges 10-19 and 20-29
+        student_age = np.random.choice(a=['10-19', '20-29'], p=[0.5,0.5], size = self.nStudents) # students age ranges 10-19 and 20-29
         student_case_severity_arr = np.empty(self.nStudents, dtype=object)
         for i, age in enumerate(student_age):
             try:
