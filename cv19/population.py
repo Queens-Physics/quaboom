@@ -90,7 +90,7 @@ class Population:
             try:
                 case_severity_arr[i] = np.random.choice(a=self.severity_options,
                                                         p=[self.severity_params[age][key] for key in constants.SEVERITY_OPTIONS])
-            except ValueError as e:
+            except ValueError:
                 print(f"'{age}' is not a valid age range and has no associated case severity.")
 
         mask_type_arr = np.random.choice(a=self.mask_options, p=self.mask_weights, size=self.nPop)
@@ -139,13 +139,13 @@ class Population:
             self.house_ppl_i[housei][where] = i
 
         ############### STUDENTS ###############
-        student_age = np.random.choice(a=['10-19', '20-29'], p=[0.5,0.5], size = self.nStudents) # students age ranges 10-19 and 20-29
+        student_age = np.random.choice(a=['10-19', '20-27'], p=[0.5,0.5], size = self.nStudents) # students age ranges 10-19 and 20-29
         student_case_severity_arr = np.empty(self.nStudents, dtype=object)
         for i, age in enumerate(student_age):
             try:
                 student_case_severity_arr[i] = np.random.choice(a=self.severity_options,
                                                                 p=[self.severity_params[age][key] for key in constants.SEVERITY_OPTIONS])
-            except ValueError as e:
+            except ValueError:
                 print(f"'{age}' is not a valid age range and has no associated case severity.")
 
         self.student_indices = np.zeros(self.nPop, dtype=int) + NULL_ID
@@ -261,23 +261,6 @@ class Population:
         # assign severity weights
         with open(self.case_severity_file, encoding='utf-8') as json_file:
             self.severity_params = json.load(json_file)
-
-#         self.severity_weights_0_19 = np.array([severity_params["case_severity_0-19"][key]
-#                                           for key in constants.SEVERITY_OPTIONS])
-#         self.severity_weights_20_29 = np.array([severity_params["case_severity_20-29"][key]
-#                                           for key in constants.SEVERITY_OPTIONS])
-#         self.severity_weights_30_39 = np.array([severity_params["case_severity_30-39"][key]
-#                                           for key in constants.SEVERITY_OPTIONS])
-#         self.severity_weights_40_49 = np.array([severity_params["case_severity_40-49"][key]
-#                                           for key in constants.SEVERITY_OPTIONS])
-#         self.severity_weights_50_59 = np.array([severity_params["case_severity_50-59"][key]
-#                                           for key in constants.SEVERITY_OPTIONS])
-#         self.severity_weights_60_69 = np.array([severity_params["case_severity_60-69"][key]
-#                                           for key in constants.SEVERITY_OPTIONS])
-#         self.severity_weights_70_79 = np.array([severity_params["case_severity_70-79"][key]
-#                                           for key in constants.SEVERITY_OPTIONS])
-#         self.severity_weights_80_up = np.array([severity_params["case_severity_80+"][key]
-#                                           for key in constants.SEVERITY_OPTIONS])
 
         # format mask weights correctly
         self.mask_weights = np.array([self.mask_type[key] for key in constants.MASK_OPTIONS])
