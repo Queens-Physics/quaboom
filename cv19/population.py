@@ -90,8 +90,8 @@ class Population:
             try:
                 case_severity_arr[i] = np.random.choice(a=self.severity_options,
                                                         p=[self.severity_params[age][key] for key in constants.SEVERITY_OPTIONS])
-            except ValueError:
-                print(f"'{age}' is not a valid age range and has no associated case severity.")
+            except KeyError as e:
+                raise ValueError((f"'{age}' is not a valid age range and has no associated case severity.")) from e
 
         mask_type_arr = np.random.choice(a=self.mask_options, p=self.mask_weights, size=self.nPop)
         has_mask_arr = np.random.uniform(size=self.nPop) < self.prob_has_mask
@@ -145,8 +145,8 @@ class Population:
             try:
                 student_case_severity_arr[i] = np.random.choice(a=self.severity_options,
                                                                 p=[self.severity_params[age][key] for key in constants.SEVERITY_OPTIONS])
-            except ValueError:
-                print(f"'{age}' is not a valid age range and has no associated case severity.")
+            except KeyError as e:
+                raise ValueError((f"'{age}' is not a valid age range and has no associated case severity.")) from e
 
         self.student_indices = np.zeros(self.nPop, dtype=int) + NULL_ID
         self.res_houses = np.zeros(len(self.stud_houses), dtype=int) + NULL_ID # student houses that are in residence will be nonzero
