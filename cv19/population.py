@@ -83,7 +83,16 @@ class Population:
         age_arr = np.random.choice(a=self.age_options, p=self.age_weights, size=self.nPop)
         job_arr = np.random.choice(a=self.job_options, p=self.job_weights, size=self.nPop)
         isolation_tend_arr = np.random.choice(a=self.isolation_options, p=self.isolation_weights, size=self.nPop)
-        case_severity_arr = np.random.choice(a=self.severity_options, p=self.severity_weights, size=self.nPop)
+        case_severity_arr = np.empty(shape=self.nPop, dtype=object)
+        # case severity now changes to depending on the age
+
+        for i, age in enumerate(age_arr):
+            try:
+                case_severity_arr[i] = np.random.choice(a=self.severity_options,
+                                                        p=[self.severity_params[age][key] for key in constants.SEVERITY_OPTIONS])
+            except KeyError as e:
+                raise ValueError((f"'{age}' is not a valid age range and has no associated case severity.")) from e
+
         mask_type_arr = np.random.choice(a=self.mask_options, p=self.mask_weights, size=self.nPop)
         has_mask_arr = np.random.uniform(size=self.nPop) < self.prob_has_mask
         vaccine_type_arr = np.random.choice(a=self.vaccine_options, p=self.vaccine_weights, size=self.nPop)
@@ -130,7 +139,14 @@ class Population:
             self.house_ppl_i[housei][where] = i
 
         ############### STUDENTS ###############
-        student_age = np.random.choice(a=['10-19', '20-29'], p=[0.5,0.5], size = self.nPop) # students are in age ranges 10-19 and 20-29
+        student_age = np.random.choice(a=['10-19', '20-29'], p=[0.5,0.5], size = self.nStudents) # students age ranges 10-19 and 20-29
+        student_case_severity_arr = np.empty(self.nStudents, dtype=object)
+        for i, age in enumerate(student_age):
+            try:
+                student_case_severity_arr[i] = np.random.choice(a=self.severity_options,
+                                                                p=[self.severity_params[age][key] for key in constants.SEVERITY_OPTIONS])
+            except KeyError as e:
+                raise ValueError((f"'{age}' is not a valid age range and has no associated case severity.")) from e
 
         self.student_indices = np.zeros(self.nPop, dtype=int) + NULL_ID
         self.res_houses = np.zeros(len(self.stud_houses), dtype=int) + NULL_ID # student houses that are in residence will be nonzero
@@ -148,13 +164,13 @@ class Population:
                                 dead=False, hospitalized=False,ICU=False,quarantined=False,quarantined_day=None,
                                 infected_day=None, recovered_day=None, death_day=None,
                                 others_infected=None, cure_days=None, recent_infections=None,
-                                age=student_age[i],
+                                age=student_age[i-self.nPop+self.nStudents], #adjust for index inconsistency
                                 job='Student',
                                 house_index=studHouseIndex,
                                 vaccinated=False,
                                 vaccine_type=vaccine_type_arr[i],
                                 isolation_tendencies=isolation_tend_arr[i],
-                                case_severity=case_severity_arr[i],
+                                case_severity=student_case_severity_arr[i-self.nPop+self.nStudents], #adjust for index inconsistency
                                 mask_type=mask_type_arr[i],
                                 has_mask=has_mask_arr[i])
 
@@ -240,9 +256,11 @@ class Population:
             setattr(self, attr, sim_obj.parameters["population_data"][attr])
 
         # case severity from disease params
-        self.severity_weights = np.array([sim_obj.disease_parameters["case_severity"][key]
-                                          for key in constants.SEVERITY_OPTIONS])
         self.severity_options = constants.SEVERITY_OPTIONS
+
+        # assign severity weights
+        with open(self.case_severity_file, encoding='utf-8') as json_file:
+            self.severity_params = json.load(json_file)
 
         # format mask weights correctly
         self.mask_weights = np.array([self.mask_type[key] for key in constants.MASK_OPTIONS])

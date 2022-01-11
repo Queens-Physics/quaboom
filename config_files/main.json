@@ -41,6 +41,7 @@
 
     "population_data":{
         "demographics_file":"../data/dataK.json",
+        "case_severity_file":"../data/case_severity.json",
         "prob_has_mask":0.8,
         "prob_of_test":1,
         "mask_type": {"Surgical": 0.2, "Non-surgical": 0.8},
