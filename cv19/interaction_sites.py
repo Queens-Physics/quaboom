@@ -349,7 +349,7 @@ class Interaction_Sites:
 
                 if person_1_infected != person_2_infected:
                     # Have an interaction between those people
-                    did_infect = self.interact(person_1_index, person_2_index)
+                    did_infect = self.interact(p1_obj, p2_obj)
                     if did_infect:
                         if person_1_infected:
                             new_infections[person_2_index] = True
@@ -403,39 +403,35 @@ class Interaction_Sites:
             Whether or not the interaction caused the spread of the infection.
 
         '''
-        if not self.policy.get_mask_mandate:
-            spread_prob = self.base_infection_spread_prob
-        else:
-            p1Mask = self.pop.get_person(person_1).wear_mask()
-            p2Mask = self.pop.get_person(person_2).wear_mask()
-            p1Infected = self.pop.get_person(person_1).is_infected()
-            P1_INWARD_PROB, P1_OUTWARD_PROB = self.pop.get_person(person_1).mask_type_efficiency()
-            P2_INWARD_PROB, P2_OUTWARD_PROB = self.pop.get_person(person_2).mask_type_efficiency()
+        p1_infected = person_1.is_infected()
+        p2_infected = person_2.is_infected()
 
-            if p1Infected:
-                if p1Mask and p2Mask:
-                    spread_prob = self.base_infection_spread_prob*P1_OUTWARD_PROB*P2_INWARD_PROB
-                elif p1Mask:
-                    spread_prob = self.base_infection_spread_prob*P1_OUTWARD_PROB
-                elif p2Mask:
-                    spread_prob = self.base_infection_spread_prob*P2_INWARD_PROB
-                spread_prob = self.base_infection_spread_prob
+        spread_prob = self.base_infection_spread_prob
 
-            else:
-                if p1Mask and p2Mask:
-                    spread_prob = self.base_infection_spread_prob*P2_OUTWARD_PROB*P1_INWARD_PROB
-                elif p1Mask:
-                    spread_prob = self.base_infection_spread_prob*P1_INWARD_PROB
-                elif p2Mask:
-                    spread_prob = self.base_infection_spread_prob*P2_OUTWARD_PROB
-                else:
-                    spread_prob = self.base_infection_spread_prob
+        if self.policy.get_mask_mandate():
+            p1_mask = person_1.wear_mask()
+            p2_mask = person_2.wear_mask()
 
-        p1Vaccinated1 = self.pop.get_person(person_1).is_vaccinated()
-        p2Vaccinated1 = self.pop.get_person(person_2).is_vaccinated()
+            P1_INWARD_PROB, P1_OUTWARD_PROB = person_1.mask_type_efficiency()
+            P2_INWARD_PROB, P2_OUTWARD_PROB = person_2.mask_type_efficiency()
 
-        p1_multiplier = self.pop.get_person(person_1).vaccine_type_efficiency() if p1Vaccinated1 else 1
-        p2_multiplier = self.pop.get_person(person_2).vaccine_type_efficiency() if p2Vaccinated1 else 1
+            if p1_infected:
+                if p1_mask:
+                    spread_prob *= P1_OUTWARD_PROB
+                if p2_mask:
+                    spread_prob *= P2_INWARD_PROB
+
+            elif p2_infected:
+                if p1_mask:
+                    spread_prob *= P1_INWARD_PROB
+                if p2_mask:
+                    spread_prob *= P2_OUTWARD_PROB
+
+        p1_vaccinated1 = person_1.is_vaccinated()
+        p2_vaccinated1 = person_2.is_vaccinated()
+
+        p1_multiplier = person_1.vaccine_type_efficiency() if p1_vaccinated1 else 1
+        p2_multiplier = person_2.vaccine_type_efficiency() if p2_vaccinated1 else 1
 
         spread_prob *= (p1_multiplier * p2_multiplier)
 
