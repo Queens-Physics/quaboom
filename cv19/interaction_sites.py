@@ -418,7 +418,7 @@ class Interaction_Sites:
 
             P1_INWARD_PROB, P1_OUTWARD_PROB = person_1.mask_type_efficiency()
             P2_INWARD_PROB, P2_OUTWARD_PROB = person_2.mask_type_efficiency()
-            
+
             virus_type = person_1.get_virus_type() if p1_infected else person_2.get_virus_type()
             virus_name = list(self.virus_names.keys())[list(self.virus_names.values()).index(virus_type)]
             spread_prob = self.base_infection_spread_prob[virus_name]
