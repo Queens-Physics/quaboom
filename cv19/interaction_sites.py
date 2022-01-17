@@ -93,7 +93,6 @@ class Interaction_Sites:
                                        self.grade_loyalty_means["RES"],
                                        self.grade_loyalty_stds["RES"])
 
-        
 
     def load_attributes_from_sim_obj(self, sim_obj):
         '''Method to load in attributes from the provided simulation class object.
@@ -414,7 +413,7 @@ class Interaction_Sites:
 
         p1_infected = person_1.is_infected()
         p2_infected = person_2.is_infected()
-        
+
         virus_type = person_1.get_virus_type() if p1_infected else person_2.get_virus_type()
         spread_prob = self.base_infection_spread_prob[self.variant_code_map[virus_type]]
 

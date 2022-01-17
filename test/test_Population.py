@@ -159,7 +159,7 @@ class TestPopulation(unittest.TestCase):
         infected_id = pop.get_infected()[0]
 
         # Make sure cure function works
-        self.assertTrue(pop.cure(index=infected_id, day=40)) #day=40 is long past due infection
+        self.assertTrue(pop.cure(index=infected_id, day=40)) # day=40 is long past due infection
         # Make sure lists are right
         self.assertTrue(infected_id in pop.get_recovered())
         self.assertFalse(infected_id in pop.get_infected())
