@@ -101,7 +101,7 @@ class simulation():
         self.track_new_quarantined = np.zeros(self.nDays, dtype=int)
         self.track_tested = np.zeros(self.nDays, dtype=int)       # total tested individuals
         self.track_new_tested = np.zeros(self.nDays, dtype=int)   # new tested per day
-        self.track_testing_wait_list = np.zeros(self.nDays, dtype=int) # counts the number of people waiting to get tests each day
+        self.track_testing_wait_list = np.zeros(self.nDays, dtype=int) # counts the number of people waiting for tests each day
         self.track_inf_students = np.zeros(self.nDays, dtype=int)
 
         self.track_masks = np.zeros(self.nDays, dtype=bool)
@@ -147,7 +147,7 @@ class simulation():
             setattr(self, attr, self.parameters["person_data"][attr])
 
         #### Load in the virus types tracking arrays ####
-        self.virus_names = np.array(list(self.variant_codes.keys()))
+        self.virus_names = list(self.variant_codes.keys())
         self.track_virus_types = {virus_name:np.zeros(self.nDays, dtype=int) for virus_name in self.virus_names}
 
 
@@ -595,6 +595,6 @@ class simulation():
                       "time_elapsed":self.track_time, "vaccinated":self.track_vaccinated}
         # Unpack the virus types
         for virus_type in self.track_virus_types.keys():
-            returnDict[str(virus_type)] = self.track_virus_types[virus_type]
+            returnDict[virus_type] = self.track_virus_types[virus_type]
 
         return returnDict

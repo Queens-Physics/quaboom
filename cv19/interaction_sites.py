@@ -93,6 +93,8 @@ class Interaction_Sites:
                                        self.grade_loyalty_means["RES"],
                                        self.grade_loyalty_stds["RES"])
 
+        
+
     def load_attributes_from_sim_obj(self, sim_obj):
         '''Method to load in attributes from the provided simulation class object.
 
@@ -116,7 +118,8 @@ class Interaction_Sites:
             setattr(self, attr, sim_obj.disease_parameters["spread_data"][attr])
 
         # Get the virus type names
-        self.virus_names = sim_obj.variant_codes
+        self.variant_codes = sim_obj.variant_codes
+        self.variant_code_map = {v_id: v_name for v_name, v_id in self.variant_codes.items()} # virus ids
 
         # Set the actual objects now
         self.pop = sim_obj.pop
@@ -411,6 +414,9 @@ class Interaction_Sites:
 
         p1_infected = person_1.is_infected()
         p2_infected = person_2.is_infected()
+        
+        virus_type = person_1.get_virus_type() if p1_infected else person_2.get_virus_type()
+        spread_prob = self.base_infection_spread_prob[self.variant_code_map[virus_type]]
 
         if self.policy.get_mask_mandate():
             p1_mask = person_1.wear_mask()
@@ -418,10 +424,6 @@ class Interaction_Sites:
 
             P1_INWARD_PROB, P1_OUTWARD_PROB = person_1.mask_type_efficiency()
             P2_INWARD_PROB, P2_OUTWARD_PROB = person_2.mask_type_efficiency()
-
-            virus_type = person_1.get_virus_type() if p1_infected else person_2.get_virus_type()
-            virus_name = list(self.virus_names.keys())[list(self.virus_names.values()).index(virus_type)]
-            spread_prob = self.base_infection_spread_prob[virus_name]
 
             if p1_infected:
                 if p1_mask:
@@ -478,16 +480,16 @@ class Interaction_Sites:
                 healthy_housemembers = [i for i in range(house_size) if not housemembers[i].is_infected()]
 
                 for person in healthy_housemembers:
-                    virus_type = np.random.choice(a=virus_types)
-                    virus_name = list(self.virus_names.keys())[list(self.virus_names.values()).index(virus_type)]
+                    virus_id = np.random.choice(a=virus_types)
+                    virus_name = self.variant_code_map[virus_id]
 
                     infection_chance = self.base_infection_spread_prob[virus_name] * self.house_infection_spread_factor
                     caught_infection = random() < infection_chance
 
                     if caught_infection:
-                        if virus_type is None:
+                        if virus_id is None:
                             raise ValueError("House infection has incorrect virus type.")
-                        self.pop.infect(index=housemembers[person].get_index(), day=day, virus_type=virus_type)
+                        self.pop.infect(index=housemembers[person].get_index(), day=day, virus_type=virus_id)
 
     def student_house_interact(self, day):
         '''Method to manage interactions between members of the same student household.
@@ -522,15 +524,15 @@ class Interaction_Sites:
                 healthy_housemembers = [i for i in range(house_size) if not housemembers[i].is_infected()]
 
                 for person in healthy_housemembers:
-                    virus_type = np.random.choice(a=virus_types)
-                    virus_name = list(self.virus_names.keys())[list(self.virus_names.values()).index(virus_type)]
+                    virus_id = np.random.choice(a=virus_types)
+                    virus_name = self.variant_code_map[virus_id]
 
                     infection_chance = self.base_infection_spread_prob[virus_name] * self.house_infection_spread_factor
                     caught_infection = random() < infection_chance
                     if caught_infection:
-                        if virus_type is None:
+                        if virus_id is None:
                             raise ValueError("House infection has incorrect virus type.")
-                        self.pop.infect(index=housemembers[person].get_index(), day=day, virus_type=virus_type)
+                        self.pop.infect(index=housemembers[person].get_index(), day=day, virus_type=virus_id)
 
     def testing_site(self, tests_per_day, day):
         '''Method to update status of symptoms and run the testing sites code.

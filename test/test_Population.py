@@ -42,7 +42,7 @@ class TestPopulation(unittest.TestCase):
         '''
         nPop = self.sim_obj.nPop
         variants = self.sim_obj.variants
-        n0 = np.sum([value for key, value in variants.items()])
+        n0 = sum(v_id for _, v_id in variants.items())
         pop = Population(self.sim_obj)
 
         # Make sure that there are n0 infected, 0 recovered, nPop-n0 susceptible
