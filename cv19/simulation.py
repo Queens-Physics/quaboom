@@ -438,7 +438,7 @@ class simulation():
                        f"tested: {self.track_tested[day]}, "
                        f"total quarantined: {self.track_quarantined[day]}, "
                        f"infected students: {self.track_inf_students[day]}, "
-                       f"variants: {self.track_virus_type[day]}"
+                       f"variants: {self.track_virus_types[day]}"
                        f"vaccinated: {self.track_vaccinated[day]}"))
 
         if self.verbose:
@@ -455,7 +455,7 @@ class simulation():
             print(f"    {np.max(self.track_quarantined)} were in quarantine at the peak")
             print(f"    {np.max(self.track_hospitalized)} at peak hospitalizations")
             print(f"    {np.max(self.track_dead[-1])} at peak deaths")
-            print(f"    The breakdown of the variants is: {np.max(self.track_virus_type[day])}")
+            print(f"    The breakdown of the variants is: {np.max(self.track_virus_types[day])}")
             print(f"    {self.track_vaccinated[day]} people were vaccinated")
             print(f"    {self.track_vaccinated[day]/self.nPop*100:.2f}% of population was vaccinated.")
 
