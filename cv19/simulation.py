@@ -242,7 +242,7 @@ class simulation():
                     # Need to check for any whitespace, if entire line is whitespace ignore.
                     name = line.split()[1] if line.strip() else ''
 
-                    if name and name not in ['RunEpidemicPlot.ipynb']:
+                    if name and str(Path(name).parents[0]) == 'cv19':
                         dirty = True
 
             except subprocess.CalledProcessError as e:
@@ -269,8 +269,6 @@ class simulation():
             Variable to indicate whether the code should return an error if same object is
             run multiple times.
         '''
-
-
         # Check whether the simulation has already been run.
         if fail_on_rerun:
             information = ("When running again, previous results will be overwritten. "
@@ -278,6 +276,9 @@ class simulation():
                            "However, if this is desired, please explicitly set the "
                            "fail_on_rerun argument to False.")
             self.check_has_run(check=False, information=information, fail=True)
+
+        if self.verbose:
+            print(f"Simulation code version (from git): {self.code_id}\n")
 
         # Get current time for measuring elapsed time of simulation.
         beg_time = timer()
