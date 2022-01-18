@@ -438,8 +438,13 @@ class simulation():
                        f"tested: {self.track_tested[day]}, "
                        f"total quarantined: {self.track_quarantined[day]}, "
                        f"infected students: {self.track_inf_students[day]}, "
-                       f"variants: {self.track_virus_types[day]}"
                        f"vaccinated: {self.track_vaccinated[day]}"))
+                
+                # Print variants
+                print("Variants", end=": ")
+                for key, val in self.track_virus_types.items():
+                    print(f"{key}:{val[day]}", end=", ")
+                print("\n")
 
         if self.verbose:
             time_seconds = timer() - beg_time
@@ -455,7 +460,10 @@ class simulation():
             print(f"    {np.max(self.track_quarantined)} were in quarantine at the peak")
             print(f"    {np.max(self.track_hospitalized)} at peak hospitalizations")
             print(f"    {np.max(self.track_dead[-1])} at peak deaths")
-            print(f"    The breakdown of the variants is: {np.max(self.track_virus_types[day])}")
+            print(f"    The breakdown of the variants is", end=": ")
+            for key, val in self.track_virus_types.items():
+                print(f"{key}-{np.max(val)}", end=", ")
+            print("")
             print(f"    {self.track_vaccinated[day]} people were vaccinated")
             print(f"    {self.track_vaccinated[day]/self.nPop*100:.2f}% of population was vaccinated.")
 
