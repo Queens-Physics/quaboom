@@ -20,7 +20,8 @@ class Person(object):
                  quarantined_day=None, infected_day=None, recovered_day=None, death_day=None, others_infected=None,
                  cure_days=None, recent_infections=None, vaccinated=False, vaccine_type=None,
                  age=None, job=None, house_index=0, isolation_tendencies=None, case_severity=None, mask_type=None,
-                 has_mask=True):
+                 has_mask=True, virus_type=None):
+
         '''Method to load in attributes from the provided simulation class object.
 
         Sets all objects in the "person_data" dictionary key as self attributes of the
@@ -103,6 +104,7 @@ class Person(object):
         self.knows_infected = False
         self.will_get_symptoms = False
         self.has_mask = has_mask
+        self.virus_type = virus_type
         self.test_day = None
         self.has_cold = False
         self.days_in_lockdown = 0
@@ -353,7 +355,15 @@ class Person(object):
         '''
         return self.has_mask
 
-    def infect(self, day, cure_days=None):
+    def get_virus_type(self):
+        '''Method to return the virus type of a person.
+        Returns
+        -------
+        self.virus_type: :obj:`int`
+        '''
+        return self.virus_type
+
+    def infect(self, day, virus_type, cure_days=None):
         '''Method to infect a person.
         If they're quarantined and their quarantine time has ended, let them out of quarantine.
         If they're not quarantined but they have severe symptoms, set self.quarantined to be True.
@@ -362,6 +372,8 @@ class Person(object):
         ----------
         day : int
             The day value that this function is being called on in the encompassing simulation class.
+        virus_type : str
+            The type of virus that this person is being infected with.
         cure_days : int
             The day value set for the person to be cured after being infected.
 
@@ -375,6 +387,7 @@ class Person(object):
         # Check that they are suseptable (maybe should have that as property?)
         if not self.recovered and not self.infected and not self.dead:
             self.infected = True
+            self.virus_type = virus_type
             self.infected_day = day
             self.will_get_symptoms = True
             self.days_until_symptoms  = np.random.randint(d_params["days_before_symptoms"]["min"],

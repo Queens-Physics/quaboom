@@ -101,14 +101,13 @@ class simulation():
         self.track_new_quarantined = np.zeros(self.nDays, dtype=int)
         self.track_tested = np.zeros(self.nDays, dtype=int)       # total tested individuals
         self.track_new_tested = np.zeros(self.nDays, dtype=int)   # new tested per day
-        self.track_testing_wait_list = np.zeros(self.nDays, dtype=int) # counts the number of people waiting to get tests each day
+        self.track_testing_wait_list = np.zeros(self.nDays, dtype=int) # counts the number of people waiting for tests each day
         self.track_inf_students = np.zeros(self.nDays, dtype=int)
 
         self.track_masks = np.zeros(self.nDays, dtype=bool)
         self.track_lockdown = np.zeros(self.nDays, dtype=bool)
         self.track_testing = np.zeros(self.nDays, dtype=bool)
         self.track_vaccinated = np.zeros(self.nDays, dtype=int)
-
         self.track_time = np.zeros(self.nDays, dtype=float) # time elapsed (in seconds) since start of simulation
 
         self.has_run = False                                 # Indicates if the sim has run yet
@@ -146,6 +145,11 @@ class simulation():
         person_attributes = self.parameters["person_data"].keys()
         for attr in person_attributes:
             setattr(self, attr, self.parameters["person_data"][attr])
+
+        #### Load in the virus types tracking arrays ####
+        self.virus_names = list(self.variant_codes.keys())
+        self.track_virus_types = {virus_name:np.zeros(self.nDays, dtype=int) for virus_name in self.virus_names}
+
 
     def load_disease_parameters(self, filename):
         ''' Method to load in attributes from the disease configuration file.
@@ -306,6 +310,10 @@ class simulation():
             self.track_new_quarantined[day] = self.pop.get_new_quarantined()
             self.track_inf_students[day] = self.pop.count_infected_students()
 
+            daily_variant_counts = self.pop.count_virus_types()
+            for virus_name in self.virus_names:
+                self.track_virus_types[virus_name][day] = daily_variant_counts[virus_name]
+
             self.track_vaccinated[day] = self.pop.count_vaccinated()
             self.new_tests = 0
 
@@ -340,7 +348,9 @@ class simulation():
             if self.inter_sites.students_on and day == self.policy.student_day_trigger:
                 infStudents = np.random.randint(self.inf_students_lower, self.inf_students_upper)
                 indices = np.random.choice(self.pop.get_student_indices(), infStudents, replace=False)
-                self.pop.infect_incoming_students(indices=indices, day=day)
+                # Convert virus type to virus code
+                student_default_virus_code = self.variant_codes[self.student_default_virus_type]
+                self.pop.infect_incoming_students(indices=indices, day=day, virus_type=student_default_virus_code)
 
             ############### VISITOR STUFF ###############
             #add a random number of visitors to the population
@@ -348,7 +358,11 @@ class simulation():
             visitors_ind = [x for x in range(self.nPop, self.nPop+num_vis-1)]
             vis_age = np.random.choice(a=self.pop.age_options, p=self.pop.age_weights, size=num_vis)
             for i in range(0, num_vis):
-                visitor = Person(index=i+self.nPop, sim_obj=self, infected=True, recovered=False, dead=False, hospitalized=False, ICU=False, quarantined=False, quarantined_day=None, infected_day=None, recovered_day=None, death_day=None, others_infected=None, cure_days=None, recent_infections=None, vaccinated=False, age=vis_age[i], job=None,house_index=None, isolation_tendencies=0.2, case_severity='Mild', has_mask=True)
+                visitor = Person(index=i+self.nPop, sim_obj=self, infected=True, recovered=False, dead=False,
+                                 hospitalized=False, ICU=False, quarantined=False, quarantined_day=None, infected_day=None,
+                                 recovered_day=None, death_day=None, others_infected=None, cure_days=None, recent_infections=None,
+                                 vaccinated=False, age=vis_age[i], job=None,house_index=None, isolation_tendencies=0.2,
+                                 case_severity='Mild', has_mask=True, virus_type="alpha")
                 self.pop.population.append(visitor)
 
             ############### INTERACTION SITES STUFF ###############
@@ -426,6 +440,12 @@ class simulation():
                        f"infected students: {self.track_inf_students[day]}, "
                        f"vaccinated: {self.track_vaccinated[day]}"))
 
+                # Print variants
+                print("Variants", end=": ")
+                for key, val in self.track_virus_types.items():
+                    print(f"{key}:{val[day]}", end=", ")
+                print("\n")
+
         if self.verbose:
             time_seconds = timer() - beg_time
             m, s = divmod(time_seconds, 60)
@@ -440,6 +460,10 @@ class simulation():
             print(f"    {np.max(self.track_quarantined)} were in quarantine at the peak")
             print(f"    {np.max(self.track_hospitalized)} at peak hospitalizations")
             print(f"    {np.max(self.track_dead[-1])} at peak deaths")
+            print("    The breakdown of the variants is", end=": ")
+            for key, val in self.track_virus_types.items():
+                print(f"{key}-{np.max(val)}", end=", ")
+            print("")
             print(f"    {self.track_vaccinated[day]} people were vaccinated")
             print(f"    {self.track_vaccinated[day]/self.nPop*100:.2f}% of population was vaccinated.")
 
@@ -485,7 +509,8 @@ class simulation():
 
     def plot(self, plot_infected=True, plot_susceptible=True, plot_dead=True, plot_recovered=True, plot_new_infected=True,
              plot_tested=True, plot_quarantined=True, plot_new_tests=True, plot_new_quarantined=True, plot_masks=True,
-             plot_hospitalized=True, plot_ICU=True, plot_lockdown=True, plot_testing=True, plot_students=True, plot_vaccinated=True, log=False):
+             plot_hospitalized=True, plot_ICU=True, plot_lockdown=True, plot_testing=True, plot_students=True,
+             plot_vaccinated=True, plot_virus_types=None, log=False):
         ''' Method used to plot simulation results.
 
         Will return a warning or error if the simulation has not been run yet.
@@ -530,6 +555,10 @@ class simulation():
             plt.plot(days, self.track_new_quarantined, label='new quarantined')
         if plot_students:
             plt.plot(days, self.track_inf_students, label="infected students")
+        if plot_virus_types is not None:
+            for key in plot_virus_types:
+                if plot_virus_types[key]:
+                    plt.plot(days, self.track_virus_types[key], label=str(key))
         if plot_vaccinated:
             plt.plot(days, self.track_vaccinated, label='vaccinated')
 
@@ -572,5 +601,8 @@ class simulation():
                       "ICU":self.track_ICU, "testing_enforced":self.track_testing,
                       "masks_enforced":self.track_masks, "lockdown_enforced":self.track_lockdown,
                       "time_elapsed":self.track_time, "vaccinated":self.track_vaccinated}
+        # Unpack the virus types
+        for virus_type in self.track_virus_types.keys():
+            returnDict[virus_type] = self.track_virus_types[virus_type]
 
         return returnDict

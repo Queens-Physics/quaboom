@@ -35,7 +35,6 @@ class Population:
         self.set_demographic_parameters()
 
         self.nPop = sim_obj.nPop  # total population
-        self.n0 = sim_obj.n0  # initial infected
         self.v0 = sim_obj.v0 # initial vaccinated
 
         # Student parameter
@@ -48,6 +47,9 @@ class Population:
         self.prob_of_test = self.prob_of_test
         self.prob_has_mask = self.prob_has_mask
         self.n_students_in_res = 0
+
+        # For access to virus code mappings
+        self.virus_codes = sim_obj.variant_codes
 
         houseIndex = 0
         totalHouse = 0
@@ -121,7 +123,8 @@ class Population:
                                isolation_tendencies=isolation_tend_arr[i],
                                case_severity=case_severity_arr[i],
                                mask_type=mask_type_arr[i],
-                               has_mask=has_mask_arr[i])
+                               has_mask=has_mask_arr[i],
+                               virus_type=None)
 
             # ADD A PERSON
             self.population[i] = newPerson
@@ -172,7 +175,8 @@ class Population:
                                 isolation_tendencies=isolation_tend_arr[i],
                                 case_severity=student_case_severity_arr[i-self.nPop+self.nStudents], #adjust for index inconsistency
                                 mask_type=mask_type_arr[i],
-                                has_mask=has_mask_arr[i])
+                                has_mask=has_mask_arr[i],
+                                virus_type=None)
 
             self.population[i] = newStudent
 
@@ -215,20 +219,23 @@ class Population:
         self.hospitalized = np.zeros(self.nPop, dtype=int) + NULL_ID  # list of people hospitalized and in the ICU
         self.ICU = np.zeros(self.nPop, dtype=int) + NULL_ID  # list of people in the ICU
         self.quarantined = np.zeros(self.nPop, dtype=int) + NULL_ID  #list of people who are currently in quarantine
+        self.virus_types = np.zeros(self.nPop, dtype=int) + NULL_ID #list of individuals with NULL_ID as virus type
         self.vaccinated = np.zeros(self.nPop, dtype=int) + NULL_ID # list of people who have been vaccinated
-
         self.testing = []  # list of people waiting to be others_infected
         self.test_sum = 0  # total number of tests that have been run
         self.quarantined_sum = 0  # total number of people in quarantine (created as the list was having indexing issues)
         self.new_quarantined_num = 0  # new people in quarantine
 
-        # Selects the indices of the n0 initially infected people
-        # at random, then infects them
-        indices = sample(range(self.nPop), self.n0)
-        for i in indices:
-            self.population[i].infect(day=0)
-            self.infected[i] = i
-            self.susceptible[i] = NULL_ID
+        # Infect the first n0 people for each virus type
+        for virus_name in sim_obj.variants.keys():
+            virus_code = sim_obj.variant_codes[virus_name]
+
+            indices = sample(range(self.nPop), sim_obj.variants[virus_name])
+            for i in indices:
+                self.population[i].infect(day=0, virus_type=virus_code)
+                self.infected[i] = i
+                self.virus_types[i] = virus_code
+                self.susceptible[i] = NULL_ID
 
         # Vaccinate first v0 people
         v_indices = sample(range(self.nPop), self.v0)
@@ -254,6 +261,8 @@ class Population:
         attributes = sim_obj.parameters["population_data"].keys()
         for attr in attributes:
             setattr(self, attr, sim_obj.parameters["population_data"][attr])
+
+        self.variant_codes = sim_obj.variant_codes
 
         # case severity from disease params
         self.severity_options = constants.SEVERITY_OPTIONS
@@ -444,6 +453,16 @@ class Population:
         '''
         return np.count_nonzero(self.infected != NULL_ID)
 
+    def count_variant_cases(self, virus_name):
+        '''Method to count the number of people infected with a certain variant.
+
+        Returns
+        -------
+        np.count_nonzero(self.infetced != NULL_ID): :obj:`np.array` of :obj:`int`
+        '''
+        virus_code = self.virus_codes[virus_name]
+        return np.count_nonzero(self.virus_types == virus_code)
+
     def count_infected_students(self):
         '''Method to count how many infected students there are.
 
@@ -507,6 +526,17 @@ class Population:
         '''
         return np.count_nonzero(self.has_mask > 0)
 
+    def count_virus_types(self):
+        '''Method to count all virus types and return them as a dictionary.
+
+        Returns
+        -------
+        counts : :obj:`dict`
+        '''
+        counts = {virus_type: np.count_nonzero(self.virus_types==virus_code)
+                  for virus_type, virus_code in self.variant_codes.items()}
+        return counts
+
     def get_person(self, index):
         '''Method to return an individual based on their index.
 
@@ -516,7 +546,7 @@ class Population:
         '''
         return self.population[index]
 
-    def infect(self, index, day):
+    def infect(self, index, day, virus_type):
         '''Method to infect a person.
 
         Parameters
@@ -530,10 +560,15 @@ class Population:
         -------
         didWork: :obj:`int`
         '''
-        didWork = self.population[index].infect(day=day)
+        # Convert to virus code if virus type is a string
+        if isinstance(virus_type, str):
+            virus_type = self.virus_codes[virus_type]
+
+        didWork = self.population[index].infect(day=day, virus_type=virus_type)
         if didWork:
             self.infected[index] = index
             self.susceptible[index] = NULL_ID
+            self.virus_types[index] = virus_type
             if self.population[index].ICU:
                 self.ICU[index] = index
             elif self.population[index].hospitalized:
@@ -541,7 +576,7 @@ class Population:
 
         return didWork
 
-    def infect_incoming_students(self, indices, day):
+    def infect_incoming_students(self, indices, day, virus_type):
         '''Method to infect incoming students to the simulation.
 
         Parameters
@@ -558,7 +593,7 @@ class Population:
         '''
         for i in indices:
             daysAgo = np.random.randint(13)
-            self.infect(index=i, day=day-daysAgo)
+            self.infect(index=i, day=day-daysAgo, virus_type=virus_type)
         return True
 
     def update_infected(self, index):
@@ -620,6 +655,7 @@ class Population:
         self.infected[index] = NULL_ID
         self.recovered[index] = index
         self.hospitalized[index] = NULL_ID
+        self.virus_types[index] = NULL_ID
         self.ICU[index] = NULL_ID
         return True
 
@@ -662,6 +698,7 @@ class Population:
         self.infected[index] = NULL_ID
         self.recovered[index] = NULL_ID
         self.hospitalized[index] = NULL_ID
+        self.virus_types[index] = NULL_ID
         self.ICU[index] = NULL_ID
         self.dead[index] = index
         return True

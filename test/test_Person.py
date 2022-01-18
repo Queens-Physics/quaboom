@@ -59,7 +59,7 @@ class TestPerson(unittest.TestCase):
         self.assertEqual(person2.recovered_day, None)     # Should have no recovery day
 
         person3 = Person(3, sim_obj=self.sim_obj, infected=False)
-        person3.infect(day=infected_day, cure_days=cure_days)
+        person3.infect(day=infected_day, cure_days=cure_days, virus_type='alpha')
 
         day = infected_day + cure_days
         self.assertTrue(person3.check_cured(day=day))     # Should be cured by infected_day + cure_days
@@ -78,23 +78,23 @@ class TestPerson(unittest.TestCase):
         infected_day, cure_days = 10, 5
         person1 = Person(1, sim_obj=self.sim_obj, infected=False, recovered=False)
 
-        self.assertTrue(person1.infect(day=infected_day))  # Infection should have worked
+        self.assertTrue(person1.infect(day=infected_day, virus_type='alpha'))  # Infection should have worked
         self.assertTrue(person1.is_infected())             # Should be infected
         self.assertFalse(person1.is_recovered())           # Should not be recovered
         self.assertEqual(person1.infected_day, infected_day)              # Should have the right infected day
 
         person2 = Person(2, sim_obj=self.sim_obj, infected=True, recovered=False)
-        self.assertFalse(person2.infect(day=infected_day)) # Should not get infected - already infected
+        self.assertFalse(person2.infect(day=infected_day, virus_type='alpha')) # Should not get infected - already infected
 
         person3 = Person(3, sim_obj=self.sim_obj, infected=False, recovered=True)
-        self.assertFalse(person3.infect(day=infected_day)) # Should not get infected - already recovered MIGHT CHANGE
+        self.assertFalse(person3.infect(day=infected_day, virus_type='alpha')) # Should not get infected - already recovered
 
         person4 = Person(4, sim_obj=self.sim_obj, infected=False, recovered=False)
-        person4.infect(day=infected_day, cure_days=cure_days)
+        person4.infect(day=infected_day, cure_days=cure_days, virus_type='alpha')
         self.assertEqual(person4.cure_days, cure_days)     # Make sure that cure days is set properly
 
         person5 = Person(5, sim_obj=self.sim_obj, infected=False, recovered=False)
-        person5.infect(day=infected_day)
+        person5.infect(day=infected_day, virus_type='alpha')
         self.assertIsNotNone(person5.cure_days)            # Make sure that cure days is set even though no parameter passed
 
 if __name__ == '__main__':

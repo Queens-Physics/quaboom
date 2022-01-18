@@ -4,9 +4,20 @@
         "disease_config_file":"disease.json",
         "nDays":100,
         "nPop":10000,
+        "variants":{
+            "general":8, 
+            "alpha":8,
+            "delta":8
+            },
+        "variant_codes":{
+            "general":0,
+            "alpha":1, 
+            "delta":2
+            },
+        "vis_default_virus_type":"alpha",
+        "student_default_virus_type":"alpha",
         "num_students":2000,
         "max_num_res_students":500,
-        "n0":10,
         "v0":0,
         "will_go_prob":{"A":0.05, "B":0.2, "C":0.7, "LECT":0.8, "STUDY":0.2, "FOOD":0.1, "RES":1},
         "N_VIS_OPTION":[ 0, 1, 2, 3 ],

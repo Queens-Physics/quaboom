@@ -93,6 +93,7 @@ class Interaction_Sites:
                                        self.grade_loyalty_means["RES"],
                                        self.grade_loyalty_stds["RES"])
 
+
     def load_attributes_from_sim_obj(self, sim_obj):
         '''Method to load in attributes from the provided simulation class object.
 
@@ -115,7 +116,9 @@ class Interaction_Sites:
         for attr in d_attributes:
             setattr(self, attr, sim_obj.disease_parameters["spread_data"][attr])
 
-        self.house_infection_spread_prob = self.base_infection_spread_prob * self.house_infection_spread_factor
+        # Get the virus type names
+        self.variant_codes = sim_obj.variant_codes
+        self.variant_code_map = {v_id: v_name for v_name, v_id in self.variant_codes.items()} # virus ids
 
         # Set the actual objects now
         self.pop = sim_obj.pop
@@ -313,6 +316,7 @@ class Interaction_Sites:
 
         '''
         new_infections = np.zeros(self.pop.get_population_size(), dtype=bool)
+        new_infection_type = np.zeros(self.pop.get_population_size(), dtype=int)
 
         for ppl_going in will_go_array:
 
@@ -353,8 +357,10 @@ class Interaction_Sites:
                     if did_infect:
                         if person_1_infected:
                             new_infections[person_2_index] = True
+                            new_infection_type[person_2_index] = self.pop.get_person(person_1_index).get_virus_type()
                         else:
                             new_infections[person_1_index] = True
+                            new_infection_type[person_1_index] = self.pop.get_person(person_2_index).get_virus_type()
 
                 # Lower the interaction count for those people
                 num_interactions[person_1] -= 1
@@ -362,8 +368,9 @@ class Interaction_Sites:
 
         #  Update people who get infected only at the end (if i get CV19 at work, prolly wont spread at the store that night ?)
         new_infection_indexes = np.where(new_infections)[0]
+#         new_infection_type_indexes = np.where(new_infection_type)[0]
         for new_infection in new_infection_indexes:
-            self.pop.infect(index=new_infection, day=day)
+            self.pop.infect(index=new_infection, virus_type=new_infection_type[new_infection], day=day)
 
     def calc_interactions(self):
         '''Method to determine how many interactions a person will have.
@@ -403,10 +410,12 @@ class Interaction_Sites:
             Whether or not the interaction caused the spread of the infection.
 
         '''
+
         p1_infected = person_1.is_infected()
         p2_infected = person_2.is_infected()
 
-        spread_prob = self.base_infection_spread_prob
+        virus_type = person_1.get_virus_type() if p1_infected else person_2.get_virus_type()
+        spread_prob = self.base_infection_spread_prob[self.variant_code_map[virus_type]]
 
         if self.policy.get_mask_mandate():
             p1_mask = person_1.wear_mask()
@@ -456,6 +465,7 @@ class Interaction_Sites:
             # Get ppl in house
             house_size = len(house_indices)
             housemembers = [self.pop.get_population()[ind] for ind in house_indices]
+            virus_types = [person.get_virus_type() for person in housemembers]
 
             # Do interactions between the housemates
             for member1, member2 in combinations(housemembers, 2):
@@ -464,14 +474,21 @@ class Interaction_Sites:
 
             # Check if anyone in the house is infected
             if any(housemembers[i].is_infected() for i in range(house_size)):
+                infected_housemembers = [i for i in range(house_size) if housemembers[i].is_infected()]
+                virus_types = [virus_types[i] for i in infected_housemembers]
                 healthy_housemembers = [i for i in range(house_size) if not housemembers[i].is_infected()]
 
                 for person in healthy_housemembers:
-                    # This should be more complicated and depend on len(infectpplinhouse)
-                    infection_chance = self.house_infection_spread_prob
+                    virus_id = np.random.choice(a=virus_types)
+                    virus_name = self.variant_code_map[virus_id]
+
+                    infection_chance = self.base_infection_spread_prob[virus_name] * self.house_infection_spread_factor
                     caught_infection = random() < infection_chance
+
                     if caught_infection:
-                        self.pop.infect(index=housemembers[person].get_index(), day=day)
+                        if virus_id is None:
+                            raise ValueError("House infection has incorrect virus type.")
+                        self.pop.infect(index=housemembers[person].get_index(), day=day, virus_type=virus_id)
 
     def student_house_interact(self, day):
         '''Method to manage interactions between members of the same student household.
@@ -492,17 +509,29 @@ class Interaction_Sites:
             # Get ppl in house
             house_size = len(house_indices)
             housemembers = [self.pop.get_population()[ind] for ind in house_indices]
+            virus_types = [person.get_virus_type() for person in housemembers]
+
+            # Do interactions between the housemates
+            for member1, member2 in combinations(housemembers, 2):
+                member1.log_contact(member2, day=day, personal=True)
+                member2.log_contact(member1, day=day, personal=True)
 
             # Check if anyone in the house is infected
             if any(housemembers[i].is_infected() for i in range(house_size)):
-                healthy_housemembers = [i for i in range(house_size) if housemembers[i].is_infected()]
+                infected_housemembers = [i for i in range(house_size) if housemembers[i].is_infected()]
+                virus_types = [virus_types[i] for i in infected_housemembers]
+                healthy_housemembers = [i for i in range(house_size) if not housemembers[i].is_infected()]
 
                 for person in healthy_housemembers:
-                    # This should be more complicated and depend on len(infectpplinhouse)
-                    infection_chance = self.house_infection_spread_prob
+                    virus_id = np.random.choice(a=virus_types)
+                    virus_name = self.variant_code_map[virus_id]
+
+                    infection_chance = self.base_infection_spread_prob[virus_name] * self.house_infection_spread_factor
                     caught_infection = random() < infection_chance
                     if caught_infection:
-                        self.pop.infect(index=housemembers[person].get_index(), day=day)
+                        if virus_id is None:
+                            raise ValueError("House infection has incorrect virus type.")
+                        self.pop.infect(index=housemembers[person].get_index(), day=day, virus_type=virus_id)
 
     def testing_site(self, tests_per_day, day):
         '''Method to update status of symptoms and run the testing sites code.
