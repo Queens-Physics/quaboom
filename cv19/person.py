@@ -570,15 +570,19 @@ class Person(object):
 
         Returns
         -------
-        self.sim_obj.surgical_inward_eff, self.sim_obj.surgical_outward_eff : :obj:`float`.
+        self.sim_obj.mask_inward_eff[self.mask_type]: :obj:`float`
+            Mask inward efficiency for the person's mask type.
+
+        self.sim_obj.mask_outward_eff[self.mask_type]: :obj:`float`
+            Mask outward efficiency for the person's mask type.
         '''
         if self.has_mask:
-            if self.mask_type == "Surgical":
-                return self.sim_obj.surgical_inward_eff, self.sim_obj.surgical_outward_eff
-            elif self.mask_type == "Non-surgical":
-                return self.sim_obj.nonsurgical_inward_eff, self.sim_obj.nonsurgical_outward_eff
-            else:
-                raise ValueError(f"'{self.mask_type}' is not a valid mask type.")
+            try:
+                return (self.sim_obj.mask_inward_eff[self.mask_type],
+                        self.sim_obj.mask_outward_eff[self.mask_type])
+            except KeyError as e:
+                raise ValueError((f"'{self.mask_type}' is not a valid mask type "
+                                  "and has no associated efficiency.")) from e
         else:
             return 1, 1  # Not wearing a mask, so no change in chance of infection
 
@@ -759,11 +763,13 @@ class Person(object):
 
         Returns
         -------
-        self.sim_obj.Pfizer_eff, self.sim_obj.Moderna_eff, self.sim_obj.AZ_eff : :obj:`float`.
+        self.sim_obj.vaccine_eff[self.vaccine_type]: :obj:`float`
         '''
-        if self.vaccinated and self.vaccine_type in self.sim_obj.vaccine_eff.keys():
-            return self.sim_obj.vaccine_eff[self.vaccine_type]
-        elif self.vaccine_type not in self.sim_obj.vaccine_eff.keys():
-            raise ValueError(f"Vaccine Type {self.vaccine_type} does not have associated efficiency.")
+        if self.vaccinated:
+            try:
+                return self.sim_obj.vaccine_eff[self.vaccine_type]
+            except KeyError as e:
+                raise ValueError((f"'{self.vaccine_type}' is not a valid vaccine type "
+                                  "and has no associated efficiency.")) from e
         else:
             return 1
