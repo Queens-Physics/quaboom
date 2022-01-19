@@ -68,7 +68,8 @@
         "students_participate":{"A":true, "B":true, "C":false},
         "quarantine_isolation_factor":0,
         "student_interaction_factor":0.5,
-        "students_on":true
+        "students_on":true,
+        "beta":0.12
     },
 
     "person_data":{

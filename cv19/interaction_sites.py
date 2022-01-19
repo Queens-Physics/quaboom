@@ -327,7 +327,7 @@ class Interaction_Sites:
                 continue # No ppl to infect here or no one already infected
 
             # Generate a list of how many interactions ppl have at the site
-            num_interactions = np.array([self.calc_interactions() for person_index in ppl_going])
+            num_interactions = self.calc_interactions(site_day_pop=len(ppl_going))
 
             while np.sum(num_interactions > 0) > 1:
                 # grab the highest interactor
@@ -372,7 +372,7 @@ class Interaction_Sites:
         for new_infection in new_infection_indexes:
             self.pop.infect(index=new_infection, virus_type=new_infection_type[new_infection], day=day)
 
-    def calc_interactions(self):
+    def calc_interactions(self, site_day_pop):
         '''Method to determine how many interactions a person will have.
 
         Note
@@ -380,17 +380,28 @@ class Interaction_Sites:
         This function should really be improved, and calibrated with real data. Current
         values were arbitrarily chosen.
 
+        Parameters
+        ----------
+        site_day_pop : `int`
+            The total number of people at that specific interaction site this day.
+
         Returns
         -------
-        number_of_interactions : int
-            The number of interactions this person will have within their interaction site.
+        number_of_interactions : :obj:`np.array` of :obj:`int`
+            The number of interactions all people will have within this interaction site.
 
         '''
 
-        # This will be some function that returns how many interactions for this person
-        upper_interaction_bound = 5
-        lower_interaction_bound = 0  # Random numbers at the moment
-        number_of_interactions = np.random.randint(lower_interaction_bound, upper_interaction_bound)
+        # Designed to hit the (0,site_day_pop), (1,0) points. Beta is a slope parameter.
+        day_hours_scaler = 8 # split groups into ppl that show up each hour
+        A = self.beta*(site_day_pop/day_hours_scaler)/(1-np.exp(-1/self.beta))
+        C = (site_day_pop/day_hours_scaler)-A/self.beta
+        def exp_dist(x):
+            return int(round(A/self.beta * np.exp(-x/self.beta) + C))
+
+        # Map a uniform distribution to number of interactions
+        uniform_dist = np.random.uniform(low=0, high=1, size=site_day_pop)
+        number_of_interactions = np.array([exp_dist(num) for num in uniform_dist])
 
         return number_of_interactions
 
