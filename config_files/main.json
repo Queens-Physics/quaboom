@@ -69,7 +69,7 @@
         "quarantine_isolation_factor":0,
         "student_interaction_factor":0.5,
         "students_on":true,
-        "beta":0.12
+        "beta":0.10
     },
 
     "person_data":{
