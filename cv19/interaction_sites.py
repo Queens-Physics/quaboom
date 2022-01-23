@@ -398,17 +398,11 @@ class Interaction_Sites:
 
         '''
 
-        day_hours_scaler = 8
-        A = self.beta*(site_day_pop/day_hours_scaler)/(1-np.exp(-1/self.beta))
-        C = (site_day_pop/day_hours_scaler)-A/self.beta
+        day_hours_scaler = 12
 
-        # Define the exponential distribution function
-        def exp_dist(x):
-            return np.round(A/self.beta * np.exp(-x/self.beta) + C).astype(int, copy=False)
-
-        # Map a uniform distribution to number of interactions
-        uniform_dist = np.random.uniform(low=0, high=1, size=site_day_pop)
-        number_of_interactions = exp_dist(uniform_dist)
+        # Generate a linaer distribution from
+        number_of_interactions = np.round(np.random.triangular(left=0, mode=0, right=site_day_pop/day_hours_scaler, 
+                                                               size=site_day_pop)).astype(int)
 
         return number_of_interactions
 
