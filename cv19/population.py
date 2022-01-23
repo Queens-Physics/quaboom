@@ -233,7 +233,8 @@ class Population:
             virus_code = sim_obj.variant_codes[virus_name]
             variant_infections = sim_obj.variants[virus_name]
 
-            for i in range(init_infect_count, init_infect_count+variant_infections):
+            for index_count in range(init_infect_count, init_infect_count+variant_infections):
+                i = total_indices[index_count]
                 self.population[i].infect(day=0, virus_type=virus_code)
                 self.infected[i] = i
                 self.virus_types[i] = virus_code
