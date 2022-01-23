@@ -402,12 +402,13 @@ class Interaction_Sites:
         A = self.beta*(site_day_pop/day_hours_scaler)/(1-np.exp(-1/self.beta))
         C = (site_day_pop/day_hours_scaler)-A/self.beta
 
+        # Define the exponential distribution function
         def exp_dist(x):
-            return int(round(A/self.beta * np.exp(-x/self.beta) + C))
+            return np.round(A/self.beta * np.exp(-x/self.beta) + C).astype(int, copy=False)
 
         # Map a uniform distribution to number of interactions
         uniform_dist = np.random.uniform(low=0, high=1, size=site_day_pop)
-        number_of_interactions = np.array([exp_dist(num) for num in uniform_dist])
+        number_of_interactions = exp_dist(uniform_dist)
 
         return number_of_interactions
 
