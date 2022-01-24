@@ -377,14 +377,15 @@ class Interaction_Sites:
 
         Note
         ----
-        Currently the distribution for the number of interactions a person will have is an
-        exponential decay, that hits the (0,site_day_pop/day_hours_scaler), (1,0) points.
-        Random numbers are uniformly generated from 0,1 and mapped to this distribution.
+        Currently the distribution for the number of interactions a given person will have is
+        a "triangular" distribution with only one side (a linear distribution). The distribution
+        output spans from 0 to site_day_pop/day_hours_scaler, where it is much more likely to have 0
+        interactions than the max. day_hours_scaler takes into account that people will not all be
+        at the interaction site at the same time, but will be dispersed throughout the 12 hour day.
 
-        Beta is a parameter that adjusts the slope of the exp decay. Lower beta means a steeper slope,
-        and less interactions. day_hours_scaler is a value that helps enforce the fact that not everyone
-        shows up at the interaction site at the same time. Therefore, one person can at max interact with
-        1/8 people that go that day.
+        As it stands, day_hours_scaler is not a config file parameter, as the hours in the day should not be
+        adjusted between simulations. If the need is felt for an adjustable scaling factor, a new (second)
+        variable should be introduced.
 
         Parameters
         ----------
@@ -401,7 +402,7 @@ class Interaction_Sites:
         day_hours_scaler = 12
 
         # Generate a linaer distribution from
-        number_of_interactions = np.round(np.random.triangular(left=0, mode=0, right=site_day_pop/day_hours_scaler, 
+        number_of_interactions = np.round(np.random.triangular(left=0, mode=0, right=site_day_pop/day_hours_scaler,
                                                                size=site_day_pop)).astype(int)
 
         return number_of_interactions
