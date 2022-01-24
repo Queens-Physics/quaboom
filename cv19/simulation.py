@@ -361,8 +361,9 @@ class simulation():
             for i in range(0, num_vis):
                 visitor = Person(index=i+self.nPop, sim_obj=self, infected=True, recovered=False, dead=False,
                                  hospitalized=False, ICU=False, quarantined=False, quarantined_day=None, infected_day=None,
-                                 recovered_day=None, death_day=None, others_infected=None, cure_days=None, recent_infections=None,
-                                 vaccinated=False, age=vis_age[i], job=None,house_index=None, isolation_tendencies=0.2,
+                                 recovered_day=None, death_day=None, others_infected=None,
+                                 cure_days=None, recent_infections=None, vaccinated=False, age=vis_age[i],
+                                 job=None,house_index=None, isolation_tendencies=0.2,
                                  case_severity='Mild', has_mask=True, virus_type="alpha")
                 self.pop.population.append(visitor)
 
@@ -379,9 +380,11 @@ class simulation():
                 will_visit_food = self.inter_sites.will_visit_site(self.inter_sites.get_food_sites(), self.will_go_prob["FOOD"])
                 self.inter_sites.site_interaction(will_visit_food, day, personal=True)
                 if not lockdown:
-                    will_visit_lects = self.inter_sites.will_visit_site(self.inter_sites.get_lect_sites(), self.will_go_prob["LECT"])
+                    will_visit_lects = self.inter_sites.will_visit_site(self.inter_sites.get_lect_sites(),
+                                                                        self.will_go_prob["LECT"])
                     self.inter_sites.site_interaction(will_visit_lects, day, personal=True)
-                    will_visit_study = self.inter_sites.will_visit_site(self.inter_sites.get_study_sites(), self.will_go_prob["STUDY"])
+                    will_visit_study = self.inter_sites.will_visit_site(self.inter_sites.get_study_sites(),
+                                                                        self.will_go_prob["STUDY"])
                     self.inter_sites.site_interaction(will_visit_study, day, personal=False)
 
             # Manage masks

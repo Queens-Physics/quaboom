@@ -327,7 +327,7 @@ class Interaction_Sites:
                 continue # No ppl to infect here or no one already infected
 
             # Generate a list of how many interactions ppl have at the site
-            num_interactions = np.array([self.calc_interactions() for person_index in ppl_going])
+            num_interactions = self.calc_interactions(site_day_pop=len(ppl_going))
 
             while np.sum(num_interactions > 0) > 1:
                 # grab the highest interactor
@@ -372,25 +372,38 @@ class Interaction_Sites:
         for new_infection in new_infection_indexes:
             self.pop.infect(index=new_infection, virus_type=new_infection_type[new_infection], day=day)
 
-    def calc_interactions(self):
+    def calc_interactions(self, site_day_pop):
         '''Method to determine how many interactions a person will have.
 
         Note
         ----
-        This function should really be improved, and calibrated with real data. Current
-        values were arbitrarily chosen.
+        Currently the distribution for the number of interactions a given person will have is
+        a "triangular" distribution with only one side (a linear distribution). The distribution
+        output spans from 0 to site_day_pop/day_hours_scaler, where it is much more likely to have 0
+        interactions than the max. day_hours_scaler takes into account that people will not all be
+        at the interaction site at the same time, but will be dispersed throughout the 12 hour day.
+
+        As it stands, day_hours_scaler is not a config file parameter, as the hours in the day should not be
+        adjusted between simulations. If the need is felt for an adjustable scaling factor, a new (second)
+        variable should be introduced.
+
+        Parameters
+        ----------
+        site_day_pop : `int`
+            The total number of people at that specific interaction site this day.
 
         Returns
         -------
-        number_of_interactions : int
-            The number of interactions this person will have within their interaction site.
+        number_of_interactions : :obj:`np.array` of :obj:`int`
+            The number of interactions all people will have within this interaction site.
 
         '''
 
-        # This will be some function that returns how many interactions for this person
-        upper_interaction_bound = 5
-        lower_interaction_bound = 0  # Random numbers at the moment
-        number_of_interactions = np.random.randint(lower_interaction_bound, upper_interaction_bound)
+        day_hours_scaler = 12
+
+        # Generate a linaer distribution from
+        number_of_interactions = np.round(np.random.triangular(left=0, mode=0, right=site_day_pop/day_hours_scaler,
+                                                               size=site_day_pop)).astype(int)
 
         return number_of_interactions
 

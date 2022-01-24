@@ -227,15 +227,19 @@ class Population:
         self.new_quarantined_num = 0  # new people in quarantine
 
         # Infect the first n0 people for each virus type
+        total_n0 = sum(v_id for _, v_id in sim_obj.variants.items())
+        init_infect_count, total_indices = 0, sample(range(self.nPop), total_n0)
         for virus_name in sim_obj.variants.keys():
             virus_code = sim_obj.variant_codes[virus_name]
+            variant_infections = sim_obj.variants[virus_name]
 
-            indices = sample(range(self.nPop), sim_obj.variants[virus_name])
-            for i in indices:
+            for index_count in range(init_infect_count, init_infect_count+variant_infections):
+                i = total_indices[index_count]
                 self.population[i].infect(day=0, virus_type=virus_code)
                 self.infected[i] = i
                 self.virus_types[i] = virus_code
                 self.susceptible[i] = NULL_ID
+            init_infect_count += variant_infections
 
         # Vaccinate first v0 people
         v_indices = sample(range(self.nPop), self.v0)
