@@ -1,6 +1,8 @@
 import json
-import random
+from random import random, sample
+
 import numpy as np
+
 from .data import constants
 from .person import Person
 
@@ -33,7 +35,7 @@ class Population:
         self.set_demographic_parameters()
 
         self.nPop = sim_obj.nPop  # total population
-        self.n0 = sim_obj.n0  # initial infected
+        self.v0 = sim_obj.v0 # initial vaccinated
 
         # Student parameter
         self.nStudents = sim_obj.num_students # full capacity ~ 24k students
@@ -45,6 +47,9 @@ class Population:
         self.prob_of_test = self.prob_of_test
         self.prob_has_mask = self.prob_has_mask
         self.n_students_in_res = 0
+
+        # For access to virus code mappings
+        self.virus_codes = sim_obj.variant_codes
 
         houseIndex = 0
         totalHouse = 0
@@ -80,9 +85,19 @@ class Population:
         age_arr = np.random.choice(a=self.age_options, p=self.age_weights, size=self.nPop)
         job_arr = np.random.choice(a=self.job_options, p=self.job_weights, size=self.nPop)
         isolation_tend_arr = np.random.choice(a=self.isolation_options, p=self.isolation_weights, size=self.nPop)
-        case_severity_arr = np.random.choice(a=self.severity_options, p=self.severity_weights, size=self.nPop)
+        case_severity_arr = np.empty(shape=self.nPop, dtype=object)
+        # case severity now changes to depending on the age
+
+        for i, age in enumerate(age_arr):
+            try:
+                case_severity_arr[i] = np.random.choice(a=self.severity_options,
+                                                        p=[self.severity_params[age][key] for key in constants.SEVERITY_OPTIONS])
+            except KeyError as e:
+                raise ValueError((f"'{age}' is not a valid age range and has no associated case severity.")) from e
+
         mask_type_arr = np.random.choice(a=self.mask_options, p=self.mask_weights, size=self.nPop)
         has_mask_arr = np.random.uniform(size=self.nPop) < self.prob_has_mask
+        vaccine_type_arr = np.random.choice(a=self.vaccine_options, p=self.vaccine_weights, size=self.nPop)
 
         # Initialize the house index and size for the loop
         houseIndex = 0
@@ -100,10 +115,16 @@ class Population:
                                quarantined=False, quarantined_day=None,
                                infected_day=None, recovered_day=None, death_day=None,
                                others_infected=None, cure_days=None, recent_infections=None,
-                               age=age_arr[i], job=job_arr[i], house_index=houseIndex,
+                               age=age_arr[i],
+                               job=job_arr[i],
+                               house_index=houseIndex,
+                               vaccinated=False,
+                               vaccine_type=vaccine_type_arr[i],
                                isolation_tendencies=isolation_tend_arr[i],
-                               case_severity=case_severity_arr[i], mask_type=mask_type_arr[i],
-                               has_mask=has_mask_arr[i])
+                               case_severity=case_severity_arr[i],
+                               mask_type=mask_type_arr[i],
+                               has_mask=has_mask_arr[i],
+                               virus_type=None)
 
             # ADD A PERSON
             self.population[i] = newPerson
@@ -121,7 +142,14 @@ class Population:
             self.house_ppl_i[housei][where] = i
 
         ############### STUDENTS ###############
-        student_age = np.random.choice(a=['10-19', '20-29'], p=[0.5,0.5], size = self.nPop) # students are in age ranges 10-19 and 20-29
+        student_age = np.random.choice(a=['10-19', '20-29'], p=[0.5,0.5], size = self.nStudents) # students age ranges 10-19 and 20-29
+        student_case_severity_arr = np.empty(self.nStudents, dtype=object)
+        for i, age in enumerate(student_age):
+            try:
+                student_case_severity_arr[i] = np.random.choice(a=self.severity_options,
+                                                                p=[self.severity_params[age][key] for key in constants.SEVERITY_OPTIONS])
+            except KeyError as e:
+                raise ValueError((f"'{age}' is not a valid age range and has no associated case severity.")) from e
 
         self.student_indices = np.zeros(self.nPop, dtype=int) + NULL_ID
         self.res_houses = np.zeros(len(self.stud_houses), dtype=int) + NULL_ID # student houses that are in residence will be nonzero
@@ -139,10 +167,17 @@ class Population:
                                 dead=False, hospitalized=False,ICU=False,quarantined=False,quarantined_day=None,
                                 infected_day=None, recovered_day=None, death_day=None,
                                 others_infected=None, cure_days=None, recent_infections=None,
-                                age=student_age[i], job='Student', house_index=studHouseIndex,
+                                age=student_age[i-self.nPop+self.nStudents], #adjust for index inconsistency
+                                job='Student',
+                                house_index=studHouseIndex,
+                                vaccinated=False,
+                                vaccine_type=vaccine_type_arr[i],
                                 isolation_tendencies=isolation_tend_arr[i],
-                                case_severity=case_severity_arr[i],
-                                has_mask=has_mask_arr[i])
+                                case_severity=student_case_severity_arr[i-self.nPop+self.nStudents], #adjust for index inconsistency
+                                mask_type=mask_type_arr[i],
+                                has_mask=has_mask_arr[i],
+                                virus_type=None)
+
             self.population[i] = newStudent
 
             self.student_indices[i] = i  # set their student status
@@ -173,6 +208,8 @@ class Population:
             self.house_stud_i[housei][where] = i
 
         # Create person status arrays
+        # A non-negative index indicates that they are the property,
+        # NULL_ID (-1) indicates that they are /not/ the property.
         self.susceptible = np.array(range(self.nPop), dtype=int)  #list of all susceptible individuals
         self.infected = np.zeros(self.nPop, dtype=int) + NULL_ID  # list of all infected people
         self.recovered = np.zeros(self.nPop, dtype=int) + NULL_ID  # list of recovered people
@@ -182,19 +219,33 @@ class Population:
         self.hospitalized = np.zeros(self.nPop, dtype=int) + NULL_ID  # list of people hospitalized and in the ICU
         self.ICU = np.zeros(self.nPop, dtype=int) + NULL_ID  # list of people in the ICU
         self.quarantined = np.zeros(self.nPop, dtype=int) + NULL_ID  #list of people who are currently in quarantine
-
+        self.virus_types = np.zeros(self.nPop, dtype=int) + NULL_ID #list of individuals with NULL_ID as virus type
+        self.vaccinated = np.zeros(self.nPop, dtype=int) + NULL_ID # list of people who have been vaccinated
         self.testing = []  # list of people waiting to be others_infected
         self.test_sum = 0  # total number of tests that have been run
         self.quarantined_sum = 0  # total number of people in quarantine (created as the list was having indexing issues)
         self.new_quarantined_num = 0  # new people in quarantine
 
-        # Selects the indices of the n0 initially infected people
-        # at random, then infects them
-        indices = random.sample(range(self.nPop), self.n0)
-        for i in indices:
-            self.population[i].infect(day=0)
-            self.infected[i] = i
-            self.susceptible[i] = NULL_ID
+        # Infect the first n0 people for each virus type
+        total_n0 = sum(v_id for _, v_id in sim_obj.variants.items())
+        init_infect_count, total_indices = 0, sample(range(self.nPop), total_n0)
+        for virus_name in sim_obj.variants.keys():
+            virus_code = sim_obj.variant_codes[virus_name]
+            variant_infections = sim_obj.variants[virus_name]
+
+            for index_count in range(init_infect_count, init_infect_count+variant_infections):
+                i = total_indices[index_count]
+                self.population[i].infect(day=0, virus_type=virus_code)
+                self.infected[i] = i
+                self.virus_types[i] = virus_code
+                self.susceptible[i] = NULL_ID
+            init_infect_count += variant_infections
+
+        # Vaccinate first v0 people
+        v_indices = sample(range(self.nPop), self.v0)
+        for i in v_indices:
+            self.population[i].set_vaccinated(day=0)
+            self.vaccinated[i] = i
 
     def load_attributes_from_sim_obj(self, sim_obj):
         '''Method to load in attributes from the provided simulation class object.
@@ -204,21 +255,33 @@ class Population:
 
         Parameters
         ----------
-        sim_obj : :obj:`simulation class`
+        sim_obj : :obj:`cv19.simulation.simulation`
             The encompassing simulation object hosting the simulation.
         '''
+
+        # making sim_obj accessible
+        self.sim_obj = sim_obj
+
         attributes = sim_obj.parameters["population_data"].keys()
         for attr in attributes:
             setattr(self, attr, sim_obj.parameters["population_data"][attr])
 
+        self.variant_codes = sim_obj.variant_codes
+
         # case severity from disease params
-        self.severity_weights = np.array([sim_obj.disease_parameters["case_severity"][key]
-                                          for key in constants.SEVERITY_OPTIONS])
         self.severity_options = constants.SEVERITY_OPTIONS
+
+        # assign severity weights
+        with open(self.case_severity_file, encoding='utf-8') as json_file:
+            self.severity_params = json.load(json_file)
 
         # format mask weights correctly
         self.mask_weights = np.array([self.mask_type[key] for key in constants.MASK_OPTIONS])
         self.mask_options = constants.MASK_OPTIONS
+
+        # format vaccine weights
+        self.vaccine_weights = np.array([self.sim_obj.vaccine_type[key] for key in constants.VACCINE_OPTIONS])
+        self.vaccine_options = constants.VACCINE_OPTIONS
 
     def set_demographic_parameters(self):
         '''Method to open disease parameters from the json file.
@@ -394,18 +457,24 @@ class Population:
         '''
         return np.count_nonzero(self.infected != NULL_ID)
 
+    def count_variant_cases(self, virus_name):
+        '''Method to count the number of people infected with a certain variant.
+
+        Returns
+        -------
+        np.count_nonzero(self.infetced != NULL_ID): :obj:`np.array` of :obj:`int`
+        '''
+        virus_code = self.virus_codes[virus_name]
+        return np.count_nonzero(self.virus_types == virus_code)
+
     def count_infected_students(self):
         '''Method to count how many infected students there are.
 
         Returns
         -------
-        infStudents: :obj:`int`
+        np.count_nonzero(np.logical_and(self.student_indices != NULL_ID, self.infected != NULL_ID)): :obj:`int`
         '''
-        infStudents = 0
-        for i in range(self.nPop):
-            if (self.student_indices[i] != NULL_ID and self.infected[i] != NULL_ID):
-                infStudents += 1
-        return infStudents
+        return np.count_nonzero(np.logical_and(self.student_indices != NULL_ID, self.infected != NULL_ID))
 
     def count_recovered(self):
         '''Method to count the number of people recovered.
@@ -461,6 +530,17 @@ class Population:
         '''
         return np.count_nonzero(self.has_mask > 0)
 
+    def count_virus_types(self):
+        '''Method to count all virus types and return them as a dictionary.
+
+        Returns
+        -------
+        counts : :obj:`dict`
+        '''
+        counts = {virus_type: np.count_nonzero(self.virus_types==virus_code)
+                  for virus_type, virus_code in self.variant_codes.items()}
+        return counts
+
     def get_person(self, index):
         '''Method to return an individual based on their index.
 
@@ -470,7 +550,7 @@ class Population:
         '''
         return self.population[index]
 
-    def infect(self, index, day):
+    def infect(self, index, day, virus_type):
         '''Method to infect a person.
 
         Parameters
@@ -484,10 +564,15 @@ class Population:
         -------
         didWork: :obj:`int`
         '''
-        didWork = self.population[index].infect(day=day)
+        # Convert to virus code if virus type is a string
+        if isinstance(virus_type, str):
+            virus_type = self.virus_codes[virus_type]
+
+        didWork = self.population[index].infect(day=day, virus_type=virus_type)
         if didWork:
             self.infected[index] = index
             self.susceptible[index] = NULL_ID
+            self.virus_types[index] = virus_type
             if self.population[index].ICU:
                 self.ICU[index] = index
             elif self.population[index].hospitalized:
@@ -495,7 +580,7 @@ class Population:
 
         return didWork
 
-    def infect_incoming_students(self, indices, day):
+    def infect_incoming_students(self, indices, day, virus_type):
         '''Method to infect incoming students to the simulation.
 
         Parameters
@@ -512,7 +597,7 @@ class Population:
         '''
         for i in indices:
             daysAgo = np.random.randint(13)
-            self.infect(index=i, day=day-daysAgo)
+            self.infect(index=i, day=day-daysAgo, virus_type=virus_type)
         return True
 
     def update_infected(self, index):
@@ -528,7 +613,7 @@ class Population:
         : :obj:`bool`
             True if the value at the index in the infected list was changed, False if it was not changed.
         '''
-        if self.infected[index] == index or self.susceptible[index] == -1 or not self.population[index].is_infected():
+        if self.infected[index] == index or self.susceptible[index] == NULL_ID or not self.population[index].is_infected():
             # Already infected, or cant be infected
             return False
         self.infected[index] = index
@@ -574,6 +659,7 @@ class Population:
         self.infected[index] = NULL_ID
         self.recovered[index] = index
         self.hospitalized[index] = NULL_ID
+        self.virus_types[index] = NULL_ID
         self.ICU[index] = NULL_ID
         return True
 
@@ -616,6 +702,7 @@ class Population:
         self.infected[index] = NULL_ID
         self.recovered[index] = NULL_ID
         self.hospitalized[index] = NULL_ID
+        self.virus_types[index] = NULL_ID
         self.ICU[index] = NULL_ID
         self.dead[index] = index
         return True
@@ -670,7 +757,7 @@ class Population:
 
                 if i not in self.testing and self.have_been_tested[i] != 1: # if person is not already in testing function
                     infected_person = self.population[i] #gets the infected person from the population list
-                    if random.random()/self.population[i].get_protocol_compliance() < self.prob_of_test:
+                    if (random() / self.population[i].get_protocol_compliance()) < self.prob_of_test:
                         if infected_person.show_symptoms and not infected_person.knows_infected:
                             self.testing.append(i) #adds the person to the testing list
                             self.population[i].knows_infected = True
@@ -723,6 +810,46 @@ class Population:
                 self.new_quarantined_num += 1
             else:
                 person.knows_infected = False
+
+    def get_vaccinated(self):
+        '''Method to retrieve indicies of people vaccinated.
+
+        Returns
+        -------
+        self.vaccinated[self.vaccinated != NULL_ID]: :obj:`np.array` of :obj:`int`
+        '''
+        return self.vaccinated[self.vaccinated != NULL_ID]
+
+    def count_vaccinated(self):
+        '''Method to count the number of people vaccinated.
+
+        Returns
+        -------
+        np.count_nonzero(self.vaccinated != NULL_ID): :obj:`np.array` of :obj:`int`
+        '''
+        return np.count_nonzero(self.vaccinated != NULL_ID)
+
+    def update_vaccinated(self, day):
+        '''Method to add people to the list of vaccinated people
+
+        Parameters
+        ----------
+        day : int
+            The day the testing is being done on.
+        '''
+        non_vaccinated = np.array([index for index in range(self.nPop)
+                           if not self.population[index].is_vaccinated()])
+
+        num_vacc = self.sim_obj.num_vaccinations
+        num_to_vaccinate = num_vacc if len(non_vaccinated) >= num_vacc else len(non_vaccinated)
+        will_vaccinate = np.random.choice(range(len(non_vaccinated)), num_to_vaccinate, replace=False)
+        self.to_vaccinate = non_vaccinated[will_vaccinate.astype(int)]
+
+        for index in self.to_vaccinate:
+            person_to_vaccinate = self.population[index]
+
+            person_to_vaccinate.set_vaccinated(day)
+            self.vaccinated[index] = index
 
     def change_mask_wearing(self):
         '''Method to mandate wearing a mask.

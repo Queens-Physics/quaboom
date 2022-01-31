@@ -19,7 +19,6 @@ def run_pylint():
                         'invalid-name',
                         'attribute-defined-outside-init',
                         'access-member-before-definition',
-                        'consider-using-f-string',
                         'fixme']
 
     # List of files or directories to run the linter on.
@@ -29,7 +28,7 @@ def run_pylint():
 
     print("Running on:")
     for f in file_list:
-        print("\t{}".format(f))
+        print(f"\t{f}")
     print("")
 
     # List of class names for which member attributes should not be checked (from pylint).
@@ -37,13 +36,13 @@ def run_pylint():
                        'Population', 'simulation']
 
     # Overall command to run.
-    cmd_list = ['python3', '-m', 'pylint',
-                '--jobs=1',
-                '--score=n',
-                '--output-format=colorized',
-                '--enable={0}'.format(','.join(messages_enable)),
-                '--disable={0}'.format(','.join(messages_disable)),
-                '--ignored-classes={0}'.format(','.join(ignored_classes))]
+    cmd_list = ["python3", "-m", "pylint",
+                "--jobs=1",
+                "--score=n",
+                "--output-format=colorized",
+                f"--enable={','.join(messages_enable)}",
+                f"--disable={','.join(messages_disable)}",
+                f"--ignored-classes={','.join(ignored_classes)}"]
 
     # Unnamed arguments (the files to process).
     cmd_list += file_list

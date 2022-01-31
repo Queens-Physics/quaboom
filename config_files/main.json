@@ -4,16 +4,30 @@
         "disease_config_file":"disease.json",
         "nDays":100,
         "nPop":10000,
+        "variants":{
+            "general":8, 
+            "alpha":8,
+            "delta":8
+            },
+        "variant_codes":{
+            "general":0,
+            "alpha":1, 
+            "delta":2
+            },
+        "vis_default_virus_type":"alpha",
+        "student_default_virus_type":"alpha",
         "num_students":2000,
         "max_num_res_students":500,
-        "n0":10,
+        "v0":0,
         "will_go_prob":{"A":0.05, "B":0.2, "C":0.7, "LECT":0.8, "STUDY":0.2, "FOOD":0.1, "RES":1},
         "N_VIS_OPTION":[ 0, 1, 2, 3 ],
         "N_VIS_PROB":[ 0.7, 0.17, 0.08, 0.05],
         "vis_age_upper":60,
         "vis_age_lower":16,
         "inf_students_upper":20,
-        "inf_students_lower":2
+        "inf_students_lower":2,
+        "num_vaccinations":0,
+        "vaccine_type": {"Pfizer":0.60, "Moderna":0.35, "AZ":0.05}
     },
 
     "policy_data":
@@ -38,6 +52,7 @@
 
     "population_data":{
         "demographics_file":"../data/dataK.json",
+        "case_severity_file":"../data/case_severity.json",
         "prob_has_mask":0.8,
         "prob_of_test":1,
         "mask_type": {"Surgical": 0.2, "Non-surgical": 0.8},
@@ -47,7 +62,7 @@
 
     "interaction_sites_data":{
 
-        "grade_per_pop":{"A":1000, "B":1000, "C":1000, "LECT":100, "STUDY":100, "FOOD":5, "RES":15},
+        "grade_per_pop":{"A":1000, "B":1000, "C":1000, "LECT":100, "STUDY":50, "FOOD":5, "RES":15},
         "grade_loyalty_means":{"A":4, "B":1, "C":1, "LECT":4, "STUDY":3, "FOOD":5, "RES":1},
         "grade_loyalty_stds":{"A":2, "B":1, "C":0.2, "LECT":2, "STUDY":2, "FOOD":2, "RES":0},
         "students_participate":{"A":true, "B":true, "C":false},
@@ -58,10 +73,8 @@
 
     "person_data":{
         "quarantine_time":14,
-        "surgical_inward_eff":0.4,
-        "surgical_outward_eff":0.3,
-        "nonsurgical_inward_eff":0.6,
-        "nonsurgical_outward_eff":0.5,
+        "mask_inward_eff":{"Surgical": 0.4, "Non-surgical": 0.6},
+        "mask_outward_eff":{"Surgical": 0.3, "Non-surgical": 0.5},
         "wear_mask_properly":0.8,
         "cold_prob":0.0001,
         "mild_symptom_prob":0.8,
@@ -87,7 +100,8 @@
         "protocol_compliance_lockdown_prob":0.99,
         "protocol_compliance_lockdown_reduction":0.8,
         "protocol_compliance_lockdown_length_threshold":16,
-        "protocol_compliance_lockdown_length_reduction":0.5
+        "protocol_compliance_lockdown_length_reduction":0.5,
+        "vaccine_eff": {"Pfizer":0.087, "Moderna":0.059,"AZ":0.24}
     }
 
 }

@@ -1,7 +1,7 @@
 '''
 This file holds the interaction sites class used in simulation.py.
 '''
-import random
+from random import random
 from copy import deepcopy
 from itertools import combinations
 
@@ -52,7 +52,7 @@ class Interaction_Sites:
 
         Parameters
         ----------
-        sim_obj : :obj:`simulation class`
+        sim_obj : :obj:`cv19.simulation.simulation`
             The encompassing simulation obejct hosting the simulation.
 
         '''
@@ -78,6 +78,8 @@ class Interaction_Sites:
         self.house_indices = deepcopy(self.pop.house_ppl_i)
 
         # Students Stuff #
+        self.stud_house_sites = deepcopy(self.pop.stud_houses)
+        self.stud_house_indices = deepcopy(self.pop.house_stud_i)
         self.lect_sites = self.init_uni(self.grade_per_pop["LECT"],
                                         self.grade_loyalty_means["LECT"],
                                         self.grade_loyalty_stds["LECT"])
@@ -87,11 +89,10 @@ class Interaction_Sites:
         self.food_sites = self.init_uni(self.grade_per_pop["FOOD"],
                                         self.grade_loyalty_means["FOOD"],
                                         self.grade_loyalty_stds["FOOD"])
-        self.res_sites = self.init_uni(self.grade_per_pop["RES"],
+        self.res_sites = self.init_res(self.grade_per_pop["RES"],
                                        self.grade_loyalty_means["RES"],
                                        self.grade_loyalty_stds["RES"])
-        self.stud_house_sites = deepcopy(self.pop.stud_houses)
-        self.stud_house_indices = deepcopy(self.pop.house_stud_i)
+
 
     def load_attributes_from_sim_obj(self, sim_obj):
         '''Method to load in attributes from the provided simulation class object.
@@ -101,7 +102,7 @@ class Interaction_Sites:
 
         Parameters
         ----------
-        sim_obj : :obj:`simulation class`
+        sim_obj : :obj:`cv19.simulation.simulation`
             The encompassing simulation obejct hosting the simulation.
 
         '''
@@ -115,7 +116,9 @@ class Interaction_Sites:
         for attr in d_attributes:
             setattr(self, attr, sim_obj.disease_parameters["spread_data"][attr])
 
-        self.house_infection_spread_prob = self.base_infection_spread_prob * self.house_infection_spread_factor
+        # Get the virus type names
+        self.variant_codes = sim_obj.variant_codes
+        self.variant_code_map = {v_id: v_name for v_name, v_id in self.variant_codes.items()} # virus ids
 
         # Set the actual objects now
         self.pop = sim_obj.pop
@@ -193,7 +196,7 @@ class Interaction_Sites:
 
         '''
         num_sites = round(self.pop.get_student_pop_size()/grade_pop_size)
-        grade_sites = [[] for i in range(num_sites)]
+        grade_sites = [[] for _ in range(num_sites)]
 
         for student in self.pop.get_population():
             if student.job == 'Student':
@@ -207,8 +210,7 @@ class Interaction_Sites:
                     grade_sites[site].append(student.get_index())
 
         # Convert everything to numpy arrays
-        for i, site in enumerate(grade_sites):
-            grade_sites[i] = np.array(site)
+        grade_sites = [np.asarray(site) for site in grade_sites]
 
         return grade_sites
 
@@ -238,7 +240,7 @@ class Interaction_Sites:
         '''
 
         num_sites = round(self.pop.get_res_size()/grade_pop_size)
-        grade_sites = [[] for i in range(num_sites)]
+        grade_sites = [[] for _ in range(num_sites)]
 
         for room in self.pop.get_residences():
             for student_i in self.stud_house_indices[room]:
@@ -252,8 +254,7 @@ class Interaction_Sites:
                     grade_sites[site].append(student_i)
 
         # Convert everything to numpy arrays
-        for i, site in enumerate(grade_sites):
-            grade_sites[i] = np.array(site)
+        grade_sites = [np.asarray(site) for site in grade_sites]
 
         return grade_sites
 
@@ -315,6 +316,7 @@ class Interaction_Sites:
 
         '''
         new_infections = np.zeros(self.pop.get_population_size(), dtype=bool)
+        new_infection_type = np.zeros(self.pop.get_population_size(), dtype=int)
 
         for ppl_going in will_go_array:
 
@@ -325,7 +327,7 @@ class Interaction_Sites:
                 continue # No ppl to infect here or no one already infected
 
             # Generate a list of how many interactions ppl have at the site
-            num_interactions = np.array([self.calc_interactions() for person_index in ppl_going])
+            num_interactions = self.calc_interactions(site_day_pop=len(ppl_going))
 
             while np.sum(num_interactions > 0) > 1:
                 # grab the highest interactor
@@ -351,12 +353,14 @@ class Interaction_Sites:
 
                 if person_1_infected != person_2_infected:
                     # Have an interaction between those people
-                    did_infect = self.interact(person_1_index, person_2_index)
+                    did_infect = self.interact(p1_obj, p2_obj)
                     if did_infect:
                         if person_1_infected:
                             new_infections[person_2_index] = True
+                            new_infection_type[person_2_index] = self.pop.get_person(person_1_index).get_virus_type()
                         else:
                             new_infections[person_1_index] = True
+                            new_infection_type[person_1_index] = self.pop.get_person(person_2_index).get_virus_type()
 
                 # Lower the interaction count for those people
                 num_interactions[person_1] -= 1
@@ -364,28 +368,42 @@ class Interaction_Sites:
 
         #  Update people who get infected only at the end (if i get CV19 at work, prolly wont spread at the store that night ?)
         new_infection_indexes = np.where(new_infections)[0]
+#         new_infection_type_indexes = np.where(new_infection_type)[0]
         for new_infection in new_infection_indexes:
-            self.pop.infect(index=new_infection, day=day)
+            self.pop.infect(index=new_infection, virus_type=new_infection_type[new_infection], day=day)
 
-    def calc_interactions(self):
+    def calc_interactions(self, site_day_pop):
         '''Method to determine how many interactions a person will have.
 
         Note
         ----
-        This function should really be improved, and calibrated with real data. Current
-        values were arbitrarily chosen.
+        Currently the distribution for the number of interactions a given person will have is
+        a "triangular" distribution with only one side (a linear distribution). The distribution
+        output spans from 0 to site_day_pop/day_hours_scaler, where it is much more likely to have 0
+        interactions than the max. day_hours_scaler takes into account that people will not all be
+        at the interaction site at the same time, but will be dispersed throughout the 12 hour day.
+
+        As it stands, day_hours_scaler is not a config file parameter, as the hours in the day should not be
+        adjusted between simulations. If the need is felt for an adjustable scaling factor, a new (second)
+        variable should be introduced.
+
+        Parameters
+        ----------
+        site_day_pop : `int`
+            The total number of people at that specific interaction site this day.
 
         Returns
         -------
-        number_of_interactions : int
-            The number of interactions this person will have within their interaction site.
+        number_of_interactions : :obj:`np.array` of :obj:`int`
+            The number of interactions all people will have within this interaction site.
 
         '''
 
-        # This will be some function that returns how many interactions for this person
-        upper_interaction_bound = 5
-        lower_interaction_bound = 0  # Random numbers at the moment
-        number_of_interactions = np.random.randint(lower_interaction_bound, upper_interaction_bound)
+        day_hours_scaler = 12
+
+        # Generate a linaer distribution from
+        number_of_interactions = np.round(np.random.triangular(left=0, mode=0, right=site_day_pop/day_hours_scaler,
+                                                               size=site_day_pop)).astype(int)
 
         return number_of_interactions
 
@@ -394,9 +412,9 @@ class Interaction_Sites:
 
         Parameters
         ----------
-        person_1 : :obj:`person.Person`
+        person_1 : :obj:`cv19.person.Person`
             First person in the two-way interaction.
-        person_2 : :obj:`person.Person`
+        person_2 : :obj:`cv19.person.Person`
             Second person in the two-way interaction.
 
         Returns
@@ -405,35 +423,41 @@ class Interaction_Sites:
             Whether or not the interaction caused the spread of the infection.
 
         '''
-        if not self.policy.get_mask_mandate:
-            spread_prob = self.base_infection_spread_prob
-        else:
-            p1Mask = self.pop.get_person(person_1).wear_mask()
-            p2Mask = self.pop.get_person(person_2).wear_mask()
-            p1Infected = self.pop.get_person(person_1).is_infected()
-            P1_INWARD_PROB, P1_OUTWARD_PROB = self.pop.get_person(person_1).mask_type_efficiency()
-            P2_INWARD_PROB, P2_OUTWARD_PROB = self.pop.get_person(person_2).mask_type_efficiency()
 
-            if p1Infected:
-                if p1Mask and p2Mask:
-                    spread_prob = self.base_infection_spread_prob*P1_OUTWARD_PROB*P2_INWARD_PROB
-                elif p1Mask:
-                    spread_prob = self.base_infection_spread_prob*P1_OUTWARD_PROB
-                elif p2Mask:
-                    spread_prob = self.base_infection_spread_prob*P2_INWARD_PROB
-                spread_prob = self.base_infection_spread_prob
+        p1_infected = person_1.is_infected()
+        p2_infected = person_2.is_infected()
 
-            else:
-                if p1Mask and p2Mask:
-                    spread_prob = self.base_infection_spread_prob*P2_OUTWARD_PROB*P1_INWARD_PROB
-                elif p1Mask:
-                    spread_prob = self.base_infection_spread_prob*P1_INWARD_PROB
-                elif p2Mask:
-                    spread_prob = self.base_infection_spread_prob*P2_OUTWARD_PROB
-                else:
-                    spread_prob = self.base_infection_spread_prob
+        virus_type = person_1.get_virus_type() if p1_infected else person_2.get_virus_type()
+        spread_prob = self.base_infection_spread_prob[self.variant_code_map[virus_type]]
 
-        return random.random() < spread_prob
+        if self.policy.get_mask_mandate():
+            p1_mask = person_1.wear_mask()
+            p2_mask = person_2.wear_mask()
+
+            P1_INWARD_PROB, P1_OUTWARD_PROB = person_1.mask_type_efficiency()
+            P2_INWARD_PROB, P2_OUTWARD_PROB = person_2.mask_type_efficiency()
+
+            if p1_infected:
+                if p1_mask:
+                    spread_prob *= P1_OUTWARD_PROB
+                if p2_mask:
+                    spread_prob *= P2_INWARD_PROB
+
+            elif p2_infected:
+                if p1_mask:
+                    spread_prob *= P1_INWARD_PROB
+                if p2_mask:
+                    spread_prob *= P2_OUTWARD_PROB
+
+        p1_vaccinated1 = person_1.is_vaccinated()
+        p2_vaccinated1 = person_2.is_vaccinated()
+
+        p1_multiplier = person_1.vaccine_type_efficiency() if p1_vaccinated1 else 1
+        p2_multiplier = person_2.vaccine_type_efficiency() if p2_vaccinated1 else 1
+
+        spread_prob *= (p1_multiplier * p2_multiplier)
+
+        return random() < spread_prob
 
     def house_interact(self, day):
         '''Method to manage interactions between members of the same household.
@@ -454,6 +478,7 @@ class Interaction_Sites:
             # Get ppl in house
             house_size = len(house_indices)
             housemembers = [self.pop.get_population()[ind] for ind in house_indices]
+            virus_types = [person.get_virus_type() for person in housemembers]
 
             # Do interactions between the housemates
             for member1, member2 in combinations(housemembers, 2):
@@ -462,14 +487,21 @@ class Interaction_Sites:
 
             # Check if anyone in the house is infected
             if any(housemembers[i].is_infected() for i in range(house_size)):
+                infected_housemembers = [i for i in range(house_size) if housemembers[i].is_infected()]
+                virus_types = [virus_types[i] for i in infected_housemembers]
                 healthy_housemembers = [i for i in range(house_size) if not housemembers[i].is_infected()]
 
                 for person in healthy_housemembers:
-                    # This should be more complicated and depend on len(infectpplinhouse)
-                    infection_chance = self.house_infection_spread_prob
-                    caught_infection = random.random()<infection_chance
+                    virus_id = np.random.choice(a=virus_types)
+                    virus_name = self.variant_code_map[virus_id]
+
+                    infection_chance = self.base_infection_spread_prob[virus_name] * self.house_infection_spread_factor
+                    caught_infection = random() < infection_chance
+
                     if caught_infection:
-                        self.pop.infect(index=housemembers[person].get_index(), day=day)
+                        if virus_id is None:
+                            raise ValueError("House infection has incorrect virus type.")
+                        self.pop.infect(index=housemembers[person].get_index(), day=day, virus_type=virus_id)
 
     def student_house_interact(self, day):
         '''Method to manage interactions between members of the same student household.
@@ -490,17 +522,29 @@ class Interaction_Sites:
             # Get ppl in house
             house_size = len(house_indices)
             housemembers = [self.pop.get_population()[ind] for ind in house_indices]
+            virus_types = [person.get_virus_type() for person in housemembers]
+
+            # Do interactions between the housemates
+            for member1, member2 in combinations(housemembers, 2):
+                member1.log_contact(member2, day=day, personal=True)
+                member2.log_contact(member1, day=day, personal=True)
 
             # Check if anyone in the house is infected
             if any(housemembers[i].is_infected() for i in range(house_size)):
-                healthy_housemembers = [i for i in range(house_size) if housemembers[i].is_infected()]
+                infected_housemembers = [i for i in range(house_size) if housemembers[i].is_infected()]
+                virus_types = [virus_types[i] for i in infected_housemembers]
+                healthy_housemembers = [i for i in range(house_size) if not housemembers[i].is_infected()]
 
                 for person in healthy_housemembers:
-                    # This should be more complicated and depend on len(infectpplinhouse)
-                    infection_chance = self.house_infection_spread_prob
-                    caught_infection = random.random()<infection_chance
+                    virus_id = np.random.choice(a=virus_types)
+                    virus_name = self.variant_code_map[virus_id]
+
+                    infection_chance = self.base_infection_spread_prob[virus_name] * self.house_infection_spread_factor
+                    caught_infection = random() < infection_chance
                     if caught_infection:
-                        self.pop.infect(index=housemembers[person].get_index(), day=day)
+                        if virus_id is None:
+                            raise ValueError("House infection has incorrect virus type.")
+                        self.pop.infect(index=housemembers[person].get_index(), day=day, virus_type=virus_id)
 
     def testing_site(self, tests_per_day, day):
         '''Method to update status of symptoms and run the testing sites code.
