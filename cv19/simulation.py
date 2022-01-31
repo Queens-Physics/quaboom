@@ -103,13 +103,14 @@ class simulation():
         self.track_new_tested = np.zeros(self.nDays, dtype=int)   # new tested per day
         self.track_testing_wait_list = np.zeros(self.nDays, dtype=int) # counts the number of people waiting to get tests each day
         self.track_inf_students = np.zeros(self.nDays, dtype=int)
-
         self.track_masks = np.zeros(self.nDays, dtype=bool)
         self.track_lockdown = np.zeros(self.nDays, dtype=bool)
         self.track_testing = np.zeros(self.nDays, dtype=bool)
-
+        self.track_R0 = np.zeros(self.nDays, dtype=float)
+        self.track_Reff = np.zeros(self.nDays, dtype=float)
+        self.track_HIT = np.zeros(self.nDays, dtype=float)
         self.track_time = np.zeros(self.nDays, dtype=float) # time elapsed (in seconds) since start of simulation
-
+        
         self.has_run = False                                 # Indicates if the sim has run yet
 
     def load_general_parameters(self, data_file):
@@ -306,7 +307,6 @@ class simulation():
 
             self.track_new_quarantined[day] = self.pop.get_new_quarantined()
             self.track_inf_students[day] = self.pop.count_infected_students()
-
             self.new_tests = 0
 
             if day != 0:
@@ -314,7 +314,10 @@ class simulation():
                 new_dead = self.track_dead[day] - self.track_dead[day-1]
                 self.track_new_infected[day] = self.track_infected[day]-self.track_infected[day-1]+new_recovered+new_dead
                 self.track_new_tested[day] = self.track_tested[day] - self.track_tested[day-1]
-
+            R0, Reff, HIT = self.R0(day)
+            self.track_R0[day] = R0
+            self.track_Reff[day] = Reff
+            self.track_HIT[day] = HIT
             ############### POLICY STUFF ###############
             mask_mandate = self.policy.update_mask_mandate(day=day)
             if mask_mandate != old_mask_mandate and self.verbose:
@@ -457,6 +460,7 @@ class simulation():
             print(np.max(self.track_dead[-1]), "at peak deaths")
 
         self.has_run = True
+
     def R0(self, day):
         '''Method to calculate daily R0 values.
         
@@ -465,12 +469,17 @@ class simulation():
         daily_R0 : float
             Daily R0 value
         '''
-        daily_R0 = self.new_infected[day]/(self.infected[day]-self.new_infected[day])
-        daily_R02 = self.new_infected[]
-        return daily_R0
-    
-    def R0_avg(self, smooth_num=None):
+        daily_R0 = self.track_new_infected[day]/(self.track_infected[day]-self.track_new_infected[day])*7
+        daily_Reff = daily_R0*self.track_susceptible[day]/self.parameters["simulation_data"]["nPop"]
+        HIT = 0
+        if daily_R0 > 0 and 1-1/daily_R0 >= 0: 
+            HIT = 1-1/daily_R0
+        '''daily_R02 = 0
+        if day != 0 and (self.track_recovered[day]-self.track_recovered[day-1]) != 0:
+            daily_R02 = self.track_new_infected[day]/(self.track_recovered[day]-self.track_recovered[day-1])'''
         
+        return daily_R0, daily_Reff, HIT 
+    
     def check_has_run(self, check, information="", fail=True):
         '''Method to check whether or not the simulation has run.
 
@@ -511,7 +520,7 @@ class simulation():
 
     def plot(self, plot_infected=True, plot_susceptible=True, plot_dead=True, plot_recovered=True, plot_new_infected=True,
              plot_tested=True, plot_quarantined=True, plot_new_tests=True, plot_new_quarantined=True, plot_masks=True,
-             plot_hospitalized=True, plot_ICU=True, plot_lockdown=True, plot_testing=True, plot_students=True, log=False):
+             plot_hospitalized=True, plot_ICU=True, plot_lockdown=True, plot_testing=True, plot_students=True, plot_R0=True, plot_Reff=False, plot_HIT=False, log=False):
         ''' Method used to plot simulation results.
 
         Will return a warning or error if the simulation has not been run yet.
@@ -556,7 +565,12 @@ class simulation():
             plt.plot(days, self.track_new_quarantined, label='new quarantined')
         if plot_students:
             plt.plot(days, self.track_inf_students, label="infected students")
-
+        if plot_R0:
+            plt.plot(days, self.track_R0, label="R0")
+        if plot_Reff:
+            plt.plot(days, self.track_Reff, label="Reff")
+        if plot_HIT:
+            plt.plot(days, self.track_HIT, label="HIT")
         # Indicate when certain mandates were in place
         if plot_masks:
             plt.fill_between(days, 0, 1, where=self.track_masks, alpha=0.3,
@@ -595,6 +609,6 @@ class simulation():
                       "new_tested":self.track_new_tested, "hospitalized":self.track_hospitalized,
                       "ICU":self.track_ICU, "testing_enforced":self.track_testing,
                       "masks_enforced":self.track_masks, "lockdown_enforced":self.track_lockdown,
-                      "time_elapsed":self.track_time}
+                      "time_elapsed":self.track_time, "R0":self.track_R0, "Reff":self.track_Reff, "HIT":self.track_HIT}
 
         return returnDict
