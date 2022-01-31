@@ -101,13 +101,13 @@ class simulation():
         self.track_new_quarantined = np.zeros(self.nDays, dtype=int)
         self.track_tested = np.zeros(self.nDays, dtype=int)       # total tested individuals
         self.track_new_tested = np.zeros(self.nDays, dtype=int)   # new tested per day
-        self.track_testing_wait_list = np.zeros(self.nDays, dtype=int) # counts the number of people waiting to get tests each day
+        self.track_testing_wait_list = np.zeros(self.nDays, dtype=int) # counts the number of people waiting for tests each day
         self.track_inf_students = np.zeros(self.nDays, dtype=int)
 
         self.track_masks = np.zeros(self.nDays, dtype=bool)
         self.track_lockdown = np.zeros(self.nDays, dtype=bool)
         self.track_testing = np.zeros(self.nDays, dtype=bool)
-
+        self.track_vaccinated = np.zeros(self.nDays, dtype=int)
         self.track_time = np.zeros(self.nDays, dtype=float) # time elapsed (in seconds) since start of simulation
 
         self.has_run = False                                 # Indicates if the sim has run yet
@@ -146,6 +146,11 @@ class simulation():
         for attr in person_attributes:
             setattr(self, attr, self.parameters["person_data"][attr])
 
+        #### Load in the virus types tracking arrays ####
+        self.virus_names = list(self.variant_codes.keys())
+        self.track_virus_types = {virus_name:np.zeros(self.nDays, dtype=int) for virus_name in self.virus_names}
+
+
     def load_disease_parameters(self, filename):
         ''' Method to load in attributes from the disease configuration file.
 
@@ -175,9 +180,9 @@ class simulation():
                 return
 
             except FileNotFoundError:
-                warnings.warn(("Unable to find file: {} "
+                warnings.warn((f"Unable to find file: {filepath} "
                                "assuming directory is relative to main config. "
-                               "Attempting read relative to CV19ROOT directory.").format(filepath))
+                               "Attempting read relative to CV19ROOT directory."))
 
                 filepath = Path(CV19ROOT, filename)
                 with open(filepath, encoding='utf-8') as file:
@@ -217,9 +222,8 @@ class simulation():
             self.code_id = self.code_id.strip()
 
         except subprocess.CalledProcessError as e:
-            warnings.warn(("Command '{}' returned a non-zero "
-                           "exit code: {}.").format(' '.join(git_version_cmd),
-                                                    e.returncode))
+            warnings.warn((f"Command '{' '.join(git_version_cmd)}' returned a non-zero "
+                           f"exit code: {e.returncode}."))
             print(e.output)
 
         except OSError:
@@ -238,13 +242,12 @@ class simulation():
                     # Need to check for any whitespace, if entire line is whitespace ignore.
                     name = line.split()[1] if line.strip() else ''
 
-                    if name and name not in ['RunEpidemicPlot.ipynb']:
+                    if name and str(Path(name).parents[0]) == 'cv19':
                         dirty = True
 
             except subprocess.CalledProcessError as e:
-                warnings.warn(("Command '{}' returned a non-zero "
-                               "exit code: {}.").format(' '.join(git_dirty_cmd),
-                                                        e.returncode))
+                warnings.warn((f"Command '{' '.join(git_dirty_cmd)}' returned a non-zero "
+                               f"exit code: {e.returncode}."))
                 print(e.output)
 
             except OSError:
@@ -266,8 +269,6 @@ class simulation():
             Variable to indicate whether the code should return an error if same object is
             run multiple times.
         '''
-
-
         # Check whether the simulation has already been run.
         if fail_on_rerun:
             information = ("When running again, previous results will be overwritten. "
@@ -275,6 +276,9 @@ class simulation():
                            "However, if this is desired, please explicitly set the "
                            "fail_on_rerun argument to False.")
             self.check_has_run(check=False, information=information, fail=True)
+
+        if self.verbose:
+            print(f"Simulation code version (from git): {self.code_id}\n")
 
         # Get current time for measuring elapsed time of simulation.
         beg_time = timer()
@@ -307,6 +311,11 @@ class simulation():
             self.track_new_quarantined[day] = self.pop.get_new_quarantined()
             self.track_inf_students[day] = self.pop.count_infected_students()
 
+            daily_variant_counts = self.pop.count_virus_types()
+            for virus_name in self.virus_names:
+                self.track_virus_types[virus_name][day] = daily_variant_counts[virus_name]
+
+            self.track_vaccinated[day] = self.pop.count_vaccinated()
             self.new_tests = 0
 
             if day != 0:
@@ -318,29 +327,31 @@ class simulation():
             ############### POLICY STUFF ###############
             mask_mandate = self.policy.update_mask_mandate(day=day)
             if mask_mandate != old_mask_mandate and self.verbose:
-                print("Day: {}, Mask Mandate: {}".format(day, mask_mandate))
+                print(f"Day: {day}, Mask Mandate: {mask_mandate}")
             old_mask_mandate = mask_mandate
 
             lockdown = self.policy.update_lockdown(day=day)
             if lockdown != old_lockdown_mandate and self.verbose:
-                print("Day: {}, Lockdown: {}".format(day, lockdown))
+                print(f"Day: {day}, Lockdown: {lockdown}")
             old_lockdown_mandate = lockdown
 
             testing_ON = self.policy.update_testing(day)
             if testing_ON != old_testing_mandate and self.verbose:
-                print("Day: {}, Testing: {}".format(day, testing_ON))
+                print(f"Day: {day}, Testing: {testing_ON}")
             old_testing_mandate = testing_ON
 
             students_go = self.policy.check_students(day=day)
             if students_go != old_student_mandate and self.verbose:
-                print("Day: {}, Uni Mandate: {}".format(day, students_go))
+                print(f"Day: {day}, Uni Mandate: {students_go}")
             old_student_mandate = students_go
 
             #infect random students on the day they come in
             if self.inter_sites.students_on and day == self.policy.student_day_trigger:
                 infStudents = np.random.randint(self.inf_students_lower, self.inf_students_upper)
                 indices = np.random.choice(self.pop.get_student_indices(), infStudents, replace=False)
-                self.pop.infect_incoming_students(indices=indices, day=day)
+                # Convert virus type to virus code
+                student_default_virus_code = self.variant_codes[self.student_default_virus_type]
+                self.pop.infect_incoming_students(indices=indices, day=day, virus_type=student_default_virus_code)
 
             ############### VISITOR STUFF ###############
             #add a random number of visitors to the population
@@ -348,11 +359,12 @@ class simulation():
             visitors_ind = [x for x in range(self.nPop, self.nPop+num_vis-1)]
             vis_age = np.random.choice(a=self.pop.age_options, p=self.pop.age_weights, size=num_vis)
             for i in range(0, num_vis):
-                visitor = Person(index=i+self.nPop, sim_obj=self, infected=True, recovered=False, dead=False, hospitalized=False, ICU=False,
-                                 quarantined=False, quarantined_day=None, infected_day=None, recovered_day=None,
-                                 death_day=None, others_infected=None, cure_days=None, recent_infections=None,
-                                 age=vis_age[i], job=None,house_index=None, isolation_tendencies=0.2, case_severity='Mild',
-                                 has_mask=True)
+                visitor = Person(index=i+self.nPop, sim_obj=self, infected=True, recovered=False, dead=False,
+                                 hospitalized=False, ICU=False, quarantined=False, quarantined_day=None, infected_day=None,
+                                 recovered_day=None, death_day=None, others_infected=None,
+                                 cure_days=None, recent_infections=None, vaccinated=False, age=vis_age[i],
+                                 job=None,house_index=None, isolation_tendencies=0.2,
+                                 case_severity='Mild', has_mask=True, virus_type="alpha")
                 self.pop.population.append(visitor)
 
             ############### INTERACTION SITES STUFF ###############
@@ -365,19 +377,15 @@ class simulation():
                 self.inter_sites.site_interaction(will_visit_C, day, personal=False)
 
             if self.inter_sites.students_on and students_go:
-                will_visit_study = self.inter_sites.will_visit_site(self.inter_sites.get_study_sites(),
-                                                                    self.will_go_prob["STUDY"])
-                #NOTE: Should a study site be a personal interaction?
-                self.inter_sites.site_interaction(will_visit_study, day, personal=True)
-                will_visit_food = self.inter_sites.will_visit_site(self.inter_sites.get_food_sites(),
-                                                                   self.will_go_prob["FOOD"])
-
+                will_visit_food = self.inter_sites.will_visit_site(self.inter_sites.get_food_sites(), self.will_go_prob["FOOD"])
                 self.inter_sites.site_interaction(will_visit_food, day, personal=True)
                 if not lockdown:
                     will_visit_lects = self.inter_sites.will_visit_site(self.inter_sites.get_lect_sites(),
                                                                         self.will_go_prob["LECT"])
-
                     self.inter_sites.site_interaction(will_visit_lects, day, personal=True)
+                    will_visit_study = self.inter_sites.will_visit_site(self.inter_sites.get_study_sites(),
+                                                                        self.will_go_prob["STUDY"])
+                    self.inter_sites.site_interaction(will_visit_study, day, personal=False)
 
             # Manage masks
             if mask_mandate:
@@ -399,6 +407,8 @@ class simulation():
             # Manage Quarantine
             self.pop.update_quarantine(day)
 
+            # Manage Vaccines
+            self.pop.update_vaccinated(day)
             ############### UPDATE POPULATION ###############
             # remove the guest visitors
             self.pop.remove_visitors(visitors_ind)
@@ -422,39 +432,44 @@ class simulation():
             self.track_time[day] = timer() - beg_time
 
             if self.verbose:
-                print(("Day: {}, "
-                       "infected: {}, "
-                       "recovered: {}, "
-                       "suceptible: {}, "
-                       "dead: {}, "
-                       "hospitalized: {}, "
-                       "ICU: {}, "
-                       "tested: {}, "
-                       "total quarantined: {}, "
-                       "infected students: {}").format(day,
-                                                       self.track_infected[day],
-                                                       self.track_recovered[day],
-                                                       self.track_susceptible[day],
-                                                       self.track_dead[day],
-                                                       self.track_hospitalized[day],
-                                                       self.track_ICU[day],
-                                                       self.track_tested[day],
-                                                       self.track_quarantined[day],
-                                                       self.track_inf_students[day]))
+                print((f"Day: {day}, "
+                       f"infected: {self.track_infected[day]}, "
+                       f"recovered: {self.track_recovered[day]}, "
+                       f"susceptible: {self.track_susceptible[day]}, "
+                       f"dead: {self.track_dead[day]}, "
+                       f"hospitalized: {self.track_hospitalized[day]}, "
+                       f"ICU: {self.track_ICU[day]}, "
+                       f"tested: {self.track_tested[day]}, "
+                       f"total quarantined: {self.track_quarantined[day]}, "
+                       f"infected students: {self.track_inf_students[day]}, "
+                       f"vaccinated: {self.track_vaccinated[day]}"))
+
+                # Print variants
+                print("Variants", end=": ")
+                for key, val in self.track_virus_types.items():
+                    print(f"{key}:{val[day]}", end=", ")
+                print("\n")
 
         if self.verbose:
-            print('{:-<80}'.format(''))
             time_seconds = timer() - beg_time
             m, s = divmod(time_seconds, 60)
             h, m = divmod(m, 60)
-            print('Time elapsed: {:02d}:{:02d}:{:02d}'.format(int(h), int(m), int(s)))
-            print("At the end,", self.track_susceptible[-1], "never got it")
-            print(self.track_dead[-1], "died")
-            print(np.max(self.track_infected), "had it at the peak")
-            print(self.track_tested[day], "have been tested")
-            print(np.max(self.track_quarantined), "were in quarantine at the peak")
-            print(np.max(self.track_hospitalized), "at peak hospitalizations")
-            print(np.max(self.track_dead[-1]), "at peak deaths")
+            print(f"{'':-<80}")
+            print("Simulation summary:")
+            print(f"    Time elapsed: {h:02.0f}:{m:02.0f}:{s:02.0f}")
+            print(f"    {self.track_susceptible[-1]} never got it")
+            print(f"    {self.track_dead[-1]} died")
+            print(f"    {np.max(self.track_infected)} had it at the peak")
+            print(f"    {self.track_tested[day]} were tested")
+            print(f"    {np.max(self.track_quarantined)} were in quarantine at the peak")
+            print(f"    {np.max(self.track_hospitalized)} at peak hospitalizations")
+            print(f"    {np.max(self.track_dead[-1])} at peak deaths")
+            print("    The breakdown of the variants is", end=": ")
+            for key, val in self.track_virus_types.items():
+                print(f"{key}-{np.max(val)}", end=", ")
+            print("")
+            print(f"    {self.track_vaccinated[day]} people were vaccinated")
+            print(f"    {self.track_vaccinated[day]/self.nPop*100:.2f}% of population was vaccinated.")
 
         self.has_run = True
     def R0(self, day):
@@ -511,7 +526,8 @@ class simulation():
 
     def plot(self, plot_infected=True, plot_susceptible=True, plot_dead=True, plot_recovered=True, plot_new_infected=True,
              plot_tested=True, plot_quarantined=True, plot_new_tests=True, plot_new_quarantined=True, plot_masks=True,
-             plot_hospitalized=True, plot_ICU=True, plot_lockdown=True, plot_testing=True, plot_students=True, log=False):
+             plot_hospitalized=True, plot_ICU=True, plot_lockdown=True, plot_testing=True, plot_students=True,
+             plot_vaccinated=True, plot_virus_types=None, log=False):
         ''' Method used to plot simulation results.
 
         Will return a warning or error if the simulation has not been run yet.
@@ -556,6 +572,12 @@ class simulation():
             plt.plot(days, self.track_new_quarantined, label='new quarantined')
         if plot_students:
             plt.plot(days, self.track_inf_students, label="infected students")
+        if plot_virus_types is not None:
+            for key in plot_virus_types:
+                if plot_virus_types[key]:
+                    plt.plot(days, self.track_virus_types[key], label=str(key))
+        if plot_vaccinated:
+            plt.plot(days, self.track_vaccinated, label='vaccinated')
 
         # Indicate when certain mandates were in place
         if plot_masks:
@@ -595,6 +617,9 @@ class simulation():
                       "new_tested":self.track_new_tested, "hospitalized":self.track_hospitalized,
                       "ICU":self.track_ICU, "testing_enforced":self.track_testing,
                       "masks_enforced":self.track_masks, "lockdown_enforced":self.track_lockdown,
-                      "time_elapsed":self.track_time}
+                      "time_elapsed":self.track_time, "vaccinated":self.track_vaccinated}
+        # Unpack the virus types
+        for virus_type in self.track_virus_types.keys():
+            returnDict[virus_type] = self.track_virus_types[virus_type]
 
         return returnDict

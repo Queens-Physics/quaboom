@@ -1,7 +1,11 @@
 {
     "mild_symptom_prob":0.8,
     "spread_data":{
-        "base_infection_spread_prob":0.15, 
+        "base_infection_spread_prob": {
+            "general": 0.15,
+            "alpha": 0.2,
+            "delta": 0.25
+            },
         "house_infection_spread_factor":1.25
         },
     "days_before_symptoms":{
