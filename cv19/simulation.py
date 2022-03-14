@@ -107,11 +107,9 @@ class simulation():
         self.track_lockdown = np.zeros(self.nDays, dtype=bool)
         self.track_testing = np.zeros(self.nDays, dtype=bool)
         self.track_time = np.zeros(self.nDays, dtype=float) # time elapsed (in seconds) since start of simulation
-        
         self.track_R0 = np.zeros(self.nDays, dtype=float) # daily R0
         self.track_Reff = np.zeros(self.nDays, dtype=float) # daily effective R0
         self.track_HIT = np.zeros(self.nDays, dtype=float) # daily herd immunity threshold
-        
         self.track_vaccinated = np.zeros(self.nDays, dtype=int)
         self.has_run = False                                 # Indicates if the sim has run yet
 
@@ -494,9 +492,9 @@ class simulation():
             daily_R0 = self.track_new_infected[day]/(new_recovered)
             daily_Reff = daily_R0*self.track_susceptible[day]/self.parameters["simulation_data"]["nPop"]
             
-        if daily_R0 > 0 and 1-1/daily_R0 >= 0: 
+        if daily_R0 > 0 and 1-1/daily_R0 >= 0:
             HIT = 1-1/daily_Reff
-        return daily_R0, daily_Reff, HIT 
+        return daily_R0, daily_Reff, HIT
     
     def check_has_run(self, check, information="", fail=True):
         '''Method to check whether or not the simulation has run.
@@ -636,7 +634,7 @@ class simulation():
                       "ICU":self.track_ICU, "testing_enforced":self.track_testing,
                       "masks_enforced":self.track_masks, "lockdown_enforced":self.track_lockdown,
                       "time_elapsed":self.track_time, "R0":self.track_R0, "Reff":self.track_Reff, "HIT":self.track_HIT,
-                      "time_elapsed":self.track_time, "vaccinated":self.track_vaccinated}
+                      "vaccinated":self.track_vaccinated}
         # Unpack the virus types
         for virus_type in self.track_virus_types.keys():
             returnDict[virus_type] = self.track_virus_types[virus_type]
