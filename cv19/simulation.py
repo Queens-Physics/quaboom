@@ -108,9 +108,9 @@ class simulation():
         self.track_testing = np.zeros(self.nDays, dtype=bool)
         self.track_time = np.zeros(self.nDays, dtype=float) # time elapsed (in seconds) since start of simulation
         
-        self.track_R0 = np.zeros(self.nDays, dtype=float) # Trackign R0
-        self.track_Reff = np.zeros(self.nDays, dtype=float)
-        self.track_HIT = np.zeros(self.nDays, dtype=float)
+        self.track_R0 = np.zeros(self.nDays, dtype=float) # daily R0
+        self.track_Reff = np.zeros(self.nDays, dtype=float) # daily effective R0
+        self.track_HIT = np.zeros(self.nDays, dtype=float) # daily herd immunity threshold
         
         self.track_vaccinated = np.zeros(self.nDays, dtype=int)
         self.has_run = False                                 # Indicates if the sim has run yet
@@ -319,16 +319,13 @@ class simulation():
 
             self.track_vaccinated[day] = self.pop.count_vaccinated()
             self.new_tests = 0
-
+            new_recovered = 0
             if day != 0:
                 new_recovered = self.track_recovered[day] - self.track_recovered[day-1]
                 new_dead = self.track_dead[day] - self.track_dead[day-1]
                 self.track_new_infected[day] = self.track_infected[day]-self.track_infected[day-1]+new_recovered+new_dead
                 self.track_new_tested[day] = self.track_tested[day] - self.track_tested[day-1]
-            R0, Reff, HIT = self.R0(day)
-            self.track_R0[day] = R0
-            self.track_Reff[day] = Reff
-            self.track_HIT[day] = HIT
+            self.track_R0[day], self.track_Reff[day], self.track_HIT[day] = self.R0(day,new_recovered)
             ############### POLICY STUFF ###############
             mask_mandate = self.policy.update_mask_mandate(day=day)
             if mask_mandate != old_mask_mandate and self.verbose:
@@ -478,23 +475,27 @@ class simulation():
 
         self.has_run = True
 
-    def R0(self, day):
+    def R0(self, day, new_recovered):
         '''Method to calculate daily R0 values.
         
         Returns
         -------
         daily_R0 : float
             Daily R0 value
+        daily_Reff : float
+            Daily Reff value
+        HIT : float
+            Daily HIT value
         '''
-        daily_R0 = self.track_new_infected[day]/(self.track_infected[day]-self.track_new_infected[day])*7
-        daily_Reff = daily_R0*self.track_susceptible[day]/self.parameters["simulation_data"]["nPop"]
+        daily_R0 = 0
+        daily_Reff = 0
         HIT = 0
+        if day !=0 and new_recovered > 0:
+            daily_R0 = self.track_new_infected[day]/(new_recovered)
+            daily_Reff = daily_R0*self.track_susceptible[day]/self.parameters["simulation_data"]["nPop"]
+            
         if daily_R0 > 0 and 1-1/daily_R0 >= 0: 
-            HIT = 1-1/daily_R0
-        '''daily_R02 = 0
-        if day != 0 and (self.track_recovered[day]-self.track_recovered[day-1]) != 0:
-            daily_R02 = self.track_new_infected[day]/(self.track_recovered[day]-self.track_recovered[day-1])'''
-        
+            HIT = 1-1/daily_Reff
         return daily_R0, daily_Reff, HIT 
     
     def check_has_run(self, check, information="", fail=True):
@@ -536,8 +537,8 @@ class simulation():
         return self.has_run
 
     def plot(self, plot_infected=True, plot_susceptible=True, plot_dead=True, plot_recovered=True, plot_new_infected=True,
-             plot_tested=True, plot_quarantined=True, plot_new_tests=True, plot_new_quarantined=True, plot_masks=True,
-             plot_hospitalized=True, plot_ICU=True, plot_lockdown=True, plot_testing=True, plot_students=True, plot_R0=True, plot_Reff=False, plot_HIT=False, plot_vaccinated=True, plot_virus_types=None, log=False):
+             plot_tested=True, plot_quarantined=True, plot_new_tests=True, plot_new_quarantined=False, plot_masks=True,
+             plot_hospitalized=True, plot_ICU=True, plot_lockdown=True, plot_testing=True, plot_students=True, plot_R0=False, plot_Reff=False, plot_HIT=False, plot_vaccinated=True, plot_virus_types=None, log=False):
 
         ''' Method used to plot simulation results.
 
