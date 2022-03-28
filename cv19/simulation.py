@@ -474,8 +474,8 @@ class simulation():
         self.has_run = True
 
     def R0(self, day, new_recovered):
-        '''Method to calculate daily R0 values.
-        
+        '''Method to calculate daily R0 values
+
         Returns
         -------
         daily_R0 : float
