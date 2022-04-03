@@ -281,19 +281,23 @@ class Interaction_Sites:
             Each individual list holds the indexes of people that will visit that site for this day.
         '''
 
-        # Could add something here that limits how many sites one person can visit (not real to visit 11 sites a day)
-        will_visit_grade = [[] for _ in range(len(site_array))]
-        for i, site in enumerate(site_array):
-            # initialize probability array, all of the same probability
-            prob_attendance = np.zeros(shape=len(site)) + will_go_prob
+        # Figure out who is going to go to this site type today
+        person_ids = np.unique(np.concatenate(site_array))
 
-            # change the probabilities for quarantined people
-            for j, person in enumerate(site):
-                if self.pop.get_person(person).is_quarantined():
-                    prob_attendance[j] = self.quarantine_isolation_factor
+        # Create array of attendence probabilities
+        prob_attendence = [self.quarantine_isolation_factor if self.pop.get_person(person).is_quarantined()
+                           else will_go_prob for person in person_ids]
 
-            site_attendance = np.random.uniform(size=prob_attendance.shape[0]) < prob_attendance
-            will_visit_grade[i] = site[site_attendance]
+        # Boolean evaluate the array
+        person_will_go = np.random.binomial(1, p=prob_attendence).astype(bool)
+        person_ids_will_go = person_ids[person_will_go]
+
+        # Assign the people going to a random array they are associated with
+        site_index_options = np.arange(len(site_array))
+        person_site_choices = [np.random.choice(site_index_options[[person in site for site in site_array]])
+                               for person in person_ids_will_go]
+
+        will_visit_grade = [person_ids_will_go[person_site_choices==i] for i in site_index_options]
 
         return will_visit_grade
 
