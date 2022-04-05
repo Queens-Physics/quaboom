@@ -62,15 +62,15 @@ class Interaction_Sites:
 
         # Generates a list of ppl that go to different grade X sites
         # len(grade_X_sites) is how many sites there are; len(grade_X_sites[i]) is how many ppl go to that site
-        self.grade_A_sites = self.init_grade(self.grade_per_pop["A"],
+        self.grade_A_sites = self.init_grade(self.site_size["A"],
                                              self.grade_loyalty_means["A"],
                                              self.grade_loyalty_stds["A"],
                                              self.students_participate["A"])
-        self.grade_B_sites = self.init_grade(self.grade_per_pop["B"],
+        self.grade_B_sites = self.init_grade(self.site_size["B"],
                                              self.grade_loyalty_means["B"],
                                              self.grade_loyalty_stds["B"],
                                              self.students_participate["B"])
-        self.grade_C_sites = self.init_grade(self.grade_per_pop["C"],
+        self.grade_C_sites = self.init_grade(self.site_size["C"],
                                              self.grade_loyalty_means["C"],
                                              self.grade_loyalty_stds["C"],
                                              self.students_participate["C"])
@@ -80,16 +80,16 @@ class Interaction_Sites:
         # Students Stuff #
         self.stud_house_sites = deepcopy(self.pop.stud_houses)
         self.stud_house_indices = deepcopy(self.pop.house_stud_i)
-        self.lect_sites = self.init_uni(self.grade_per_pop["LECT"],
+        self.lect_sites = self.init_uni(self.site_size["LECT"],
                                         self.grade_loyalty_means["LECT"],
                                         self.grade_loyalty_stds["LECT"])
-        self.study_sites = self.init_uni(self.grade_per_pop["STUDY"],
+        self.study_sites = self.init_uni(self.site_size["STUDY"],
                                          self.grade_loyalty_means["STUDY"],
                                          self.grade_loyalty_stds["STUDY"])
-        self.food_sites = self.init_uni(self.grade_per_pop["FOOD"],
+        self.food_sites = self.init_uni(self.site_size["FOOD"],
                                         self.grade_loyalty_means["FOOD"],
                                         self.grade_loyalty_stds["FOOD"])
-        self.res_sites = self.init_res(self.grade_per_pop["RES"],
+        self.res_sites = self.init_res(self.site_size["RES"],
                                        self.grade_loyalty_means["RES"],
                                        self.grade_loyalty_stds["RES"])
 
