@@ -344,7 +344,7 @@ class simulation():
             if students_go != old_student_mandate and self.verbose:
                 print(f"Day: {day}, Uni Mandate: {students_go}")
             old_student_mandate = students_go
-            
+
             # Remove dead agents from site attendence
             self.inter_sites.remove_dead()
 
