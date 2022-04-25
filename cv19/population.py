@@ -213,7 +213,7 @@ class Population:
         self.susceptible = np.array(range(self.nPop), dtype=int)  #list of all susceptible individuals
         self.infected = np.zeros(self.nPop, dtype=int) + NULL_ID  # list of all infected people
         self.recovered = np.zeros(self.nPop, dtype=int) + NULL_ID  # list of recovered people
-        self.dead = np.zeros(self.nPop, dtype=int) + NULL_ID  # list of recovered people
+        self.dead = np.zeros(self.nPop, dtype=int) + NULL_ID  # list of dead people
         self.have_been_tested = np.zeros(self.nPop, dtype=int) + NULL_ID  # list of people who have been tested
         self.knows_infected = np.zeros(self.nPop, dtype=int) + NULL_ID  # list of people with positive test and still infected
         self.hospitalized = np.zeros(self.nPop, dtype=int) + NULL_ID  # list of people hospitalized and in the ICU

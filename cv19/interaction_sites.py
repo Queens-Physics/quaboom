@@ -258,6 +258,52 @@ class Interaction_Sites:
 
         return grade_sites
 
+    def remove_dead(self):
+        '''Method to remove dead agents from interaction site arrays.
+
+        Iterates through each type of site array, and will remove all agents that are
+        dead from each array.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+        '''
+
+        # Create list of all dead agents
+        dead_agents = self.pop.get_dead()
+
+        # Site type A
+        for i, site_array in enumerate(self.grade_A_sites):
+            self.grade_A_sites[i] = np.array([agent for agent in site_array if agent not in dead_agents])
+
+        # Site type B
+        for i, site_array in enumerate(self.grade_B_sites):
+            self.grade_B_sites[i] = np.array([agent for agent in site_array if agent not in dead_agents])
+
+        # Site type C
+        for i, site_array in enumerate(self.grade_C_sites):
+            self.grade_C_sites[i] = np.array([agent for agent in site_array if agent not in dead_agents])
+
+        # Site type lecture
+        for i, site_array in enumerate(self.lect_sites):
+            self.lect_sites[i] = np.array([agent for agent in site_array if agent not in dead_agents])
+
+        # Site type study
+        for i, site_array in enumerate(self.study_sites):
+            self.study_sites[i] = np.array([agent for agent in site_array if agent not in dead_agents])
+
+        # Site type food
+        for i, site_array in enumerate(self.food_sites):
+            self.food_sites[i] = np.array([agent for agent in site_array if agent not in dead_agents])
+
+        # Site type res
+        for i, site_array in enumerate(self.res_sites):
+            self.res_sites[i] = np.array([agent for agent in site_array if agent not in dead_agents])
+
     def will_visit_site(self, site_array, will_go_prob):
         '''Method to determine who will visit a site on a given day.
 
