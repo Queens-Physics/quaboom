@@ -278,31 +278,39 @@ class Interaction_Sites:
 
         # Site type A
         for i, site_array in enumerate(self.grade_A_sites):
-            self.grade_A_sites[i] = np.array([agent for agent in site_array if agent not in dead_agents])
+            # Mask where True indicates alive and False indicates dead (note the invert argument)
+            mask_alive = np.isin(site_array, dead_agents, invert=True)
+            self.grade_A_sites[i] = site_array[mask_alive]
 
         # Site type B
         for i, site_array in enumerate(self.grade_B_sites):
-            self.grade_B_sites[i] = np.array([agent for agent in site_array if agent not in dead_agents])
+            mask_alive = np.isin(site_array, dead_agents, invert=True)
+            self.grade_B_sites[i] = site_array[mask_alive]
 
         # Site type C
         for i, site_array in enumerate(self.grade_C_sites):
-            self.grade_C_sites[i] = np.array([agent for agent in site_array if agent not in dead_agents])
+            mask_alive = np.isin(site_array, dead_agents, invert=True)
+            self.grade_C_sites[i] = site_array[mask_alive]
 
         # Site type lecture
         for i, site_array in enumerate(self.lect_sites):
-            self.lect_sites[i] = np.array([agent for agent in site_array if agent not in dead_agents])
+            mask_alive = np.isin(site_array, dead_agents, invert=True)
+            self.lect_sites[i] = site_array[mask_alive]
 
         # Site type study
         for i, site_array in enumerate(self.study_sites):
-            self.study_sites[i] = np.array([agent for agent in site_array if agent not in dead_agents])
+            mask_alive = np.isin(site_array, dead_agents, invert=True)
+            self.study_sites[i] = site_array[mask_alive]
 
         # Site type food
         for i, site_array in enumerate(self.food_sites):
-            self.food_sites[i] = np.array([agent for agent in site_array if agent not in dead_agents])
+            mask_alive = np.isin(site_array, dead_agents, invert=True)
+            self.food_sites[i] = site_array[mask_alive]
 
         # Site type res
         for i, site_array in enumerate(self.res_sites):
-            self.res_sites[i] = np.array([agent for agent in site_array if agent not in dead_agents])
+            mask_alive = np.isin(site_array, dead_agents, invert=True)
+            self.res_sites[i] = site_array[mask_alive]
 
     def will_visit_site(self, site_array, will_go_prob):
         '''Method to determine who will visit a site on a given day.
