@@ -322,7 +322,7 @@ class simulation():
                 new_dead = self.track_dead[day] - self.track_dead[day-1]
                 self.track_new_infected[day] = self.track_infected[day]-self.track_infected[day-1]+new_recovered+new_dead
                 self.track_new_tested[day] = self.track_tested[day] - self.track_tested[day-1]
-            self.track_R0[day], self.track_Reff[day], self.track_HIT[day] = self.R0(day,new_recovered)
+            self.track_R0[day], self.track_Reff[day], self.track_HIT[day] = self.R0(day)
             ############### POLICY STUFF ###############
             mask_mandate = self.policy.update_mask_mandate(day=day)
             if mask_mandate != old_mask_mandate and self.verbose:
