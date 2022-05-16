@@ -319,7 +319,6 @@ class simulation():
             self.new_tests = 0
             new_recovered = 0
             if day != 0:
-                new_recovered = self.track_recovered[day] - self.track_recovered[day-1]
                 new_dead = self.track_dead[day] - self.track_dead[day-1]
                 self.track_new_infected[day] = self.track_infected[day]-self.track_infected[day-1]+new_recovered+new_dead
                 self.track_new_tested[day] = self.track_tested[day] - self.track_tested[day-1]
@@ -473,7 +472,7 @@ class simulation():
 
         self.has_run = True
 
-    def R0(self, day, new_recovered):
+    def R0(self, day):
         '''Method to calculate daily R0 values
 
         Returns
@@ -488,8 +487,9 @@ class simulation():
         daily_R0 = 0
         daily_Reff = 0
         HIT = 0
-        if day !=0 and new_recovered > 0:
-            daily_R0 = self.track_new_infected[day]/(new_recovered)
+        new_recovered = self.track_recovered[day] - self.track_recovered[day-1]
+        if day != 0 and new_recovered > 0:
+            daily_R0 = self.track_new_infected[day]/new_recovered
             daily_Reff = daily_R0*self.track_susceptible[day]/self.parameters["simulation_data"]["nPop"]
         if daily_R0 > 0 and 1-1/daily_R0 >= 0:
             HIT = 1-1/daily_Reff
