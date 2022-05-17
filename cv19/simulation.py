@@ -495,7 +495,7 @@ class simulation():
         if day != 0 and new_recovered > 0:
             daily_R0 = self.track_new_infected[day]/new_recovered
             daily_Reff = daily_R0*self.track_susceptible[day]/self.parameters["simulation_data"]["nPop"]
-        if daily_R0 > 0 and 1-1/daily_R0 >= 0:
+        if daily_Reff > 0 and 1-1/daily_Reff >= 0:
             HIT = 1-1/daily_Reff
         return daily_R0, daily_Reff, HIT
     def check_has_run(self, check, information="", fail=True):
