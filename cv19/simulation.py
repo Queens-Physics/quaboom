@@ -319,6 +319,7 @@ class simulation():
             self.new_tests = 0
             new_recovered = 0
             if day != 0:
+                new_recovered = self.track_recovered[day] - self.track_recovered[day-1]
                 new_dead = self.track_dead[day] - self.track_dead[day-1]
                 self.track_new_infected[day] = self.track_infected[day]-self.track_infected[day-1]+new_recovered+new_dead
                 self.track_new_tested[day] = self.track_tested[day] - self.track_tested[day-1]
