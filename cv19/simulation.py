@@ -103,13 +103,14 @@ class simulation():
         self.track_new_tested = np.zeros(self.nDays, dtype=int)   # new tested per day
         self.track_testing_wait_list = np.zeros(self.nDays, dtype=int) # counts the number of people waiting for tests each day
         self.track_inf_students = np.zeros(self.nDays, dtype=int)
-
         self.track_masks = np.zeros(self.nDays, dtype=bool)
         self.track_lockdown = np.zeros(self.nDays, dtype=bool)
         self.track_testing = np.zeros(self.nDays, dtype=bool)
-        self.track_vaccinated = np.zeros(self.nDays, dtype=int)
         self.track_time = np.zeros(self.nDays, dtype=float) # time elapsed (in seconds) since start of simulation
-
+        self.track_R0 = np.zeros(self.nDays, dtype=float) # daily R0
+        self.track_Reff = np.zeros(self.nDays, dtype=float) # daily effective R0
+        self.track_HIT = np.zeros(self.nDays, dtype=float) # daily herd immunity threshold
+        self.track_vaccinated = np.zeros(self.nDays, dtype=int)
         self.has_run = False                                 # Indicates if the sim has run yet
 
     def load_general_parameters(self, data_file):
@@ -310,20 +311,19 @@ class simulation():
 
             self.track_new_quarantined[day] = self.pop.get_new_quarantined()
             self.track_inf_students[day] = self.pop.count_infected_students()
-
             daily_variant_counts = self.pop.count_virus_types()
             for virus_name in self.virus_names:
                 self.track_virus_types[virus_name][day] = daily_variant_counts[virus_name]
 
             self.track_vaccinated[day] = self.pop.count_vaccinated()
             self.new_tests = 0
-
+            new_recovered = 0
             if day != 0:
                 new_recovered = self.track_recovered[day] - self.track_recovered[day-1]
                 new_dead = self.track_dead[day] - self.track_dead[day-1]
                 self.track_new_infected[day] = self.track_infected[day]-self.track_infected[day-1]+new_recovered+new_dead
                 self.track_new_tested[day] = self.track_tested[day] - self.track_tested[day-1]
-
+            self.track_R0[day], self.track_Reff[day], self.track_HIT[day] = self.R0(day)
             ############### POLICY STUFF ###############
             mask_mandate = self.policy.update_mask_mandate(day=day)
             if mask_mandate != old_mask_mandate and self.verbose:
@@ -344,6 +344,9 @@ class simulation():
             if students_go != old_student_mandate and self.verbose:
                 print(f"Day: {day}, Uni Mandate: {students_go}")
             old_student_mandate = students_go
+
+            # Remove dead agents from site attendence
+            self.inter_sites.remove_dead()
 
             #infect random students on the day they come in
             if self.inter_sites.students_on and day == self.policy.student_day_trigger:
@@ -473,6 +476,28 @@ class simulation():
 
         self.has_run = True
 
+    def R0(self, day):
+        '''Method to calculate daily R0 values
+
+        Returns
+        -------
+        daily_R0 : float
+            Daily R0 value
+        daily_Reff : float
+            Daily Reff value
+        HIT : float
+            Daily HIT value
+        '''
+        daily_R0 = 0
+        daily_Reff = 0
+        HIT = 0
+        new_recovered = self.track_recovered[day] - self.track_recovered[day-1]
+        if day != 0 and new_recovered > 0:
+            daily_R0 = self.track_new_infected[day]/new_recovered
+            daily_Reff = daily_R0*self.track_susceptible[day]/self.parameters["simulation_data"]["nPop"]
+        if daily_R0 > 0 and 1-1/daily_R0 >= 0:
+            HIT = 1-1/daily_Reff
+        return daily_R0, daily_Reff, HIT
     def check_has_run(self, check, information="", fail=True):
         '''Method to check whether or not the simulation has run.
 
@@ -512,9 +537,9 @@ class simulation():
         return self.has_run
 
     def plot(self, plot_infected=True, plot_susceptible=True, plot_dead=True, plot_recovered=True, plot_new_infected=True,
-             plot_tested=True, plot_quarantined=True, plot_new_tests=True, plot_new_quarantined=True, plot_masks=True,
-             plot_hospitalized=True, plot_ICU=True, plot_lockdown=True, plot_testing=True, plot_students=True,
-             plot_vaccinated=True, plot_virus_types=None, log=False):
+             plot_tested=True, plot_quarantined=True, plot_new_tests=True, plot_new_quarantined=False, plot_masks=True,
+             plot_hospitalized=True, plot_ICU=True, plot_lockdown=True, plot_testing=True, plot_students=True, plot_R0=False, plot_Reff=False, plot_HIT=False, plot_vaccinated=True, plot_virus_types=None, log=False):
+
         ''' Method used to plot simulation results.
 
         Will return a warning or error if the simulation has not been run yet.
@@ -559,6 +584,12 @@ class simulation():
             plt.plot(days, self.track_new_quarantined, label='new quarantined')
         if plot_students:
             plt.plot(days, self.track_inf_students, label="infected students")
+        if plot_R0:
+            plt.plot(days, self.track_R0, label="R0")
+        if plot_Reff:
+            plt.plot(days, self.track_Reff, label="Reff")
+        if plot_HIT:
+            plt.plot(days, self.track_HIT, label="HIT")
         if plot_virus_types is not None:
             for key in plot_virus_types:
                 if plot_virus_types[key]:
@@ -604,7 +635,8 @@ class simulation():
                       "new_tested":self.track_new_tested, "hospitalized":self.track_hospitalized,
                       "ICU":self.track_ICU, "testing_enforced":self.track_testing,
                       "masks_enforced":self.track_masks, "lockdown_enforced":self.track_lockdown,
-                      "time_elapsed":self.track_time, "vaccinated":self.track_vaccinated}
+                      "time_elapsed":self.track_time, "R0":self.track_R0, "Reff":self.track_Reff, "HIT":self.track_HIT,
+                      "vaccinated":self.track_vaccinated}
         # Unpack the virus types
         for virus_type in self.track_virus_types.keys():
             returnDict[virus_type] = self.track_virus_types[virus_type]
