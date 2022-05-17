@@ -344,6 +344,9 @@ class simulation():
                 print(f"Day: {day}, Uni Mandate: {students_go}")
             old_student_mandate = students_go
 
+            # Remove dead agents from site attendence
+            self.inter_sites.remove_dead()
+
             #infect random students on the day they come in
             if self.inter_sites.students_on and day == self.policy.student_day_trigger:
                 infStudents = np.random.randint(self.inf_students_lower, self.inf_students_upper)

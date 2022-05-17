@@ -62,15 +62,15 @@ class Interaction_Sites:
 
         # Generates a list of ppl that go to different grade X sites
         # len(grade_X_sites) is how many sites there are; len(grade_X_sites[i]) is how many ppl go to that site
-        self.grade_A_sites = self.init_grade(self.grade_per_pop["A"],
+        self.grade_A_sites = self.init_grade(self.site_size["A"],
                                              self.grade_loyalty_means["A"],
                                              self.grade_loyalty_stds["A"],
                                              self.students_participate["A"])
-        self.grade_B_sites = self.init_grade(self.grade_per_pop["B"],
+        self.grade_B_sites = self.init_grade(self.site_size["B"],
                                              self.grade_loyalty_means["B"],
                                              self.grade_loyalty_stds["B"],
                                              self.students_participate["B"])
-        self.grade_C_sites = self.init_grade(self.grade_per_pop["C"],
+        self.grade_C_sites = self.init_grade(self.site_size["C"],
                                              self.grade_loyalty_means["C"],
                                              self.grade_loyalty_stds["C"],
                                              self.students_participate["C"])
@@ -80,16 +80,16 @@ class Interaction_Sites:
         # Students Stuff #
         self.stud_house_sites = deepcopy(self.pop.stud_houses)
         self.stud_house_indices = deepcopy(self.pop.house_stud_i)
-        self.lect_sites = self.init_uni(self.grade_per_pop["LECT"],
+        self.lect_sites = self.init_uni(self.site_size["LECT"],
                                         self.grade_loyalty_means["LECT"],
                                         self.grade_loyalty_stds["LECT"])
-        self.study_sites = self.init_uni(self.grade_per_pop["STUDY"],
+        self.study_sites = self.init_uni(self.site_size["STUDY"],
                                          self.grade_loyalty_means["STUDY"],
                                          self.grade_loyalty_stds["STUDY"])
-        self.food_sites = self.init_uni(self.grade_per_pop["FOOD"],
+        self.food_sites = self.init_uni(self.site_size["FOOD"],
                                         self.grade_loyalty_means["FOOD"],
                                         self.grade_loyalty_stds["FOOD"])
-        self.res_sites = self.init_res(self.grade_per_pop["RES"],
+        self.res_sites = self.init_res(self.site_size["RES"],
                                        self.grade_loyalty_means["RES"],
                                        self.grade_loyalty_stds["RES"])
 
@@ -258,6 +258,60 @@ class Interaction_Sites:
 
         return grade_sites
 
+    def remove_dead(self):
+        '''Method to remove dead agents from interaction site arrays.
+
+        Iterates through each type of site array, and will remove all agents that are
+        dead from each array.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+        '''
+
+        # Create list of all dead agents
+        dead_agents = self.pop.get_dead()
+
+        # Site type A
+        for i, site_array in enumerate(self.grade_A_sites):
+            # Mask where True indicates alive and False indicates dead (note the invert argument)
+            mask_alive = np.isin(site_array, dead_agents, invert=True)
+            self.grade_A_sites[i] = site_array[mask_alive]
+
+        # Site type B
+        for i, site_array in enumerate(self.grade_B_sites):
+            mask_alive = np.isin(site_array, dead_agents, invert=True)
+            self.grade_B_sites[i] = site_array[mask_alive]
+
+        # Site type C
+        for i, site_array in enumerate(self.grade_C_sites):
+            mask_alive = np.isin(site_array, dead_agents, invert=True)
+            self.grade_C_sites[i] = site_array[mask_alive]
+
+        # Site type lecture
+        for i, site_array in enumerate(self.lect_sites):
+            mask_alive = np.isin(site_array, dead_agents, invert=True)
+            self.lect_sites[i] = site_array[mask_alive]
+
+        # Site type study
+        for i, site_array in enumerate(self.study_sites):
+            mask_alive = np.isin(site_array, dead_agents, invert=True)
+            self.study_sites[i] = site_array[mask_alive]
+
+        # Site type food
+        for i, site_array in enumerate(self.food_sites):
+            mask_alive = np.isin(site_array, dead_agents, invert=True)
+            self.food_sites[i] = site_array[mask_alive]
+
+        # Site type res
+        for i, site_array in enumerate(self.res_sites):
+            mask_alive = np.isin(site_array, dead_agents, invert=True)
+            self.res_sites[i] = site_array[mask_alive]
+
     def will_visit_site(self, site_array, will_go_prob):
         '''Method to determine who will visit a site on a given day.
 
@@ -281,19 +335,23 @@ class Interaction_Sites:
             Each individual list holds the indexes of people that will visit that site for this day.
         '''
 
-        # Could add something here that limits how many sites one person can visit (not real to visit 11 sites a day)
-        will_visit_grade = [[] for _ in range(len(site_array))]
-        for i, site in enumerate(site_array):
-            # initialize probability array, all of the same probability
-            prob_attendance = np.zeros(shape=len(site)) + will_go_prob
+        # Figure out who is going to go to this site type today
+        person_ids = np.unique(np.concatenate(site_array))
 
-            # change the probabilities for quarantined people
-            for j, person in enumerate(site):
-                if self.pop.get_person(person).is_quarantined():
-                    prob_attendance[j] = self.quarantine_isolation_factor
+        # Create array of attendence probabilities
+        prob_attendence = [self.quarantine_isolation_factor if self.pop.get_person(person).is_quarantined()
+                           else will_go_prob for person in person_ids]
 
-            site_attendance = np.random.uniform(size=prob_attendance.shape[0]) < prob_attendance
-            will_visit_grade[i] = site[site_attendance]
+        # Boolean evaluate the array
+        person_will_go = np.random.binomial(1, p=prob_attendence).astype(bool)
+        person_ids_will_go = person_ids[person_will_go]
+
+        # Assign the people going to a random array they are associated with
+        site_index_options = np.arange(len(site_array))
+        person_site_choices = [np.random.choice(site_index_options[[person in site for site in site_array]])
+                               for person in person_ids_will_go]
+
+        will_visit_grade = [person_ids_will_go[person_site_choices==i] for i in site_index_options]
 
         return will_visit_grade
 
