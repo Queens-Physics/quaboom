@@ -88,6 +88,7 @@
         "min_ICU_days": 43,
         "max_die_days": 30,
         "min_die_days": 14,
+        "R0_lag_time":5,
         "ct_length": 2,
         "ct_prob_remember_personal_contacts": 0.8,
         "protocol_compliance": 1,
