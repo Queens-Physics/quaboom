@@ -556,7 +556,7 @@ class simulation():
     def plot(self, plot_infected=True, plot_susceptible=True, plot_dead=True, plot_recovered=True, plot_new_infected=True,
              plot_tested=True, plot_quarantined=True, plot_new_tests=True, plot_new_quarantined=False, plot_masks=True,
              plot_hospitalized=True, plot_ICU=True, plot_lockdown=True, plot_testing=True, plot_students=True, plot_R0=False, 
-             plot_Reff=False, plot_HIT=False, plot_gamma=False, plot_beta=False, plot_vaccinated=True, plot_virus_types=None,
+             plot_R_eff=False, plot_HIT=False, plot_gamma=False, plot_beta=False, plot_vaccinated=True, plot_virus_types=None,
              log=False):
 
         ''' Method used to plot simulation results.
@@ -605,8 +605,8 @@ class simulation():
             plt.plot(days, self.track_inf_students, label="infected students")
         if plot_R0:
             plt.plot(days, self.track_R0, label="R0")
-        if plot_Reff:
-            plt.plot(days, self.track_Reff, label="Reff")
+        if plot_R_eff:
+            plt.plot(days, self.track_R_eff, label="Reff")
         if plot_HIT:
             plt.plot(days, self.track_HIT, label="HIT")
         if plot_gamma:
