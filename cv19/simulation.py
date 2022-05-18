@@ -323,6 +323,8 @@ class simulation():
                 new_dead = self.track_dead[day] - self.track_dead[day-1]
                 self.track_new_infected[day] = self.track_infected[day]-self.track_infected[day-1]+new_recovered+new_dead
                 self.track_new_tested[day] = self.track_tested[day] - self.track_tested[day-1]
+            if day - self.R0_lag_time >=0:
+                self.track_R0[day], self.track_Reff[day], self.track_HIT[day] = self.R0(day)
             self.track_R0[day], self.track_Reff[day], self.track_HIT[day] = self.R0(day)
             ############### POLICY STUFF ###############
             mask_mandate = self.policy.update_mask_mandate(day=day)
@@ -492,10 +494,10 @@ class simulation():
         daily_Reff = 0
         HIT = 0
         new_recovered = self.track_recovered[day] - self.track_recovered[day-1]
-        if day != 0 and new_recovered > 0:
-            daily_R0 = self.track_new_infected[day]/new_recovered
+        if new_recovered > 0:
+            daily_R0 = self.track_new_infected[day - self.R0_lag_time]/new_recovered
             daily_Reff = daily_R0*self.track_susceptible[day]/self.parameters["simulation_data"]["nPop"]
-        if daily_R0 > 0 and 1-1/daily_R0 >= 0:
+        if daily_Reff > 0 and 1-1/daily_Reff >= 0:
             HIT = 1-1/daily_Reff
         return daily_R0, daily_Reff, HIT
     def check_has_run(self, check, information="", fail=True):
