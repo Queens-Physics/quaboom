@@ -492,7 +492,7 @@ class simulation():
         daily_Reff = 0
         HIT = 0
         new_recovered = self.track_recovered[day] - self.track_recovered[day-1]
-        if day != 0 and new_recovered > 0:
+        if day-self.R0_lag_time >= 0 and new_recovered > 0:
             daily_R0 = self.track_new_infected[day-self.R0_lag_time]/new_recovered
             daily_Reff = daily_R0*self.track_susceptible[day]/self.parameters["simulation_data"]["nPop"]
         if daily_Reff > 0 and 1-1/daily_Reff >= 0:
