@@ -2,8 +2,8 @@
     "simulation_data":
     {
         "disease_config_file":"disease.json",
-        "nDays":120,
-        "nPop":100000,
+        "nDays":100,
+        "nPop":10000,
         "variants":{
             "general":10, 
             "alpha":0,
