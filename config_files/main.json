@@ -5,9 +5,9 @@
         "nDays":100,
         "nPop":10000,
         "variants":{
-            "general":8, 
-            "alpha":8,
-            "delta":8
+            "general":10, 
+            "alpha":0,
+            "delta":0
             },
         "variant_codes":{
             "general":0,
@@ -19,7 +19,7 @@
         "num_students":2000,
         "max_num_res_students":500,
         "v0":0,
-        "will_go_prob":{"A":0.05, "B":0.2, "C":0.7, "LECT":0.7, "STUDY":0.5, "FOOD":0.1, "RES":1},
+        "will_go_prob":{"A":0.05, "B":0.14, "C":0.7, "LECT":0.7, "STUDY":0.5, "FOOD":0.1, "RES":1},
         "N_VIS_OPTION":[ 0, 1, 2, 3 ],
         "N_VIS_PROB":[ 0.7, 0.17, 0.08, 0.05],
         "vis_age_upper":60,
@@ -34,19 +34,19 @@
     {
         "initial_mask_mandate":true,
         "mask_trigger":0.3,
-        "mask_day_trigger":15,
+        "mask_day_trigger":0,
         "initial_lockdown_mandate":false,
-        "lockdown_on_trigger":0.001,
-        "lockdown_off_trigger":0.1,
-        "lockdown_on_day_trigger":null,
-        "lockdown_off_day_trigger":null,
+        "lockdown_on_trigger":null,
+        "lockdown_off_trigger":null,
+        "lockdown_on_day_trigger":0,
+        "lockdown_off_day_trigger":101,
         "initial_testing_mandate":false,
         "testing_trigger":null,
         "testing_day_trigger":0,
-        "testing_baseline":10,
+        "testing_baseline":5000,
         "testing_rates":[0.1, 0.8, 0.1],
         "initial_student_mandate":false,
-        "student_day_trigger":20,
+        "student_day_trigger":101,
         "prob_of_symptoms":0.7
     },
 

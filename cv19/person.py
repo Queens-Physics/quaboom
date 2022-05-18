@@ -366,7 +366,7 @@ class Person(object):
     def infect(self, day, virus_type, cure_days=None):
         '''Method to infect a person.
         If they're quarantined and their quarantine time has ended, let them out of quarantine.
-        If they're not quarantined but they have severe symptoms, set self.quarantined to be True.
+        If they're not quarantined but they have severe symptoms to get hospitalized, set self.quarantined to be True.
 
         Parameters
         ----------
@@ -404,8 +404,8 @@ class Person(object):
                                                    d_params["mild_days"]["max"]) if cure_days is None else cure_days
             #Assuming that all hospitalization or worse cases will show symptoms
             elif self.case_severity == 'Hospitalization':
-                self.cure_days = np.random.randint(d_params["severe_days"]["min"],
-                                                   d_params["severe_days"]["max"]) if cure_days is None else cure_days
+                self.cure_days = np.random.randint(d_params["hospital_days"]["min"],
+                                                   d_params["hospital_days"]["max"]) if cure_days is None else cure_days
                 self.hospitalized = True
             elif self.case_severity == 'ICU':
                 self.cure_days = np.random.randint(d_params["ICU_days"]["min"],
