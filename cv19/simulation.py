@@ -113,7 +113,7 @@ class simulation():
         self.track_vaccinated = np.zeros(self.nDays, dtype=int)
         self.track_gamma = np.zeros(self.nDays, dtype=float)
         self.track_beta = np.zeros(self.nDays, dtype=float)
-        
+
         self.has_run = False  # Indicates if the sim has run yet
 
     def load_general_parameters(self, data_file):
@@ -319,18 +319,18 @@ class simulation():
                 self.track_virus_types[virus_name][day] = daily_variant_counts[virus_name]
 
             self.track_vaccinated[day] = self.pop.count_vaccinated()
-            
+
             self.new_tests = 0
             new_recovered = 0
-            
+
             if day != 0:
                 new_recovered = self.track_recovered[day] - self.track_recovered[day-1]
                 new_dead = self.track_dead[day] - self.track_dead[day-1]
                 self.track_new_infected[day] = self.track_infected[day]-self.track_infected[day-1]+new_recovered+new_dead
                 self.track_new_tested[day] = self.track_tested[day] - self.track_tested[day-1]
-            
+
                 self.calculate_SIR_metrics(day)
-            
+
             ############### POLICY STUFF ###############
             mask_mandate = self.policy.update_mask_mandate(day=day)
             if mask_mandate != old_mask_mandate and self.verbose:
@@ -485,10 +485,10 @@ class simulation():
 
     def calculate_SIR_metrics(self, day):
         '''Method to caclulate all metrics related to SIR models.
-        
+
         These variables are defined in the wikipedia page and are calculated as such. No variables are
-        returned, all values are set inside the function in the tracking arrays. 
-        
+        returned, all values are set inside the function in the tracking arrays.
+
         The following variables are calculated: gamma, beta, R0, R effective, and HIT (herd immunity threshold).
         '''
 
@@ -514,7 +514,7 @@ class simulation():
             self.track_HIT[day] = HIT
 
         self.track_gamma[day], self.track_beta[day] = gamma, beta
-    
+
     def check_has_run(self, check, information="", fail=True):
         '''Method to check whether or not the simulation has run.
 
@@ -555,7 +555,7 @@ class simulation():
 
     def plot(self, plot_infected=True, plot_susceptible=True, plot_dead=True, plot_recovered=True, plot_new_infected=True,
              plot_tested=True, plot_quarantined=True, plot_new_tests=True, plot_new_quarantined=False, plot_masks=True,
-             plot_hospitalized=True, plot_ICU=True, plot_lockdown=True, plot_testing=True, plot_students=True, plot_R0=False, 
+             plot_hospitalized=True, plot_ICU=True, plot_lockdown=True, plot_testing=True, plot_students=True, plot_R0=False,
              plot_R_eff=False, plot_HIT=False, plot_gamma=False, plot_beta=False, plot_vaccinated=True, plot_virus_types=None,
              log=False):
 
