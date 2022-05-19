@@ -488,6 +488,8 @@ class simulation():
 
         These variables are defined in the wikipedia page and are calculated as such. No variables are
         returned, all values are set inside the function in the tracking arrays.
+        
+        Wikipedia page link: https://en.wikipedia.org/wiki/Compartmental_models_in_epidemiology
 
         The following variables are calculated: gamma, beta, R0, R effective, and HIT (herd immunity threshold).
         '''
