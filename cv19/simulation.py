@@ -108,10 +108,13 @@ class simulation():
         self.track_testing = np.zeros(self.nDays, dtype=bool)
         self.track_time = np.zeros(self.nDays, dtype=float) # time elapsed (in seconds) since start of simulation
         self.track_R0 = np.zeros(self.nDays, dtype=float) # daily R0
-        self.track_Reff = np.zeros(self.nDays, dtype=float) # daily effective R0
+        self.track_R_eff = np.zeros(self.nDays, dtype=float) # daily effective R0
         self.track_HIT = np.zeros(self.nDays, dtype=float) # daily herd immunity threshold
         self.track_vaccinated = np.zeros(self.nDays, dtype=int)
-        self.has_run = False                                 # Indicates if the sim has run yet
+        self.track_gamma = np.zeros(self.nDays, dtype=float)
+        self.track_beta = np.zeros(self.nDays, dtype=float)
+
+        self.has_run = False  # Indicates if the sim has run yet
 
     def load_general_parameters(self, data_file):
         ''' Method to load in attributes from the general configuration file.
@@ -316,16 +319,18 @@ class simulation():
                 self.track_virus_types[virus_name][day] = daily_variant_counts[virus_name]
 
             self.track_vaccinated[day] = self.pop.count_vaccinated()
+
             self.new_tests = 0
             new_recovered = 0
+
             if day != 0:
                 new_recovered = self.track_recovered[day] - self.track_recovered[day-1]
                 new_dead = self.track_dead[day] - self.track_dead[day-1]
                 self.track_new_infected[day] = self.track_infected[day]-self.track_infected[day-1]+new_recovered+new_dead
                 self.track_new_tested[day] = self.track_tested[day] - self.track_tested[day-1]
-            if day - self.R0_lag_time >=0:
-                self.track_R0[day], self.track_Reff[day], self.track_HIT[day] = self.R0(day)
-            self.track_R0[day], self.track_Reff[day], self.track_HIT[day] = self.R0(day)
+
+                self.calculate_SIR_metrics(day)
+
             ############### POLICY STUFF ###############
             mask_mandate = self.policy.update_mask_mandate(day=day)
             if mask_mandate != old_mask_mandate and self.verbose:
@@ -478,28 +483,40 @@ class simulation():
 
         self.has_run = True
 
-    def R0(self, day):
-        '''Method to calculate daily R0 values
+    def calculate_SIR_metrics(self, day):
+        '''Method to caclulate all metrics related to SIR models.
 
-        Returns
-        -------
-        daily_R0 : float
-            Daily R0 value
-        daily_Reff : float
-            Daily Reff value
-        HIT : float
-            Daily HIT value
+        These variables are defined in the wikipedia page and are calculated as such. No variables are
+        returned, all values are set inside the function in the tracking arrays.
+
+        Wikipedia page link: https://en.wikipedia.org/wiki/Compartmental_models_in_epidemiology
+
+        The following variables are calculated: gamma, beta, R0, R effective, and HIT (herd immunity threshold).
         '''
-        daily_R0 = 0
-        daily_Reff = 0
-        HIT = 0
-        new_recovered = self.track_recovered[day] - self.track_recovered[day-1]
-        if new_recovered > 0:
-            daily_R0 = self.track_new_infected[day - self.R0_lag_time]/new_recovered
-            daily_Reff = daily_R0*self.track_susceptible[day]/self.parameters["simulation_data"]["nPop"]
-        if daily_Reff > 0 and 1-1/daily_Reff >= 0:
-            HIT = 1-1/daily_Reff
-        return daily_R0, daily_Reff, HIT
+
+        # Define variables in accordance with wikipedia page
+        dR_dt = self.track_recovered[day] - self.track_recovered[day - 1]
+        dI_dt = self.track_new_infected[day]
+        S, I = self.track_susceptible[day], self.track_infected[day]
+        N = self.parameters["simulation_data"]["nPop"]
+
+        gamma = dR_dt / I
+        beta = (dI_dt + gamma*I)*(N/(I*S))
+
+        if day - self.R0_lag_time >= 0:
+
+            # Use the old gamma (infected rate) and current beta (recovery rate)
+            lagged_gamma = self.track_gamma[day - self.R0_lag_time]
+            daily_R0 = beta / lagged_gamma if lagged_gamma != 0 else 0
+            daily_R_eff = daily_R0 * (S/N)
+            HIT = 1 - 1/daily_R_eff if daily_R_eff != 0 else 1
+
+            self.track_R0[day] = daily_R0
+            self.track_R_eff[day] = daily_R_eff
+            self.track_HIT[day] = HIT
+
+        self.track_gamma[day], self.track_beta[day] = gamma, beta
+
     def check_has_run(self, check, information="", fail=True):
         '''Method to check whether or not the simulation has run.
 
@@ -540,7 +557,9 @@ class simulation():
 
     def plot(self, plot_infected=True, plot_susceptible=True, plot_dead=True, plot_recovered=True, plot_new_infected=True,
              plot_tested=True, plot_quarantined=True, plot_new_tests=True, plot_new_quarantined=False, plot_masks=True,
-             plot_hospitalized=True, plot_ICU=True, plot_lockdown=True, plot_testing=True, plot_students=True, plot_R0=False, plot_Reff=False, plot_HIT=False, plot_vaccinated=True, plot_virus_types=None, log=False):
+             plot_hospitalized=True, plot_ICU=True, plot_lockdown=True, plot_testing=True, plot_students=True, plot_R0=False,
+             plot_R_eff=False, plot_HIT=False, plot_gamma=False, plot_beta=False, plot_vaccinated=True, plot_virus_types=None,
+             log=False):
 
         ''' Method used to plot simulation results.
 
@@ -588,10 +607,14 @@ class simulation():
             plt.plot(days, self.track_inf_students, label="infected students")
         if plot_R0:
             plt.plot(days, self.track_R0, label="R0")
-        if plot_Reff:
-            plt.plot(days, self.track_Reff, label="Reff")
+        if plot_R_eff:
+            plt.plot(days, self.track_R_eff, label="Reff")
         if plot_HIT:
             plt.plot(days, self.track_HIT, label="HIT")
+        if plot_gamma:
+            plt.plot(days, self.track_gamma, label="gamma")
+        if plot_beta:
+            plt.plot(days, self.track_beta, label="beta")
         if plot_virus_types is not None:
             for key in plot_virus_types:
                 if plot_virus_types[key]:
