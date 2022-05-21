@@ -660,7 +660,7 @@ class simulation():
                       "new_tested":self.track_new_tested, "hospitalized":self.track_hospitalized,
                       "ICU":self.track_ICU, "testing_enforced":self.track_testing,
                       "masks_enforced":self.track_masks, "lockdown_enforced":self.track_lockdown,
-                      "time_elapsed":self.track_time, "R0":self.track_R0, "Reff":self.track_Reff, "HIT":self.track_HIT,
+                      "time_elapsed":self.track_time, "R0":self.track_R0, "Reff":self.track_R_eff, "HIT":self.track_HIT,
                       "vaccinated":self.track_vaccinated}
         # Unpack the virus types
         for virus_type in self.track_virus_types.keys():
