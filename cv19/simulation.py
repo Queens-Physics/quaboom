@@ -661,7 +661,7 @@ class simulation():
                       "ICU":self.track_ICU, "testing_enforced":self.track_testing,
                       "masks_enforced":self.track_masks, "lockdown_enforced":self.track_lockdown,
                       "time_elapsed":self.track_time, "R0":self.track_R0, "Reff":self.track_R_eff, "HIT":self.track_HIT,
-                      "vaccinated":self.track_vaccinated}
+                      "vaccinated":self.track_vaccinated, "gamma":self.track_gamma, "beta":self.track_beta}
         # Unpack the virus types
         for virus_type in self.track_virus_types.keys():
             returnDict[virus_type] = self.track_virus_types[virus_type]
