@@ -500,8 +500,8 @@ class simulation():
         S, I = self.track_susceptible[day], self.track_infected[day]
         N = self.parameters["simulation_data"]["nPop"]
 
-        gamma = dR_dt / I
-        beta = (dI_dt + gamma*I)*(N/(I*S))
+        gamma = dR_dt / I if I > 0 else 0
+        beta = (dI_dt + gamma*I)*(N/(I*S)) if I*S > 0 else 0
 
         if day - self.R0_lag_time >= 0:
 
