@@ -116,7 +116,7 @@ class Interaction_Sites:
         Parameters
         ----------
         grade_code : str
-            Code used to index the values to create this type of site from the config file. 
+            Code used to index the values to create this type of site from the config file.
 
         Returns
         -------
@@ -161,7 +161,7 @@ class Interaction_Sites:
         Parameters
         ----------
         grade_code : str
-            Code used to index the values to create this type of site from the config file. 
+            Code used to index the values to create this type of site from the config file.
 
         Returns
         -------
