@@ -62,36 +62,19 @@ class Interaction_Sites:
 
         # Generates a list of ppl that go to different grade X sites
         # len(grade_X_sites) is how many sites there are; len(grade_X_sites[i]) is how many ppl go to that site
-        self.grade_A_sites = self.init_grade(self.site_size["A"],
-                                             self.grade_loyalty_means["A"],
-                                             self.grade_loyalty_stds["A"],
-                                             self.students_participate["A"])
-        self.grade_B_sites = self.init_grade(self.site_size["B"],
-                                             self.grade_loyalty_means["B"],
-                                             self.grade_loyalty_stds["B"],
-                                             self.students_participate["B"])
-        self.grade_C_sites = self.init_grade(self.site_size["C"],
-                                             self.grade_loyalty_means["C"],
-                                             self.grade_loyalty_stds["C"],
-                                             self.students_participate["C"])
+        self.grade_A_sites = self.init_grade(grade_code="A")
+        self.grade_B_sites = self.init_grade(grade_code="B")
+        self.grade_C_sites = self.init_grade(grade_code="C")
         self.house_sites = deepcopy(self.pop.household)
         self.house_indices = deepcopy(self.pop.house_ppl_i)
 
         # Students Stuff #
         self.stud_house_sites = deepcopy(self.pop.stud_houses)
         self.stud_house_indices = deepcopy(self.pop.house_stud_i)
-        self.lect_sites = self.init_uni(self.site_size["LECT"],
-                                        self.grade_loyalty_means["LECT"],
-                                        self.grade_loyalty_stds["LECT"])
-        self.study_sites = self.init_uni(self.site_size["STUDY"],
-                                         self.grade_loyalty_means["STUDY"],
-                                         self.grade_loyalty_stds["STUDY"])
-        self.food_sites = self.init_uni(self.site_size["FOOD"],
-                                        self.grade_loyalty_means["FOOD"],
-                                        self.grade_loyalty_stds["FOOD"])
-        self.res_sites = self.init_res(self.site_size["RES"],
-                                       self.grade_loyalty_means["RES"],
-                                       self.grade_loyalty_stds["RES"])
+        self.lect_sites = self.init_uni(grade_code="LECT")
+        self.study_sites = self.init_uni(grade_code="STUDY")
+        self.food_sites = self.init_uni(grade_code="FOOD")
+        self.res_sites = self.init_res(grade_code="RES")
 
 
     def load_attributes_from_sim_obj(self, sim_obj):
@@ -124,7 +107,7 @@ class Interaction_Sites:
         self.pop = sim_obj.pop
         self.policy = sim_obj.policy
 
-    def init_grade(self, grade_pop_size, loyalty_mean, loyalty_std, students_interact):
+    def init_grade(self, grade_code):
         '''Method designed to associate members of the population with interaction sites
 
         This method initializes all non-student interaction sites by creating a list
@@ -132,16 +115,8 @@ class Interaction_Sites:
 
         Parameters
         ----------
-        grade_pop_size : int
-            Number of people per interaction site. Determines how many interaction sites
-            there will be across the population.
-        loyalty_mean : float
-            The mean number of this type of sites that each person will be associated with.
-        loyalty_std : float
-            The standard deviation in the number of sites of this type a person will be
-            associated with.
-        students_interact : boolean
-            Whether or not students will attend the interaction site being initialized
+        grade_code : str
+            Code used to index the values to create this type of site from the config file. 
 
         Returns
         -------
@@ -150,8 +125,14 @@ class Interaction_Sites:
             array holds the index of people that are associated with that site (can visit it).
 
         '''
-        # Find out how many sites there should be - guessing right now
-        num_sites = round(self.pop.get_population_size()/grade_pop_size)
+
+        loyalty_mean = self.grade_loyalty_means[grade_code]
+        loyalty_std = self.grade_loyalty_stds[grade_code]
+        students_interact = self.students_participate[grade_code]
+
+        # Calculate number of sites
+        num_sites = self.site_num[grade_code] if self.site_num[grade_code] is not None else \
+                    round(self.pop.get_population_size()/self.site_size[grade_code])
         grade_sites = [[] for _ in range(num_sites)]
 
         for person in self.pop.get_population():
@@ -171,7 +152,7 @@ class Interaction_Sites:
 
         return grade_sites
 
-    def init_uni(self, grade_pop_size, loyalty_mean, loyalty_std):
+    def init_uni(self, grade_code):
         '''Method designed to associate members of the student population with interaction sites
 
         This method initializes all student interaction sites by creating a list
@@ -179,14 +160,8 @@ class Interaction_Sites:
 
         Parameters
         ----------
-        grade_pop_size : int
-            Number of people per interaction site. Determines how many interaction sites
-            there will be across the population.
-        loyalty_mean : float
-            The mean number of this type of sites that each person will be associated with.
-        loyalty_std : float
-            The standard deviation in the number of sites of this type a person will be
-            associated with.
+        grade_code : str
+            Code used to index the values to create this type of site from the config file. 
 
         Returns
         -------
@@ -195,7 +170,13 @@ class Interaction_Sites:
             array holds the index of people that are associated with that site (can visit it)
 
         '''
-        num_sites = round(self.pop.get_student_pop_size()/grade_pop_size)
+
+        loyalty_mean = self.grade_loyalty_means[grade_code]
+        loyalty_std = self.grade_loyalty_stds[grade_code]
+
+        # Calculate number of sites
+        num_sites = self.site_num[grade_code] if self.site_num[grade_code] is not None else \
+                    round(self.pop.get_population_size()/self.site_size[grade_code])
         grade_sites = [[] for _ in range(num_sites)]
 
         for student in self.pop.get_population():
@@ -214,7 +195,7 @@ class Interaction_Sites:
 
         return grade_sites
 
-    def init_res(self, grade_pop_size, loyalty_mean, loyalty_std):
+    def init_res(self, grade_code):
         '''Method designed to associate students with the residence interaction site
 
         This method initializes the residence interaction sites by creating a list
@@ -239,7 +220,12 @@ class Interaction_Sites:
 
         '''
 
-        num_sites = round(self.pop.get_res_size()/grade_pop_size)
+        loyalty_mean = self.grade_loyalty_means[grade_code]
+        loyalty_std = self.grade_loyalty_stds[grade_code]
+
+        # Calculate number of sites
+        num_sites = self.site_num[grade_code] if self.site_num[grade_code] is not None else \
+                    round(self.pop.get_population_size()/self.site_size[grade_code])
         grade_sites = [[] for _ in range(num_sites)]
 
         for room in self.pop.get_residences():

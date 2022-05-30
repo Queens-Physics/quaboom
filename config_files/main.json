@@ -63,6 +63,7 @@
     "interaction_sites_data":{
 
         "site_size":{"A":1000, "B":1000, "C":100, "LECT":100, "STUDY":100, "FOOD":100, "RES":300},
+        "site_num": {"A":null, "B":null, "C":null, "LECT":null, "STUDY":null, "FOOD":null, "RES":null},
         "grade_loyalty_means":{"A":4, "B":1, "C":1, "LECT":5, "STUDY":3, "FOOD":5, "RES":1},
         "grade_loyalty_stds":{"A":2, "B":1, "C":0.2, "LECT":1, "STUDY":2, "FOOD":2, "RES":0},
         "students_participate":{"A":true, "B":true, "C":false},
