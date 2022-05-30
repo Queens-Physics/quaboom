@@ -235,9 +235,9 @@ class Interaction_Sites:
         grade_sites = [np.asarray(site) for site in grade_sites]
 
         return grade_sites
-    
+
     def calculate_num_sites(self, grade_code):
-        '''Method used to calculate the number of sites for an interaction site grade. 
+        '''Method used to calculate the number of sites for an interaction site grade.
 
         Parameters
         ----------
