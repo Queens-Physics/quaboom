@@ -1,6 +1,7 @@
 '''
 This file holds the interaction sites class used in simulation.py.
 '''
+import warnings
 from random import random
 from copy import deepcopy
 from itertools import combinations
@@ -131,8 +132,7 @@ class Interaction_Sites:
         students_interact = self.students_participate[grade_code]
 
         # Calculate number of sites
-        num_sites = self.site_num[grade_code] if self.site_num[grade_code] is not None else \
-                    round(self.pop.get_population_size()/self.site_size[grade_code])
+        num_sites = self.calculate_num_sites(grade_code=grade_code)
         grade_sites = [[] for _ in range(num_sites)]
 
         for person in self.pop.get_population():
@@ -175,8 +175,7 @@ class Interaction_Sites:
         loyalty_std = self.grade_loyalty_stds[grade_code]
 
         # Calculate number of sites
-        num_sites = self.site_num[grade_code] if self.site_num[grade_code] is not None else \
-                    round(self.pop.get_population_size()/self.site_size[grade_code])
+        num_sites = self.calculate_num_sites(grade_code=grade_code)
         grade_sites = [[] for _ in range(num_sites)]
 
         for student in self.pop.get_population():
@@ -203,14 +202,8 @@ class Interaction_Sites:
 
         Parameters
         ----------
-        grade_pop_size : int
-            Number of people per residence section. Determines how many interaction sites
-            there will be across the population.
-        loyalty_mean : float
-            The mean number of this type of sites that each person will be associated with.
-        loyalty_std : float
-            The standard deviation in the number of sites of this type a person will be
-            associated with.
+        grade_code : str
+            Code used to index the values to create this type of site from the config file.
 
         Returns
         -------
@@ -224,8 +217,7 @@ class Interaction_Sites:
         loyalty_std = self.grade_loyalty_stds[grade_code]
 
         # Calculate number of sites
-        num_sites = self.site_num[grade_code] if self.site_num[grade_code] is not None else \
-                    round(self.pop.get_population_size()/self.site_size[grade_code])
+        num_sites = self.calculate_num_sites(grade_code=grade_code)
         grade_sites = [[] for _ in range(num_sites)]
 
         for room in self.pop.get_residences():
@@ -243,6 +235,28 @@ class Interaction_Sites:
         grade_sites = [np.asarray(site) for site in grade_sites]
 
         return grade_sites
+    
+    def calculate_num_sites(self, grade_code):
+        '''Method used to calculate the number of sites for an interaction site grade. 
+
+        Parameters
+        ----------
+        grade_code : str
+            Code used to index the values to create this type of site from the config file.
+
+        Returns
+        -------
+        num_sites : int
+            The number of sites to be used for that interaction site grade.
+        '''
+
+        if self.site_num[grade_code] == 0:
+            # Raise a warning
+            warnings.warn(f"Site type '{grade_code}' size set to 0. No interaction sites of this type created.")
+            return 0
+        else:
+            return self.site_num[grade_code] if self.site_num[grade_code] is not None else \
+                   round(self.pop.get_population_size()/self.site_size[grade_code])
 
     def remove_dead(self):
         '''Method to remove dead agents from interaction site arrays.
