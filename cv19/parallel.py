@@ -1,4 +1,4 @@
-import json
+import toml
 import multiprocessing
 import pickle
 from pathlib import Path
@@ -178,9 +178,9 @@ def tabular_mode(base_config_file, independent, dependent, num_runs=8, num_cores
     # Running through each scenario
     for i, values in enumerate(zip(*mesh)):
 
-        # Load the json file
+        # Load the TOML file
         with open(base_config_file, encoding='utf-8') as f:
-            temp_config = json.load(f)
+            temp_config = toml.load(f)
 
         config_dir = Path(base_config_file).parent
 
@@ -514,7 +514,7 @@ if __name__ == "__main__":
 
     # Tabular mode
     table = tabular_mode(
-        'config_files/main.json',
+        'config_files/main.toml',
         {
             "population_data.prob_has_mask":[1/4, 1/2, 3/4, 1]
         },
@@ -533,6 +533,6 @@ if __name__ == "__main__":
     # Confidence interval mode
     parameters_to_plot=["infected","new_infected","recovered","susceptible","dead","quarantined","inf_students","total_tested","new_tested","hospitalized","ICU","testing_enforced","masks_enforced","lockdown_enforced","time_elapsed"]
 
-    confidence_interval('config_files/main.json', parameterstoplot=parameters_to_plot, confidence=0.9)
+    confidence_interval('config_files/main.toml', parameterstoplot=parameters_to_plot, confidence=0.9)
 
     input()

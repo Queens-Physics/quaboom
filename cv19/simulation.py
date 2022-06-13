@@ -1,4 +1,4 @@
-import json
+import toml
 import warnings
 import subprocess
 from timeit import default_timer as timer
@@ -19,7 +19,7 @@ class simulation():
     A class designed to host the actual monte-carlo simulation and to track the results.
 
     Holds all of the attributes outlined in the simulation_data section of the
-    main.json configuration file, in addition to the ones listed below.
+    main.toml configuration file, in addition to the ones listed below.
 
     Attributes
     ----------
@@ -130,7 +130,7 @@ class simulation():
 
         if isinstance(data_file, str):
             with open(data_file, encoding='utf-8') as file:
-                self.parameters = json.load(file)
+                self.parameters = toml.load(file)
 
             self.config_dir = Path(data_file).parent
 
@@ -170,7 +170,7 @@ class simulation():
         # If path is absolute, use it.
         if Path(filename).is_absolute():
             with open(filename, encoding='utf-8') as file:
-                self.disease_parameters = json.load(file)
+                self.disease_parameters = toml.load(file)
 
         # Assume that the configuration filename is relative to path of main config.
         # If not set, assume relative to working directory.
@@ -179,7 +179,7 @@ class simulation():
             filepath = Path(self.config_dir, filename)
             try:
                 with open(filepath, encoding='utf-8') as file:
-                    self.disease_parameters = json.load(file)
+                    self.disease_parameters = toml.load(file)
 
                 return
 
@@ -190,7 +190,7 @@ class simulation():
 
                 filepath = Path(CV19ROOT, filename)
                 with open(filepath, encoding='utf-8') as file:
-                    self.disease_parameters = json.load(file)
+                    self.disease_parameters = toml.load(file)
 
     def init_classes(self):
         ''' Method that links the policy, population, and interaction sites class objects with

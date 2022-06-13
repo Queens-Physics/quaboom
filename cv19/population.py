@@ -1,4 +1,4 @@
-import json
+import toml
 from random import random, sample
 
 import numpy as np
@@ -272,8 +272,8 @@ class Population:
         self.severity_options = constants.SEVERITY_OPTIONS
 
         # assign severity weights
-        with open(self.case_severity_file, encoding='utf-8') as json_file:
-            self.severity_params = json.load(json_file)
+        with open(self.case_severity_file, encoding='utf-8') as toml_file:
+            self.severity_params = toml.load(toml_file)
 
         # format mask weights correctly
         self.mask_weights = np.array([self.mask_type[key] for key in constants.MASK_OPTIONS])
@@ -284,12 +284,12 @@ class Population:
         self.vaccine_options = constants.VACCINE_OPTIONS
 
     def set_demographic_parameters(self):
-        '''Method to open disease parameters from the json file.
+        '''Method to open disease parameters from the TOML file.
 
         Sets all constants in the population class as self attributes of the population class.
         '''
-        with open(self.demographics_file, encoding='utf-8') as json_file:
-            disease_params = json.load(json_file)
+        with open(self.demographics_file, encoding='utf-8') as toml_file:
+            disease_params = toml.load(toml_file)
 
         self.age_options = constants.AGE_OPTIONS
         self.job_options = constants.JOB_OPTIONS
@@ -301,7 +301,7 @@ class Population:
         # Normalize the probability
         self.isolation_weights /= float(sum(self.isolation_weights))  #this is the one we don't have data on yet
 
-        # PULL DATA FROM THE JSON FILE #
+        # PULL DATA FROM THE TOML FILE #
         # age #
         self.age_weights = np.array([disease_params['age_weights'][age_range]
                                      for age_range in self.age_options])

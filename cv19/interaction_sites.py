@@ -250,12 +250,12 @@ class Interaction_Sites:
             The number of sites to be used for that interaction site grade.
         '''
 
-        if self.site_num[grade_code] == 0:
+        if grade_code in self.site_num and self.site_num[grade_code] == 0:
             # Raise a warning
             warnings.warn(f"Site type '{grade_code}' size set to 0. No interaction sites of this type created.")
             return 0
         else:
-            return self.site_num[grade_code] if self.site_num[grade_code] is not None else \
+            return self.site_num[grade_code] if grade_code in self.site_num and self.site_num[grade_code] is not None else \
                    round(self.pop.get_population_size()/self.site_size[grade_code])
 
     def remove_dead(self):

@@ -1,5 +1,5 @@
 [simulation_data]
-disease_config_file = "disease.json"
+disease_config_file = "disease.toml"
 nDays = 100
 nPop = 10000
 vis_default_virus_type = "alpha"
@@ -55,8 +55,8 @@ student_day_trigger = 101
 prob_of_symptoms = 0.7
 
 [population_data]
-demographics_file = "../data/dataK.json"
-case_severity_file = "../data/case_severity.json"
+demographics_file = "../data/dataK.toml"
+case_severity_file = "../data/case_severity.toml"
 prob_has_mask = 0.8
 prob_of_test = 1
 ct_enabled = true
