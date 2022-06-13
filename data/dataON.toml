@@ -1,0 +1,27 @@
+# these are based on the Ontario population numbers. 90-99 is actually 90+ this is just for easier looping
+[age_weights]
+0-9 = 0.108
+10-19 = 0.116
+20-29 = 0.132
+30-39 = 0.127
+40-49 = 0.134
+50-59 = 0.152
+60-69 = 0.118
+70-79 = 0.069
+80-89 = 0.036
+90-99 = 0.008
+
+# all the jobs that weren't health or sales were combined; if needed we can separate them again
+[job_weights]
+Neither = 0.702
+Health = 0.064
+Sales = 0.234
+
+# Weights of number of people in each house in Ontario. 5 is actually 5+ this is just for easier looping
+[house_weights]
+1 = 0.259
+2 = 0.328
+3 = 0.161
+4 = 0.154
+5 = 0.098
+

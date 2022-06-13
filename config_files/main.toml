@@ -1,0 +1,171 @@
+[simulation_data]
+disease_config_file = "disease.json"
+nDays = 100
+nPop = 10000
+vis_default_virus_type = "alpha"
+student_default_virus_type = "alpha"
+num_students = 2000
+max_num_res_students = 500
+v0 = 0
+N_VIS_OPTION = [0, 1, 2, 3]
+N_VIS_PROB = [0.7, 0.17, 0.08, 0.05]
+vis_age_upper = 60
+vis_age_lower = 16
+inf_students_upper = 20
+inf_students_lower = 2
+num_vaccinations = 0
+
+    [simulation_data.variants]
+    general = 10
+    alpha = 0
+    delta = 0
+
+    [simulation_data.variant_codes]
+    general = 0
+    alpha = 1
+    delta = 2
+
+    [simulation_data.will_go_prob]
+    A = 0.05
+    B = 0.14
+    C = 0.7
+    LECT = 0.7
+    STUDY = 0.5
+    FOOD = 0.1
+    RES = 1
+
+    [simulation_data.vaccine_type]
+    Pfizer = 0.6
+    Moderna = 0.35
+    AZ = 0.05
+
+[policy_data]
+initial_mask_mandate = true
+mask_trigger = 0.3
+mask_day_trigger = 0
+initial_lockdown_mandate = false
+lockdown_on_day_trigger = 0
+lockdown_off_day_trigger = 101
+initial_testing_mandate = false
+testing_day_trigger = 0
+testing_baseline = 5000
+testing_rates = [0.1, 0.8, 0.1]
+initial_student_mandate = false
+student_day_trigger = 101
+prob_of_symptoms = 0.7
+
+[population_data]
+demographics_file = "../data/dataK.json"
+case_severity_file = "../data/case_severity.json"
+prob_has_mask = 0.8
+prob_of_test = 1
+ct_enabled = true
+ct_capacity = 10000
+
+    [population_data.mask_type]
+    Surgical = 0.2
+    Non-surgical = 0.8
+
+[interaction_sites_data]
+quarantine_isolation_factor = 0
+student_interaction_factor = 0.5
+students_on = true
+
+    [interaction_sites_data.site_size]
+    A = 1000
+    B = 1000
+    C = 100
+    LECT = 100
+    STUDY = 100
+    FOOD = 100
+    RES = 300
+
+    [interaction_sites_data.site_num]
+    [interaction_sites_data.grade_loyalty_means]
+    A = 4
+    B = 1
+    C = 1
+    LECT = 5
+    STUDY = 3
+    FOOD = 5
+    RES = 1
+
+    [interaction_sites_data.grade_loyalty_stds]
+    A = 2
+    B = 1
+    C = 0.2
+    LECT = 1
+    STUDY = 2
+    FOOD = 2
+    RES = 0
+
+    [interaction_sites_data.students_participate]
+    A = true
+    B = true
+    C = false
+
+[person_data]
+quarantine_time = 14
+wear_mask_properly = 0.8
+cold_prob = 0.0001
+mild_symptom_prob = 0.8
+R0_lag_time = 5
+ct_length = 2
+ct_prob_remember_personal_contacts = 0.8
+protocol_compliance = 1
+protocol_compliance_house_prob = [0.2, 0.4, 0.6, 0.4, 0.2]
+protocol_compliance_house_reduction = [1.0, 0.9, 0.8, 0.7, 0.6]
+protocol_compliance_lockdown_prob = 0.99
+protocol_compliance_lockdown_reduction = 0.8
+protocol_compliance_lockdown_length_threshold = 16
+protocol_compliance_lockdown_length_reduction = 0.5
+
+    [person_data.mask_inward_eff]
+    Surgical = 0.4
+    Non-surgical = 0.6
+
+    [person_data.mask_outward_eff]
+    Surgical = 0.3
+    Non-surgical = 0.5
+
+    [person_data.protocol_compliance_age_prob]
+    0-9 = 0
+    10-19 = 0.5
+    20-29 = 0.6
+    30-39 = 0.8
+    40-49 = 0.8
+    50-59 = 0.7
+    60-69 = 0.6
+    70-79 = 0.9
+    80-89 = 0.9
+    90- = 0.9
+
+    [person_data.protocol_compliance_age_reduction]
+    0-9 = 1
+    10-19 = 0.7
+    20-29 = 0.3
+    30-39 = 0.7
+    40-49 = 0.5
+    50-59 = 0.5
+    60-69 = 0.4
+    70-79 = 0.7
+    80-89 = 0.9
+    90- = 0.9
+
+    [person_data.protocol_compliance_case_severity_prob]
+    Mild = 0.5
+    Death = 0.1
+    Hospitalization = 0.2
+    ICU = 0.3
+
+    [person_data.protocol_compliance_case_severity_reduction]
+    Mild = 0.5
+    Death = 0.9
+    Hospitalization = 0.8
+    ICU = 0.7
+
+    [person_data.vaccine_eff]
+    Pfizer = 0.087
+    Moderna = 0.059
+    AZ = 0.24
+
