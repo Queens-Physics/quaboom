@@ -1,5 +1,5 @@
-import tomli
 from random import random, sample
+import tomli
 
 import numpy as np
 

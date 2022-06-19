@@ -1,7 +1,7 @@
-import tomli
 import multiprocessing
 import pickle
 from pathlib import Path
+import tomli
 
 import numpy as np
 import pandas as pd

@@ -1,8 +1,8 @@
-import tomli
 import warnings
 import subprocess
 from timeit import default_timer as timer
 from pathlib import Path
+import tomli
 
 import numpy as np
 import matplotlib.pyplot as plt
