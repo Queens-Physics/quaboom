@@ -1,4 +1,4 @@
-import toml
+import tomli
 from random import random, sample
 
 import numpy as np
@@ -272,8 +272,8 @@ class Population:
         self.severity_options = constants.SEVERITY_OPTIONS
 
         # assign severity weights
-        with open(self.case_severity_file, encoding='utf-8') as toml_file:
-            self.severity_params = toml.load(toml_file)
+        with open(self.case_severity_file, 'rb') as toml_file:
+            self.severity_params = tomli.load(toml_file)
 
         # format mask weights correctly
         self.mask_weights = np.array([self.mask_type[key] for key in constants.MASK_OPTIONS])
@@ -288,8 +288,8 @@ class Population:
 
         Sets all constants in the population class as self attributes of the population class.
         '''
-        with open(self.demographics_file, encoding='utf-8') as toml_file:
-            disease_params = toml.load(toml_file)
+        with open(self.demographics_file, 'rb') as toml_file:
+            disease_params = tomli.load(toml_file)
 
         self.age_options = constants.AGE_OPTIONS
         self.job_options = constants.JOB_OPTIONS

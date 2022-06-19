@@ -1,4 +1,4 @@
-import toml
+import tomli
 import warnings
 import subprocess
 from timeit import default_timer as timer
@@ -129,8 +129,8 @@ class simulation():
         '''
 
         if isinstance(data_file, str):
-            with open(data_file, encoding='utf-8') as file:
-                self.parameters = toml.load(file)
+            with open(data_file, 'rb') as file:
+                self.parameters = tomli.load(file)
 
             self.config_dir = Path(data_file).parent
 
@@ -169,8 +169,8 @@ class simulation():
 
         # If path is absolute, use it.
         if Path(filename).is_absolute():
-            with open(filename, encoding='utf-8') as file:
-                self.disease_parameters = toml.load(file)
+            with open(filename, 'rb') as file:
+                self.disease_parameters = tomli.load(file)
 
         # Assume that the configuration filename is relative to path of main config.
         # If not set, assume relative to working directory.
@@ -178,8 +178,8 @@ class simulation():
         else:
             filepath = Path(self.config_dir, filename)
             try:
-                with open(filepath, encoding='utf-8') as file:
-                    self.disease_parameters = toml.load(file)
+                with open(filepath, 'rb') as file:
+                    self.disease_parameters = tomli.load(file)
 
                 return
 
@@ -189,8 +189,8 @@ class simulation():
                                "Attempting read relative to CV19ROOT directory."))
 
                 filepath = Path(CV19ROOT, filename)
-                with open(filepath, encoding='utf-8') as file:
-                    self.disease_parameters = toml.load(file)
+                with open(filepath, 'rb') as file:
+                    self.disease_parameters = tomli.load(file)
 
     def init_classes(self):
         ''' Method that links the policy, population, and interaction sites class objects with

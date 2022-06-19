@@ -1,4 +1,4 @@
-import toml
+import tomli
 import multiprocessing
 import pickle
 from pathlib import Path
@@ -179,8 +179,8 @@ def tabular_mode(base_config_file, independent, dependent, num_runs=8, num_cores
     for i, values in enumerate(zip(*mesh)):
 
         # Load the TOML file
-        with open(base_config_file, encoding='utf-8') as f:
-            temp_config = toml.load(f)
+        with open(base_config_file, 'rb') as f:
+            temp_config = tomli.load(f)
 
         config_dir = Path(base_config_file).parent
 
