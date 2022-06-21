@@ -46,7 +46,7 @@
         "testing_baseline":5000,
         "testing_rates":[0.1, 0.8, 0.1],
         "initial_student_mandate":false,
-        "student_day_trigger":101,
+        "student_day_trigger":null,
         "prob_of_symptoms":0.7
     },
 
@@ -69,7 +69,7 @@
         "students_participate":{"A":true, "B":true, "C":false},
         "quarantine_isolation_factor":0,
         "student_interaction_factor":0.5,
-        "students_on":true
+        "students_on":false
     },
 
     "person_data":{
