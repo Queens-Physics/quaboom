@@ -90,7 +90,8 @@ class simulation():
         self.set_code_version() # Set the version of the code being used to run simulation.
 
         # Arrays to store the values during the simulation
-        self.track_new_infected = np.zeros(self.nDays, dtype=int) # new infections
+        self.track_new_infected = np.zeros(self.nDays, dtype=int) # new infections (always > 0)
+        self.track_delta_infected = np.zeros(self.nDays, dtype=int)   # change in total infections
         self.track_infected = np.zeros(self.nDays, dtype=int)     # currently infected
         self.track_susceptible = np.zeros(self.nDays, dtype=int)  # never been exposed
         self.track_recovered = np.zeros(self.nDays, dtype=int)    # total recovered
@@ -323,7 +324,10 @@ class simulation():
             self.new_tests = 0
 
             if day != 0:
-                self.track_new_infected[day] = self.track_infected[day]-self.track_infected[day-1]
+                new_recovered = self.track_recovered[day] - self.track_recovered[day-1]
+                new_dead = self.track_dead[day] - self.track_dead[day-1]
+                self.track_delta_infected[day] = self.track_infected[day]-self.track_infected[day-1]
+                self.track_new_infected[day] = self.track_delta_infected[day]+new_recovered+new_dead
                 self.track_new_tested[day] = self.track_tested[day] - self.track_tested[day-1]
 
                 self.calculate_SIR_metrics(day)
@@ -493,7 +497,7 @@ class simulation():
 
         # Define variables in accordance with wikipedia page
         dR_dt = self.track_recovered[day] - self.track_recovered[day - 1]
-        dI_dt = self.track_new_infected[day]
+        dI_dt = self.track_delta_infected[day]
         S, I = self.track_susceptible[day], self.track_infected[day]
         N = self.parameters["simulation_data"]["nPop"]
 
