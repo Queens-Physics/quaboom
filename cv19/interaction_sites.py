@@ -76,6 +76,8 @@ class Interaction_Sites:
         self.study_sites = self.init_uni(grade_code="STUDY")
         self.food_sites = self.init_uni(grade_code="FOOD")
         self.res_sites = self.init_res(grade_code="RES")
+        
+        self.daily_interactions = dict()
 
 
     def load_attributes_from_sim_obj(self, sim_obj):
@@ -355,7 +357,7 @@ class Interaction_Sites:
 
         return will_visit_grade
 
-    def site_interaction(self, will_go_array, day, personal):
+    def site_interaction(self, will_go_array, day, personal, grade_code):
         '''Method that hosts interactions between people for an interaction site type.
 
         This method manages interactions between people going to the same interaction
@@ -375,6 +377,8 @@ class Interaction_Sites:
         '''
         new_infections = np.zeros(self.pop.get_population_size(), dtype=bool)
         new_infection_type = np.zeros(self.pop.get_population_size(), dtype=int)
+        
+        total_interactions_count = 0
 
         for ppl_going in will_go_array:
 
@@ -386,6 +390,7 @@ class Interaction_Sites:
 
             # Generate a list of how many interactions ppl have at the site
             num_interactions = self.calc_interactions(site_day_pop=len(ppl_going))
+            total_interactions_count += num_interactions // 2
 
             while np.sum(num_interactions > 0) > 1:
                 # grab the highest interactor
@@ -429,6 +434,9 @@ class Interaction_Sites:
 #         new_infection_type_indexes = np.where(new_infection_type)[0]
         for new_infection in new_infection_indexes:
             self.pop.infect(index=new_infection, virus_type=new_infection_type[new_infection], day=day)
+            
+        # Update total daily interactions count
+        self.daily_interactions[grade_code] = total_interactions_count
 
     def calc_interactions(self, site_day_pop):
         '''Method to determine how many interactions a person will have.
@@ -603,6 +611,15 @@ class Interaction_Sites:
                         if virus_id is None:
                             raise ValueError("House infection has incorrect virus type.")
                         self.pop.infect(index=housemembers[person].get_index(), day=day, virus_type=virus_id)
+
+    def calc_daily_interactions(self):
+        '''Method to calculate daily interactions across all sites.
+        
+        Returns
+        -------
+        total_daily_interactions : int
+            The total number of interactions for the last day.
+        '''
 
     def testing_site(self, tests_per_day, day):
         '''Method to update status of symptoms and run the testing sites code.

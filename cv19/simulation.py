@@ -113,6 +113,7 @@ class simulation():
         self.track_vaccinated = np.zeros(self.nDays, dtype=int)
         self.track_gamma = np.zeros(self.nDays, dtype=float)
         self.track_beta = np.zeros(self.nDays, dtype=float)
+        self.track_n_interactions = np.zeros(self.nDays, dtype=int) # Daily number of interactions
 
         self.has_run = False  # Indicates if the sim has run yet
 
@@ -408,6 +409,9 @@ class simulation():
             if self.inter_sites.students_on and students_go:
                 will_visit_res = self.inter_sites.will_visit_site(self.inter_sites.get_res_sites(), self.will_go_prob["RES"])
                 self.inter_sites.site_interaction(will_visit_res, day, personal=True)
+
+            # Calculate total interactions for this day across all sites
+            self.track_n_interactions[day] = self.inter_sites.calc_daily_interactions()
 
             # Manage testing sites
             if testing_ON:
