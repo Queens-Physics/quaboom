@@ -624,7 +624,7 @@ class simulation():
                     plt.plot(days, self.track_virus_types[key], label=str(key))
         if plot_n_interactions is not None:
             for item in plot_n_interactions:
-                if item in self.inter_sites.daily_interactions.keys():
+                if item in self.inter_sites.daily_interactions:
                     plt.plot(days, self.inter_sites.daily_interactions[item], label=f"Total Interactions: {item}")
         if plot_vaccinated:
             plt.plot(days, self.track_vaccinated, label='vaccinated')
