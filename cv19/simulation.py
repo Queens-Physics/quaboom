@@ -11,7 +11,7 @@ from . import CV19ROOT
 from .person import Person
 from .population import Population
 from .policy import Policy
-from .interaction_sites import Interaction_Sites
+from .interactionsites import InteractionSites
 
 
 class simulation():
@@ -203,7 +203,7 @@ class simulation():
         self.pop = Population(self)
 
         # Initalize the interaction sites
-        self.inter_sites = Interaction_Sites(self)
+        self.inter_sites = InteractionSites(self)
 
     def set_code_version(self):
         '''Method to get and set the version of the code used to run the simulation.
