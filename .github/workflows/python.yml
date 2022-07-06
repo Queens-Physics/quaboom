@@ -28,6 +28,29 @@ jobs:
         source ./env.sh
         python3 test/linters/pylint.py
 
+  flake8:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+
+    - name: Install dependencies
+      run: |
+        python3 -m pip install --upgrade pip
+        pip install flake8==4.0.1
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        ./configure
+
+    - name: Lint with Flake8
+      run: |
+        source ./env.sh
+        python3 test/linters/flake8.py
+
   unit-tests:
     runs-on: ubuntu-latest
 
