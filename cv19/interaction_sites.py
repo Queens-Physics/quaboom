@@ -56,14 +56,13 @@ class Interaction_Sites:
         ----------
         sim_obj : :obj:`cv19.simulation.simulation`
             The encompassing simulation obejct hosting the simulation.
-
         '''
 
         # Set attributes from config file
         self.load_attributes_from_sim_obj(sim_obj)
 
-        # Generates a list of ppl that go to different grade X sites
-        # len(grade_X_sites) is how many sites there are; len(grade_X_sites[i]) is how many ppl go to that site
+        # Generates a list of people that go to different grade X sites
+        # len(grade_X_sites) is how many sites there are; len(grade_X_sites[i]) is how many people go to that site
         self.grade_A_sites = self.init_grade(grade_code="A")
         self.grade_B_sites = self.init_grade(grade_code="B")
         self.grade_C_sites = self.init_grade(grade_code="C")
@@ -88,7 +87,6 @@ class Interaction_Sites:
         ----------
         sim_obj : :obj:`cv19.simulation.simulation`
             The encompassing simulation obejct hosting the simulation.
-
         '''
 
         attributes = sim_obj.parameters["interaction_sites_data"].keys()
@@ -109,7 +107,7 @@ class Interaction_Sites:
         self.policy = sim_obj.policy
 
     def init_grade(self, grade_code):
-        '''Method designed to associate members of the population with interaction sites
+        '''Method designed to associate members of the population with interaction sites.
 
         This method initializes all non-student interaction sites by creating a list
         of person indices for each interaction site, for that type of interaction type.
@@ -124,7 +122,6 @@ class Interaction_Sites:
         grade_sites : :obj:`np.array` of :obj:`np.array` of :obj:`int`
             An array holding one array for each interaction site of this type. Each nested
             array holds the index of people that are associated with that site (can visit it).
-
         '''
 
         loyalty_mean = self.grade_loyalty_means[grade_code]
@@ -153,7 +150,7 @@ class Interaction_Sites:
         return grade_sites
 
     def init_uni(self, grade_code):
-        '''Method designed to associate members of the student population with interaction sites
+        '''Method designed to associate members of the student population with interaction sites.
 
         This method initializes all student interaction sites by creating a list
         of person indices for each interaction site, for that type of interaction type.
@@ -167,8 +164,7 @@ class Interaction_Sites:
         -------
         grade_sites : :obj:`np.array` of :obj:`np.array` of :obj:`int`
             An array holding one array for each interaction site of this type. Each nested
-            array holds the index of people that are associated with that site (can visit it)
-
+            array holds the index of people that are associated with that site (can visit it).
         '''
 
         loyalty_mean = self.grade_loyalty_means[grade_code]
@@ -195,7 +191,7 @@ class Interaction_Sites:
         return grade_sites
 
     def init_res(self, grade_code):
-        '''Method designed to associate students with the residence interaction site
+        '''Method designed to associate students with the residence interaction site.
 
         This method initializes the residence interaction sites by creating a list
         of person indices for each interaction site.
@@ -210,7 +206,6 @@ class Interaction_Sites:
         grade_sites : :obj:`np.array` of :obj:`np.array` of :obj:`int`
             An array holding one array for each interaction site of this type. Each nested
             array holds the index of people that are associated with that site (can visit it)
-
         '''
 
         loyalty_mean = self.grade_loyalty_means[grade_code]
@@ -371,8 +366,8 @@ class Interaction_Sites:
         day : int
             The day value that this function is being called on in the encompassing simulation class.
             Used as input to the infect function after infections have been determined.
-
         '''
+
         new_infections = np.zeros(self.pop.get_population_size(), dtype=bool)
         new_infection_type = np.zeros(self.pop.get_population_size(), dtype=int)
 
@@ -424,7 +419,7 @@ class Interaction_Sites:
                 num_interactions[person_1] -= 1
                 num_interactions[person_2] -= 1
 
-        #  Update people who get infected only at the end (if i get CV19 at work, prolly wont spread at the store that night ?)
+        #  Update people who get infected only at the end. Assuming if I get CV19 at work, I probably won't spread at the store that night.
         new_infection_indexes = np.where(new_infections)[0]
 #         new_infection_type_indexes = np.where(new_infection_type)[0]
         for new_infection in new_infection_indexes:
@@ -454,7 +449,6 @@ class Interaction_Sites:
         -------
         number_of_interactions : :obj:`np.array` of :obj:`int`
             The number of interactions all people will have within this interaction site.
-
         '''
 
         day_hours_scaler = 12
@@ -479,7 +473,6 @@ class Interaction_Sites:
         -------
         : :obj:`bool`
             Whether or not the interaction caused the spread of the infection.
-
         '''
 
         p1_infected = person_1.is_infected()
@@ -529,11 +522,10 @@ class Interaction_Sites:
         day : int
             The day value that this function is being called on in the encompassing simulation class.
             Used as input to the infect function after infections have been determined.
-
         '''
 
         for house_indices in self.house_indices:
-            # Get ppl in house
+            # Get people in house
             house_size = len(house_indices)
             housemembers = [self.pop.get_population()[ind] for ind in house_indices]
             virus_types = [person.get_virus_type() for person in housemembers]
@@ -573,11 +565,10 @@ class Interaction_Sites:
         day : int
             The day value that this function is being called on in the encompassing simulation class.
             Used as input to the infect function after infections have been determined.
-
         '''
 
         for house_indices in self.stud_house_indices:
-            # Get ppl in house
+            # Get people in house
             house_size = len(house_indices)
             housemembers = [self.pop.get_population()[ind] for ind in house_indices]
             virus_types = [person.get_virus_type() for person in housemembers]
@@ -613,7 +604,6 @@ class Interaction_Sites:
             The max number of available tests for this given day.
         day : int
             The day value that this function is being called on in the encompassing simulation class.
-
         '''
 
         self.pop.random_symptomatic()
