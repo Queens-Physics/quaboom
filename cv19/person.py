@@ -696,10 +696,12 @@ class Person(object):
         -------
         self.protocol_compliance: :obj:`float`
         '''
-        if self.protocol_compliance is None:  # If no protocol compliance it is defined
+        # If no protocol compliance it is defined
+        if self.protocol_compliance is None:
             self.protocol_compliance = self.sim_obj.protocol_compliance
 
-        if self.days_in_lockdown > self.sim_obj.protocol_compliance_lockdown_length_threshold and random() < self.sim_obj.protocol_compliance_lockdown_prob:  # as the lockdown length increases decrease the protocol compliance
+        # As the lockdown length increases, decrease the protocol compliance
+        if self.days_in_lockdown > self.sim_obj.protocol_compliance_lockdown_length_threshold and random() < self.sim_obj.protocol_compliance_lockdown_prob:
             self.protocol_compliance *= self.sim_obj.protocol_compliance_lockdown_length_reduction
 
         if lockdown_level != old_lockdown_mandate:

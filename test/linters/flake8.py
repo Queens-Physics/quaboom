@@ -13,7 +13,7 @@ def run_flake8():
     Automatically ran on every pull request via GitHub actions.
     '''
     # Maximum line length.
-    max_line_len = 300
+    max_line_len = 200
 
     # Messages/warnings/errors to enable and disable.
     messages_disable = ["W503", "E741"]
@@ -30,6 +30,7 @@ def run_flake8():
 
     # Overall command to run.
     cmd_list = ["flake8",
+                "--statistics",
                 "--jobs=1",
                 f"--max-line-length={max_line_len}",
                 f"--ignore={','.join(messages_disable)}"]

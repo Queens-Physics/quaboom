@@ -546,7 +546,21 @@ if __name__ == "__main__":
     plt.show()
 
     # Confidence interval mode
-    parameters_to_plot = ["infected", "new_infected", "recovered", "susceptible", "dead", "quarantined", "inf_students", "total_tested", "new_tested", "hospitalized", "ICU", "testing_enforced", "masks_enforced", "lockdown_enforced", "time_elapsed"]
+    parameters_to_plot = ["infected",
+                          "new_infected",
+                          "recovered",
+                          "susceptible",
+                          "dead",
+                          "quarantined",
+                          "inf_students",
+                          "total_tested",
+                          "new_tested",
+                          "hospitalized",
+                          "ICU",
+                          "testing_enforced",
+                          "masks_enforced",
+                          "lockdown_enforced",
+                          "time_elapsed"]
 
     confidence_interval('config_files/main.json', parameterstoplot=parameters_to_plot, confidence=0.9)
 
