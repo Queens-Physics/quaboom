@@ -79,36 +79,36 @@ class simulation():
         self.load_general_parameters(config_file)
         self.load_disease_parameters(self.disease_config_file)
 
-        self.init_classes() # Have to initalize the classes after we have all of the parameters
+        self.init_classes()  # Have to initalize the classes after we have all of the parameters
 
-        self.verbose = verbose # Whether or not to print daily simulation information.
+        self.verbose = verbose  # Whether or not to print daily simulation information.
 
-        self.set_code_version() # Set the version of the code being used to run simulation.
+        self.set_code_version()  # Set the version of the code being used to run simulation.
 
         # Arrays to store the values during the simulation
-        self.track_new_infected = np.zeros(self.nDays, dtype=int) # new infections
-        self.track_infected = np.zeros(self.nDays, dtype=int) # currently infected
-        self.track_susceptible = np.zeros(self.nDays, dtype=int) # never been exposed
-        self.track_recovered = np.zeros(self.nDays, dtype=int) # total recovered
-        self.track_dead = np.zeros(self.nDays, dtype=int) # total deaths
-        self.track_hospitalized = np.zeros(self.nDays, dtype=int) # total hospitalizations
-        self.track_ICU = np.zeros(self.nDays, dtype=int) # total ICU
-        self.track_quarantined = np.zeros(self.nDays, dtype=int) # population currently in quarantine
-        self.track_new_quarantined = np.zeros(self.nDays, dtype=int) # newly quarantined that day
+        self.track_new_infected = np.zeros(self.nDays, dtype=int)  # new infections
+        self.track_infected = np.zeros(self.nDays, dtype=int)  # currently infected
+        self.track_susceptible = np.zeros(self.nDays, dtype=int)  # never been exposed
+        self.track_recovered = np.zeros(self.nDays, dtype=int)  # total recovered
+        self.track_dead = np.zeros(self.nDays, dtype=int)  # total deaths
+        self.track_hospitalized = np.zeros(self.nDays, dtype=int)  # total hospitalizations
+        self.track_ICU = np.zeros(self.nDays, dtype=int)  # total ICU
+        self.track_quarantined = np.zeros(self.nDays, dtype=int)  # population currently in quarantine
+        self.track_new_quarantined = np.zeros(self.nDays, dtype=int)  # newly quarantined that day
         self.track_tested = np.zeros(self.nDays, dtype=int)       # total tested individuals
         self.track_new_tested = np.zeros(self.nDays, dtype=int)   # new tested per day
-        self.track_testing_wait_list = np.zeros(self.nDays, dtype=int) # counts the number of people waiting for tests each day
-        self.track_inf_students = np.zeros(self.nDays, dtype=int) # total infected students
-        self.track_masks = np.zeros(self.nDays, dtype=bool) # tracks masking mandates
-        self.track_lockdown = np.zeros(self.nDays, dtype=bool) # tracks lockdown mandates
-        self.track_testing = np.zeros(self.nDays, dtype=bool) # tracks testing mandates
-        self.track_time = np.zeros(self.nDays, dtype=float) # time elapsed (in seconds) since start of simulation
-        self.track_R0 = np.zeros(self.nDays, dtype=float) # daily R0
-        self.track_R_eff = np.zeros(self.nDays, dtype=float) # daily effective R0
-        self.track_HIT = np.zeros(self.nDays, dtype=float) # daily herd immunity threshold
-        self.track_vaccinated = np.zeros(self.nDays, dtype=int) # total vaccinated
-        self.track_gamma = np.zeros(self.nDays, dtype=float) # daily gamma value
-        self.track_beta = np.zeros(self.nDays, dtype=float) # daily beta value
+        self.track_testing_wait_list = np.zeros(self.nDays, dtype=int)  # counts the number of people waiting for tests each day
+        self.track_inf_students = np.zeros(self.nDays, dtype=int)  # total infected students
+        self.track_masks = np.zeros(self.nDays, dtype=bool)  # tracks masking mandates
+        self.track_lockdown = np.zeros(self.nDays, dtype=bool)  # tracks lockdown mandates
+        self.track_testing = np.zeros(self.nDays, dtype=bool)  # tracks testing mandates
+        self.track_time = np.zeros(self.nDays, dtype=float)  # time elapsed (in seconds) since start of simulation
+        self.track_R0 = np.zeros(self.nDays, dtype=float)  # daily R0
+        self.track_R_eff = np.zeros(self.nDays, dtype=float)  # daily effective R0
+        self.track_HIT = np.zeros(self.nDays, dtype=float)  # daily herd immunity threshold
+        self.track_vaccinated = np.zeros(self.nDays, dtype=int)  # total vaccinated
+        self.track_gamma = np.zeros(self.nDays, dtype=float)  # daily gamma value
+        self.track_beta = np.zeros(self.nDays, dtype=float)  # daily beta value
 
         self.has_run = False  # Indicates if the sim has run yet
 
@@ -136,20 +136,19 @@ class simulation():
         else:
             raise TypeError("Please supply dictionary object or file path.")
 
-        #### Do the simulation parameters ####
+        # Do the simulation parameters
         attributes = self.parameters["simulation_data"].keys()
         for attr in attributes:
             setattr(self, attr, self.parameters["simulation_data"][attr])
 
-        #### Store the constant person parameters here so they are not duplicated ####
+        # Store the constant person parameters here so they are not duplicated
         person_attributes = self.parameters["person_data"].keys()
         for attr in person_attributes:
             setattr(self, attr, self.parameters["person_data"][attr])
 
-        #### Load in the virus types tracking arrays ####
+        # Load in the virus types tracking arrays
         self.virus_names = list(self.variant_codes.keys())
-        self.track_virus_types = {virus_name:np.zeros(self.nDays, dtype=int) for virus_name in self.virus_names}
-
+        self.track_virus_types = {virus_name: np.zeros(self.nDays, dtype=int) for virus_name in self.virus_names}
 
     def load_disease_parameters(self, filename):
         ''' Method to load in attributes from the disease configuration file.
@@ -294,9 +293,9 @@ class simulation():
         # Loop over the number of days
         for day in range(self.nDays):
 
-            ############### UPDATE TRACKING ###############
+            # UPDATE TRACKING
 
-            #Count all the different states of people
+            # Count all the different states of people
             self.track_infected[day] = self.pop.count_infected()
             self.track_susceptible[day] = self.pop.count_susceptible()
             self.track_recovered[day] = self.pop.count_recovered()
@@ -323,14 +322,14 @@ class simulation():
             new_recovered = 0
 
             if day != 0:
-                new_recovered = self.track_recovered[day] - self.track_recovered[day-1]
-                new_dead = self.track_dead[day] - self.track_dead[day-1]
-                self.track_new_infected[day] = self.track_infected[day]-self.track_infected[day-1]+new_recovered+new_dead
-                self.track_new_tested[day] = self.track_tested[day] - self.track_tested[day-1]
+                new_recovered = self.track_recovered[day] - self.track_recovered[day - 1]
+                new_dead = self.track_dead[day] - self.track_dead[day - 1]
+                self.track_new_infected[day] = self.track_infected[day] - self.track_infected[day - 1] + new_recovered + new_dead
+                self.track_new_tested[day] = self.track_tested[day] - self.track_tested[day - 1]
 
                 self.calculate_SIR_metrics(day)
 
-            ############### UPDATE POLICY ###############
+            # UPDATE POLICY
             mask_mandate = self.policy.update_mask_mandate(day=day)
             if mask_mandate != old_mask_mandate and self.verbose:
                 print(f"Day: {day}, Mask Mandate: {mask_mandate}")
@@ -354,7 +353,7 @@ class simulation():
             # Remove dead agents from site attendence
             self.inter_sites.remove_dead()
 
-            #infect random students on the day they come in
+            # infect random students on the day they come in
             if self.inter_sites.students_on and day == self.policy.student_day_trigger:
                 infStudents = np.random.randint(self.inf_students_lower, self.inf_students_upper)
                 indices = np.random.choice(self.pop.get_student_indices(), infStudents, replace=False)
@@ -362,21 +361,21 @@ class simulation():
                 student_default_virus_code = self.variant_codes[self.student_default_virus_type]
                 self.pop.infect_incoming_students(indices=indices, day=day, virus_type=student_default_virus_code)
 
-            ############### UPDATE VISITORS ###############
-            #add a random number of visitors to the population
+            # UPDATE VISITORS
+            # add a random number of visitors to the population
             num_vis = np.random.choice(a=self.N_VIS_OPTION, p=self.N_VIS_PROB)
-            visitors_ind = [x for x in range(self.nPop, self.nPop+num_vis-1)]
+            visitors_ind = [x for x in range(self.nPop, self.nPop + num_vis - 1)]
             vis_age = np.random.choice(a=self.pop.age_options, p=self.pop.age_weights, size=num_vis)
             for i in range(0, num_vis):
-                visitor = Person(index=i+self.nPop, sim_obj=self, infected=True, recovered=False, dead=False,
+                visitor = Person(index=i + self.nPop, sim_obj=self, infected=True, recovered=False, dead=False,
                                  hospitalized=False, ICU=False, quarantined=False, quarantined_day=None, infected_day=None,
                                  recovered_day=None, death_day=None, others_infected=None,
                                  cure_days=None, recent_infections=None, vaccinated=False, age=vis_age[i],
-                                 job=None,house_index=None, isolation_tendencies=0.2,
+                                 job=None, house_index=None, isolation_tendencies=0.2,
                                  case_severity='Mild', has_mask=True, virus_type="alpha")
                 self.pop.population.append(visitor)
 
-            ############### UPDATE INTERACTION SITES ###############
+            # UPDATE INTERACTION SITES
             will_visit_B = self.inter_sites.will_visit_site(self.inter_sites.get_grade_B_sites(), self.will_go_prob["B"])
             self.inter_sites.site_interaction(will_visit_B, day, personal=False)
             if not lockdown:
@@ -418,7 +417,9 @@ class simulation():
 
             # Manage Vaccines
             self.pop.update_vaccinated(day)
-            ############### UPDATE POPULATION ###############
+
+            # UPDATE POPULATION
+
             # remove the guest visitors
             self.pop.remove_visitors(visitors_ind)
             for index in self.pop.get_infected():
@@ -500,15 +501,15 @@ class simulation():
         N = self.parameters["simulation_data"]["nPop"]
 
         gamma = dR_dt / I if I > 0 else 0
-        beta = (dI_dt + gamma*I)*(N/(I*S)) if I*S > 0 else 0
+        beta = (dI_dt + gamma * I) * (N / (I * S)) if I * S > 0 else 0
 
         if day - self.R0_lag_time >= 0:
 
             # Use the old gamma (infected rate) and current beta (recovery rate)
             lagged_gamma = self.track_gamma[day - self.R0_lag_time]
             daily_R0 = beta / lagged_gamma if lagged_gamma != 0 else 0
-            daily_R_eff = daily_R0 * (S/N)
-            HIT = 1 - 1/daily_R_eff if daily_R_eff != 0 else 1
+            daily_R_eff = daily_R0 * (S / N)
+            HIT = 1 - 1 / daily_R_eff if daily_R_eff != 0 else 1
 
             self.track_R0[day] = daily_R0
             self.track_R_eff[day] = daily_R_eff
@@ -560,7 +561,6 @@ class simulation():
              plot_hospitalized=True, plot_ICU=True, plot_lockdown=True, plot_testing=True, plot_students=True, plot_R0=False,
              plot_R_eff=False, plot_HIT=False, plot_gamma=False, plot_beta=False, plot_vaccinated=True, plot_virus_types=None,
              log=False):
-
         ''' Method used to plot simulation results.
 
         Will return a warning or error if the simulation has not been run yet.
@@ -577,8 +577,8 @@ class simulation():
 
         self.check_has_run(check=True, information="Cannot make plots.", fail=True)
 
-        _, ax = plt.subplots(figsize=(10,8), dpi=100)
-        days = np.linspace(0,self.nDays, self.nDays, dtype=int)
+        _, ax = plt.subplots(figsize=(10, 8), dpi=100)
+        days = np.linspace(0, self.nDays, self.nDays, dtype=int)
 
         # Plot the tracking arrays
         if plot_infected:
@@ -654,15 +654,15 @@ class simulation():
                            information="Cannot return zero-initialized arrays.",
                            fail=True)
 
-        returnDict = {"infected":self.track_infected, "new_infected":self.track_new_infected,
-                      "recovered":self.track_recovered, "susceptible":self.track_susceptible,
-                      "dead":self.track_dead, "quarantined":self.track_quarantined,
-                      "inf_students":self.track_inf_students, "total_tested":self.track_tested,
-                      "new_tested":self.track_new_tested, "hospitalized":self.track_hospitalized,
-                      "ICU":self.track_ICU, "testing_enforced":self.track_testing,
-                      "masks_enforced":self.track_masks, "lockdown_enforced":self.track_lockdown,
-                      "time_elapsed":self.track_time, "R0":self.track_R0, "Reff":self.track_R_eff, "HIT":self.track_HIT,
-                      "vaccinated":self.track_vaccinated, "gamma":self.track_gamma, "beta":self.track_beta}
+        returnDict = {"infected": self.track_infected, "new_infected": self.track_new_infected,
+                      "recovered": self.track_recovered, "susceptible": self.track_susceptible,
+                      "dead": self.track_dead, "quarantined": self.track_quarantined,
+                      "inf_students": self.track_inf_students, "total_tested": self.track_tested,
+                      "new_tested": self.track_new_tested, "hospitalized": self.track_hospitalized,
+                      "ICU": self.track_ICU, "testing_enforced": self.track_testing,
+                      "masks_enforced": self.track_masks, "lockdown_enforced": self.track_lockdown,
+                      "time_elapsed": self.track_time, "R0": self.track_R0, "Reff": self.track_R_eff, "HIT": self.track_HIT,
+                      "vaccinated": self.track_vaccinated, "gamma": self.track_gamma, "beta": self.track_beta}
         # Unpack the virus types
         for virus_type in self.track_virus_types.keys():
             returnDict[virus_type] = self.track_virus_types[virus_type]
