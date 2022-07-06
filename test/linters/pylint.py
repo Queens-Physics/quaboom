@@ -37,7 +37,7 @@ def run_pylint():
                        'Population', 'simulation']
 
     # Overall command to run.
-    cmd_list = ["python3", "-m", "pylint",
+    cmd_list = ["pylint",
                 "--jobs=1",
                 "--score=n",
                 "--output-format=colorized",
@@ -51,11 +51,9 @@ def run_pylint():
     # Run the pylint command.
     # Return non-zero exit code upon failure.
     try:
-        t = subprocess.check_output(cmd_list, text=True)
-        print(t)
-
+        subprocess.run(cmd_list, check=True, text=True)
     except subprocess.CalledProcessError as e:
-        print(e.output)
+        print(f"\npylint returned with non-zero exit code: {e.returncode}.")
         return e.returncode
 
     return 0

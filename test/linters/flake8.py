@@ -40,11 +40,9 @@ def run_flake8():
     # Run the flake8 command.
     # Return non-zero exit code upon failure.
     try:
-        t = subprocess.check_output(cmd_list, text=True)
-        print(t)
-
+        subprocess.run(cmd_list, check=True, text=True)
     except subprocess.CalledProcessError as e:
-        print(e.output)
+        print(f"\nflake8 returned with non-zero exit code: {e.returncode}.")
         return e.returncode
 
     return 0
