@@ -18,6 +18,7 @@ class TestPopulation(unittest.TestCase):
     The TestPopulation class has not been updated recently, and covers a limited amount of the
     population class funcitonality. Keep this in mind when adding new functionality.
     '''
+
     def setUp(self):
         ''' Set up method for testing the population class.
 
@@ -48,7 +49,7 @@ class TestPopulation(unittest.TestCase):
         # Make sure that there are n0 infected, 0 recovered, nPop-n0 susceptible
         self.assertEqual(pop.count_infected(), n0)
         self.assertEqual(pop.count_recovered(), 0)
-        self.assertEqual(pop.count_susceptible(), nPop-n0)
+        self.assertEqual(pop.count_susceptible(), nPop - n0)
 
         # Make sure variant counts are correct
         for key, value in variants.items():
@@ -159,7 +160,7 @@ class TestPopulation(unittest.TestCase):
         infected_id = pop.get_infected()[0]
 
         # Make sure cure function works
-        self.assertTrue(pop.cure(index=infected_id, day=40)) # day=40 is long past due infection
+        self.assertTrue(pop.cure(index=infected_id, day=40))  # day=40 is long past due infection
         # Make sure lists are right
         self.assertTrue(infected_id in pop.get_recovered())
         self.assertFalse(infected_id in pop.get_infected())
@@ -167,6 +168,7 @@ class TestPopulation(unittest.TestCase):
         # Make sure the person attribute was changed
         self.assertTrue(pop.get_person(index=infected_id).is_recovered())
         self.assertFalse(pop.get_person(index=infected_id).is_infected())
+
 
 if __name__ == '__main__':
     unittest.main()

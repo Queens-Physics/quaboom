@@ -6,6 +6,7 @@ from pathlib import Path
 
 from cv19 import CV19ROOT
 
+
 def run_pylint():
     '''
     Run the Pylint test on the module and some other files in the repository.
@@ -58,6 +59,7 @@ def run_pylint():
         return e.returncode
 
     return 0
+
 
 if __name__ == "__main__":
     sys.exit(run_pylint())
