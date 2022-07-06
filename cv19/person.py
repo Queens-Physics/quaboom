@@ -2,6 +2,7 @@ from random import random
 
 import numpy as np
 
+
 class Person(object):
     '''A class designed to create individuals to create a population.
 
@@ -21,7 +22,6 @@ class Person(object):
                  cure_days=None, recent_infections=None, vaccinated=False, vaccine_type=None,
                  age=None, job=None, house_index=0, isolation_tendencies=None, case_severity=None, mask_type=None,
                  has_mask=True, virus_type=None):
-
         '''Method to load in attributes from the provided simulation class object.
 
         Sets all objects in the "person_data" dictionary key as self attributes of the
@@ -118,7 +118,7 @@ class Person(object):
         self.personal_contacts = {}
 
         # Whether this person uses a contact tracing app
-        self.has_ct_app = random() < 1 #TODO add the "CT_APP_PROB" variable here
+        self.has_ct_app = random() < 1  # TODO add the "CT_APP_PROB" variable here
 
     def __str__(self):
         '''Prints the person identifier.
@@ -250,7 +250,7 @@ class Person(object):
             self.has_cold = True
         return self.show_symptoms
 
-    def set_test_day(self,day):
+    def set_test_day(self, day):
         '''Method to set the day a person is tested.
 
         Parameters
@@ -390,8 +390,8 @@ class Person(object):
             self.virus_type = virus_type
             self.infected_day = day
             self.will_get_symptoms = True
-            self.days_until_symptoms  = np.random.randint(d_params["days_before_symptoms"]["min"],
-                                                          d_params["days_before_symptoms"]["max"])
+            self.days_until_symptoms = np.random.randint(d_params["days_before_symptoms"]["min"],
+                                                         d_params["days_before_symptoms"]["max"])
 
             # If cure days not specified then choose random number inbetween min and max
             if self.case_severity == 'Mild' or self.case_severity is None:  # If severity not specified, choose Mild
@@ -402,7 +402,7 @@ class Person(object):
 
                 self.cure_days = np.random.randint(d_params["mild_days"]["min"],
                                                    d_params["mild_days"]["max"]) if cure_days is None else cure_days
-            #Assuming that all hospitalization or worse cases will show symptoms
+            # Assuming that all hospitalization or worse cases will show symptoms
             elif self.case_severity == 'Hospitalization':
                 self.cure_days = np.random.randint(d_params["hospital_days"]["min"],
                                                    d_params["hospital_days"]["max"]) if cure_days is None else cure_days
@@ -490,7 +490,7 @@ class Person(object):
                 return True
         return False
 
-    def check_dead(self, day): # checking that case_severity==death outside of the loop
+    def check_dead(self, day):  # checking that case_severity==death outside of the loop
         '''Method to check the timeline if a person will be die once they are infected if
         their days_since_infected is greater or equal to their cure_days.
 
@@ -557,10 +557,10 @@ class Person(object):
         mask_options = np.random.uniform()
 
         if self.has_mask:
-            if mask_options/self.protocol_compliance > self.sim_obj.wear_mask_properly:
-                return False  #False = not wearing a mask
+            if mask_options / self.protocol_compliance > self.sim_obj.wear_mask_properly:
+                return False  # False = not wearing a mask
             else:
-                return True  #True = wearing a mask
+                return True  # True = wearing a mask
         else:
             return False
 
@@ -652,7 +652,7 @@ class Person(object):
         '''Called when a person is notified of a positive contact with a
         covid case. '''
 
-        #NOTE: Is this what we want to happen when a positive contact occurs?
+        # NOTE: Is this what we want to happen when a positive contact occurs?
         self.set_quarantine(day)
 
     def set_protocol_compliance(self, house_size):
@@ -667,19 +667,19 @@ class Person(object):
         -------
         self.protocol_compliance: :obj:`float`
         '''
-        if self.protocol_compliance is None: #If no protocol compliance score is defined
+        if self.protocol_compliance is None:  # If no protocol compliance score is defined
             self.protocol_compliance = self.sim_obj.goodness
 
-        if house_size > len(self.sim_obj.protocol_compliance_house_prob): #Sets the house size to the largest house size probability if the house size is larger than that number
+        if house_size > len(self.sim_obj.protocol_compliance_house_prob):  # Sets the house size to the largest house size probability if the house size is larger than that number
             house_size = len(self.sim_obj.protocol_compliance_house_prob)
         if random() < self.sim_obj.protocol_compliance_house_prob[house_size - 1]:
-            self.protocol_compliance *= self.sim_obj.protocol_compliance_house_reduction[house_size - 1] # changes the persons protocol compliance based on house size
+            self.protocol_compliance *= self.sim_obj.protocol_compliance_house_reduction[house_size - 1]  # changes the persons protocol compliance based on house size
 
         if random() < self.sim_obj.protocol_compliance_age_prob[self.age]:
             self.protocol_compliance *= self.sim_obj.protocol_compliance_age_reduction[self.age]
 
         if random() < self.sim_obj.protocol_compliance_case_severity_prob[self.case_severity]:
-            self.protocol_compliance *= self.sim_obj.protocol_compliance_case_severity_reduction[self.case_severity] #changes protocol compliance based on how severity of a potential case
+            self.protocol_compliance *= self.sim_obj.protocol_compliance_case_severity_reduction[self.case_severity]  # changes protocol compliance based on how severity of a potential case
         return self.protocol_compliance
 
     def update_protocol_compliance(self, lockdown_level, old_lockdown_mandate):
@@ -696,10 +696,10 @@ class Person(object):
         -------
         self.protocol_compliance: :obj:`float`
         '''
-        if self.protocol_compliance is None: #If no protocol compliance it is defined
-            self.protocol_compliance =  self.sim_obj.protocol_compliance
+        if self.protocol_compliance is None:  # If no protocol compliance it is defined
+            self.protocol_compliance = self.sim_obj.protocol_compliance
 
-        if self.days_in_lockdown > self.sim_obj.protocol_compliance_lockdown_length_threshold and random() < self.sim_obj.protocol_compliance_lockdown_prob: #as the lockdown length increases decrease the protocol compliance
+        if self.days_in_lockdown > self.sim_obj.protocol_compliance_lockdown_length_threshold and random() < self.sim_obj.protocol_compliance_lockdown_prob:  # as the lockdown length increases decrease the protocol compliance
             self.protocol_compliance *= self.sim_obj.protocol_compliance_lockdown_length_reduction
 
         if lockdown_level != old_lockdown_mandate:
