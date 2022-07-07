@@ -91,6 +91,7 @@ students_on = true
     # STUDY
     # FOOD
     # RES
+
     [interaction_sites_data.grade_loyalty_means]
     A = 4
     B = 1
@@ -178,4 +179,3 @@ protocol_compliance_lockdown_length_reduction = 0.5
     Pfizer = 0.087
     Moderna = 0.059
     AZ = 0.24
-
