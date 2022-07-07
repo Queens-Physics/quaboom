@@ -109,13 +109,13 @@ class Policy:
         '''
 
         # Change the policy based on conditions
-        if self.lockdown_on_day_trigger is not None and day >= self.lockdown_on_day_trigger:
+        if hasattr(self, "lockdown_on_day_trigger") and day >= self.lockdown_on_day_trigger:
             lockdown_mandate = True
-        elif self.lockdown_on_day_trigger is not None and day >= self.lockdown_off_day_trigger:
+        elif hasattr(self, "lockdown_on_day_trigger") and day >= self.lockdown_off_day_trigger:
             lockdown_mandate = False
-        elif self.lockdown_on_trigger is not None and self.sim_obj.pop.count_quarantined()/self.prob_of_symptoms/self.sim_obj.nPop > self.lockdown_on_trigger:
+        elif hasattr(self, "lockdown_on_trigger") and self.sim_obj.pop.count_quarantined()/self.prob_of_symptoms/self.sim_obj.nPop > self.lockdown_on_trigger:
             lockdown_mandate = True
-        elif self.lockdown_off_trigger is not None and self.sim_obj.pop.count_quarantined()/self.prob_of_symptoms/self.sim_obj.nPop <= self.lockdown_off_trigger:
+        elif hasattr(self, "lockdown_on_trigger") and self.sim_obj.pop.count_quarantined()/self.prob_of_symptoms/self.sim_obj.nPop <= self.lockdown_off_trigger:
             lockdown_mandate = False
         else:
             lockdown_mandate = False
