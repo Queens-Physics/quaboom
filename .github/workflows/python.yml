@@ -19,7 +19,7 @@ jobs:
     - name: Install dependencies
       run: |
         python3 -m pip install --upgrade pip
-        pip install pylint==2.11.1
+        pip install pylint==2.14.4
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
         ./configure
 
