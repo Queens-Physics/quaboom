@@ -65,9 +65,9 @@ class Policy:
 
         '''
         # Change the policy based on conditions
-        if self.mask_day_trigger is not None and day >= self.mask_day_trigger:
+        if hasattr(self, "mask_day_trigger") and day >= self.mask_day_trigger:
             mask_mandate = True
-        elif self.mask_trigger is not None and self.sim_obj.pop.count_infected()/self.prob_of_symptoms/self.sim_obj.nPop > self.mask_trigger:
+        elif hasattr(self, "mask_trigger") and self.sim_obj.pop.count_infected()/self.prob_of_symptoms/self.sim_obj.nPop > self.mask_trigger:
             mask_mandate = True
         else:
             mask_mandate = False
@@ -152,9 +152,9 @@ class Policy:
 
         '''
 
-        if self.testing_day_trigger is not None and day >= self.testing_day_trigger:
+        if hasattr(self, "testing_day_trigger") and day >= self.testing_day_trigger:
             testing = True
-        elif self.testing_trigger is not None and self.sim_obj.pop.count_quarantined()/self.prob_of_symptoms/self.sim_obj.pop.nPop > self.testing_trigger:
+        elif hasattr(self, "testing_trigger") and self.sim_obj.pop.count_quarantined()/self.prob_of_symptoms/self.sim_obj.pop.nPop > self.testing_trigger:
             testing = True
         else:
             testing = False
@@ -184,7 +184,7 @@ class Policy:
         tests =  (self.testing_rates[0]*self.sim_obj.pop.count_quarantined()
                   + self.testing_rates[1]*self.sim_obj.pop.get_new_quarantined()
                   + self.testing_rates[2]*wait_list) # defines the number of tests going to be run
-        if self.testing_baseline is None:
+        if not hasattr(self, "testing_baseline"):
             self.testing_baseline = 0
         elif tests < self.testing_baseline and wait_list > 0:
             tests = self.testing_baseline
@@ -208,7 +208,7 @@ class Policy:
         '''
 
         # Change the policy based on conditions
-        if self.student_day_trigger is not None and day >= self.student_day_trigger:
+        if hasattr(self, "student_day_trigger") and day >= self.student_day_trigger:
             student_mandate = True
         else:
             student_mandate = False
