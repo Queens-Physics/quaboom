@@ -288,6 +288,7 @@ class Population:
 
         Sets all constants in the population class as self attributes of the population class.
         '''
+
         with open(self.demographics_file, 'rb') as toml_file:
             disease_params = tomli.load(toml_file)
 
