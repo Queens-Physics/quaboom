@@ -81,8 +81,8 @@ class InteractionSites:
     def load_attributes_from_sim_obj(self, sim_obj):
         '''Method to load in attributes from the provided simulation class object.
 
-        Sets all objects in the "interactionsites_data" dictionary key as self
-        attributes of the interactionsites class.
+        Sets all objects in the "interaction_sites_data" dictionary key as self
+        attributes of the InteractionSites class.
 
         Parameters
         ----------
@@ -91,9 +91,9 @@ class InteractionSites:
 
         '''
 
-        attributes = sim_obj.parameters["interactionsites_data"].keys()
+        attributes = sim_obj.parameters["interaction_sites_data"].keys()
         for attr in attributes:
-            setattr(self, attr, sim_obj.parameters["interactionsites_data"][attr])
+            setattr(self, attr, sim_obj.parameters["interaction_sites_data"][attr])
 
         # Get the disease parameters
         d_attributes = sim_obj.disease_parameters["spread_data"].keys()

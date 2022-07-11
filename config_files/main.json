@@ -60,7 +60,7 @@
         "ct_capacity": 10000
     },
 
-    "interactionsites_data":{
+    "interaction_sites_data":{
 
         "site_size":{"A":1000, "B":1000, "C":100, "LECT":100, "STUDY":100, "FOOD":100, "RES":300},
         "site_num": {"A":null, "B":null, "C":null, "LECT":null, "STUDY":null, "FOOD":null, "RES":null},

@@ -1,6 +1,6 @@
 Interaction Sites
 =================
 
-.. autoclass:: cv19.interactionsites.InteractionSites
+.. autoclass:: cv19.interaction_sites.InteractionSites
     :members:
     :undoc-members:

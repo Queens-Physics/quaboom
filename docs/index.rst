@@ -14,7 +14,7 @@ Welcome to CV-19 Simulation's documentation!
    getting_started
    person
    population
-   interactionsites
+   interaction_sites
    simulation
 
 Indices and tables

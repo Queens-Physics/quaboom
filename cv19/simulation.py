@@ -11,7 +11,7 @@ from . import CV19ROOT
 from .person import Person
 from .population import Population
 from .policy import Policy
-from .interactionsites import InteractionSites
+from .interaction_sites import InteractionSites
 
 
 class simulation():
