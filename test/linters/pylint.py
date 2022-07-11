@@ -33,7 +33,7 @@ def run_pylint():
 
     # List of class names for which member attributes should not be checked (from pylint).
     ignored_classes = ['InteractionSites', 'Person', 'Policy',
-                       'Population', 'simulation']
+                       'Population', 'Simulation']
 
     # Overall command to run.
     cmd_list = ["python3", "-m", "pylint",

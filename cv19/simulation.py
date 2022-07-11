@@ -14,7 +14,7 @@ from .policy import Policy
 from .interaction_sites import InteractionSites
 
 
-class simulation():
+class Simulation():
     '''
     A class designed to host the actual monte-carlo simulation and to track the results.
 
@@ -194,7 +194,7 @@ class simulation():
 
     def init_classes(self):
         ''' Method that links the policy, population, and interaction sites class objects with
-        the simulation class (serves as pointer variables).
+        the Simulation class (serves as pointer variables).
         '''
         # Initalize the policy class
         self.policy = Policy(self)
@@ -263,7 +263,7 @@ class simulation():
     def run(self, fail_on_rerun=True):
         ''' Method that runs the monte-carlo simulation.
 
-        This is the main function in the simulation class that generates the tracking data. The
+        This is the main function in the Simulation class that generates the tracking data. The
         fail_on_rerun parameter is added to make sure that data from previous runs is not overwritten
         by running the simulation again.
 
@@ -568,7 +568,7 @@ class simulation():
         Parameters
         ----------
         plot_* : bool
-            Takes in a single variable for each tracking array held in the simulation class object. The
+            Takes in a single variable for each tracking array held in the Simulation class object. The
             variable is of name plot_<tracked value name>, for example plot_hospitalized. Setting this
             parameter to `True` will plot the array, and `False` will not.
         log : bool

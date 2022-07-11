@@ -8,7 +8,7 @@ import pandas as pd
 import scipy.stats as st
 from matplotlib import pyplot as plt
 
-from .simulation import simulation
+from .simulation import Simulation
 
 def async_simulation(config_file, config_dir="", verbose=False):
     """Does a single run of the simulation with the supplied configuration details.
@@ -26,7 +26,7 @@ def async_simulation(config_file, config_dir="", verbose=False):
         arrays from the simulation
 
     """
-    sim = simulation(config_file, config_dir=config_dir, verbose=verbose)
+    sim = Simulation(config_file, config_dir=config_dir, verbose=verbose)
     sim.run()
     return sim.get_arrays()
 
