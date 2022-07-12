@@ -30,7 +30,7 @@ class Person(object):
         Parameters
         ----------
         sim_obj :obj:`simulation.simulation`
-            The encompassing simulation object hosting the simulation
+            The encompassing simulation object hosting the simulation.
         infected : bool
             Determines if person is infected or not, defaults False.
         recovered : bool
@@ -62,7 +62,7 @@ class Person(object):
         age : string
             Is an age range the person belongs to.
         job : string
-            Is the job that belongs to the person
+            Is the job that belongs to the person.
         house_index : int
         isolation_tendencies : float
             How likely a person is to isolate, defaults None.
@@ -74,7 +74,7 @@ class Person(object):
             Determines if a person will wear a mask or not, defaults to True.
         goodness : float
         days_in_lockdown : int
-            Records the number of days a person has been under lockdown
+            Records the number of days a person has been under lockdown.
         '''
 
         self.infected = infected
@@ -210,7 +210,7 @@ class Person(object):
         ''' Method to determine if a person is done quarantining based on an inputted day.
         Will return True if person is recovered, dead or the inputted day is greater than
         self.sim_obj.quarantine_time.
-        Will return False otherwise
+        Will return False otherwise.
 
         Parameters
         ----------
@@ -245,6 +245,7 @@ class Person(object):
         -------
         self.show_symptoms: :obj:`bool`
         '''
+
         if random() <= self.sim_obj.cold_prob:
             self.show_symptoms = True
             self.has_cold = True
@@ -277,13 +278,14 @@ class Person(object):
         Parameters
         ----------
         day: int
-            The current day in the simulation to compare against  when the person was tested.
+            The current day in the simulation to compare against when the person was tested.
 
         Returns
         -------
         : :obj:`bool`
             True if the quarantine time range has passed since they have been last tested and False if not.
         '''
+
         if self.test_day is None:
             return False
         elif (day - self.test_day) >= self.quarantine_time:
@@ -304,6 +306,7 @@ class Person(object):
         -------
         self.show_symptoms: :obj:`bool`
         '''
+
         if self.will_get_symptoms and (day - self.infected_day) >= self.days_until_symptoms and self.infected or self.has_cold:
             self.show_symptoms = True
         elif not self.infected and not self.has_cold:
@@ -357,6 +360,7 @@ class Person(object):
 
     def get_virus_type(self):
         '''Method to return the virus type of a person.
+
         Returns
         -------
         self.virus_type: :obj:`int`
@@ -365,8 +369,6 @@ class Person(object):
 
     def infect(self, day, virus_type, cure_days=None):
         '''Method to infect a person.
-        If they're quarantined and their quarantine time has ended, let them out of quarantine.
-        If they're not quarantined but they have severe symptoms to get hospitalized, set self.quarantined to be True.
 
         Parameters
         ----------
@@ -382,6 +384,7 @@ class Person(object):
         : :obj:`bool`
             True if infected and False if not.
         '''
+
         d_params = self.sim_obj.disease_parameters
 
         # Check that they are suseptable (maybe should have that as property?)
@@ -439,6 +442,7 @@ class Person(object):
         : :obj:`bool`
             True if quarantined and False if not.
         '''
+
         if self.quarantined:
             days_since_quarantined = day - self.quarantined_day
             if days_since_quarantined >= self.sim_obj.quarantine_time:
@@ -473,6 +477,7 @@ class Person(object):
         : :obj:`bool`
             True if they were cured, False if not.
         '''
+
         if self.infected and not self.recovered:
 
             days_since_infected = day - self.infected_day
@@ -506,6 +511,7 @@ class Person(object):
         : :obj:`bool`
             True they died and False if not.
         '''
+
         if self.infected:
 
             days_since_infected = day - self.infected_day
@@ -526,6 +532,7 @@ class Person(object):
         : :obj:`bool`
             True if hospitalized and False if not.
         '''
+
         if self.infected:
             if self.case_severity == 'Hospitalization' or self.case_severity == 'ICU' or self.case_severity == 'Death':
                 self.hospitalized = True
@@ -539,8 +546,9 @@ class Person(object):
         Returns
         -------
         : :obj:`bool`
-        True if person goes to ICU and False if not.
+            True if person goes to ICU and False if not.
         '''
+
         if self.infected:
             if self.case_severity == 'ICU' or self.case_severity == 'Death':
                 self.ICU = True
@@ -556,6 +564,7 @@ class Person(object):
         : :obj:`bool`
             True if wearing a mask and False if not.
         '''
+
         mask_options = np.random.uniform()
 
         if self.has_mask:
@@ -578,6 +587,7 @@ class Person(object):
         self.sim_obj.mask_outward_eff[self.mask_type]: :obj:`float`
             Mask outward efficiency for the person's mask type.
         '''
+
         if self.has_mask:
             try:
                 return (self.sim_obj.mask_inward_eff[self.mask_type],
@@ -589,17 +599,17 @@ class Person(object):
             return 1, 1  # Not wearing a mask, so no change in chance of infection
 
     def log_contact(self, other, day: int, personal: bool = False) -> None:
-        """Logs a contact between two individuals.
+        '''Logs a contact between two individuals.
 
         Parameters
         ----------
         other : :obj:`Person`
-            Person that self is interacting with
+            Person that self is interacting with.
         day : int
-            Current day in the simulation
+            Current day in the simulation.
         personal : bool, default False
-            Whether or not the two people know each other
-        """
+            Whether or not the two people know each other.
+        '''
 
         def add_contact(log):
             if day in log.keys():
@@ -612,14 +622,13 @@ class Person(object):
             add_contact(self.personal_contacts)
 
     def contact_tracing(self, day: int) -> None:
-        """Contacts everyone that they have had contact with.
+        '''Contacts everyone that they have had contact with.
 
         Parameters
         ----------
         day : int
-            Current day in the simulation
-
-        """
+            Current day in the simulation.
+        '''
 
         end = day + 1
         beginning = end - self.sim_obj.ct_length
@@ -652,9 +661,9 @@ class Person(object):
 
     def positive_contact(self, day):
         '''Called when a person is notified of a positive contact with a
-        covid case. '''
+        covid case.
+        '''
 
-        #NOTE: Is this what we want to happen when a positive contact occurs?
         self.set_quarantine(day)
 
     def set_protocol_compliance(self, house_size):
@@ -669,6 +678,7 @@ class Person(object):
         -------
         self.protocol_compliance: :obj:`float`
         '''
+
         if self.protocol_compliance is None: #If no protocol compliance score is defined
             self.protocol_compliance = self.sim_obj.goodness
 
@@ -690,7 +700,7 @@ class Person(object):
         Parameters
         -------
         lockdown_level: bool
-            Paramter to check if the lockdown is on (True)
+            Paramter to check if the lockdown is on (True).
         old_lockdown_mandate: bool
             Paramter to check what the lockdown was the day before the current one.
 
@@ -698,6 +708,7 @@ class Person(object):
         -------
         self.protocol_compliance: :obj:`float`
         '''
+
         if self.protocol_compliance is None: #If no protocol compliance it is defined
             self.protocol_compliance =  self.sim_obj.protocol_compliance
 
@@ -730,6 +741,7 @@ class Person(object):
         -------
         self.days_in_lockdown: :obj:`int`
         '''
+
         if lockdown_level or self.quarantined:
             self.days_in_lockdown += 1
         elif self.days_in_lockdown != 0:

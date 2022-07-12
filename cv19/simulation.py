@@ -59,12 +59,9 @@ class simulation():
         An array to track the time taken to run each day of the simulation.
     has_run : bool
         A variable indicating if this object has run a simulaiton yet.
-
     '''
 
     def __init__(self, config_file, config_dir="", verbose=False):
-
-
         ''' __init__ method docstring.
 
         Parameters
@@ -78,7 +75,6 @@ class simulation():
             A variable indicating whether to print updates with simulation information while running.
         '''
 
-
         self.config_dir = config_dir
         self.load_general_parameters(config_file)
         self.load_disease_parameters(self.disease_config_file)
@@ -91,28 +87,28 @@ class simulation():
 
         # Arrays to store the values during the simulation
         self.track_new_infected = np.zeros(self.nDays, dtype=int) # new infections
-        self.track_infected = np.zeros(self.nDays, dtype=int)     # currently infected
-        self.track_susceptible = np.zeros(self.nDays, dtype=int)  # never been exposed
-        self.track_recovered = np.zeros(self.nDays, dtype=int)    # total recovered
-        self.track_dead = np.zeros(self.nDays, dtype=int)         # total deaths
+        self.track_infected = np.zeros(self.nDays, dtype=int) # currently infected
+        self.track_susceptible = np.zeros(self.nDays, dtype=int) # never been exposed
+        self.track_recovered = np.zeros(self.nDays, dtype=int) # total recovered
+        self.track_dead = np.zeros(self.nDays, dtype=int) # total deaths
         self.track_hospitalized = np.zeros(self.nDays, dtype=int) # total hospitalizations
-        self.track_ICU = np.zeros(self.nDays, dtype=int)          # total ICU
-        self.track_quarantined = np.zeros(self.nDays, dtype=int)  # population currently in quarantine
-        self.track_new_quarantined = np.zeros(self.nDays, dtype=int)
+        self.track_ICU = np.zeros(self.nDays, dtype=int) # total ICU
+        self.track_quarantined = np.zeros(self.nDays, dtype=int) # population currently in quarantine
+        self.track_new_quarantined = np.zeros(self.nDays, dtype=int) # newly quarantined that day
         self.track_tested = np.zeros(self.nDays, dtype=int)       # total tested individuals
         self.track_new_tested = np.zeros(self.nDays, dtype=int)   # new tested per day
         self.track_testing_wait_list = np.zeros(self.nDays, dtype=int) # counts the number of people waiting for tests each day
-        self.track_inf_students = np.zeros(self.nDays, dtype=int)
-        self.track_masks = np.zeros(self.nDays, dtype=bool)
-        self.track_lockdown = np.zeros(self.nDays, dtype=bool)
-        self.track_testing = np.zeros(self.nDays, dtype=bool)
+        self.track_inf_students = np.zeros(self.nDays, dtype=int) # total infected students
+        self.track_masks = np.zeros(self.nDays, dtype=bool) # tracks masking mandates
+        self.track_lockdown = np.zeros(self.nDays, dtype=bool) # tracks lockdown mandates
+        self.track_testing = np.zeros(self.nDays, dtype=bool) # tracks testing mandates
         self.track_time = np.zeros(self.nDays, dtype=float) # time elapsed (in seconds) since start of simulation
         self.track_R0 = np.zeros(self.nDays, dtype=float) # daily R0
         self.track_R_eff = np.zeros(self.nDays, dtype=float) # daily effective R0
         self.track_HIT = np.zeros(self.nDays, dtype=float) # daily herd immunity threshold
-        self.track_vaccinated = np.zeros(self.nDays, dtype=int)
-        self.track_gamma = np.zeros(self.nDays, dtype=float)
-        self.track_beta = np.zeros(self.nDays, dtype=float)
+        self.track_vaccinated = np.zeros(self.nDays, dtype=int) # total vaccinated
+        self.track_gamma = np.zeros(self.nDays, dtype=float) # daily gamma value
+        self.track_beta = np.zeros(self.nDays, dtype=float) # daily beta value
         self.track_n_interactions = np.zeros(self.nDays, dtype=int) # Daily number of interactions
 
         self.has_run = False  # Indicates if the sim has run yet
@@ -197,6 +193,7 @@ class simulation():
         ''' Method that links the policy, population, and interaction sites class objects with
         the simulation class (serves as pointer variables).
         '''
+
         # Initalize the policy class
         self.policy = Policy(self)
 
@@ -215,6 +212,7 @@ class simulation():
         on certain files. For example, local modifications to the notebook do not
         matter, whereas any modifications to the main classes could.
         '''
+
         # By default, set the code identifier to None.
         self.code_id = None
 
@@ -274,6 +272,7 @@ class simulation():
             Variable to indicate whether the code should return an error if same object is
             run multiple times.
         '''
+
         # Check whether the simulation has already been run.
         if fail_on_rerun:
             information = ("When running again, previous results will be overwritten. "
@@ -296,7 +295,7 @@ class simulation():
         # Loop over the number of days
         for day in range(self.nDays):
 
-            ############### TRACKING STUFF ###############
+            ############### UPDATE TRACKING ###############
 
             #Count all the different states of people
             self.track_infected[day] = self.pop.count_infected()
@@ -332,7 +331,7 @@ class simulation():
 
                 self.calculate_SIR_metrics(day)
 
-            ############### POLICY STUFF ###############
+            ############### UPDATE POLICY ###############
             mask_mandate = self.policy.update_mask_mandate(day=day)
             if mask_mandate != old_mask_mandate and self.verbose:
                 print(f"Day: {day}, Mask Mandate: {mask_mandate}")
@@ -364,7 +363,7 @@ class simulation():
                 student_default_virus_code = self.variant_codes[self.student_default_virus_type]
                 self.pop.infect_incoming_students(indices=indices, day=day, virus_type=student_default_virus_code)
 
-            ############### VISITOR STUFF ###############
+            ############### UPDATE VISITORS ###############
             #add a random number of visitors to the population
             num_vis = np.random.choice(a=self.N_VIS_OPTION, p=self.N_VIS_PROB)
             visitors_ind = [x for x in range(self.nPop, self.nPop+num_vis-1)]
@@ -378,7 +377,7 @@ class simulation():
                                  case_severity='Mild', has_mask=True, virus_type="alpha")
                 self.pop.population.append(visitor)
 
-            ############### INTERACTION SITES STUFF ###############
+            ############### UPDATE INTERACTION SITES ###############
             will_visit_B = self.inter_sites.will_visit_site(self.inter_sites.get_grade_B_sites(), self.will_go_prob["B"])
             self.inter_sites.site_interaction(will_visit_B, day, personal=False, grade_code="B")
             if not lockdown:
@@ -537,6 +536,7 @@ class simulation():
         self.has_run : bool
             Whether or not the simulation has been run.
         '''
+
         if self.has_run == check:
             return self.has_run
 
@@ -656,6 +656,7 @@ class simulation():
         returnDict : dict of `np.array`
             A dictionary holding all of the tracking arrays with the raw simulation results.
         '''
+
         self.check_has_run(check=True,
                            information="Cannot return zero-initialized arrays.",
                            fail=True)
