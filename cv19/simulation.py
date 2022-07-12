@@ -327,7 +327,7 @@ class simulation():
                 new_recovered = self.track_recovered[day] - self.track_recovered[day-1]
                 new_dead = self.track_dead[day] - self.track_dead[day-1]
                 self.track_delta_infected[day] = self.track_infected[day]-self.track_infected[day-1]
-                self.track_new_infected[day] = self.track_delta_infected[day]+new_recovered+new_dead
+                self.track_new_infected[day] = self.inter_sites.daily_new_infections
                 self.track_new_tested[day] = self.track_tested[day] - self.track_tested[day-1]
 
                 self.calculate_SIR_metrics(day)
@@ -353,9 +353,6 @@ class simulation():
                 print(f"Day: {day}, Uni Mandate: {students_go}")
             old_student_mandate = students_go
 
-            # Remove dead agents from site attendence
-            self.inter_sites.remove_dead()
-
             #infect random students on the day they come in
             if self.inter_sites.students_on and day == self.policy.student_day_trigger:
                 infStudents = np.random.randint(self.inf_students_lower, self.inf_students_upper)
@@ -379,6 +376,7 @@ class simulation():
                 self.pop.population.append(visitor)
 
             ############### INTERACTION SITES STUFF ###############
+            self.inter_sites.daily_reset()
             will_visit_B = self.inter_sites.will_visit_site(self.inter_sites.get_grade_B_sites(), self.will_go_prob["B"])
             self.inter_sites.site_interaction(will_visit_B, day, personal=False)
             if not lockdown:
