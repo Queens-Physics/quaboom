@@ -715,6 +715,7 @@ class Population:
         day : int
             The day value that this function is being called on in the encompassing simulation class.
         '''
+
         for i in self.get_quarantined():
             # Check their status
             if self.population[i].leave_quarantine(day):
