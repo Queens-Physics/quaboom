@@ -23,7 +23,6 @@ class Policy:
         ----------
         sim_obj : :obj:`simulation.simulation`
             The encompassing simulation object hosting the simulation.
-
         '''
 
         self.sim_obj = sim_obj
@@ -37,8 +36,8 @@ class Policy:
         Sets all objects in the "policy_data" dictionary key as self
         attributes of the policy class. No paramteres are passed, as
         the simulation class is set as an attribute.
-
         '''
+
         # Loop through keys
         attributes = self.sim_obj.parameters["policy_data"].keys()
 
@@ -62,8 +61,8 @@ class Policy:
         day : int
             The day value that this function is being called on in the encompassing simulation class.
             Used to evaluate whether the simulation has passed the day trigger.
-
         '''
+
         # Change the policy based on conditions
         if self.mask_day_trigger is not None and day >= self.mask_day_trigger:
             mask_mandate = True
@@ -105,7 +104,6 @@ class Policy:
         day : int
             The day value that this function is being called on in the encompassing simulation class.
             Used to evaluate whether the simulation has passed the day trigger.
-
         '''
 
         # Change the policy based on conditions
@@ -149,7 +147,6 @@ class Policy:
         day : int
             The day value that this function is being called on in the encompassing simulation class.
             Used to evaluate whether the simulation has passed the day trigger.
-
         '''
 
         if self.testing_day_trigger is not None and day >= self.testing_day_trigger:
@@ -194,7 +191,7 @@ class Policy:
         '''Method to update whether students are added to the simulation.
 
         This funciton evaluates whether students should be added based on
-        `studnet_day_trigger`.
+        `student_day_trigger`.
 
         If the current day is greater than `student_day_trigger`, students
         will be added to the simulation.
@@ -204,7 +201,6 @@ class Policy:
         day : int
             The day value that this function is being called on in the encompassing simulation class.
             Used to evaluate whether the simulation has passed the day trigger.
-
         '''
 
         # Change the policy based on conditions
