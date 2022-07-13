@@ -1,5 +1,5 @@
-from random import random, sample
 import tomli
+from random import random, sample
 
 import numpy as np
 
@@ -11,12 +11,12 @@ NULL_ID = -1 # This value means that the person index at this location is not su
 
 class Population:
     '''Creates a population of people based on the total population
-     uses and age distrubution to weight the assignment of ages
+     uses and age distrubution to weight the assignment of ages.
 
-     suscept list has negative values for infected, and positive indicies for susept
-     infected list has negative values for healthy, and positive indicies for infected
-     recovered list has negative values for not recovered, and postitive indicies for
-     recovered
+     Susceptible list has negative values for infected, and positive indicies for suseptible.
+     Infected list has negative values for healthy, and positive indicies for infected.
+     Recovered list has negative values for not recovered, and postitive indicies for
+     recovered.
      '''
 
     def __init__(self, sim_obj):
@@ -297,7 +297,7 @@ class Population:
         self.house_options = constants.HOUSE_OPTIONS
         self.isolation_options = constants.ISOLATION_OPTIONS
 
-        # isolation #
+        # Isolation #
         self.isolation_weights = np.ones(len(self.isolation_options))
         # Normalize the probability
         self.isolation_weights /= float(sum(self.isolation_weights))  #this is the one we don't have data on yet
@@ -307,11 +307,11 @@ class Population:
         self.age_weights = np.array([disease_params['age_weights'][age_range]
                                      for age_range in self.age_options])
 
-        # job #
+        # Job #
         self.job_weights = np.array([disease_params['job_weights'][job_type]
                                      for job_type in self.job_options])
 
-        # house #
+        # House #
         self.house_weights = np.array([disease_params['house_weights'][house_size]
                                        for house_size in self.house_options])
 
@@ -337,7 +337,7 @@ class Population:
         return self.population
 
     def get_student_indices(self):
-        '''Method to retrieve a list of the student indices
+        '''Method to retrieve a list of the student indices.
 
         Returns
         -------
@@ -346,7 +346,7 @@ class Population:
         return self.student_indices[self.student_indices != NULL_ID]
 
     def get_student_pop_size(self):
-        '''Method to retrieve the number of students
+        '''Method to retrieve the number of students.
 
         Returns
         -------
@@ -355,7 +355,8 @@ class Population:
         return self.nStudents
 
     def remove_visitors(self, indices):
-        '''Method to remove visitors from the simulation.'''
+        '''Method to remove visitors from the simulation.
+        '''
         for i in indices:
             np.delete(self.population, i)
 
@@ -427,12 +428,12 @@ class Population:
 
         Returns
         -------
-        self.res_houses: :obj:`np.array` of *something* ? not sure yet, this is a work in progress
+        self.res_houses: :obj:`np.array` of :obj:`int`
         '''
         return self.res_houses[self.res_houses != NULL_ID]
 
     def get_res_size(self):
-        '''Method to retrieve the number of students in residence
+        '''Method to retrieve the number of students in residence.
 
         Returns
         -------
@@ -565,6 +566,7 @@ class Population:
         -------
         didWork: :obj:`int`
         '''
+
         # Convert to virus code if virus type is a string
         if isinstance(virus_type, str):
             virus_type = self.virus_codes[virus_type]
@@ -596,6 +598,7 @@ class Population:
         : :obj:`bool`
             True to infect the student.
         '''
+
         for i in indices:
             daysAgo = np.random.randint(13)
             self.infect(index=i, day=day-daysAgo, virus_type=virus_type)
@@ -614,6 +617,7 @@ class Population:
         : :obj:`bool`
             True if the value at the index in the infected list was changed, False if it was not changed.
         '''
+
         if self.infected[index] == index or self.susceptible[index] == NULL_ID or not self.population[index].is_infected():
             # Already infected, or cant be infected
             return False
@@ -635,6 +639,7 @@ class Population:
         -------
         didWork: :obj:`int`
         '''
+
         didWork = self.population[index].check_cured(day)
         if didWork:
             self.infected[index] = NULL_ID
@@ -654,6 +659,7 @@ class Population:
         : :obj:`bool`
             True if the value at the index in the cured list was changed, False if it was not changed.
         '''
+
         if self.recovered[index] == index or not self.population[index].is_recovered():
             # Already recovered in pop obj or person obj is not actually recovered
             return False
@@ -678,6 +684,7 @@ class Population:
         -------
         didWork: :obj:`bool`
         '''
+
         didWork = self.population[index].check_dead(day)
         if didWork:
             self.infected[index] = NULL_ID
@@ -698,6 +705,7 @@ class Population:
         : :obj:`bool`
             True if the value at the index in the dead list was changed, False if it was not changed.
         '''
+
         if self.dead[index] == index or not self.population[index].is_dead():
             return False
         self.infected[index] = NULL_ID
@@ -709,13 +717,14 @@ class Population:
         return True
 
     def update_quarantine(self, day):
-        '''Method to release everyone who has done their quarantine - DOES NOT ADD NEW PPL TO LIST
+        '''Method to release everyone who has done their quarantine. This does not add new people to the list.
 
         Parameters
         ----------
         day : int
             The day value that this function is being called on in the encompassing simulation class.
         '''
+
         for i in self.get_quarantined():
             # Check their status
             if self.population[i].leave_quarantine(day):
@@ -740,18 +749,21 @@ class Population:
         return self.test_sum
 
     def random_symptomatic(self):
-        '''Method that causes a random sample of people to develop cold like symptoms.'''
+        '''Method that causes a random sample of people to develop cold like symptoms.
+        '''
+
         for person in self.population:
             person.not_infected_symptoms()
 
     def update_symptomatic(self, day):
-        '''Method to add people to the testing waitlist based on their symtoms.
+        '''Method to add people to the testing waitlist based on their symptoms.
 
         Parameters
         ----------
         day: int
             The current day the simulation is on.
         '''
+
         #updates everyone's symptoms
         for i in range (len(self.infected)):
             if self.population[i].check_symptoms(day):
@@ -783,8 +795,9 @@ class Population:
         tests_per_day: int
             Paramter gives the number of tests run.
         day: int
-            The day the testing is being done on
+            The day the testing is being done on.
         '''
+
         # if less people are in the list than testing capacity test everyone in the list
         if len(self.testing) < tests_per_day:
             tests_per_day = len(self.testing)
@@ -831,13 +844,14 @@ class Population:
         return np.count_nonzero(self.vaccinated != NULL_ID)
 
     def update_vaccinated(self, day):
-        '''Method to add people to the list of vaccinated people
+        '''Method to add people to the list of vaccinated people.
 
         Parameters
         ----------
         day : int
             The day the testing is being done on.
         '''
+
         non_vaccinated = np.array([index for index in range(self.nPop)
                            if not self.population[index].is_vaccinated()])
 
