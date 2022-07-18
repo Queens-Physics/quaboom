@@ -61,7 +61,7 @@ class Interaction_Sites:
         # Set attributes from config file
         self.load_attributes_from_sim_obj(sim_obj)
 
-        self.daily_interactions = {"HOUSE_GENERAL": np.zeros(self.nDays), 
+        self.daily_interactions = {"HOUSE_GENERAL": np.zeros(self.nDays),
                                    "HOUSE_STUDENT": np.zeros(self.nDays)}
 
         # Generates a list of people that go to different grade X sites
