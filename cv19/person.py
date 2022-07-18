@@ -676,20 +676,21 @@ class Person(object):
         -------
         self.protocol_compliance: :obj:`float`
         '''
+        if (self.sim_obj.protocol_compliance_on):
+            if self.protocol_compliance is None: #If no protocol compliance score is defined
+                self.protocol_compliance = self.sim_obj.goodness
 
-        if self.protocol_compliance is None: #If no protocol compliance score is defined
-            self.protocol_compliance = self.sim_obj.goodness
+            if house_size > len(self.sim_obj.protocol_compliance_house_prob): #Sets the house size to the largest house size probability if the house size is larger than that number
+                house_size = len(self.sim_obj.protocol_compliance_house_prob)
+            if random() < self.sim_obj.protocol_compliance_house_prob[house_size - 1]:
+                self.protocol_compliance *= self.sim_obj.protocol_compliance_house_reduction[house_size - 1] # changes the persons protocol compliance based on house size
 
-        if house_size > len(self.sim_obj.protocol_compliance_house_prob): #Sets the house size to the largest house size probability if the house size is larger than that number
-            house_size = len(self.sim_obj.protocol_compliance_house_prob)
-        if random() < self.sim_obj.protocol_compliance_house_prob[house_size - 1]:
-            self.protocol_compliance *= self.sim_obj.protocol_compliance_house_reduction[house_size - 1] # changes the persons protocol compliance based on house size
+            if random() < self.sim_obj.protocol_compliance_age_prob[self.age]:
+                self.protocol_compliance *= self.sim_obj.protocol_compliance_age_reduction[self.age]
 
-        if random() < self.sim_obj.protocol_compliance_age_prob[self.age]:
-            self.protocol_compliance *= self.sim_obj.protocol_compliance_age_reduction[self.age]
-
-        if random() < self.sim_obj.protocol_compliance_case_severity_prob[self.case_severity]:
-            self.protocol_compliance *= self.sim_obj.protocol_compliance_case_severity_reduction[self.case_severity] #changes protocol compliance based on how severity of a potential case
+            if random() < self.sim_obj.protocol_compliance_case_severity_prob[self.case_severity]:
+                self.protocol_compliance *= self.sim_obj.protocol_compliance_case_severity_reduction[self.case_severity] #changes protocol compliance based on how severity of a potential case
+        else: self.protocol_compliance = 1
         return self.protocol_compliance
 
     def update_protocol_compliance(self, lockdown_level, old_lockdown_mandate):
@@ -706,20 +707,20 @@ class Person(object):
         -------
         self.protocol_compliance: :obj:`float`
         '''
+        if (self.sim_obj.protocol_compliance_on):
+            if self.protocol_compliance is None: #If no protocol compliance it is defined
+                self.protocol_compliance =  self.sim_obj.protocol_compliance
 
-        if self.protocol_compliance is None: #If no protocol compliance it is defined
-            self.protocol_compliance =  self.sim_obj.protocol_compliance
+            if self.days_in_lockdown > self.sim_obj.protocol_compliance_lockdown_length_threshold and random() < self.sim_obj.protocol_compliance_lockdown_prob: #as the lockdown length increases decrease the protocol compliance
+                self.protocol_compliance *= self.sim_obj.protocol_compliance_lockdown_length_reduction
 
-        if self.days_in_lockdown > self.sim_obj.protocol_compliance_lockdown_length_threshold and random() < self.sim_obj.protocol_compliance_lockdown_prob: #as the lockdown length increases decrease the protocol compliance
-            self.protocol_compliance *= self.sim_obj.protocol_compliance_lockdown_length_reduction
-
-        if lockdown_level != old_lockdown_mandate:
+            if lockdown_level != old_lockdown_mandate:
             # when the lockdown starts increase the protocol compliance of a person
-            if lockdown_level and random() < self.sim_obj.protocol_compliance_lockdown_prob:
-                self.protocol_compliance *= self.sim_obj.protocol_compliance_lockdown_reduction
+                if lockdown_level and random() < self.sim_obj.protocol_compliance_lockdown_prob:
+                    self.protocol_compliance *= self.sim_obj.protocol_compliance_lockdown_reduction
             # when the lockdown ends decrease the protocol compliance of a person
-            elif not lockdown_level and random() < self.sim_obj.protocol_compliance_lockdown_prob:
-                self.protocol_compliance /= self.sim_obj.protocol_compliance_lockdown_reduction
+                elif not lockdown_level and random() < self.sim_obj.protocol_compliance_lockdown_prob:
+                    self.protocol_compliance /= self.sim_obj.protocol_compliance_lockdown_reduction
 
         return self.protocol_compliance
 
