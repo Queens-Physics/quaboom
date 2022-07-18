@@ -61,7 +61,8 @@ class Interaction_Sites:
         # Set attributes from config file
         self.load_attributes_from_sim_obj(sim_obj)
 
-        self.daily_interactions = {"HOME": np.zeros(self.nDays), "STUDENT_HOME": np.zeros(self.nDays)}
+        self.daily_interactions = {"HOUSE_GENERAL": np.zeros(self.nDays), 
+                                   "HOUSE_STUDENT": np.zeros(self.nDays)}
 
         # Generates a list of people that go to different grade X sites
         # len(grade_X_sites) is how many sites there are; len(grade_X_sites[i]) is how many people go to that site
@@ -579,7 +580,7 @@ class Interaction_Sites:
                             raise ValueError("House infection has incorrect virus type.")
                         self.pop.infect(index=housemembers[person].get_index(), day=day, virus_type=virus_id)
 
-        self.daily_interactions["HOME"][day] = total_house_interactions
+        self.daily_interactions["HOUSE_GENERAL"][day] = total_house_interactions
 
 
     def student_house_interact(self, day):
@@ -627,7 +628,7 @@ class Interaction_Sites:
                             raise ValueError("House infection has incorrect virus type.")
                         self.pop.infect(index=housemembers[person].get_index(), day=day, virus_type=virus_id)
 
-        self.daily_interactions["STUDENT_HOME"][day] = total_house_interactions
+        self.daily_interactions["HOUSE_STUDENT"][day] = total_house_interactions
 
     def testing_site(self, tests_per_day, day):
         '''Method to update status of symptoms and run the testing sites code.
