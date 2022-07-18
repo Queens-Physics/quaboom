@@ -676,7 +676,7 @@ class Person(object):
         -------
         self.protocol_compliance: :obj:`float`
         '''
-        if (self.sim_obj.protocol_compliance_on):
+        if self.sim_obj.protocol_compliance_on:
             if self.protocol_compliance is None: #If no protocol compliance score is defined
                 self.protocol_compliance = self.sim_obj.goodness
 
@@ -707,7 +707,7 @@ class Person(object):
         -------
         self.protocol_compliance: :obj:`float`
         '''
-        if (self.sim_obj.protocol_compliance_on):
+        if self.sim_obj.protocol_compliance_on:
             if self.protocol_compliance is None: #If no protocol compliance it is defined
                 self.protocol_compliance =  self.sim_obj.protocol_compliance
 
