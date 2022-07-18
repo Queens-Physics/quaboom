@@ -204,6 +204,8 @@ class Person(object):
 
         self.quarantined_day = day
         self.quarantined = True
+        self.sim_obj.pop.quarantined[self.index] = self.index
+
         return self.quarantined
 
     def leave_quarantine(self, day):
@@ -456,9 +458,7 @@ class Person(object):
             if self.case_severity != "Mild":
                 # if their symtoms are not mild, quarantine if they're infected
                 # assume people in the hospital aren't spreading it either
-                self.quarantined_day = day
-                self.quarantined = True
-                self.sim_obj.pop.quarantined[self.index] = self.index
+                self.set_quarantine(day)
 
                 return True
             return False
