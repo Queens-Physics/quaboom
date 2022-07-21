@@ -560,7 +560,7 @@ class simulation():
              plot_tested=True, plot_quarantined=True, plot_new_tests=True, plot_new_quarantined=False, plot_masks=True,
              plot_hospitalized=True, plot_ICU=True, plot_lockdown=True, plot_testing=True, plot_students=True, plot_R0=False,
              plot_R_eff=False, plot_HIT=False, plot_gamma=False, plot_beta=False, plot_vaccinated=True, plot_virus_types=None,
-             plot_n_interactions=None, log=False):
+             plot_n_interactions=False, log=False):
 
         ''' Method used to plot simulation results.
 
@@ -573,7 +573,8 @@ class simulation():
             Takes in a single variable for each tracking array held in the simulation class object. The
             variable is of name plot_<tracked value name>, for example plot_hospitalized. Setting this
             parameter to `True` will plot the array, and `False` will not. An exception to this is when
-            plotting n_interactions, which requires a list of codes for which sites to plot for.
+            plotting virus_types and n_interactions, which should be tuples or lists of the
+            appropriate keys for those variables.
         log : bool
             Indicate whether to plot with a log scale on the y-axis.
         '''
@@ -622,7 +623,7 @@ class simulation():
             for key in plot_virus_types:
                 if plot_virus_types[key]:
                     plt.plot(days, self.track_virus_types[key], label=str(key))
-        if plot_n_interactions is not None:
+        if plot_n_interactions:
             for item in plot_n_interactions:
                 if item in self.inter_sites.daily_interactions:
                     plt.plot(days, self.inter_sites.daily_interactions[item], label=f"Total Interactions: {item}")
