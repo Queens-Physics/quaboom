@@ -86,11 +86,12 @@ class simulation():
         self.set_code_version() # Set the version of the code being used to run simulation.
 
         # Arrays to store the values during the simulation
-        self.track_new_infected = np.zeros(self.nDays, dtype=int) # new infections
-        self.track_infected = np.zeros(self.nDays, dtype=int) # currently infected
-        self.track_susceptible = np.zeros(self.nDays, dtype=int) # never been exposed
-        self.track_recovered = np.zeros(self.nDays, dtype=int) # total recovered
-        self.track_dead = np.zeros(self.nDays, dtype=int) # total deaths
+        self.track_new_infected = np.zeros(self.nDays, dtype=int) # new infections (always > 0)
+        self.track_delta_infected = np.zeros(self.nDays, dtype=int)   # change in total infections
+        self.track_infected = np.zeros(self.nDays, dtype=int)     # currently infected
+        self.track_susceptible = np.zeros(self.nDays, dtype=int)  # never been exposed
+        self.track_recovered = np.zeros(self.nDays, dtype=int)    # total recovered
+        self.track_dead = np.zeros(self.nDays, dtype=int)         # total deaths
         self.track_hospitalized = np.zeros(self.nDays, dtype=int) # total hospitalizations
         self.track_ICU = np.zeros(self.nDays, dtype=int) # total ICU
         self.track_quarantined = np.zeros(self.nDays, dtype=int) # population currently in quarantine
@@ -321,12 +322,10 @@ class simulation():
             self.track_vaccinated[day] = self.pop.count_vaccinated()
 
             self.new_tests = 0
-            new_recovered = 0
 
             if day != 0:
-                new_recovered = self.track_recovered[day] - self.track_recovered[day-1]
-                new_dead = self.track_dead[day] - self.track_dead[day-1]
-                self.track_new_infected[day] = self.track_infected[day]-self.track_infected[day-1]+new_recovered+new_dead
+                self.track_delta_infected[day] = self.track_infected[day]-self.track_infected[day-1]
+                self.track_new_infected[day] = self.inter_sites.daily_new_infections
                 self.track_new_tested[day] = self.track_tested[day] - self.track_tested[day-1]
 
                 self.calculate_SIR_metrics(day)
@@ -352,9 +351,6 @@ class simulation():
                 print(f"Day: {day}, Uni Mandate: {students_go}")
             old_student_mandate = students_go
 
-            # Remove dead agents from site attendence
-            self.inter_sites.remove_dead()
-
             #infect random students on the day they come in
             if self.inter_sites.students_on and day == self.policy.student_day_trigger:
                 infStudents = np.random.randint(self.inf_students_lower, self.inf_students_upper)
@@ -378,6 +374,8 @@ class simulation():
                 self.pop.population.append(visitor)
 
             ############### UPDATE INTERACTION SITES ###############
+            self.inter_sites.daily_reset()
+
             will_visit_B = self.inter_sites.will_visit_site(self.inter_sites.get_grade_B_sites(), self.will_go_prob["B"])
             self.inter_sites.site_interaction(will_visit_B, day, personal=False, grade_code="B")
             if not lockdown:
@@ -496,7 +494,7 @@ class simulation():
 
         # Define variables in accordance with wikipedia page
         dR_dt = self.track_recovered[day] - self.track_recovered[day - 1]
-        dI_dt = self.track_new_infected[day]
+        dI_dt = self.track_delta_infected[day]
         S, I = self.track_susceptible[day], self.track_infected[day]
         N = self.parameters["simulation_data"]["nPop"]
 

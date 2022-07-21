@@ -81,6 +81,7 @@ class Interaction_Sites:
         self.food_sites = self.init_uni(grade_code="FOOD")
         self.res_sites = self.init_res(grade_code="RES")
 
+        self.daily_new_infections = 0
 
 
 
@@ -248,6 +249,24 @@ class Interaction_Sites:
         self.daily_interactions[grade_code] = np.zeros(self.nDays)
 
         return grade_sites
+
+    def daily_reset(self):
+        '''Method used to reset the interaction sites at the end of each day.
+
+        This function is currently used to clean up dead agents from interaction sites,
+        and to reset daily counts (such as the daily infection count).
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+        '''
+
+        self.remove_dead()
+        self.daily_new_infections = 0
 
     def calculate_num_sites(self, grade_code):
         '''Method used to calculate the number of sites for an interaction site grade.
@@ -447,7 +466,7 @@ class Interaction_Sites:
 
         #  Update people who get infected only at the end. Assuming if I get CV19 at work, I probably won't spread at the store that night.
         new_infection_indexes = np.where(new_infections)[0]
-#         new_infection_type_indexes = np.where(new_infection_type)[0]
+        self.daily_new_infections += len(new_infection_indexes)
         for new_infection in new_infection_indexes:
             self.pop.infect(index=new_infection, virus_type=new_infection_type[new_infection], day=day)
 
@@ -581,6 +600,7 @@ class Interaction_Sites:
                     caught_infection = random() < infection_chance
 
                     if caught_infection:
+                        self.daily_new_infections += 1
                         if virus_id is None:
                             raise ValueError("House infection has incorrect virus type.")
                         self.pop.infect(index=housemembers[person].get_index(), day=day, virus_type=virus_id)
@@ -629,6 +649,7 @@ class Interaction_Sites:
                     infection_chance = self.base_infection_spread_prob[virus_name] * self.house_infection_spread_factor
                     caught_infection = random() < infection_chance
                     if caught_infection:
+                        self.daily_new_infections += 1
                         if virus_id is None:
                             raise ValueError("House infection has incorrect virus type.")
                         self.pop.infect(index=housemembers[person].get_index(), day=day, virus_type=virus_id)
