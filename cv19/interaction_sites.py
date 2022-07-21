@@ -384,6 +384,11 @@ class Interaction_Sites:
         day : int
             The day value that this function is being called on in the encompassing simulation class.
             Used as input to the infect function after infections have been determined.
+        personal : bool
+            Used to indicate if the type of interaction at this site is personal, which relates to
+            contact tracing abilities.
+        grade_code : str
+            Code used to index the values to create this type of site from the config file.
         '''
 
         new_infections = np.zeros(self.pop.get_population_size(), dtype=bool)
