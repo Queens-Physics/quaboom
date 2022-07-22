@@ -330,6 +330,7 @@ class simulation():
                 self.calculate_SIR_metrics(day)
 
             # UPDATE POLICY
+
             mask_mandate = self.policy.update_mask_mandate(day=day)
             if mask_mandate != old_mask_mandate and self.verbose:
                 print(f"Day: {day}, Mask Mandate: {mask_mandate}")
@@ -359,6 +360,7 @@ class simulation():
                 self.pop.infect_incoming_students(indices=indices, day=day, virus_type=student_default_virus_code)
 
             # UPDATE VISITORS
+
             # add a random number of visitors to the population
             num_vis = np.random.choice(a=self.N_VIS_OPTION, p=self.N_VIS_PROB)
             visitors_ind = [x for x in range(self.nPop, self.nPop + num_vis - 1)]
@@ -373,6 +375,7 @@ class simulation():
                 self.pop.population.append(visitor)
 
             # UPDATE INTERACTION SITES
+
             self.inter_sites.daily_reset()
 
             will_visit_B = self.inter_sites.will_visit_site(self.inter_sites.get_grade_B_sites(), self.will_go_prob["B"])
@@ -401,6 +404,7 @@ class simulation():
             # Manage at home interactions
             self.inter_sites.house_interact(day)
             self.inter_sites.student_house_interact(day)
+
             # Residence interactions
             if self.inter_sites.students_on and students_go:
                 will_visit_res = self.inter_sites.will_visit_site(self.inter_sites.get_res_sites(), self.will_go_prob["RES"])
