@@ -24,7 +24,7 @@ class TestPerson(unittest.TestCase):
         This function is called every time the class is initalized, and creates a single
         simulation object that is used in all of the tests.
         '''
-        config_file = str(Path(Path(__file__).parent, "../config_files/main.json").resolve())
+        config_file = str(Path(Path(__file__).parent, "../config_files/main.toml").resolve())
         self.sim_obj = simulation(config_file)
 
     def tearDown(self):

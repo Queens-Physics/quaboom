@@ -204,6 +204,8 @@ class Person(object):
 
         self.quarantined_day = day
         self.quarantined = True
+        self.sim_obj.pop.quarantined[self.index] = self.index
+
         return self.quarantined
 
     def leave_quarantine(self, day):
@@ -447,6 +449,7 @@ class Person(object):
             days_since_quarantined = day - self.quarantined_day
             if days_since_quarantined >= self.sim_obj.quarantine_time:
                 self.quarantined = False
+                self.sim_obj.pop.quarantined[self.index] = -1 # Null value
                 return False
             return True
         else:  # if not self quarantined
@@ -455,8 +458,7 @@ class Person(object):
             if self.case_severity != "Mild":
                 # if their symtoms are not mild, quarantine if they're infected
                 # assume people in the hospital aren't spreading it either
-                self.quarantined_day = day
-                self.quarantined = True
+                self.set_quarantine(day)
 
                 return True
             return False
@@ -677,7 +679,7 @@ class Person(object):
         self.protocol_compliance: :obj:`float`
         '''
 
-        if self.protocol_compliance is None:  # If no protocol compliance score is defined
+        if not hasattr(self, "protocol_compliance"):  # If no protocol compliance score is defined
             self.protocol_compliance = self.sim_obj.goodness
 
         if house_size > len(self.sim_obj.protocol_compliance_house_prob):  # Sets the house size to the largest house size probability if the house size is larger than that number
@@ -708,7 +710,7 @@ class Person(object):
         '''
 
         # If no protocol compliance it is defined
-        if self.protocol_compliance is None:
+        if not hasattr(self, "protocol_compliance"):
             self.protocol_compliance = self.sim_obj.protocol_compliance
 
         # As the lockdown length increases, decrease the protocol compliance

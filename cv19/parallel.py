@@ -1,7 +1,7 @@
-import json
 import multiprocessing
 import pickle
 from pathlib import Path
+import tomli
 
 import numpy as np
 import pandas as pd
@@ -179,9 +179,9 @@ def tabular_mode(base_config_file, independent, dependent, num_runs=8, num_cores
     # Running through each scenario
     for i, values in enumerate(zip(*mesh)):
 
-        # Load the json file
-        with open(base_config_file, encoding='utf-8') as f:
-            temp_config = json.load(f)
+        # Load the TOML file
+        with open(base_config_file, 'rb') as f:
+            temp_config = tomli.load(f)
 
         config_dir = Path(base_config_file).parent
 
@@ -537,7 +537,7 @@ if __name__ == "__main__":
 
     # Tabular mode
     table = tabular_mode(
-        'config_files/main.json',
+        'config_files/main.toml',
         {
             "population_data.prob_has_mask": [0.25, 0.50, 0.75, 1.00]
         },
@@ -570,6 +570,6 @@ if __name__ == "__main__":
                           "lockdown_enforced",
                           "time_elapsed"]
 
-    confidence_interval('config_files/main.json', parameterstoplot=parameters_to_plot, confidence=0.9)
+    confidence_interval('config_files/main.toml', parameterstoplot=parameters_to_plot, confidence=0.9)
 
     input()
