@@ -449,7 +449,7 @@ class Person(object):
             days_since_quarantined = day - self.quarantined_day
             if days_since_quarantined >= self.sim_obj.quarantine_time:
                 self.quarantined = False
-                self.sim_obj.pop.quarantined[self.index] = -1 # Null value
+                self.sim_obj.pop.quarantined[self.index] = -1  # Null value
                 return False
             return True
         else:  # if not self quarantined

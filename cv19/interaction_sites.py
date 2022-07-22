@@ -287,7 +287,7 @@ class Interaction_Sites:
             return 0
         else:
             return self.site_num[grade_code] if grade_code in self.site_num else \
-              round(self.pop.get_population_size()/self.site_size[grade_code])
+                round(self.pop.get_population_size() / self.site_size[grade_code])
 
     def remove_dead(self):
         '''Method to remove dead agents from interaction site arrays.
@@ -605,7 +605,6 @@ class Interaction_Sites:
                         self.pop.infect(index=housemembers[person].get_index(), day=day, virus_type=virus_id)
 
         self.daily_interactions["HOUSE_GENERAL"][day] = total_house_interactions
-
 
     def student_house_interact(self, day):
         '''Method to manage interactions between members of the same student household.

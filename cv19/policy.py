@@ -150,7 +150,7 @@ class Policy:
 
         if hasattr(self, "testing_day_trigger") and day >= self.testing_day_trigger:
             testing = True
-        elif hasattr(self, "testing_trigger") and self.sim_obj.pop.count_quarantined() /self.prob_of_symptoms / self.sim_obj.pop.nPop > self.testing_trigger:
+        elif hasattr(self, "testing_trigger") and self.sim_obj.pop.count_quarantined() / self.prob_of_symptoms / self.sim_obj.pop.nPop > self.testing_trigger:
             testing = True
         else:
             testing = False
