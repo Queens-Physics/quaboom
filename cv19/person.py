@@ -679,7 +679,7 @@ class Person(object):
         self.protocol_compliance: :obj:`float`
         '''
 
-        if self.protocol_compliance is None: #If no protocol compliance score is defined
+        if not hasattr(self, "protocol_compliance"): #If no protocol compliance score is defined
             self.protocol_compliance = self.sim_obj.goodness
 
         if house_size > len(self.sim_obj.protocol_compliance_house_prob): #Sets the house size to the largest house size probability if the house size is larger than that number
@@ -709,7 +709,7 @@ class Person(object):
         self.protocol_compliance: :obj:`float`
         '''
 
-        if self.protocol_compliance is None: #If no protocol compliance it is defined
+        if not hasattr(self, "protocol_compliance"): #If no protocol compliance it is defined
             self.protocol_compliance =  self.sim_obj.protocol_compliance
 
         if self.days_in_lockdown > self.sim_obj.protocol_compliance_lockdown_length_threshold and random() < self.sim_obj.protocol_compliance_lockdown_prob: #as the lockdown length increases decrease the protocol compliance

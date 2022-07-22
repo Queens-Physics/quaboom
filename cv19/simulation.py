@@ -1,8 +1,8 @@
-import json
 import warnings
 import subprocess
 from timeit import default_timer as timer
 from pathlib import Path
+import tomli
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -19,7 +19,7 @@ class simulation():
     A class designed to host the actual monte-carlo simulation and to track the results.
 
     Holds all of the attributes outlined in the simulation_data section of the
-    main.json configuration file, in addition to the ones listed below.
+    main.toml configuration file, in addition to the ones listed below.
 
     Attributes
     ----------
@@ -127,8 +127,8 @@ class simulation():
         '''
 
         if isinstance(data_file, str):
-            with open(data_file, encoding='utf-8') as file:
-                self.parameters = json.load(file)
+            with open(data_file, 'rb') as file:
+                self.parameters = tomli.load(file)
 
             self.config_dir = Path(data_file).parent
 
@@ -167,8 +167,8 @@ class simulation():
 
         # If path is absolute, use it.
         if Path(filename).is_absolute():
-            with open(filename, encoding='utf-8') as file:
-                self.disease_parameters = json.load(file)
+            with open(filename, 'rb') as file:
+                self.disease_parameters = tomli.load(file)
 
         # Assume that the configuration filename is relative to path of main config.
         # If not set, assume relative to working directory.
@@ -176,8 +176,8 @@ class simulation():
         else:
             filepath = Path(self.config_dir, filename)
             try:
-                with open(filepath, encoding='utf-8') as file:
-                    self.disease_parameters = json.load(file)
+                with open(filepath, 'rb') as file:
+                    self.disease_parameters = tomli.load(file)
 
                 return
 
@@ -187,8 +187,8 @@ class simulation():
                                "Attempting read relative to CV19ROOT directory."))
 
                 filepath = Path(CV19ROOT, filename)
-                with open(filepath, encoding='utf-8') as file:
-                    self.disease_parameters = json.load(file)
+                with open(filepath, 'rb') as file:
+                    self.disease_parameters = tomli.load(file)
 
     def init_classes(self):
         ''' Method that links the policy, population, and interaction sites class objects with
