@@ -84,7 +84,7 @@ pip install autopep8
 Then, run autopep8, changing files in place:
 
 ```sh
-autopep8 --in-place --ignore=E501 cv19
+autopep8 --in-place --ignore=E501 cv19/*.py
 ```
 
 Note that it may not fix everything,
@@ -94,4 +94,5 @@ fix line length problems manually,
 either by moving comments around,
 changing variable names,
 or using continued indentation depending on the context.
-Many Pylint warnings will also not be fixed automatically.
+Many Pylint warnings will also not be fixed automatically
+by autopep8.
