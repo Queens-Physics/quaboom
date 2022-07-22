@@ -16,4 +16,5 @@ jobs:
       env:
         VALIDATE_ALL_CODEBASE: true
         VALIDATE_EDITORCONFIG: true
+        EDITORCONFIG_FILE_NAME: .ecrc
         DEFAULT_BRANCH: master
