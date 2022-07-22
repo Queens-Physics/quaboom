@@ -11,10 +11,16 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+
+    - name: Install dependencies
+      run: |
+        python3 -m pip install --upgrade pip
+        pip install editorconfig-checker==2.4.0
+
     - name: Lint other files with EditorConfig
-      uses: github/super-linter/slim@v4
-      env:
-        VALIDATE_ALL_CODEBASE: true
-        VALIDATE_EDITORCONFIG: true
-        EDITORCONFIG_FILE_NAME: .ecrc
-        DEFAULT_BRANCH: master
+      run: |
+        ec
