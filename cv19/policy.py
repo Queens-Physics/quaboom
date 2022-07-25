@@ -66,7 +66,7 @@ class Policy:
         # Change the policy based on conditions
         if hasattr(self, "mask_day_trigger") and day >= self.mask_day_trigger:
             mask_mandate = True
-        elif hasattr(self, "mask_trigger") and self.sim_obj.pop.count_infected()/self.prob_of_symptoms/self.sim_obj.nPop > self.mask_trigger:
+        elif hasattr(self, "mask_trigger") and self.sim_obj.pop.count_infected() / self.prob_of_symptoms / self.sim_obj.nPop > self.mask_trigger:
             mask_mandate = True
         else:
             mask_mandate = False
@@ -83,7 +83,6 @@ class Policy:
         self.mask_mandate : bool
         '''
         return self.mask_mandate
-
 
     def update_lockdown(self, day):
         '''Method to update the simulation's lockdown mandate based on trigger parameters.
@@ -111,9 +110,9 @@ class Policy:
             lockdown_mandate = True
         elif hasattr(self, "lockdown_on_day_trigger") and day >= self.lockdown_off_day_trigger:
             lockdown_mandate = False
-        elif hasattr(self, "lockdown_on_trigger") and self.sim_obj.pop.count_quarantined()/self.prob_of_symptoms/self.sim_obj.nPop > self.lockdown_on_trigger:
+        elif hasattr(self, "lockdown_on_trigger") and self.sim_obj.pop.count_quarantined() / self.prob_of_symptoms / self.sim_obj.nPop > self.lockdown_on_trigger:
             lockdown_mandate = True
-        elif hasattr(self, "lockdown_on_trigger") and self.sim_obj.pop.count_quarantined()/self.prob_of_symptoms/self.sim_obj.nPop <= self.lockdown_off_trigger:
+        elif hasattr(self, "lockdown_on_trigger") and self.sim_obj.pop.count_quarantined() / self.prob_of_symptoms / self.sim_obj.nPop <= self.lockdown_off_trigger:
             lockdown_mandate = False
         else:
             lockdown_mandate = False
@@ -151,7 +150,7 @@ class Policy:
 
         if hasattr(self, "testing_day_trigger") and day >= self.testing_day_trigger:
             testing = True
-        elif hasattr(self, "testing_trigger") and self.sim_obj.pop.count_quarantined()/self.prob_of_symptoms/self.sim_obj.pop.nPop > self.testing_trigger:
+        elif hasattr(self, "testing_trigger") and self.sim_obj.pop.count_quarantined() / self.prob_of_symptoms / self.sim_obj.pop.nPop > self.testing_trigger:
             testing = True
         else:
             testing = False
@@ -178,9 +177,9 @@ class Policy:
             The number of people on the testing waitlist for this day in the simulation.
         '''
 
-        tests =  (self.testing_rates[0]*self.sim_obj.pop.count_quarantined()
-                  + self.testing_rates[1]*self.sim_obj.pop.get_new_quarantined()
-                  + self.testing_rates[2]*wait_list) # defines the number of tests going to be run
+        tests = (self.testing_rates[0] * self.sim_obj.pop.count_quarantined()
+                 + self.testing_rates[1] * self.sim_obj.pop.get_new_quarantined()
+                 + self.testing_rates[2] * wait_list)  # defines the number of tests going to be run
         if not hasattr(self, "testing_baseline"):
             self.testing_baseline = 0
         elif tests < self.testing_baseline and wait_list > 0:

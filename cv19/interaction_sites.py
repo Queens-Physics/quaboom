@@ -9,6 +9,7 @@ from math import comb
 
 import numpy as np
 
+
 class Interaction_Sites:
     '''A class designed to host interactions between persons within specific locations.
 
@@ -83,8 +84,6 @@ class Interaction_Sites:
 
         self.daily_new_infections = 0
 
-
-
     def load_attributes_from_sim_obj(self, sim_obj):
         '''Method to load in attributes from the provided simulation class object.
 
@@ -108,7 +107,7 @@ class Interaction_Sites:
 
         # Get the virus type names
         self.variant_codes = sim_obj.variant_codes
-        self.variant_code_map = {v_id: v_name for v_name, v_id in self.variant_codes.items()} # virus ids
+        self.variant_code_map = {v_id: v_name for v_name, v_id in self.variant_codes.items()}  # virus ids
 
         # Set the actual objects now
         self.pop = sim_obj.pop
@@ -144,7 +143,7 @@ class Interaction_Sites:
 
         for person in self.pop.get_population():
             if students_interact or not (self.students_on and person.job == 'Student'):
-                #if students are meant to go to this site
+                # if students are meant to go to this site
                 # Assign people to this specific site
                 num_diff_sites = abs(round(np.random.normal(loyalty_mean, loyalty_std)))
                 num_diff_sites = num_diff_sites if num_diff_sites <= num_sites else num_sites
@@ -288,7 +287,7 @@ class Interaction_Sites:
             return 0
         else:
             return self.site_num[grade_code] if grade_code in self.site_num else \
-                   round(self.pop.get_population_size()/self.site_size[grade_code])
+                round(self.pop.get_population_size() / self.site_size[grade_code])
 
     def remove_dead(self):
         '''Method to remove dead agents from interaction site arrays.
@@ -383,7 +382,7 @@ class Interaction_Sites:
         person_site_choices = [np.random.choice(site_index_options[[person in site for site in site_array]])
                                for person in person_ids_will_go]
 
-        will_visit_grade = [person_ids_will_go[person_site_choices==i] for i in site_index_options]
+        will_visit_grade = [person_ids_will_go[person_site_choices == i] for i in site_index_options]
 
         return will_visit_grade
 
@@ -425,7 +424,7 @@ class Interaction_Sites:
             total_interactions_count += np.sum(num_interactions) // 2
 
             if len(infected_persons) == 0 or (len(infected_persons) + len(recovered_persons) == len(ppl_going)):
-                continue # No ppl to infect here or no one already infected
+                continue  # No ppl to infect here or no one already infected
 
             while np.sum(num_interactions > 0) > 1:
                 # grab the highest interactor
@@ -502,7 +501,7 @@ class Interaction_Sites:
         day_hours_scaler = 12
 
         # Generate a linaer distribution from
-        number_of_interactions = np.round(np.random.triangular(left=0, mode=0, right=site_day_pop/day_hours_scaler,
+        number_of_interactions = np.round(np.random.triangular(left=0, mode=0, right=site_day_pop / day_hours_scaler,
                                                                size=site_day_pop)).astype(int)
 
         return number_of_interactions
@@ -606,7 +605,6 @@ class Interaction_Sites:
                         self.pop.infect(index=housemembers[person].get_index(), day=day, virus_type=virus_id)
 
         self.daily_interactions["HOUSE_GENERAL"][day] = total_house_interactions
-
 
     def student_house_interact(self, day):
         '''Method to manage interactions between members of the same student household.

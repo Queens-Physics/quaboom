@@ -6,8 +6,10 @@ import numpy as np
 from .data import constants
 from .person import Person
 
-NULL_ID = -1 # This value means that the person index at this location is not susceptible/infected/dead/...
-             # All arrays are intialized to this (except healthy, as everyone is healthy)
+# This value means that the person index at this location is not susceptible/infected/dead/...
+# All arrays are intialized to this (except healthy, as everyone is healthy)
+NULL_ID = -1
+
 
 class Population:
     '''Creates a population of people based on the total population
@@ -35,15 +37,15 @@ class Population:
         self.set_demographic_parameters()
 
         self.nPop = sim_obj.nPop  # total population
-        self.v0 = sim_obj.v0 # initial vaccinated
+        self.v0 = sim_obj.v0  # initial vaccinated
 
         # Student parameter
-        self.nStudents = sim_obj.num_students # full capacity ~ 24k students
+        self.nStudents = sim_obj.num_students  # full capacity ~ 24k students
 
         self.population = [0] * self.nPop  # The list of all people
-        self.household = [0] * self.nPop # list of non-student houses (list that contains all lists of the people in the house)
-        self.students = [0] * self.nStudents # The list of only students
-        self.stud_houses = [0] * self.nStudents # list of student houses
+        self.household = [0] * self.nPop  # list of non-student houses (list that contains all lists of the people in the house)
+        self.students = [0] * self.nStudents  # The list of only students
+        self.stud_houses = [0] * self.nStudents  # list of student houses
         self.prob_of_test = self.prob_of_test
         self.prob_has_mask = self.prob_has_mask
         self.n_students_in_res = 0
@@ -53,14 +55,14 @@ class Population:
 
         houseIndex = 0
         totalHouse = 0
-        while totalHouse < self.nPop-self.nStudents:
+        while totalHouse < self.nPop - self.nStudents:
             houseSize = np.random.choice(a=self.house_options, p=self.house_weights)
             totalHouse += houseSize
             self.household[houseIndex] = houseSize
             houseIndex += 1
         # Trim the last house if there's too many people in it for the population
-        if totalHouse > self.nPop-self.nStudents:
-            self.household[houseIndex-1] -= totalHouse - (self.nPop-self.nStudents)
+        if totalHouse > self.nPop - self.nStudents:
+            self.household[houseIndex - 1] -= totalHouse - (self.nPop - self.nStudents)
         # Slice household list to the right size
         self.household = self.household[:houseIndex]
 
@@ -73,10 +75,10 @@ class Population:
             self.stud_houses[studHouseIndex] = studHouseSize
             studHouseIndex += 1
             if studHouseSize == 1:
-                count +=1
+                count += 1
         # Trim the last house if there's too many people in it for the population
         if studTotalHouse > self.nStudents:
-            self.stud_houses[studHouseIndex-1] -= studTotalHouse - (self.nStudents)
+            self.stud_houses[studHouseIndex - 1] -= studTotalHouse - (self.nStudents)
         # Slice student houses list to the right size
         self.stud_houses = self.stud_houses[:studHouseIndex]
 
@@ -103,18 +105,28 @@ class Population:
         houseIndex = 0
         houseSize = self.household[houseIndex]
 
-        for i in range(0, self.nPop-self.nStudents):
+        for i in range(0, self.nPop - self.nStudents):
             # check if the house size is 0 at the beginning
             if houseSize == 0:
                 houseIndex += 1
                 houseSize = self.household[houseIndex]
 
             # MAKE A PERSON
-            newPerson = Person(index=i, sim_obj=sim_obj, infected=False, recovered=False,
-                               dead=False, hospitalized=False, ICU=False,
-                               quarantined=False, quarantined_day=None,
-                               infected_day=None, recovered_day=None, death_day=None,
-                               others_infected=None, cure_days=None, recent_infections=None,
+            newPerson = Person(index=i,
+                               sim_obj=sim_obj,
+                               infected=False,
+                               recovered=False,
+                               dead=False,
+                               hospitalized=False,
+                               ICU=False,
+                               quarantined=False,
+                               quarantined_day=None,
+                               infected_day=None,
+                               recovered_day=None,
+                               death_day=None,
+                               others_infected=None,
+                               cure_days=None,
+                               recent_infections=None,
                                age=age_arr[i],
                                job=job_arr[i],
                                house_index=houseIndex,
@@ -136,44 +148,56 @@ class Population:
         self.house_ppl_i = [np.tile(-1, size) for size in self.household]
 
         # add people indices to the housing list
-        for i in range(0, self.nPop-self.nStudents):
+        for i in range(0, self.nPop - self.nStudents):
             housei = self.population[i].household
             where = np.where(self.house_ppl_i[housei] == -1)[0][0]
             self.house_ppl_i[housei][where] = i
 
-        ############### STUDENTS ###############
-        student_age = np.random.choice(a=['10-19', '20-29'], p=[0.5,0.5], size = self.nStudents) # students age ranges 10-19 and 20-29
+        # Students
+        student_age = np.random.choice(a=['10-19', '20-29'], p=[0.5, 0.5], size=self.nStudents)  # students age ranges 10-19 and 20-29
         student_case_severity_arr = np.empty(self.nStudents, dtype=object)
         for i, age in enumerate(student_age):
             try:
                 student_case_severity_arr[i] = np.random.choice(a=self.severity_options,
-                                                                p=[self.severity_params[age][key] for key in constants.SEVERITY_OPTIONS])
+                                                                p=[self.severity_params[age][key]
+                                                                   for key in constants.SEVERITY_OPTIONS])
             except KeyError as e:
                 raise ValueError((f"'{age}' is not a valid age range and has no associated case severity.")) from e
 
         self.student_indices = np.zeros(self.nPop, dtype=int) + NULL_ID
-        self.res_houses = np.zeros(len(self.stud_houses), dtype=int) + NULL_ID # student houses that are in residence will be nonzero
+        self.res_houses = np.zeros(len(self.stud_houses), dtype=int) + NULL_ID  # student houses that are in residence will be nonzero
 
         studHouseIndex = 0
         studHouseSize = self.stud_houses[studHouseIndex]
 
-        for i in range(self.nPop-self.nStudents, self.nPop):
+        for i in range(self.nPop - self.nStudents, self.nPop):
             # check if the house size is 0 at the beginning
             if studHouseSize == 0:
                 studHouseIndex += 1
                 studHouseSize = self.stud_houses[studHouseIndex]
 
-            newStudent = Person(index=i, sim_obj=sim_obj, infected=False, recovered=False,
-                                dead=False, hospitalized=False,ICU=False,quarantined=False,quarantined_day=None,
-                                infected_day=None, recovered_day=None, death_day=None,
-                                others_infected=None, cure_days=None, recent_infections=None,
-                                age=student_age[i-self.nPop+self.nStudents], #adjust for index inconsistency
+            newStudent = Person(index=i,
+                                sim_obj=sim_obj,
+                                infected=False,
+                                recovered=False,
+                                dead=False,
+                                hospitalized=False,
+                                ICU=False,
+                                quarantined=False,
+                                quarantined_day=None,
+                                infected_day=None,
+                                recovered_day=None,
+                                death_day=None,
+                                others_infected=None,
+                                cure_days=None,
+                                recent_infections=None,
+                                age=student_age[i - self.nPop + self.nStudents],  # adjust for index inconsistency
                                 job='Student',
                                 house_index=studHouseIndex,
                                 vaccinated=False,
                                 vaccine_type=vaccine_type_arr[i],
                                 isolation_tendencies=isolation_tend_arr[i],
-                                case_severity=student_case_severity_arr[i-self.nPop+self.nStudents], #adjust for index inconsistency
+                                case_severity=student_case_severity_arr[i - self.nPop + self.nStudents],  # adjust for index inconsistency
                                 mask_type=mask_type_arr[i],
                                 has_mask=has_mask_arr[i],
                                 virus_type=None)
@@ -190,19 +214,19 @@ class Population:
 
         # create the residence list
         # this is probably not the most efficient it could be
-        for house_size in range(1,3):
+        for house_size in range(1, 3):
             for i, stud_house_size in enumerate(self.stud_houses):
                 # If the student house only has 1 person, add it to the residence list
                 if stud_house_size == house_size:
-                    if self.n_students_in_res >= (sim_obj.max_num_res_students-1):
+                    if self.n_students_in_res >= (sim_obj.max_num_res_students - 1):
                         break
                     self.res_houses[i] = i
                     self.n_students_in_res += house_size
-            if self.n_students_in_res >= (sim_obj.max_num_res_students-1):
+            if self.n_students_in_res >= (sim_obj.max_num_res_students - 1):
                 break
 
         # Add the people indices to the list
-        for i in range(self.nPop-self.nStudents, self.nPop):
+        for i in range(self.nPop - self.nStudents, self.nPop):
             housei = self.population[i].household
             where = np.where(self.house_stud_i[housei] == -1)[0][0]
             self.house_stud_i[housei][where] = i
@@ -210,7 +234,7 @@ class Population:
         # Create person status arrays
         # A non-negative index indicates that they are the property,
         # NULL_ID (-1) indicates that they are /not/ the property.
-        self.susceptible = np.array(range(self.nPop), dtype=int)  #list of all susceptible individuals
+        self.susceptible = np.array(range(self.nPop), dtype=int)  # list of all susceptible individuals
         self.infected = np.zeros(self.nPop, dtype=int) + NULL_ID  # list of all infected people
         self.recovered = np.zeros(self.nPop, dtype=int) + NULL_ID  # list of recovered people
         self.dead = np.zeros(self.nPop, dtype=int) + NULL_ID  # list of dead people
@@ -218,9 +242,9 @@ class Population:
         self.knows_infected = np.zeros(self.nPop, dtype=int) + NULL_ID  # list of people with positive test and still infected
         self.hospitalized = np.zeros(self.nPop, dtype=int) + NULL_ID  # list of people hospitalized and in the ICU
         self.ICU = np.zeros(self.nPop, dtype=int) + NULL_ID  # list of people in the ICU
-        self.quarantined = np.zeros(self.nPop, dtype=int) + NULL_ID  #list of people who are currently in quarantine
-        self.virus_types = np.zeros(self.nPop, dtype=int) + NULL_ID #list of individuals with NULL_ID as virus type
-        self.vaccinated = np.zeros(self.nPop, dtype=int) + NULL_ID # list of people who have been vaccinated
+        self.quarantined = np.zeros(self.nPop, dtype=int) + NULL_ID  # list of people who are currently in quarantine
+        self.virus_types = np.zeros(self.nPop, dtype=int) + NULL_ID  # list of individuals with NULL_ID as virus type
+        self.vaccinated = np.zeros(self.nPop, dtype=int) + NULL_ID  # list of people who have been vaccinated
         self.testing = []  # list of people waiting to be others_infected
         self.test_sum = 0  # total number of tests that have been run
         self.quarantined_sum = 0  # total number of people in quarantine (created as the list was having indexing issues)
@@ -233,7 +257,7 @@ class Population:
             virus_code = sim_obj.variant_codes[virus_name]
             variant_infections = sim_obj.variants[virus_name]
 
-            for index_count in range(init_infect_count, init_infect_count+variant_infections):
+            for index_count in range(init_infect_count, init_infect_count + variant_infections):
                 i = total_indices[index_count]
                 self.population[i].infect(day=0, virus_type=virus_code)
                 self.infected[i] = i
@@ -300,7 +324,7 @@ class Population:
         # Isolation #
         self.isolation_weights = np.ones(len(self.isolation_options))
         # Normalize the probability
-        self.isolation_weights /= float(sum(self.isolation_weights))  #this is the one we don't have data on yet
+        self.isolation_weights /= float(sum(self.isolation_weights))  # this is the one we don't have data on yet
 
         # PULL DATA FROM THE TOML FILE #
         # age #
@@ -539,7 +563,7 @@ class Population:
         -------
         counts : :obj:`dict`
         '''
-        counts = {virus_type: np.count_nonzero(self.virus_types==virus_code)
+        counts = {virus_type: np.count_nonzero(self.virus_types == virus_code)
                   for virus_type, virus_code in self.variant_codes.items()}
         return counts
 
@@ -601,7 +625,7 @@ class Population:
 
         for i in indices:
             daysAgo = np.random.randint(13)
-            self.infect(index=i, day=day-daysAgo, virus_type=virus_type)
+            self.infect(index=i, day=day - daysAgo, virus_type=virus_type)
         return True
 
     def update_infected(self, index):
@@ -763,20 +787,18 @@ class Population:
         day: int
             The current day the simulation is on.
         '''
-
-        #updates everyone's symptoms
-        for i in range (len(self.infected)):
+        # updates everyone's symptoms
+        for i in range(len(self.infected)):
             if self.population[i].check_symptoms(day):
 
-                if i not in self.testing and self.have_been_tested[i] != 1: # if person is not already in testing function
-                    infected_person = self.population[i] #gets the infected person from the population list
+                if i not in self.testing and self.have_been_tested[i] != 1:  # if person is not already in testing function
+                    infected_person = self.population[i]  # gets the infected person from the population list
                     if (random() / self.population[i].get_protocol_compliance()) < self.prob_of_test:
                         if infected_person.show_symptoms and not infected_person.knows_infected:
-                            self.testing.append(i) #adds the person to the testing list
+                            self.testing.append(i)  # adds the person to the testing list
                             self.population[i].knows_infected = True
                     elif infected_person.check_test_day(day):
-                        self.have_been_tested[i] = 0 #remove them from the testing list (allows them to get retested if they get symptoms again)
-
+                        self.have_been_tested[i] = 0  # remove them from the testing list (allows them to get retested if they get symptoms again)
 
     def get_testing_wait_list(self):
         '''Method to return number of people waiting to be tested.
@@ -801,9 +823,9 @@ class Population:
         # if less people are in the list than testing capacity test everyone in the list
         if len(self.testing) < tests_per_day:
             tests_per_day = len(self.testing)
-        self.test_sum += tests_per_day # Add the daily tests to the total number of tests
+        self.test_sum += tests_per_day  # Add the daily tests to the total number of tests
 
-        self.new_quarantined_num = 0 # Reset number of newly quarantined
+        self.new_quarantined_num = 0  # Reset number of newly quarantined
         num_contacts_traced = 0
 
         for _ in range(tests_per_day):
@@ -853,7 +875,7 @@ class Population:
         '''
 
         non_vaccinated = np.array([index for index in range(self.nPop)
-                           if not self.population[index].is_vaccinated()])
+                                   if not self.population[index].is_vaccinated()])
 
         num_vacc = self.sim_obj.num_vaccinations
         num_to_vaccinate = num_vacc if len(non_vaccinated) >= num_vacc else len(non_vaccinated)
