@@ -5,7 +5,7 @@
   "IgnoreDefaults": false,
   "SpacesAftertabs": false,
   "NoColor": false,
-  "Exclude": ["cv19", "data", "SIR_models", "old_sim_files"],
+  "Exclude": ["SIR_models", "old_sim_files", "\\.csv$", "\\.tsv$", "\\.py$"],
   "AllowedContentTypes": [],
   "PassedFiles": [],
   "Disable": {
