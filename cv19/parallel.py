@@ -1,7 +1,7 @@
-import json
 import multiprocessing
 import pickle
 from pathlib import Path
+import tomli
 
 import numpy as np
 import pandas as pd
@@ -9,6 +9,7 @@ import scipy.stats as st
 from matplotlib import pyplot as plt
 
 from .simulation import Simulation
+
 
 def async_simulation(config_file, config_dir="", verbose=False):
     '''Does a single run of the simulation with the supplied configuration details.
@@ -29,6 +30,7 @@ def async_simulation(config_file, config_dir="", verbose=False):
     sim = Simulation(config_file, config_dir=config_dir, verbose=verbose)
     sim.run()
     return sim.get_arrays()
+
 
 def run_async(num_runs, config_file, save_name=None, num_cores=-1, config_dir="", verbose=False):
     '''Runs multiple simulations in parallel using the supplied configuration settings.
@@ -68,6 +70,7 @@ def run_async(num_runs, config_file, save_name=None, num_cores=-1, config_dir=""
 
     return df
 
+
 def _config_editor(config, param_name, value):
     '''Takes string form of a parameter's name (eg. policy_data.testing_rate)
     and changes it to the supplied value.
@@ -100,6 +103,7 @@ def _config_editor(config, param_name, value):
         # Not the last parameter: advance in the dictionary
         else:
             x = x[param]
+
 
 def tabular_mode(base_config_file, independent, dependent, num_runs=8, num_cores=8, save_name=None, verbose=False):
     '''Automatically measures the impact of various public health measures on different metrics.
@@ -175,9 +179,9 @@ def tabular_mode(base_config_file, independent, dependent, num_runs=8, num_cores
     # Running through each scenario
     for i, values in enumerate(zip(*mesh)):
 
-        # Load the json file
-        with open(base_config_file, encoding='utf-8') as f:
-            temp_config = json.load(f)
+        # Load the TOML file
+        with open(base_config_file, 'rb') as f:
+            temp_config = tomli.load(f)
 
         config_dir = Path(base_config_file).parent
 
@@ -221,6 +225,7 @@ def tabular_mode(base_config_file, independent, dependent, num_runs=8, num_cores
         raise ValueError("Type of each element in DataFrame is not consistent.")
 
     return results
+
 
 def confidence_interval(config, parameterstoplot, num_runs=8, confidence=0.80, num_cores=-1, save_name=None, verbose=False):
     '''Plots the results of multiple simulations with confidence bands
@@ -283,6 +288,7 @@ def confidence_interval(config, parameterstoplot, num_runs=8, confidence=0.80, n
     ax_ci.legend()
     fig_ci.show()
 
+
 def confidence_interval_complex(*scenarios, z=2):
     '''Draws a plot that tracks one or more metrics in the simulation. The
     simulation is run many times to get a more accurate representation of
@@ -339,7 +345,9 @@ def confidence_interval_complex(*scenarios, z=2):
     raise NotImplementedError(("Function not yet implemented. "
                                "Current code:\n") + code)
 
-#### Metric calculator functions ####
+# Metric calculator functions
+
+
 def peak(data):
     '''Calculates the number of people infected at the peak, averaged over the
     simulations that were run.
@@ -360,6 +368,7 @@ def peak(data):
     return (peak_infections.mean(),
             peak_infections.std() / np.sqrt(len(peak_infections)))
 
+
 def peak_date(data):
     '''Calculates the date of the peak, averaged over the simulations that were
     run.
@@ -378,6 +387,7 @@ def peak_date(data):
     peak_infections_dates = data['infected'].apply(np.argmax)
     return (peak_infections_dates.mean(),
             peak_infections_dates.std() / np.sqrt(len(peak_infections_dates)))
+
 
 def hospitalizations(data):
     '''Calculates the number of hospitalizations at the peak, averaged over the
@@ -399,6 +409,7 @@ def hospitalizations(data):
     return (peak_hospitalizations.mean(),
             peak_hospitalizations.std() / np.sqrt(len(peak_hospitalizations)))
 
+
 def deaths(data):
     '''The average number of total deaths over all simulations that were run.
 
@@ -416,6 +427,7 @@ def deaths(data):
     total_deaths = data['dead'].apply(max)
     return (total_deaths.mean(),
             total_deaths.std() / np.sqrt(len(total_deaths)))
+
 
 def peak_quarantine(data):
     '''The number of people in quarantine at the peak, averaged over the simulations
@@ -437,6 +449,7 @@ def peak_quarantine(data):
     return (peak_quarantined.mean(),
             peak_quarantined.std() / np.sqrt(len(peak_quarantined)))
 
+
 def peak_ICU(data):
     '''The number of people in ICU at the peak, averaged over the simulations
     that were run.
@@ -456,6 +469,7 @@ def peak_ICU(data):
     peak_ICUs = data['ICU'].apply(max)
     return (peak_ICUs.mean(),
             peak_ICUs.std() / np.sqrt(len(peak_ICUs)))
+
 
 def peak_deaths(data):
     '''The number of deaths at the peak, averaged over the simulations
@@ -477,6 +491,7 @@ def peak_deaths(data):
     return (peak_death.mean(),
             peak_death.std() / np.sqrt(len(peak_death)))
 
+
 def peak_hospitalization(data):
     '''The number of people in the hospital at the peak, averaged over the
     simulations that were run.
@@ -497,6 +512,7 @@ def peak_hospitalization(data):
     return (peak_hospitalized.mean(),
             peak_hospitalized.std() / np.sqrt(len(peak_hospitalized)))
 
+
 def time_elapsed(data):
     '''Time elapsed for the simulation.
 
@@ -515,14 +531,15 @@ def time_elapsed(data):
     return (simulation_times.mean(),
             simulation_times.std() / np.sqrt(len(simulation_times)))
 
+
 # Sample usage
 if __name__ == "__main__":
 
     # Tabular mode
     table = tabular_mode(
-        'config_files/main.json',
+        'config_files/main.toml',
         {
-            "population_data.prob_has_mask":[1/4, 1/2, 3/4, 1]
+            "population_data.prob_has_mask": [0.25, 0.50, 0.75, 1.00]
         },
         {
             'peak cases': peak,
@@ -537,8 +554,22 @@ if __name__ == "__main__":
     plt.show()
 
     # Confidence interval mode
-    parameters_to_plot=["infected","new_infected","recovered","susceptible","dead","quarantined","inf_students","total_tested","new_tested","hospitalized","ICU","testing_enforced","masks_enforced","lockdown_enforced","time_elapsed"]
+    parameters_to_plot = ["infected",
+                          "new_infected",
+                          "recovered",
+                          "susceptible",
+                          "dead",
+                          "quarantined",
+                          "inf_students",
+                          "total_tested",
+                          "new_tested",
+                          "hospitalized",
+                          "ICU",
+                          "testing_enforced",
+                          "masks_enforced",
+                          "lockdown_enforced",
+                          "time_elapsed"]
 
-    confidence_interval('config_files/main.json', parameterstoplot=parameters_to_plot, confidence=0.9)
+    confidence_interval('config_files/main.toml', parameterstoplot=parameters_to_plot, confidence=0.9)
 
     input()

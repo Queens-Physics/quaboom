@@ -1,0 +1,69 @@
+# distribution of severity of the case; those in None would be considered mild, taken from _
+[0-9]
+Mild = 0.9936
+Death = 4.5e-05
+Hospitalization = 0.005695
+ICU = 0.00066
+
+# distribution of severity of the case; those in None would be considered mild, taken from _
+[10-19]
+Mild = 0.9936
+Death = 4.5e-05
+Hospitalization = 0.005695
+ICU = 0.00066
+
+# distribution of severity of the case; those in None would be considered mild, taken from _
+[20-29]
+Mild = 0.985944
+Death = 0.000246
+Hospitalization = 0.0122
+ICU = 0.00161
+
+# distribution of severity of the case; those in None would be considered mild, taken from _
+[30-39]
+Mild = 0.972
+Death = 0.0007
+Hospitalization = 0.02335
+ICU = 0.00395
+
+# distribution of severity of the case; those in None would be considered mild, taken from _
+[40-49]
+Mild = 0.9568
+Death = 0.00175
+Hospitalization = 0.0341
+ICU = 0.00735
+
+# distribution of severity of the case; those in None would be considered mild, taken from _
+[50-59]
+Mild = 0.9164
+Death = 0.0058
+Hospitalization = 0.0616
+ICU = 0.0162
+
+# distribution of severity of the case; those in None would be considered mild, taken from _
+[60-69]
+Mild = 0.8265
+Death = 0.0221
+Hospitalization = 0.118
+ICU = 0.0334
+
+# distribution of severity of the case; those in None would be considered mild, taken from _
+[70-79]
+Mild = 0.62
+Death = 0.0858
+Hospitalization = 0.2404
+ICU = 0.0538
+
+# distribution of severity of the case; those in None would be considered mild, taken from _
+[80-89]
+Mild = 0.465
+Death = 0.2307
+Hospitalization = 0.2826
+ICU = 0.0217
+
+# distribution of severity of the case; those in None would be considered mild, taken from _
+[90-99]
+Mild = 0.465
+Death = 0.2307
+Hospitalization = 0.2826
+ICU = 0.0217

@@ -5,8 +5,10 @@ import warnings
 from random import random
 from copy import deepcopy
 from itertools import combinations
+from math import comb
 
 import numpy as np
+
 
 class InteractionSites:
     '''A class designed to host interactions between persons within specific locations.
@@ -60,8 +62,12 @@ class InteractionSites:
         # Set attributes from config file
         self.load_attributes_from_sim_obj(sim_obj)
 
+        self.daily_interactions = {"HOUSE_GENERAL": np.zeros(self.nDays),
+                                   "HOUSE_STUDENT": np.zeros(self.nDays)}
+
         # Generates a list of people that go to different grade X sites
         # len(grade_X_sites) is how many sites there are; len(grade_X_sites[i]) is how many people go to that site
+
         self.grade_A_sites = self.init_grade(grade_code="A")
         self.grade_B_sites = self.init_grade(grade_code="B")
         self.grade_C_sites = self.init_grade(grade_code="C")
@@ -76,6 +82,7 @@ class InteractionSites:
         self.food_sites = self.init_uni(grade_code="FOOD")
         self.res_sites = self.init_res(grade_code="RES")
 
+        self.daily_new_infections = 0
 
     def load_attributes_from_sim_obj(self, sim_obj):
         '''Method to load in attributes from the provided simulation class object.
@@ -100,11 +107,13 @@ class InteractionSites:
 
         # Get the virus type names
         self.variant_codes = sim_obj.variant_codes
-        self.variant_code_map = {v_id: v_name for v_name, v_id in self.variant_codes.items()} # virus ids
+        self.variant_code_map = {v_id: v_name for v_name, v_id in self.variant_codes.items()}  # virus ids
 
         # Set the actual objects now
         self.pop = sim_obj.pop
         self.policy = sim_obj.policy
+
+        self.nDays = sim_obj.parameters["simulation_data"]["nDays"]
 
     def init_grade(self, grade_code):
         '''Method designed to associate members of the population with interaction sites.
@@ -134,7 +143,7 @@ class InteractionSites:
 
         for person in self.pop.get_population():
             if students_interact or not (self.students_on and person.job == 'Student'):
-                #if students are meant to go to this site
+                # if students are meant to go to this site
                 # Assign people to this specific site
                 num_diff_sites = abs(round(np.random.normal(loyalty_mean, loyalty_std)))
                 num_diff_sites = num_diff_sites if num_diff_sites <= num_sites else num_sites
@@ -146,6 +155,9 @@ class InteractionSites:
 
         # Convert everything to numpy arrays
         grade_sites = [np.asarray(site) for site in grade_sites]
+
+        # Initialize the number of interactions dictionary
+        self.daily_interactions[grade_code] = np.zeros(self.nDays)
 
         return grade_sites
 
@@ -188,6 +200,9 @@ class InteractionSites:
         # Convert everything to numpy arrays
         grade_sites = [np.asarray(site) for site in grade_sites]
 
+        # Initialize the number of interactions dictionary
+        self.daily_interactions[grade_code] = np.zeros(self.nDays)
+
         return grade_sites
 
     def init_res(self, grade_code):
@@ -229,7 +244,28 @@ class InteractionSites:
         # Convert everything to numpy arrays
         grade_sites = [np.asarray(site) for site in grade_sites]
 
+        # Initialize the number of interactions dictionary
+        self.daily_interactions[grade_code] = np.zeros(self.nDays)
+
         return grade_sites
+
+    def daily_reset(self):
+        '''Method used to reset the interaction sites at the end of each day.
+
+        This function is currently used to clean up dead agents from interaction sites,
+        and to reset daily counts (such as the daily infection count).
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+        '''
+
+        self.remove_dead()
+        self.daily_new_infections = 0
 
     def calculate_num_sites(self, grade_code):
         '''Method used to calculate the number of sites for an interaction site grade.
@@ -245,13 +281,13 @@ class InteractionSites:
             The number of sites to be used for that interaction site grade.
         '''
 
-        if self.site_num[grade_code] == 0:
+        if grade_code in self.site_num and self.site_num[grade_code] == 0:
             # Raise a warning
             warnings.warn(f"Site type '{grade_code}' size set to 0. No interaction sites of this type created.")
             return 0
         else:
-            return self.site_num[grade_code] if self.site_num[grade_code] is not None else \
-                   round(self.pop.get_population_size()/self.site_size[grade_code])
+            return self.site_num[grade_code] if grade_code in self.site_num else \
+                round(self.pop.get_population_size() / self.site_size[grade_code])
 
     def remove_dead(self):
         '''Method to remove dead agents from interaction site arrays.
@@ -346,11 +382,11 @@ class InteractionSites:
         person_site_choices = [np.random.choice(site_index_options[[person in site for site in site_array]])
                                for person in person_ids_will_go]
 
-        will_visit_grade = [person_ids_will_go[person_site_choices==i] for i in site_index_options]
+        will_visit_grade = [person_ids_will_go[person_site_choices == i] for i in site_index_options]
 
         return will_visit_grade
 
-    def site_interaction(self, will_go_array, day, personal):
+    def site_interaction(self, will_go_array, day, personal, grade_code):
         '''Method that hosts interactions between people for an interaction site type.
 
         This method manages interactions between people going to the same interaction
@@ -366,21 +402,29 @@ class InteractionSites:
         day : int
             The day value that this function is being called on in the encompassing simulation class.
             Used as input to the infect function after infections have been determined.
+        personal : bool
+            Used to indicate if the type of interaction at this site is personal, which relates to
+            contact tracing abilities.
+        grade_code : str
+            Code used to index the values to create this type of site from the config file.
         '''
 
         new_infections = np.zeros(self.pop.get_population_size(), dtype=bool)
         new_infection_type = np.zeros(self.pop.get_population_size(), dtype=int)
+
+        total_interactions_count = 0
 
         for ppl_going in will_go_array:
 
             infected_persons = [index for index in ppl_going if self.pop.get_person(index).is_infected()]
             recovered_persons = [index for index in ppl_going if self.pop.get_person(index).is_recovered()]
 
-            if len(infected_persons) == 0 or (len(infected_persons) + len(recovered_persons) == len(ppl_going)):
-                continue # No ppl to infect here or no one already infected
-
             # Generate a list of how many interactions ppl have at the site
             num_interactions = self.calc_interactions(site_day_pop=len(ppl_going))
+            total_interactions_count += np.sum(num_interactions) // 2
+
+            if len(infected_persons) == 0 or (len(infected_persons) + len(recovered_persons) == len(ppl_going)):
+                continue  # No ppl to infect here or no one already infected
 
             while np.sum(num_interactions > 0) > 1:
                 # grab the highest interactor
@@ -421,9 +465,12 @@ class InteractionSites:
 
         #  Update people who get infected only at the end. Assuming if I get CV19 at work, I probably won't spread at the store that night.
         new_infection_indexes = np.where(new_infections)[0]
-#         new_infection_type_indexes = np.where(new_infection_type)[0]
+        self.daily_new_infections += len(new_infection_indexes)
         for new_infection in new_infection_indexes:
             self.pop.infect(index=new_infection, virus_type=new_infection_type[new_infection], day=day)
+
+        # Update total daily interactions count
+        self.daily_interactions[grade_code][day] = total_interactions_count
 
     def calc_interactions(self, site_day_pop):
         '''Method to determine how many interactions a person will have.
@@ -454,7 +501,7 @@ class InteractionSites:
         day_hours_scaler = 12
 
         # Generate a linaer distribution from
-        number_of_interactions = np.round(np.random.triangular(left=0, mode=0, right=site_day_pop/day_hours_scaler,
+        number_of_interactions = np.round(np.random.triangular(left=0, mode=0, right=site_day_pop / day_hours_scaler,
                                                                size=site_day_pop)).astype(int)
 
         return number_of_interactions
@@ -524,11 +571,14 @@ class InteractionSites:
             Used as input to the infect function after infections have been determined.
         '''
 
+        total_house_interactions = 0
         for house_indices in self.house_indices:
             # Get people in house
             house_size = len(house_indices)
             housemembers = [self.pop.get_population()[ind] for ind in house_indices]
             virus_types = [person.get_virus_type() for person in housemembers]
+
+            total_house_interactions += comb(len(housemembers), 2)
 
             # Do interactions between the housemates
             for member1, member2 in combinations(housemembers, 2):
@@ -549,9 +599,12 @@ class InteractionSites:
                     caught_infection = random() < infection_chance
 
                     if caught_infection:
+                        self.daily_new_infections += 1
                         if virus_id is None:
                             raise ValueError("House infection has incorrect virus type.")
                         self.pop.infect(index=housemembers[person].get_index(), day=day, virus_type=virus_id)
+
+        self.daily_interactions["HOUSE_GENERAL"][day] = total_house_interactions
 
     def student_house_interact(self, day):
         '''Method to manage interactions between members of the same student household.
@@ -567,11 +620,14 @@ class InteractionSites:
             Used as input to the infect function after infections have been determined.
         '''
 
+        total_house_interactions = 0
         for house_indices in self.stud_house_indices:
             # Get people in house
             house_size = len(house_indices)
             housemembers = [self.pop.get_population()[ind] for ind in house_indices]
             virus_types = [person.get_virus_type() for person in housemembers]
+
+            total_house_interactions += comb(len(housemembers), 2)
 
             # Do interactions between the housemates
             for member1, member2 in combinations(housemembers, 2):
@@ -591,9 +647,12 @@ class InteractionSites:
                     infection_chance = self.base_infection_spread_prob[virus_name] * self.house_infection_spread_factor
                     caught_infection = random() < infection_chance
                     if caught_infection:
+                        self.daily_new_infections += 1
                         if virus_id is None:
                             raise ValueError("House infection has incorrect virus type.")
                         self.pop.infect(index=housemembers[person].get_index(), day=day, virus_type=virus_id)
+
+        self.daily_interactions["HOUSE_STUDENT"][day] = total_house_interactions
 
     def testing_site(self, tests_per_day, day):
         '''Method to update status of symptoms and run the testing sites code.
