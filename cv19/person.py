@@ -292,7 +292,7 @@ class Person(object):
 
         if self.test_day is None:
             return False
-        elif (day - self.test_day) >= self.quarantine_time:
+        elif (day - self.test_day) >= self.sim_obj.quarantine_time:
             self.test_day = None
             self.has_cold = False
             return True

@@ -787,18 +787,27 @@ class Population:
         day: int
             The current day the simulation is on.
         '''
-        # updates everyone's symptoms
-        for i in range(len(self.infected)):
-            if self.population[i].check_symptoms(day):
 
-                if i not in self.testing and self.have_been_tested[i] != 1:  # if person is not already in testing function
-                    infected_person = self.population[i]  # gets the infected person from the population list
-                    if (random() / self.population[i].get_protocol_compliance()) < self.prob_of_test:
-                        if infected_person.show_symptoms and not infected_person.knows_infected:
-                            self.testing.append(i)  # adds the person to the testing list
-                            self.population[i].knows_infected = True
-                    elif infected_person.check_test_day(day):
-                        self.have_been_tested[i] = 0  # remove them from the testing list (allows them to get retested if they get symptoms again)
+        # Update people who were recently tested, see if they can test again
+        can_test_again = [person_id for person_id, person in enumerate(self.population) if person.check_test_day(day)]
+
+        # Get all potentially symptomatic people
+        cold_persons = [person_id for person_id, person in enumerate(self.population) if person.has_cold]
+        infected_persons = self.get_infected()
+
+        people_to_check = set(cold_persons).union(infected_persons).union(can_test_again)
+        for person_id in people_to_check:
+
+            # Check if they are showing symptoms and update their status
+            if self.population[person_id].check_symptoms(day):
+                person = self.get_person(person_id)
+
+                # Calculate if they should be tested again
+                not_in_testing = person_id not in self.testing
+                will_comply = (random() / person.get_protocol_compliance()) < self.prob_of_test
+
+                if not_in_testing and will_comply:
+                    self.testing.append(person_id)
 
     def get_testing_wait_list(self):
         '''Method to return number of people waiting to be tested.
