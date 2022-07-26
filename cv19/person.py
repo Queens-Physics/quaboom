@@ -202,9 +202,11 @@ class Person(object):
         self.quarantined: :obj:`bool`
         '''
 
-        self.quarantined_day = day
-        self.quarantined = True
-        self.sim_obj.pop.quarantined[self.index] = self.index
+        # Make sure person is not already quarantined
+        if not self.is_quarantined():
+            self.quarantined_day = day
+            self.quarantined = True
+            self.sim_obj.pop.quarantined[self.index] = self.index
 
         return self.quarantined
 

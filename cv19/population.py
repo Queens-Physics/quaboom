@@ -834,9 +834,6 @@ class Population:
             person = self.population[person_index]
             person.set_test_day(day)
             self.have_been_tested[person_index] = person_index
-            if self.ct_enabled and num_contacts_traced < self.ct_capacity:
-                person.contact_tracing(day=day)
-                num_contacts_traced += 1
 
             if person.infected:
                 person.knows_infected = True
@@ -844,6 +841,11 @@ class Population:
                 person.set_quarantine(day)
                 self.quarantined[person_index] = person_index
                 self.new_quarantined_num += 1
+
+                if self.ct_enabled and num_contacts_traced < self.ct_capacity:
+                    person.contact_tracing(day=day)
+                    num_contacts_traced += 1
+
             else:
                 person.knows_infected = False
 
