@@ -1,7 +1,7 @@
-import json
 import multiprocessing
 import pickle
 from pathlib import Path
+import tomli
 
 import numpy as np
 import pandas as pd
@@ -10,48 +10,50 @@ from matplotlib import pyplot as plt
 
 from .simulation import simulation
 
+
 def async_simulation(config_file, config_dir="", verbose=False):
-    """Does a single run of the simulation with the supplied configuration details.
+    '''Does a single run of the simulation with the supplied configuration details.
 
     Parameters
     ----------
     config_file : str
-        filename for the configuration file
+        Filename for the configuration file.
     verbose : bool, default False
-        whether to output information from each day of the simulation
+        Whether to output information from each day of the simulation.
 
     Returns
     -------
     tuple
-        arrays from the simulation
+        Arrays from the simulation.
+    '''
 
-    """
     sim = simulation(config_file, config_dir=config_dir, verbose=verbose)
     sim.run()
     return sim.get_arrays()
 
+
 def run_async(num_runs, config_file, save_name=None, num_cores=-1, config_dir="", verbose=False):
-    """Runs multiple simulations in parallel using the supplied configuration settings.
+    '''Runs multiple simulations in parallel using the supplied configuration settings.
 
     Parameters
     ----------
     num_runs : int
-        number of times to run the simulation
+        Number of times to run the simulation.
     config_file : str
-        file containing the configuration details
+        File containing the configuration details.
     save_name : str, default='simulation.pkl'
-        filename to save the simulation results upon completion
+        Filename to save the simulation results upon completion.
     num_cores : int, default=-1
-        number of CPU cores to use when running the simulation. If -1, then use
+        Number of CPU cores to use when running the simulation. If -1, then use
         all available cores.
     verbose : bool, default False
-        whether to output information from each day of the simulation
+        Whether to output information from each day of the simulation.
 
     Returns
     -------
     pandas.DataFrame
-        containing the results of the simulation in tabular format
-    """
+        Containing the results of the simulation in tabular format.
+    '''
 
     if num_cores == -1:
         num_cores = multiprocessing.cpu_count()
@@ -68,24 +70,25 @@ def run_async(num_runs, config_file, save_name=None, num_cores=-1, config_dir=""
 
     return df
 
+
 def _config_editor(config, param_name, value):
-    """Takes string form of a parameter's name (eg. policy_data.testing_rate)
+    '''Takes string form of a parameter's name (eg. policy_data.testing_rate)
     and changes it to the supplied value.
 
     Parameters
     ----------
     config : dict
-        dictionary containing the configuration settings
+        Dictionary containing the configuration settings.
     param_name : str
-        string form of a parameter's name (eg. policy_data.testing_rate)
+        String form of a parameter's name (eg. policy_data.testing_rate).
     value : object
-        value to set the parameter to
+        Value to set the parameter to.
 
     Raises
     ------
     ValueError
-        If param_name is not in the config dictionary
-    """
+        If param_name is not in the config dictionary.
+    '''
 
     x = config
     param_names = param_name.split('.')
@@ -102,36 +105,34 @@ def _config_editor(config, param_name, value):
             x = x[param]
 
 
-
 def tabular_mode(base_config_file, independent, dependent, num_runs=8, num_cores=8, save_name=None, verbose=False):
-    """Automatically measures the impact of various public health measures on different metrics.
+    '''Automatically measures the impact of various public health measures on different metrics.
 
     Parameters
     ----------
     base_config_file : str
-        filename for the configuration file to be used as a base
+        Filename for the configuration file to be used as a base.
     independent : dict
-        a dictionary where the keys are names of the parameters that
+        A dictionary where the keys are names of the parameters that
         are independent variables, and the value is a list with all of the
-        values that variable should take on
-        Eg. to set the policy_data -> testing_rate to 0.1, 0.2, ..., 1, you
-        would use the following dictionary:
-            {"policy_data.testing_rate":[0.1*(x+1) for x in range(10)]}
+        values that variable should take on (eg. to set the policy_data ->
+        testing_rate to 0.1, 0.2, ..., 1, you would use the following dictionary:
+            {"policy_data.testing_rate":[0.1*(x+1) for x in range(10)]})
         ** Currently only supports changing one independent variable **
     dependent : dict
-        a dictionary where the keys are the names of the dependent
+        A dictionary where the keys are the names of the dependent
         variables, and the values are functions that take the simulation
         results as input and calculate the dependent variable.
-        Eg. to measure total deaths and peak cases, use the following
+        (eg. to measure total deaths and peak cases, use the following
         dictionary:
             {
                 "total deaths":total_death_func,
                 "peak cases":peak_case_func
-            }
+            })
     num_runs : int, default = 8
-        number of times to run the simulation per configuration
+        Number of times to run the simulation per configuration.
     num_cores : int, default=-1
-        number of CPU cores to use when running the simulation. If -1, then use
+        Number of CPU cores to use when running the simulation. If -1, then use
         all available cores.
     save_name : str or list[str] or None, default None
         The filename(s) to use when saving results from the simulation. If using
@@ -142,19 +143,19 @@ def tabular_mode(base_config_file, independent, dependent, num_runs=8, num_cores
         for the independent variable, and each scenario will be saved under its
         corresponding filename. If None, then don't save any results.
     verbose : bool, default False
-        whether to output information from each day of the simulation
+        Whether to output information from each day of the simulation.
 
     Returns
     -------
     pd.DataFrame
-        contains the values of the dependent variables
+        Contains the values of the dependent variables
         for each of the supplied independent variable values.
 
     Raises
     ------
     NotImplementedError
-        if the number of independent variables is not 1
-    """
+        If the number of independent variables is not 1.
+    '''
 
     if len(independent) > 1:
         raise NotImplementedError("Number of independent variables must be 1.")
@@ -178,9 +179,9 @@ def tabular_mode(base_config_file, independent, dependent, num_runs=8, num_cores
     # Running through each scenario
     for i, values in enumerate(zip(*mesh)):
 
-        # Load the json file
-        with open(base_config_file, encoding='utf-8') as f:
-            temp_config = json.load(f)
+        # Load the TOML file
+        with open(base_config_file, 'rb') as f:
+            temp_config = tomli.load(f)
 
         config_dir = Path(base_config_file).parent
 
@@ -225,32 +226,33 @@ def tabular_mode(base_config_file, independent, dependent, num_runs=8, num_cores
 
     return results
 
+
 def confidence_interval(config, parameterstoplot, num_runs=8, confidence=0.80, num_cores=-1, save_name=None, verbose=False):
-    """Plots the results of multiple simulations with confidence bands
+    '''Plots the results of multiple simulations with confidence bands
     to give a better understanding of the trend of a given scenario.
     Displays a plot of the results.
 
     Parameters
     ----------
     config : str
-        filename of the configuration file to use for this simulation
+        Filename of the configuration file to use for this simulation.
     parameters_to_plot : list
-        list of parameters to include when plotting with the condifence interval
+        List of parameters to include when plotting with the condifence interval.
     num_runs : int, default=8
-        number of times to run the simulation
+        Number of times to run the simulation.
     confidence : float
-        confidence of the confidence bands, ie. the proportion of results
+        Confidence of the confidence bands, ie. the proportion of results
         that fall within the confidence bands. The range of this parameter
         should be (0, 1].
     num_cores : int, default=-1
-        number of cores to use when running the simulation. If -1, then use
+        Number of cores to use when running the simulation. If -1, then use
         all available cores.
     save_name: str or None, default None
-        name to save the results under. Default None, which means don't save
+        Name to save the results under. Default None, which means don't save
         the results.
     verbose : bool, default False
-        whether to output information from each day of the simulation
-    """
+        Whether to output information from each day of the simulation.
+    '''
 
     result = run_async(num_runs, config, num_cores=num_cores, save_name=save_name, verbose=verbose)
 
@@ -286,12 +288,13 @@ def confidence_interval(config, parameterstoplot, num_runs=8, confidence=0.80, n
     ax_ci.legend()
     fig_ci.show()
 
+
 def confidence_interval_complex(*scenarios, z=2):
-    """Draws a plot that tracks one or more metrics in the simulation. The
+    '''Draws a plot that tracks one or more metrics in the simulation. The
     simulation is run many times to get a more accurate representation of
     the trends. The metric(s) is(are) drawn with confidence intervals.
 
-    *scenarios: one or more dictionaries that contain:
+    *Scenarios: one or more dictionaries that contain:
         - 'name': name of the scenario
         - 'params': parameters
         - 'metric': metric to plot
@@ -302,7 +305,7 @@ def confidence_interval_complex(*scenarios, z=2):
         - z=3 => 99% confidence.
 
     This function draws a plot of the metrics over time.
-    """
+    '''
 
     del z
     del scenarios
@@ -342,9 +345,11 @@ def confidence_interval_complex(*scenarios, z=2):
     raise NotImplementedError(("Function not yet implemented. "
                                "Current code:\n") + code)
 
-#### Metric calculator functions ####
+# Metric calculator functions
+
+
 def peak(data):
-    """Calculates the number of people infected at the peak, averaged over the
+    '''Calculates the number of people infected at the peak, averaged over the
     simulations that were run.
 
     Parameters
@@ -357,13 +362,15 @@ def peak(data):
     tuple of float
         Number of people infected at the peak, averaged over the simulations that
         were run, and uncertainty.
-    """
+    '''
+
     peak_infections = data['infected'].apply(max)
     return (peak_infections.mean(),
             peak_infections.std() / np.sqrt(len(peak_infections)))
 
+
 def peak_date(data):
-    """Calculates the date of the peak, averaged over the simulations that were
+    '''Calculates the date of the peak, averaged over the simulations that were
     run.
 
     Parameters
@@ -375,13 +382,15 @@ def peak_date(data):
     -------
     tuple of float
         Date of the peak, averaged over the simulations that were run, and uncertainty.
-    """
+    '''
+
     peak_infections_dates = data['infected'].apply(np.argmax)
     return (peak_infections_dates.mean(),
             peak_infections_dates.std() / np.sqrt(len(peak_infections_dates)))
 
+
 def hospitalizations(data):
-    """Calculates the number of hospitalizations at the peak, averaged over the
+    '''Calculates the number of hospitalizations at the peak, averaged over the
     simulations that were run.
 
     Parameters
@@ -394,13 +403,15 @@ def hospitalizations(data):
     tuple of float
         Number of hospitalizations at the peak, averaged over the simulations that
         were run, and uncertainty.
-    """
+    '''
+
     peak_hospitalizations = data['hospitalized'].apply(max)
     return (peak_hospitalizations.mean(),
             peak_hospitalizations.std() / np.sqrt(len(peak_hospitalizations)))
 
+
 def deaths(data):
-    """The average number of total deaths over all simulations that were run.
+    '''The average number of total deaths over all simulations that were run.
 
     Parameters
     ----------
@@ -411,13 +422,15 @@ def deaths(data):
     tuple of float
         Average number of total deaths over all simulations that were run
         and uncertainty.
-    """
+    '''
+
     total_deaths = data['dead'].apply(max)
     return (total_deaths.mean(),
             total_deaths.std() / np.sqrt(len(total_deaths)))
 
+
 def peak_quarantine(data):
-    """The number of people in quarantine at the peak, averaged over the simulations
+    '''The number of people in quarantine at the peak, averaged over the simulations
     that were run.
 
     Parameters
@@ -430,13 +443,15 @@ def peak_quarantine(data):
     tuple of float
         Number of people in quarantine at the peak, averaged over the simulations
         that were run, and uncertainty.
-    """
+    '''
+
     peak_quarantined = data['quarantined'].apply(max)
     return (peak_quarantined.mean(),
             peak_quarantined.std() / np.sqrt(len(peak_quarantined)))
 
+
 def peak_ICU(data):
-    """The number of people in ICU at the peak, averaged over the simulations
+    '''The number of people in ICU at the peak, averaged over the simulations
     that were run.
 
     Parameters
@@ -449,13 +464,15 @@ def peak_ICU(data):
     tuple of float
         Number of people in ICU at the peak, averaged over the simulations
         that were run, and uncertainty.
-    """
+    '''
+
     peak_ICUs = data['ICU'].apply(max)
     return (peak_ICUs.mean(),
             peak_ICUs.std() / np.sqrt(len(peak_ICUs)))
 
+
 def peak_deaths(data):
-    """The number of deaths at the peak, averaged over the simulations
+    '''The number of deaths at the peak, averaged over the simulations
     that were run.
 
     Parameters
@@ -468,13 +485,15 @@ def peak_deaths(data):
     tuple of float
         Number of deaths at the peak, averaged over the simulations
         that were run, and uncertainty.
-    """
+    '''
+
     peak_death = data['dead'].apply(max)
     return (peak_death.mean(),
             peak_death.std() / np.sqrt(len(peak_death)))
 
+
 def peak_hospitalization(data):
-    """The number of people in the hospital at the peak, averaged over the
+    '''The number of people in the hospital at the peak, averaged over the
     simulations that were run.
 
     Parameters
@@ -487,13 +506,15 @@ def peak_hospitalization(data):
     tuple of float
         Number of people in the hospital at the peak, averaged over the simulations
         that were run, and uncertainty.
-    """
+    '''
+
     peak_hospitalized = data['hospitalized'].apply(max)
     return (peak_hospitalized.mean(),
             peak_hospitalized.std() / np.sqrt(len(peak_hospitalized)))
 
+
 def time_elapsed(data):
-    """Time elapsed for the simulation.
+    '''Time elapsed for the simulation.
 
     Parameters
     ----------
@@ -504,19 +525,21 @@ def time_elapsed(data):
     -------
     tuple of float
         Average elapsed time of the simulations and uncertainty.
-    """
+    '''
+
     simulation_times = data['time_elapsed'].apply(max)
     return (simulation_times.mean(),
             simulation_times.std() / np.sqrt(len(simulation_times)))
+
 
 # Sample usage
 if __name__ == "__main__":
 
     # Tabular mode
     table = tabular_mode(
-        'config_files/main.json',
+        'config_files/main.toml',
         {
-            "population_data.prob_has_mask":[1/4, 1/2, 3/4, 1]
+            "population_data.prob_has_mask": [0.25, 0.50, 0.75, 1.00]
         },
         {
             'peak cases': peak,
@@ -531,8 +554,22 @@ if __name__ == "__main__":
     plt.show()
 
     # Confidence interval mode
-    parameters_to_plot=["infected","new_infected","recovered","susceptible","dead","quarantined","inf_students","total_tested","new_tested","hospitalized","ICU","testing_enforced","masks_enforced","lockdown_enforced","time_elapsed"]
+    parameters_to_plot = ["infected",
+                          "new_infected",
+                          "recovered",
+                          "susceptible",
+                          "dead",
+                          "quarantined",
+                          "inf_students",
+                          "total_tested",
+                          "new_tested",
+                          "hospitalized",
+                          "ICU",
+                          "testing_enforced",
+                          "masks_enforced",
+                          "lockdown_enforced",
+                          "time_elapsed"]
 
-    confidence_interval('config_files/main.json', parameterstoplot=parameters_to_plot, confidence=0.9)
+    confidence_interval('config_files/main.toml', parameterstoplot=parameters_to_plot, confidence=0.9)
 
     input()

@@ -24,7 +24,7 @@ class TestPerson(unittest.TestCase):
         This function is called every time the class is initalized, and creates a single
         simulation object that is used in all of the tests.
         '''
-        config_file = str(Path(Path(__file__).parent, "../config_files/main.json").resolve())
+        config_file = str(Path(Path(__file__).parent, "../config_files/main.toml").resolve())
         self.sim_obj = simulation(config_file)
 
     def tearDown(self):
@@ -84,10 +84,10 @@ class TestPerson(unittest.TestCase):
         self.assertEqual(person1.infected_day, infected_day)              # Should have the right infected day
 
         person2 = Person(2, sim_obj=self.sim_obj, infected=True, recovered=False)
-        self.assertFalse(person2.infect(day=infected_day, virus_type='alpha')) # Should not get infected - already infected
+        self.assertFalse(person2.infect(day=infected_day, virus_type='alpha'))  # Should not get infected - already infected
 
         person3 = Person(3, sim_obj=self.sim_obj, infected=False, recovered=True)
-        self.assertFalse(person3.infect(day=infected_day, virus_type='alpha')) # Should not get infected - already recovered
+        self.assertFalse(person3.infect(day=infected_day, virus_type='alpha'))  # Should not get infected - already recovered
 
         person4 = Person(4, sim_obj=self.sim_obj, infected=False, recovered=False)
         person4.infect(day=infected_day, cure_days=cure_days, virus_type='alpha')
@@ -96,6 +96,7 @@ class TestPerson(unittest.TestCase):
         person5 = Person(5, sim_obj=self.sim_obj, infected=False, recovered=False)
         person5.infect(day=infected_day, virus_type='alpha')
         self.assertIsNotNone(person5.cure_days)            # Make sure that cure days is set even though no parameter passed
+
 
 if __name__ == '__main__':
     unittest.main()
