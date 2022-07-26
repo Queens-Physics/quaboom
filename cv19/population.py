@@ -782,6 +782,13 @@ class Population:
     def update_symptomatic(self, day):
         '''Method to add people to the testing waitlist based on their symptoms.
 
+        First iterates through the entire population to check who should be allowed to test again. Calling
+        the `person.check_test_day` function updates the testing ability of that person based on the day,
+        and returns `True` if that person can test again and `False` if not.
+
+        The rest of the code creates a list of all people who could possibly be symptomatic and can test.
+        This list is looped through to judge whether a person should be added to the testing list.
+
         Parameters
         ----------
         day: int
