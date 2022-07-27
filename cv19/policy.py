@@ -156,7 +156,7 @@ class Policy:
             testing = False
         return testing
 
-    def get_num_tests(self, wait_list):
+    def get_num_tests(self, total_quarantined, new_quarantined, wait_list):
         '''A method to calculate how many tests to administer for a given day.
 
         The number of tests on any given day is assumed to have a linear relationship with
@@ -173,12 +173,16 @@ class Policy:
 
         Parameters
         ----------
+        total_quarantined : int
+            The number of people currently in quarantine in the simulation.
+        new_quarantined : int
+            The number of new people added to quarantine in the simulation.
         wait_list : int
             The number of people on the testing waitlist for this day in the simulation.
         '''
-
-        tests = (self.testing_rates[0] * self.sim_obj.pop.count_quarantined()
-                 + self.testing_rates[1] * self.sim_obj.pop.get_new_quarantined()
+        print(total_quarantined, new_quarantined, wait_list)
+        tests = (self.testing_rates[0] * total_quarantined
+                 + self.testing_rates[1] * new_quarantined
                  + self.testing_rates[2] * wait_list)  # defines the number of tests going to be run
         if not hasattr(self, "testing_baseline"):
             self.testing_baseline = 0
