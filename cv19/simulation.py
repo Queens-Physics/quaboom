@@ -412,8 +412,8 @@ class simulation():
 
             # Manage testing sites
             if testing_ON:
-                tests = self.policy.get_num_tests(self.track_testing_wait_list[day])
-                self.inter_sites.testing_site(tests, day)
+                tests_per_day = self.policy.get_num_tests(self.track_testing_wait_list[day])
+                self.inter_sites.testing_site(tests_per_day, day)
 
             # Manage Quarantine
             self.pop.update_quarantine(day)
