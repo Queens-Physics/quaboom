@@ -772,18 +772,18 @@ class Population:
         '''
         return self.test_sum
 
-    def random_symptomatic(self):
+    def update_uninfected_symptomatics(self):
         '''Method that causes a random sample of people to develop cold like symptoms.
         '''
 
         for person in self.population:
-            person.not_infected_symptoms()
+            person.update_uninfected_symptomatic()
 
-    def update_symptomatic(self, day):
+    def update_infected_symptomatics(self, day):
         '''Method to add people to the testing waitlist based on their symptoms.
 
         First iterates through the entire population to check who should be allowed to test again. Calling
-        the `person.check_test_day` function updates the testing ability of that person based on the day,
+        the `person.has_been_tested_recently` function updates the testing ability of that person based on the day,
         and returns `True` if that person can test again and `False` if not.
 
         The rest of the code creates a list of all people who could possibly be symptomatic and can test.

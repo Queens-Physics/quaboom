@@ -119,6 +119,7 @@ students_on = true
 quarantine_time = 14
 wear_mask_properly = 0.8
 cold_prob = 0.0001
+cold_duration_days = 5
 mild_symptom_prob = 0.8
 R0_lag_time = 5
 ct_length = 2

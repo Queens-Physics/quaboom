@@ -242,15 +242,19 @@ class Person(object):
         '''
         return self.quarantined_day
 
-    def not_infected_symptoms(self):
-        '''Method to randomly infect a person with non COVID19 symptoms.
+    def update_uninfected_symptomatic(self):
+        '''Method to randomly infect a person with non COVID19 symptoms or to turn off non COVID19 symptoms.
 
         Returns
         -------
         self.show_symptoms: :obj:`bool`
         '''
 
-        if random() <= self.sim_obj.cold_prob:
+        if self.has_cold:
+            if random() <= 1/self.sim_obj.cold_duration_days:
+                self.show_symptoms = True
+                self.has_cold = True
+        elif random() <= self.sim_obj.cold_prob:
             self.show_symptoms = True
             self.has_cold = True
         return self.show_symptoms
@@ -290,9 +294,8 @@ class Person(object):
             True if the quarantine time range has passed since they have been last tested and False if not.
         '''
 
-        if self.test_day is not None and (day - self.test_day) >= self.sim_obj.quarantine_time:
+        if self.test_day is not None and (day - self.test_day) < self.sim_obj.quarantine_time:
             self.test_day = None
-            self.has_cold = False
             return True
         return False
 

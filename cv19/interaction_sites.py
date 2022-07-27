@@ -665,8 +665,8 @@ class Interaction_Sites:
             The day value that this function is being called on in the encompassing simulation class.
         '''
 
-        self.pop.random_symptomatic()
-        self.pop.update_symptomatic(day)
+        self.pop.update_uninfected_symptomatics()
+        self.pop.update_infected_symptomatics(day)
         self.pop.get_tested(tests_per_day, day)
 
     def get_grade_A_sites(self):
