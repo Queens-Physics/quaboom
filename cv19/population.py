@@ -795,16 +795,10 @@ class Population:
             The current day the simulation is on.
         '''
 
-        # Update people who were recently tested, see if they can test again
-        can_test_again = [person_id for person_id, person in enumerate(self.population) if person.check_test_day(day)]
+        people_to_check = (person_id for person_id, person in enumerate(self.population)
+                           if person.could_be_symptomatic() and not person.has_been_tested_recently(day))
 
-        # Get all potentially symptomatic people
-        cold_persons = [person_id for person_id, person in enumerate(self.population) if person.has_cold]
-        infected_persons = self.get_infected()
-
-        people_to_check = set(cold_persons).union(infected_persons).union(can_test_again)
         for person_id in people_to_check:
-
             # Check if they are showing symptoms and update their status
             if self.population[person_id].check_symptoms(day):
                 person = self.get_person(person_id)
