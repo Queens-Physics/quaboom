@@ -180,7 +180,7 @@ class Policy:
         wait_list : int
             The number of people on the testing waitlist for this day in the simulation.
         '''
-        print(total_quarantined, new_quarantined, wait_list)
+
         tests = (self.testing_rates[0] * total_quarantined
                  + self.testing_rates[1] * new_quarantined
                  + self.testing_rates[2] * wait_list)  # defines the number of tests going to be run
