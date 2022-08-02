@@ -10,7 +10,7 @@ from math import comb
 import numpy as np
 
 
-class Interaction_Sites:
+class InteractionSites:
     '''A class designed to host interactions between persons within specific locations.
 
     There are currently 7 different locations that can host interactions between
@@ -88,7 +88,7 @@ class Interaction_Sites:
         '''Method to load in attributes from the provided simulation class object.
 
         Sets all objects in the "interaction_sites_data" dictionary key as self
-        attributes of the interaction_sites class.
+        attributes of the InteractionSites class.
 
         Parameters
         ----------

@@ -25,7 +25,7 @@ class Person(object):
         '''Method to load in attributes from the provided simulation class object.
 
         Sets all objects in the "person_data" dictionary key as self attributes of the
-        interaction_sites class.
+        InteractionSites class.
 
         Parameters
         ----------

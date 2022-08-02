@@ -4,7 +4,7 @@ import unittest
 from pathlib import Path
 
 from cv19.person import Person
-from cv19.simulation import simulation
+from cv19.simulation import Simulation
 
 
 class TestPerson(unittest.TestCase):
@@ -25,7 +25,7 @@ class TestPerson(unittest.TestCase):
         simulation object that is used in all of the tests.
         '''
         config_file = str(Path(Path(__file__).parent, "../config_files/main.toml").resolve())
-        self.sim_obj = simulation(config_file)
+        self.sim_obj = Simulation(config_file)
 
     def tearDown(self):
         ''' Tear down method for testing the person class.
