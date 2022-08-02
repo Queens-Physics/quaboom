@@ -251,7 +251,7 @@ class Person(object):
         '''
 
         if self.has_cold:
-            if random() <= 1/self.sim_obj.cold_duration_days:
+            if random() <= 1 / self.sim_obj.cold_duration_days:
                 self.show_symptoms = False
                 self.has_cold = False
         elif random() <= self.sim_obj.cold_prob:
@@ -320,7 +320,7 @@ class Person(object):
         elif not self.infected and not self.has_cold:
             self.show_symptoms = False
         return self.show_symptoms
-    
+
     def could_be_symptomatic(self):
         '''Method to check if the person could be showing symptoms.
 
