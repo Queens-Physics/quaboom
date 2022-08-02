@@ -1,13 +1,15 @@
-# top-most EditorConfig file
+# Top-most EditorConfig file.
 root = true
 
-# Unix-style newlines with a newline ending every file
+# All files: Unix-style newlines with a newline ending every file,
+# no trailing whitespace, and UTF-8 file encoding.
 [*]
 end_of_line = lf
 insert_final_newline = true
 trim_trailing_whitespace = true
 charset = utf-8
 
+# TOML files: Indentations should be exactly four spaces.
 [*.toml]
 indent_style = space
 indent_size = 4
