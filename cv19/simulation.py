@@ -363,14 +363,14 @@ class simulation():
 
             # add a random number of visitors to the population
             num_vis = np.random.choice(a=self.N_VIS_OPTION, p=self.N_VIS_PROB)
-            visitors_ind = [x for x in range(self.nPop, self.nPop + num_vis - 1)]
+            visitors_ind = [x for x in range(self.nPop, self.nPop + num_vis)]
             vis_age = np.random.choice(a=self.pop.age_options, p=self.pop.age_weights, size=num_vis)
             for i in range(0, num_vis):
                 visitor = Person(index=i + self.nPop, sim_obj=self, infected=True, recovered=False, dead=False,
                                  hospitalized=False, ICU=False, quarantined=False, quarantined_day=None, infected_day=None,
                                  recovered_day=None, death_day=None, others_infected=None,
                                  cure_days=None, recent_infections=None, vaccinated=False, age=vis_age[i],
-                                 job=None, house_index=None, isolation_tendencies=0.2,
+                                 job="Visitor", house_index=None, isolation_tendencies=0.2,
                                  case_severity='Mild', has_mask=True, virus_type="alpha")
                 self.pop.population.append(visitor)
 
@@ -425,6 +425,7 @@ class simulation():
 
             # remove the guest visitors
             self.pop.remove_visitors(visitors_ind)
+
             for index in self.pop.get_infected():
                 infected_person = self.pop.get_person(index=index)
 

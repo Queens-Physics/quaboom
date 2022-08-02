@@ -381,8 +381,8 @@ class Population:
     def remove_visitors(self, indices):
         '''Method to remove visitors from the simulation.
         '''
-        for i in indices:
-            np.delete(self.population, i)
+        for i in range(len(indices)-1, -1, -1):
+            self.population.pop(indices[i])
 
     def get_susceptible(self):
         '''Method to retrieve indicies of people suseptible.
