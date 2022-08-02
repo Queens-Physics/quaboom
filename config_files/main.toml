@@ -54,7 +54,7 @@ testing_day_trigger = 0
 testing_baseline = 5000
 testing_rates = [0.1, 0.8, 0.1]
 initial_student_mandate = false
-student_day_trigger = 101
+# student_day_trigger = 20
 prob_of_symptoms = 0.7
 
 [population_data]
@@ -72,7 +72,7 @@ ct_capacity = 10000
 [interaction_sites_data]
 quarantine_isolation_factor = 0
 student_interaction_factor = 0.5
-students_on = true
+students_on = false
 
     [interaction_sites_data.site_size]
     A = 1000
