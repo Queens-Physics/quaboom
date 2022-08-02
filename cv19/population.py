@@ -795,7 +795,7 @@ class Population:
             The current day the simulation is on.
         '''
 
-        people_to_check = (person_id for person_id, person in enumerate(self.population)
+        people_to_check = (person_id for person_id, person in enumerate(self.population[:self.nPop])
                            if person.could_be_symptomatic() and not person.has_been_tested_recently(day))
 
         for person_id in people_to_check:

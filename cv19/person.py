@@ -252,8 +252,8 @@ class Person(object):
 
         if self.has_cold:
             if random() <= 1/self.sim_obj.cold_duration_days:
-                self.show_symptoms = True
-                self.has_cold = True
+                self.show_symptoms = False
+                self.has_cold = False
         elif random() <= self.sim_obj.cold_prob:
             self.show_symptoms = True
             self.has_cold = True
@@ -294,10 +294,13 @@ class Person(object):
             True if the quarantine time range has passed since they have been last tested and False if not.
         '''
 
-        if self.test_day is not None and (day - self.test_day) < self.sim_obj.quarantine_time:
-            self.test_day = None
+        if self.test_day is None:
+            return False
+        elif (day - self.test_day) < self.sim_obj.quarantine_time:
             return True
-        return False
+        else:
+            self.test_day = None
+            return False
 
     def check_symptoms(self, day):
         '''Method to check a persons symtoms based on if they are infected with COVID19 or a cold.
