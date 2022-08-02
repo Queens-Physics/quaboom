@@ -61,6 +61,7 @@ that are automatically run, first install both packages:
 ```sh
 pip install pylint==2.14.4
 pip install flake8==4.0.1
+pip install editorconfig-checker==2.4.0
 ```
 
 Then, run the tests:
@@ -68,6 +69,7 @@ Then, run the tests:
 ```sh
 ./test/linters/pylint.py
 ./test/linters/flake8.py
+ec -verbose
 ```
 
 Each file has certain parameters that are modified
