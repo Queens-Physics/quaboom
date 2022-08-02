@@ -69,7 +69,7 @@ Then, run the tests:
 ```sh
 ./test/linters/pylint.py
 ./test/linters/flake8.py
-ec -verbose
+ec
 ```
 
 Each file has certain parameters that are modified

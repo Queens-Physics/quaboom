@@ -1,6 +1,6 @@
 {
   "Version": "2.4.0",
-  "Verbose": false,
+  "Verbose": true,
   "Debug": false,
   "IgnoreDefaults": false,
   "SpacesAftertabs": false,
