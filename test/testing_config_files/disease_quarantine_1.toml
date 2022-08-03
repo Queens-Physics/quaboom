@@ -1,0 +1,53 @@
+mild_symptom_prob = 0.8
+
+[spread_data]
+house_infection_spread_factor = 1.25
+
+    [spread_data.base_infection_spread_prob]
+    general = 0.0
+    alpha = 0.2
+    delta = 0.25
+
+# Lauer, Stephen A., et al. The incubation period of coronavirus disease 2019 (COVID-19) from publicly reported confirmed cases: estimation and application. Annals of internal medicine 172.9 (2020): 577-582, time to onset of illness.
+[days_before_symptoms]
+max = 7
+min = 2
+
+# Huang, Chaolin, et al. Clinical features of patients infected with 2019 novel coronavirus in Wuhan, China. The lancet 395.10223 (2020): 497-506, time to illness + onset to ARDS.
+[hospital_days]
+max = 21
+min = 12
+
+# Lauer, Stephen A., et al. The incubation period of coronavirus disease 2019 (COVID-19) from publicly reported confirmed cases: estimation and application. Annals of internal medicine 172.9 (2020): 577-582 time to onset of illness.
+[mild_days]
+max = 7
+min = 4
+
+# Zhou, Fei, et al. Clinical course and risk factors for mortality of adult inpatients with COVID-19 in Wuhan, China: a retrospective cohort study. The lancet 395.10229 (2020): 1054-1062, Time from illness onset to hospital admission days for survivors +ICU length of stay + time to onset.
+[ICU_days]
+max = 29
+min = 16
+
+# Zhou, Fei, et al. Clinical course and risk factors for mortality of adult inpatients with COVID-19 in Wuhan, China: a retrospective cohort study. The lancet 395.10229 (2020): 1054-1062, Time from illness onset to death + time to onset of illness.
+[die_days]
+max = 29
+min = 19
+
+# max number of days that a person with this level of infection stays sick for
+[max_infectious]
+MILD = 10
+SEVERE = 20
+
+# distribution of severity of the case; those in None would be considered mild
+[case_severity]
+Mild = 0.894
+Death = 0.019
+Hospitalization = 0.074
+ICU = 0.013
+
+# https://www.canada.ca/en/public-health/services/diseases/2019-novel-coronavirus-infection/health-professionals/transmission.html, Accessed: 11-05-2022
+[incubation]
+MAX = 14
+AVG = 5
+MIN = 1
+Dist = "poisson"
