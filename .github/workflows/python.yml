@@ -80,6 +80,13 @@ jobs:
         cd test
         ./test_Population.py
 
+    - name: Run the Simulations unit test
+      run: |
+        source ./env.sh
+	    cd test
+        ./test_Simulation.py
+
+
   sphinx-docs:
     runs-on: ubuntu-latest
 
