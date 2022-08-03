@@ -103,7 +103,7 @@ class TestPerson(unittest.TestCase):
         Checks that a person can be infected and quarantined and let out correctly. Should be expanded
         when quarantine mechanic code is refactored.
         '''
-        
+
         infected_day, quarantined_day = 20, 25
         quarantine_time = self.sim_obj.quarantine_time
         person1 = Person(1, sim_obj=self.sim_obj, infected=True, infected_day=infected_day,
@@ -115,6 +115,7 @@ class TestPerson(unittest.TestCase):
         did_leave_quarantine = person1.leave_quarantine(day=quarantined_day + quarantine_time)
         self.assertTrue(did_leave_quarantine)
         self.assertFalse(person1.is_quarantined())
+
 
 if __name__ == '__main__':
     unittest.main()

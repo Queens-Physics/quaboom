@@ -17,7 +17,7 @@ class TestSimulation(unittest.TestCase):
     ----
     This class holds code to check that the outputs of a run simulation are as expected. This differs from
     other unit test files, which focus on checking specific functions outside the context of a full
-    simulation. 
+    simulation.
     '''
 
     def setUp(self):
@@ -29,7 +29,7 @@ class TestSimulation(unittest.TestCase):
         quarantine_config_file_1 = str(Path(Path(__file__).parent, "testing_config_files/main_quarantine_1.toml").resolve())
         self.quarantine_obj_1 = Simulation(quarantine_config_file_1, verbose=False)
         self.quarantine_obj_1.run()
-        
+
         quarantine_config_file_2 = str(Path(Path(__file__).parent, "testing_config_files/main_quarantine_2.toml").resolve())
         self.quarantine_obj_2 = Simulation(quarantine_config_file_2, verbose=False)
         self.quarantine_obj_2.run()
@@ -42,44 +42,44 @@ class TestSimulation(unittest.TestCase):
 
     def test_quarantine_1(self):
         ''' Method used to make sure the simulation associated with quarantine_1 behaved as expected.
-        
+
         This simulation has lots of infections to begin and no infection spread.
 
         Checks that there are no quarantines at the end of the simulation, and that no new quarantines
         take place after infections have died out. Also checks that we do not start with quarantines.
-        Checks that no new quarantines appear without testing happening that day. 
+        Checks that no new quarantines appear without testing happening that day.
         '''
 
         raw_data = pd.DataFrame(self.quarantine_obj_1.get_arrays())
-        
-        self.assertTrue(raw_data['quarantined'].iloc[-1] == 0) # No quarantined at end
-        self.assertTrue(raw_data['quarantined'].iloc[0] == 0) # No quarantined at start
-        
+
+        self.assertTrue(raw_data['quarantined'].iloc[-1] == 0)  # No quarantined at end
+        self.assertTrue(raw_data['quarantined'].iloc[0] == 0)   # No quarantined at start
+
         for i in range(raw_data.shape[0]):
             if raw_data['new_quarantined'].iloc[i] != 0:
-                self.assertTrue(raw_data['new_tested'].iloc[i] != 0) # No new quarantines without tests
+                self.assertTrue(raw_data['new_tested'].iloc[i] != 0)  # No new quarantines without tests
 
     def test_quarantine_2(self):
         ''' Method used to make sure the simulation associated with quarantine_2 behaved as expected.
 
         This simulation focuses on making sure that uninfected, symptomatic tests (cold tests) behave as expected.
         It has no infections, but a very high cold probability.
-        
+
         Currently, quarantine should only take place after a positive test. Therefore, we should see no quarantine
         in this simulaiton. Also will check that the number of interactions remains roughly consistent.
         '''
-        
+
         raw_data = pd.DataFrame(self.quarantine_obj_2.get_arrays())
-        
+
         # Make sure there are tests and no one gets quarantined
         self.assertTrue(raw_data['new_tested'].sum() > 0 and raw_data['quarantined'].sum() == 0)
-        
+
         n_interactions = raw_data['total_daily_interactions_B']
         start_interactions_mean = n_interactions.iloc[:10].mean()
         end_interactions_mean = n_interactions.iloc[-10:].mean()
-        
+
         # Make sure it falls within half a standard deviation
-        self.assertTrue(np.abs(start_interactions_mean - end_interactions_mean) < n_interactions.std()/2)
+        self.assertTrue(np.abs(start_interactions_mean - end_interactions_mean) < n_interactions.std() / 2)
 
 
 if __name__ == '__main__':
