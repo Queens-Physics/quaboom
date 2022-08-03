@@ -667,7 +667,7 @@ class Simulation():
         returnDict = {"infected": self.track_infected, "new_infected": self.track_new_infected,
                       "recovered": self.track_recovered, "susceptible": self.track_susceptible,
                       "dead": self.track_dead, "quarantined": self.track_quarantined,
-                      "new_quarantined": self.track_new_quarantined, 
+                      "new_quarantined": self.track_new_quarantined,
                       "inf_students": self.track_inf_students, "total_tested": self.track_tested,
                       "new_tested": self.track_new_tested, "hospitalized": self.track_hospitalized,
                       "ICU": self.track_ICU, "testing_enforced": self.track_testing,
