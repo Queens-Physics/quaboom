@@ -230,8 +230,8 @@ class Person(object):
         if self.recovered or self.dead or (day - self.quarantined_day) >= self.sim_obj.quarantine_time:
             self.quarantined = False
             self.show_symptoms = False
-            return not self.quarantined
-        return not self.quarantined
+            return True
+        return False
 
     def get_quarantine_day(self):
         '''Method to retrieve the day a person is put into quarantine.
