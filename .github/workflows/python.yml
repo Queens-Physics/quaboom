@@ -86,7 +86,6 @@ jobs:
         cd test
         ./test_Simulation.py
 
-
   sphinx-docs:
     runs-on: ubuntu-latest
 
