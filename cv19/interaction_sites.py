@@ -366,23 +366,39 @@ class InteractionSites:
             Each individual list holds the indexes of people that will visit that site for this day.
         '''
 
-        # Figure out who is going to go to this site type today
+        # Figure out who is going to go to this site type today.
         person_ids = np.unique(np.concatenate(site_array))
 
-        # Create array of attendence probabilities
-        prob_attendence = [self.quarantine_isolation_factor if self.pop.get_person(person).is_quarantined()
-                           else will_go_prob for person in person_ids]
+        # Create array of attendence probabilities.
+        prob_attendence = [self.quarantine_isolation_factor
+                           if self.pop.get_person(person).is_quarantined() else will_go_prob
+                           for person in person_ids]
 
-        # Boolean evaluate the array
-        person_will_go = np.random.binomial(1, p=prob_attendence).astype(bool)
-        person_ids_will_go = person_ids[person_will_go]
+        # Select a subset of people who will actually choose to go to the site.
+        person_will_go_mask = np.random.binomial(1, p=prob_attendence).astype(bool)
+        person_ids = person_ids[person_will_go_mask]
 
-        # Assign the people going to a random array they are associated with
-        site_index_options = np.arange(len(site_array))
-        person_site_choices = [np.random.choice(site_index_options[[person in site for site in site_array]])
-                               for person in person_ids_will_go]
+        # Create a Boolean array of people (rows) and sites (columns).
+        # Each entry corresponds to whether or not
+        # a given person can go to the given site.
+        person_site_array = np.zeros(shape=(person_ids.shape[0], len(site_array)), dtype=bool)
+        for s, site in enumerate(site_array):
+            mask = np.isin(person_ids, site)
+            person_site_array[mask, s] = True
 
-        will_visit_grade = [person_ids_will_go[person_site_choices == i] for i in site_index_options]
+        # Choose a random number for each person,
+        # with an upper bound as the number of available sites for that person.
+        high = person_site_array.sum(axis=-1)
+        random_site_index = np.random.randint(low=0, high=high)
+
+        # argsort the array (descending) along sites and use random number above to select
+        # one of the available sites (first sites up to high[i] are available for person i).
+        site_indexes_argsorted = np.argsort(person_site_array, axis=-1)[..., ::-1]
+        person_site_index = site_indexes_argsorted[np.arange(site_indexes_argsorted.shape[0]),
+                                                   random_site_index]
+
+        will_visit_grade = [person_ids[np.where(person_site_index == s)[0]]
+                            for s in range(len(site_array))]
 
         return will_visit_grade
 
