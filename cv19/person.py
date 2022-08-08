@@ -242,15 +242,19 @@ class Person(object):
         '''
         return self.quarantined_day
 
-    def not_infected_symptoms(self):
-        '''Method to randomly infect a person with non COVID19 symptoms.
+    def update_uninfected_symptomatic(self):
+        '''Method to randomly infect a person with non COVID19 symptoms or to turn off non COVID19 symptoms.
 
         Returns
         -------
         self.show_symptoms: :obj:`bool`
         '''
 
-        if random() <= self.sim_obj.cold_prob:
+        if self.has_cold:
+            if random() <= 1 / self.sim_obj.cold_duration_days:
+                self.show_symptoms = False
+                self.has_cold = False
+        elif random() <= self.sim_obj.cold_prob:
             self.show_symptoms = True
             self.has_cold = True
         return self.show_symptoms
@@ -274,7 +278,7 @@ class Person(object):
         '''
         return self.test_day
 
-    def check_test_day(self, day):
+    def has_been_tested_recently(self, day):
         '''Method to check if the person has been tested in the quarantine time range.
         If the day is greater than the test day is removed.
         If the person had a cold it is also removed.
@@ -292,11 +296,11 @@ class Person(object):
 
         if self.test_day is None:
             return False
-        elif (day - self.test_day) >= self.quarantine_time:
-            self.test_day = None
-            self.has_cold = False
+        elif (day - self.test_day) < self.sim_obj.quarantine_time:
             return True
-        return False
+        else:
+            self.test_day = None
+            return False
 
     def check_symptoms(self, day):
         '''Method to check a persons symtoms based on if they are infected with COVID19 or a cold.
@@ -316,6 +320,19 @@ class Person(object):
         elif not self.infected and not self.has_cold:
             self.show_symptoms = False
         return self.show_symptoms
+
+    def could_be_symptomatic(self):
+        '''Method to check if the person could be showing symptoms.
+
+        A person could show symptoms if they are infected or if they have a cold.
+
+        Returns
+        -------
+        could_be_symptomatic : `bool`
+            True if the person has the potential for symptoms, False if not.
+        '''
+
+        return (self.has_cold or self.infected)
 
     def get_index(self):
         '''Method to retrieve the index of a person.
