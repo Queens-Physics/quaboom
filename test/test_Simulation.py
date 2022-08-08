@@ -52,12 +52,12 @@ class TestSimulation(unittest.TestCase):
 
         raw_data = pd.DataFrame(self.quarantine_obj_1.get_arrays())
 
-        self.assertTrue(raw_data['quarantined'].iloc[-1] == 0)  # No quarantined at end
-        self.assertTrue(raw_data['quarantined'].iloc[0] == 0)   # No quarantined at start
+        self.assertTrue(raw_data['quarantined'].iloc[-1] == 0)
+        self.assertTrue(raw_data['quarantined'].iloc[0] == 0)
 
-        for i in range(raw_data.shape[0]):
-            if raw_data['new_quarantined'].iloc[i] != 0:
-                self.assertTrue(raw_data['new_tested'].iloc[i] != 0)  # No new quarantines without tests
+        # Check that number of number of new tests is greater than or equal to
+        # the number of new quarantines for a given day
+        self.assertTrue((raw_data["new_tested"] >= raw_data["new_quarantined"]).all())
 
     def test_quarantine_2(self):
         ''' Method used to make sure the simulation associated with quarantine_2 behaved as expected.
@@ -72,7 +72,7 @@ class TestSimulation(unittest.TestCase):
         raw_data = pd.DataFrame(self.quarantine_obj_2.get_arrays())
 
         # Make sure there are tests and no one gets quarantined
-        self.assertTrue(raw_data['new_tested'].sum() > 0 and raw_data['quarantined'].sum() == 0)
+        self.assertTrue(raw_data['new_tested'].gt(0).any() and raw_data['quarantined'].eq(0).all())
 
         n_interactions = raw_data['total_daily_interactions_B']
         start_interactions_mean = n_interactions.iloc[:10].mean()
