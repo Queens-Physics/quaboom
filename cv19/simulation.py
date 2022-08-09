@@ -366,7 +366,7 @@ class simulation():
             visitors_ind = [x for x in range(self.nPop, self.nPop + num_vis)]
             vis_age = np.random.choice(a=self.pop.age_options, p=self.pop.age_weights, size=num_vis)
             for i in range(0, num_vis):
-                visitor = Person(index=i + self.nPop, sim_obj=self, infected=True, recovered=False, dead=False,
+                visitor = Person(index=visitors_ind[i], sim_obj=self, infected=True, recovered=False, dead=False,
                                  hospitalized=False, ICU=False, quarantined=False, quarantined_day=None, infected_day=None,
                                  recovered_day=None, death_day=None, others_infected=None,
                                  cure_days=None, recent_infections=None, vaccinated=False, age=vis_age[i],

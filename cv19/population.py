@@ -381,8 +381,12 @@ class Population:
     def remove_visitors(self, indices):
         '''Method to remove visitors from the simulation.
         '''
-        for i in range(len(indices)-1, -1, -1):
-            self.population.pop(indices[i])
+        for i in sorted(indices, reverse=True):
+            self.population.pop(i)
+
+        if len(self.population) != self.nPop:
+            raise RuntimeError(("Population is not expected length after removing visitors "
+                           f"(expected {self.nPop}, is {len(self.population)})."))
 
     def get_susceptible(self):
         '''Method to retrieve indicies of people suseptible.
