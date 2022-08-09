@@ -776,33 +776,43 @@ class Population:
         '''
         return self.test_sum
 
-    def random_symptomatic(self):
+    def update_uninfected_symptomatics(self):
         '''Method that causes a random sample of people to develop cold like symptoms.
         '''
 
         for person in self.population:
-            person.not_infected_symptoms()
+            person.update_uninfected_symptomatic()
 
-    def update_symptomatic(self, day):
+    def update_infected_symptomatics(self, day):
         '''Method to add people to the testing waitlist based on their symptoms.
+
+        First iterates through the entire population to check who should be allowed to test again. Calling
+        the `person.has_been_tested_recently` function updates the testing ability of that person based on the day,
+        and returns `True` if that person can test again and `False` if not.
+
+        The rest of the code creates a list of all people who could possibly be symptomatic and can test.
+        This list is looped through to judge whether a person should be added to the testing list.
 
         Parameters
         ----------
         day: int
             The current day the simulation is on.
         '''
-        # updates everyone's symptoms
-        for i in range(len(self.infected)):
-            if self.population[i].check_symptoms(day):
 
-                if i not in self.testing and self.have_been_tested[i] != 1:  # if person is not already in testing function
-                    infected_person = self.population[i]  # gets the infected person from the population list
-                    if (random() / self.population[i].get_protocol_compliance()) < self.prob_of_test:
-                        if infected_person.show_symptoms and not infected_person.knows_infected:
-                            self.testing.append(i)  # adds the person to the testing list
-                            self.population[i].knows_infected = True
-                    elif infected_person.check_test_day(day):
-                        self.have_been_tested[i] = 0  # remove them from the testing list (allows them to get retested if they get symptoms again)
+        people_to_check = (person_id for person_id, person in enumerate(self.population[:self.nPop])
+                           if person.could_be_symptomatic() and not person.has_been_tested_recently(day))
+
+        for person_id in people_to_check:
+            # Check if they are showing symptoms and update their status
+            if self.population[person_id].check_symptoms(day):
+                person = self.get_person(person_id)
+
+                # Calculate if they should be tested again
+                not_in_testing = person_id not in self.testing
+                will_comply = (random() / person.get_protocol_compliance()) < self.prob_of_test
+
+                if not_in_testing and will_comply:
+                    self.testing.append(person_id)
 
     def get_testing_wait_list(self):
         '''Method to return number of people waiting to be tested.

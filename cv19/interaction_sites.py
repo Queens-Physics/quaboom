@@ -10,7 +10,7 @@ from math import comb
 import numpy as np
 
 
-class Interaction_Sites:
+class InteractionSites:
     '''A class designed to host interactions between persons within specific locations.
 
     There are currently 7 different locations that can host interactions between
@@ -88,7 +88,7 @@ class Interaction_Sites:
         '''Method to load in attributes from the provided simulation class object.
 
         Sets all objects in the "interaction_sites_data" dictionary key as self
-        attributes of the interaction_sites class.
+        attributes of the InteractionSites class.
 
         Parameters
         ----------
@@ -665,8 +665,8 @@ class Interaction_Sites:
             The day value that this function is being called on in the encompassing simulation class.
         '''
 
-        self.pop.random_symptomatic()
-        self.pop.update_symptomatic(day)
+        self.pop.update_uninfected_symptomatics()
+        self.pop.update_infected_symptomatics(day)
         self.pop.get_tested(tests_per_day, day)
 
     def get_grade_A_sites(self):
