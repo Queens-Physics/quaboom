@@ -386,7 +386,7 @@ class Population:
 
         if len(self.population) != self.nPop:
             raise RuntimeError(("Population is not expected length after removing visitors "
-                           f"(expected {self.nPop}, is {len(self.population)})."))
+                               f"(expected {self.nPop}, is {len(self.population)})."))
 
     def get_susceptible(self):
         '''Method to retrieve indicies of people suseptible.
