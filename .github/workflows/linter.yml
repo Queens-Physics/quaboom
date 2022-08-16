@@ -1,0 +1,26 @@
+name: Other linters
+
+on:
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  editorconfig:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+
+    - name: Install dependencies
+      run: |
+        python3 -m pip install --upgrade pip
+        pip install editorconfig-checker==2.4.0
+
+    - name: Lint other files with EditorConfig
+      run: |
+        ec

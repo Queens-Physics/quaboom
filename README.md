@@ -49,18 +49,22 @@ be sure to fork the repository,
 make your changes on a new branch,
 and submit a pull request through GitHub.
 
-The code generally adheres to the
+The Python code generally adheres to the
 [PEP 8](https://peps.python.org/pep-0008/) style standards.
 We use [Pylint](https://pylint.pycqa.org/en/latest/)
 and [Flake8](https://flake8.pycqa.org/en/latest/)
 to enforce good practices and
 reduce the potential for bugs to be introduced.
+We also use an [EditorConfig](https://editorconfig.org/) linter
+to enforce a consistent style across all files,
+including configuration files and READMEs.
 To check whether or not your code will pass the exact tests
 that are automatically run, first install both packages:
 
 ```sh
 pip install pylint==2.14.4
 pip install flake8==4.0.1
+pip install editorconfig-checker==2.4.0
 ```
 
 Then, run the tests:
@@ -68,6 +72,7 @@ Then, run the tests:
 ```sh
 ./test/linters/pylint.py
 ./test/linters/flake8.py
+ec
 ```
 
 Each file has certain parameters that are modified
