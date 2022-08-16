@@ -97,6 +97,25 @@ class TestPerson(unittest.TestCase):
         person5.infect(day=infected_day, virus_type='alpha')
         self.assertIsNotNone(person5.cure_days)            # Make sure that cure days is set even though no parameter passed
 
+    def test_quarantine(self):
+        ''' Method used to test the quarantine mechanic to ensure it is behaving correctly.
+
+        Checks that a person can be infected and quarantined and let out correctly. Should be expanded
+        when quarantine mechanic code is refactored.
+        '''
+
+        infected_day, quarantined_day = 20, 25
+        quarantine_time = self.sim_obj.quarantine_time
+        person1 = Person(1, sim_obj=self.sim_obj, infected=True, infected_day=infected_day,
+                         recovered=False, quarantined_day=quarantined_day)
+
+        # Make sure they are let out properly
+        did_leave_quarantine = person1.leave_quarantine(day=quarantined_day + quarantine_time - 1)
+        self.assertFalse(did_leave_quarantine)
+        did_leave_quarantine = person1.leave_quarantine(day=quarantined_day + quarantine_time)
+        self.assertTrue(did_leave_quarantine)
+        self.assertFalse(person1.is_quarantined())
+
 
 if __name__ == '__main__':
     unittest.main()
