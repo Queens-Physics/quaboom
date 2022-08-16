@@ -52,6 +52,7 @@ class TestSimulation(unittest.TestCase):
 
         raw_data = pd.DataFrame(self.quarantine_obj_1.get_arrays())
 
+        # Make sure we start and end with no quarantined
         self.assertTrue(raw_data['quarantined'].iloc[-1] == 0)
         self.assertTrue(raw_data['quarantined'].iloc[0] == 0)
 
