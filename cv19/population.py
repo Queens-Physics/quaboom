@@ -238,14 +238,13 @@ class Population:
         self.infected = np.zeros(self.nPop, dtype=int) + NULL_ID  # list of all infected people
         self.recovered = np.zeros(self.nPop, dtype=int) + NULL_ID  # list of recovered people
         self.dead = np.zeros(self.nPop, dtype=int) + NULL_ID  # list of dead people
-        self.have_been_tested = np.zeros(self.nPop, dtype=int) + NULL_ID  # list of people who have been tested
         self.knows_infected = np.zeros(self.nPop, dtype=int) + NULL_ID  # list of people with positive test and still infected
         self.hospitalized = np.zeros(self.nPop, dtype=int) + NULL_ID  # list of people hospitalized and in the ICU
         self.ICU = np.zeros(self.nPop, dtype=int) + NULL_ID  # list of people in the ICU
         self.quarantined = np.zeros(self.nPop, dtype=int) + NULL_ID  # list of people who are currently in quarantine
         self.virus_types = np.zeros(self.nPop, dtype=int) + NULL_ID  # list of individuals with NULL_ID as virus type
         self.vaccinated = np.zeros(self.nPop, dtype=int) + NULL_ID  # list of people who have been vaccinated
-        self.testing = []  # list of people waiting to be others_infected
+        self.testing = []  # list of people waiting to be tested
         self.test_sum = 0  # total number of tests that have been run
         self.quarantined_sum = 0  # total number of people in quarantine (created as the list was having indexing issues)
         self.new_quarantined_num = 0  # new people in quarantine
@@ -823,7 +822,7 @@ class Population:
         '''
         return len(self.testing)
 
-    def get_tested(self, tests_per_day, day):
+    def get_tested(self, n_tests_max, day):
         '''Method to test people in the testing waitlist.
 
         Parameters
@@ -834,28 +833,30 @@ class Population:
             The day the testing is being done on.
         '''
 
-        # if less people are in the list than testing capacity test everyone in the list
-        if len(self.testing) < tests_per_day:
-            tests_per_day = len(self.testing)
-        self.test_sum += tests_per_day  # Add the daily tests to the total number of tests
+        # If less people are on the wait list than the testing capacity, test everyone.
+        n_tests = min(len(self.testing), n_tests_max)
+        self.test_sum += n_tests
 
-        self.new_quarantined_num = 0  # Reset number of newly quarantined
+        # Reset number of newly quarantined people.
+        self.new_quarantined_num = 0
+
         num_contacts_traced = 0
-
-        for _ in range(tests_per_day):
-            person_index = self.testing[0]  # Gets first person waiting for test
-            self.testing.pop(0)   # Removes first person waiting for test
+        for _ in range(n_tests):
+            # Gets first person in the testing wait list and removes them.
+            person_index = self.testing.pop(0)
             person = self.population[person_index]
             person.set_test_day(day)
-            self.have_been_tested[person_index] = person_index
 
+            # Assumes tests are 100% accurate, does not account for false negatives.
+            # TODO: implement a parameter for the testing accuracy.
             if person.infected:
                 person.knows_infected = True
-                # quarantines the person
+
+                # Quarantines the person.
                 person.set_quarantine(day)
-                self.quarantined[person_index] = person_index
                 self.new_quarantined_num += 1
 
+                # Contact tracing.
                 if self.ct_enabled and num_contacts_traced < self.ct_capacity:
                     person.contact_tracing(day=day)
                     num_contacts_traced += 1
