@@ -4,3 +4,4 @@ matplotlib
 scipy
 sphinx
 sphinx-rtd-theme
+tomli

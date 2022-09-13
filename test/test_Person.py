@@ -4,7 +4,7 @@ import unittest
 from pathlib import Path
 
 from cv19.person import Person
-from cv19.simulation import simulation
+from cv19.simulation import Simulation
 
 
 class TestPerson(unittest.TestCase):
@@ -24,8 +24,8 @@ class TestPerson(unittest.TestCase):
         This function is called every time the class is initalized, and creates a single
         simulation object that is used in all of the tests.
         '''
-        config_file = str(Path(Path(__file__).parent, "../config_files/main.json").resolve())
-        self.sim_obj = simulation(config_file)
+        config_file = str(Path(Path(__file__).parent, "../config_files/main.toml").resolve())
+        self.sim_obj = Simulation(config_file)
 
     def tearDown(self):
         ''' Tear down method for testing the person class.
@@ -84,10 +84,10 @@ class TestPerson(unittest.TestCase):
         self.assertEqual(person1.infected_day, infected_day)              # Should have the right infected day
 
         person2 = Person(2, sim_obj=self.sim_obj, infected=True, recovered=False)
-        self.assertFalse(person2.infect(day=infected_day, virus_type='alpha')) # Should not get infected - already infected
+        self.assertFalse(person2.infect(day=infected_day, virus_type='alpha'))  # Should not get infected - already infected
 
         person3 = Person(3, sim_obj=self.sim_obj, infected=False, recovered=True)
-        self.assertFalse(person3.infect(day=infected_day, virus_type='alpha')) # Should not get infected - already recovered
+        self.assertFalse(person3.infect(day=infected_day, virus_type='alpha'))  # Should not get infected - already recovered
 
         person4 = Person(4, sim_obj=self.sim_obj, infected=False, recovered=False)
         person4.infect(day=infected_day, cure_days=cure_days, virus_type='alpha')
@@ -96,6 +96,26 @@ class TestPerson(unittest.TestCase):
         person5 = Person(5, sim_obj=self.sim_obj, infected=False, recovered=False)
         person5.infect(day=infected_day, virus_type='alpha')
         self.assertIsNotNone(person5.cure_days)            # Make sure that cure days is set even though no parameter passed
+
+    def test_quarantine(self):
+        ''' Method used to test the quarantine mechanic to ensure it is behaving correctly.
+
+        Checks that a person can be infected and quarantined and let out correctly. Should be expanded
+        when quarantine mechanic code is refactored.
+        '''
+
+        infected_day, quarantined_day = 20, 25
+        quarantine_time = self.sim_obj.quarantine_time
+        person1 = Person(1, sim_obj=self.sim_obj, infected=True, infected_day=infected_day,
+                         recovered=False, quarantined_day=quarantined_day)
+
+        # Make sure they are let out properly
+        did_leave_quarantine = person1.leave_quarantine(day=quarantined_day + quarantine_time - 1)
+        self.assertFalse(did_leave_quarantine)
+        did_leave_quarantine = person1.leave_quarantine(day=quarantined_day + quarantine_time)
+        self.assertTrue(did_leave_quarantine)
+        self.assertFalse(person1.is_quarantined())
+
 
 if __name__ == '__main__':
     unittest.main()

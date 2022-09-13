@@ -6,7 +6,7 @@ This is where all the data that can be implemented in the code is located.
 This folder contains tsv/csv files with age groupings.
 
 ###### CanadaPopulation2020.csv
-This is a file with the population of Canada by province. It has data from January of 2020 as well as April of 2020. 
+This is a file with the population of Canada by province. It has data from January of 2020 as well as April of 2020.
 
 ###### KingstonPopulation.tsv
 This is a file with the population of Kingston divided into five year age groupings and subdivided into male and female populations within those age groupings.
@@ -26,9 +26,9 @@ https://www.publichealthontario.ca/-/media/documents/ncov/epi/covid-19-severe-ou
 ###### TimePeriods.csv
 This file contains time period for different characteristics of covid cases, such as:
 
-Incubation period - the time between contracting the virus and showing symptoms 
-(Sources: 
-Early Transmission Dynamics in Wuhan, China, of Novel Coronavirus–Infected Pneumonia https://www.nejm.org/doi/10.1056/NEJMoa2001316 
+Incubation period - the time between contracting the virus and showing symptoms
+(Sources:
+Early Transmission Dynamics in Wuhan, China, of Novel Coronavirus–Infected Pneumonia https://www.nejm.org/doi/10.1056/NEJMoa2001316
 Coronavirus disease (COVID-19): Summary of assumptions https://www.canada.ca/en/public-health/services/diseases/2019-novel-coronavirus-infection/health-professionals/assumptions.html#a2 )
 
 Recovery period - the time from onset to recovery from disease (not necessarily the same as infectious period, since symptoms typically outlast infectiousness)
@@ -59,7 +59,7 @@ This file contains the population of Kingston separated into categories based on
 This data is from the 2016 Census Profile for Kingston (Statistics Canada).
 
 ###### commuting_data.csv
-This file contains commuting data for the population of Kingston - the number of people commuting divided by mode of commuting as well as by commuting duration. Those commuting by public transit and with a longer commuting duration would be at an increased risk of contracting the virus. 
+This file contains commuting data for the population of Kingston - the number of people commuting divided by mode of commuting as well as by commuting duration. Those commuting by public transit and with a longer commuting duration would be at an increased risk of contracting the virus.
 
 This data is from the 2016 Census Profile for Kingston (Statistics Canada).
 
