@@ -553,15 +553,15 @@ class InteractionSites:
 
             if p1_infected:
                 if p1_mask:
-                    spread_prob *= (1-P1_OUTWARD_EFF)
+                    spread_prob *= (1 - P1_OUTWARD_EFF)
                 if p2_mask:
-                    spread_prob *= (1-P2_INWARD_EFF)
+                    spread_prob *= (1 - P2_INWARD_EFF)
 
             elif p2_infected:
                 if p1_mask:
-                    spread_prob *= (1-P1_INWARD_EFF)
+                    spread_prob *= (1 - P1_INWARD_EFF)
                 if p2_mask:
-                    spread_prob *= (1-P2_OUTWARD_EFF)
+                    spread_prob *= (1 - P2_OUTWARD_EFF)
 
         p1_vaccinated1 = person_1.is_vaccinated()
         p2_vaccinated1 = person_2.is_vaccinated()
@@ -569,7 +569,7 @@ class InteractionSites:
         p1_vaccine_eff = person_1.vaccine_type_efficiency() if p1_vaccinated1 else 1
         p2_vaccine_eff = person_2.vaccine_type_efficiency() if p2_vaccinated1 else 1
 
-        spread_prob *= ((1-p1_vaccine_eff) * (1-p2_vaccine_eff))
+        spread_prob *= ((1 - p1_vaccine_eff) * (1 - p2_vaccine_eff))
 
         return random() < spread_prob
 
