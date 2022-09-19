@@ -566,8 +566,8 @@ class InteractionSites:
         p1_vaccinated1 = person_1.is_vaccinated()
         p2_vaccinated1 = person_2.is_vaccinated()
 
-        p1_vaccine_eff = person_1.vaccine_type_efficiency() if p1_vaccinated1 else 1
-        p2_vaccine_eff = person_2.vaccine_type_efficiency() if p2_vaccinated1 else 1
+        p1_vaccine_eff = person_1.vaccine_type_efficiency() if p1_vaccinated1 else 0
+        p2_vaccine_eff = person_2.vaccine_type_efficiency() if p2_vaccinated1 else 0
 
         spread_prob *= ((1 - p1_vaccine_eff) * (1 - p2_vaccine_eff))
 
