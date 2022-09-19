@@ -548,28 +548,28 @@ class InteractionSites:
             p1_mask = person_1.wear_mask()
             p2_mask = person_2.wear_mask()
 
-            P1_INWARD_PROB, P1_OUTWARD_PROB = person_1.mask_type_efficiency()
-            P2_INWARD_PROB, P2_OUTWARD_PROB = person_2.mask_type_efficiency()
+            P1_INWARD_EFF, P1_OUTWARD_EFF = person_1.mask_type_efficiency() #eff indicates how protective the mask is
+            P2_INWARD_EFF, P2_OUTWARD_EFF = person_2.mask_type_efficiency()
 
             if p1_infected:
                 if p1_mask:
-                    spread_prob *= P1_OUTWARD_PROB
+                    spread_prob *= (1-P1_OUTWARD_EFF) # 1-efficacy = spread probability
                 if p2_mask:
-                    spread_prob *= P2_INWARD_PROB
+                    spread_prob *= (1-P2_INWARD_EFF)
 
             elif p2_infected:
                 if p1_mask:
-                    spread_prob *= P1_INWARD_PROB
+                    spread_prob *= (1-P1_INWARD_EFF)
                 if p2_mask:
-                    spread_prob *= P2_OUTWARD_PROB
+                    spread_prob *= (1-P2_OUTWARD_EFF)
 
         p1_vaccinated1 = person_1.is_vaccinated()
         p2_vaccinated1 = person_2.is_vaccinated()
 
-        p1_multiplier = person_1.vaccine_type_efficiency() if p1_vaccinated1 else 1
-        p2_multiplier = person_2.vaccine_type_efficiency() if p2_vaccinated1 else 1
+        p1_vaccine_eff = person_1.vaccine_type_efficiency() if p1_vaccinated1 else 1
+        p2_vaccine_eff = person_2.vaccine_type_efficiency() if p2_vaccinated1 else 1
 
-        spread_prob *= (p1_multiplier * p2_multiplier)
+        spread_prob *= ((1-p1_vaccine_eff) * (1-p2_vaccine_eff)) # 1 - vaccine eff = spread probability
 
         return random() < spread_prob
 
