@@ -612,8 +612,8 @@ class InteractionSites:
                     virus_name = self.variant_code_map[virus_id]
 
                     infection_chance = self.base_infection_spread_prob[virus_name] * self.house_infection_spread_factor
-                    person_vaccinated = person.is_vaccinated()
-                    person_vaccine_eff = person.vaccine_type_efficiency() if person_vaccinated else 0
+                    person_vaccinated = housemembers[person].is_vaccinated()
+                    person_vaccine_eff = housemembers[person].vaccine_type_efficiency() if person_vaccinated else 0
                     infection_chance *= (1 - person_vaccine_eff)
                     caught_infection = random() < infection_chance
 
@@ -664,8 +664,8 @@ class InteractionSites:
                     virus_name = self.variant_code_map[virus_id]
 
                     infection_chance = self.base_infection_spread_prob[virus_name] * self.house_infection_spread_factor
-                    person_vaccinated = person.is_vaccinated()
-                    person_vaccine_eff = person.vaccine_type_efficiency() if person_vaccinated else 0
+                    person_vaccinated = housemembers[person].is_vaccinated()
+                    person_vaccine_eff = housemembers[person].vaccine_type_efficiency() if person_vaccinated else 0
                     infection_chance *= (1 - person_vaccine_eff)
                     caught_infection = random() < infection_chance
                     if caught_infection:
