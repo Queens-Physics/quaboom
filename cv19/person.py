@@ -179,7 +179,7 @@ class Person(object):
         '''
         return self.ICU
 
-    def is_hospitalzied(self):
+    def is_hospitalized(self):
         '''Method to retrieve if a person is hospitalized. Returns True if in hospital,
         False if not.
 
@@ -202,7 +202,7 @@ class Person(object):
         self.quarantined: :obj:`bool`
         '''
 
-        # Make sure person is not already quarantined
+        # Make sure person is not already quarantined.
         if not self.is_quarantined():
             self.quarantined_day = day
             self.quarantined = True
@@ -225,8 +225,7 @@ class Person(object):
         -------
         not self.quarantined: :obj:`bool`
         '''
-        if self.quarantined_day is None:
-            self.quarantined_day = 0
+
         if self.recovered or self.dead or (day - self.quarantined_day) >= self.sim_obj.quarantine_time:
             self.quarantined = False
             self.show_symptoms = False
@@ -303,22 +302,26 @@ class Person(object):
             return False
 
     def check_symptoms(self, day):
-        '''Method to check a persons symtoms based on if they are infected with COVID19 or a cold.
+        '''Method to check a person's symptoms based on if they are infected with COVID19 or a cold.
 
         Parameters
         ----------
         day: int
-            The current day in the simulation to compare against  when the person was tested.
+            The current day in the simulation to compare against when the person was tested.
 
         Returns
         -------
         self.show_symptoms: :obj:`bool`
         '''
 
-        if self.will_get_symptoms and (day - self.infected_day) >= self.days_until_symptoms and self.infected or self.has_cold:
+        if ((self.infected
+             and self.will_get_symptoms
+             and (day - self.infected_day) >= self.days_until_symptoms)
+                or self.has_cold):
             self.show_symptoms = True
-        elif not self.infected and not self.has_cold:
+        else:
             self.show_symptoms = False
+
         return self.show_symptoms
 
     def could_be_symptomatic(self):
@@ -498,9 +501,8 @@ class Person(object):
         '''
 
         if self.infected and not self.recovered:
-
-            days_since_infected = day - self.infected_day
             # Checks cure timeline
+            days_since_infected = day - self.infected_day
             if days_since_infected >= self.cure_days:
                 # Resets values to cure them
                 self.infected = False
@@ -514,6 +516,7 @@ class Person(object):
                 self.ICU = False
 
                 return True
+
         return False
 
     def check_dead(self, day):  # checking that case_severity==death outside of the loop
@@ -531,16 +534,16 @@ class Person(object):
             True they died and False if not.
         '''
 
-        if self.infected:
-
-            days_since_infected = day - self.infected_day
+        if self.infected and self.case_severity == 'Death':
             # Checks death timeline
+            days_since_infected = day - self.infected_day
             if days_since_infected >= self.cure_days:
                 self.infected = False
                 self.dead = True
                 self.death_day = day
 
                 return True
+
         return False
 
     def check_hospitalized(self):
@@ -552,11 +555,10 @@ class Person(object):
             True if hospitalized and False if not.
         '''
 
-        if self.infected:
-            if self.case_severity == 'Hospitalization' or self.case_severity == 'ICU' or self.case_severity == 'Death':
-                self.hospitalized = True
-
+        if self.infected and self.case_severity in ('Hospitalization', 'ICU', 'Death'):
+            self.hospitalized = True
             return True
+
         return False
 
     def check_ICU(self):
@@ -568,11 +570,10 @@ class Person(object):
             True if person goes to ICU and False if not.
         '''
 
-        if self.infected:
-            if self.case_severity == 'ICU' or self.case_severity == 'Death':
-                self.ICU = True
-
+        if self.infected and self.case_severity in ('ICU', 'Death'):
+            self.ICU = True
             return True
+
         return False
 
     def wear_mask(self):
@@ -790,8 +791,10 @@ class Person(object):
         -------
         self.vaccinated: :obj:`bool`
         '''
-        self.vaccinated_day = day
-        self.vaccinated = True
+        # Make sure person is not already vaccinated.
+        if not self.is_vaccinated():
+            self.vaccinated_day = day
+            self.vaccinated = True
 
     def vaccine_type_efficiency(self):
         '''Method to determines what the efficiency of the vaccine based on the type of vaccine administered.
