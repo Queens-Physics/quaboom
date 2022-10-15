@@ -140,7 +140,6 @@ class InteractionSites:
         # Calculate number of sites
         num_sites = self.calculate_num_sites(grade_code=grade_code)
         grade_sites = [[] for _ in range(num_sites)]
-        print(num_sites)
 
         for person in self.pop.get_population():
             if students_interact or not (self.students_on and person.job == 'Student'):
