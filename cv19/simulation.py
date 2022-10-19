@@ -197,7 +197,6 @@ class Simulation():
                     with open(filepath, 'rb') as file:
                         self.disease_parameters = tomli.load(file)
 
-
     def init_classes(self):
         ''' Method that links the policy, population, and interaction sites class objects with
         the Simulation class (serves as pointer variables).
