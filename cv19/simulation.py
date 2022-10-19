@@ -61,7 +61,7 @@ class Simulation():
         A variable indicating if this object has run a simulaiton yet.
     '''
 
-    def __init__(self, config_file, config_dir="", verbose=False):
+    def __init__(self, config_file, config_dir="", config_overrides=None, verbose=False):
         ''' __init__ method docstring.
 
         Parameters
@@ -71,13 +71,17 @@ class Simulation():
         config_dir : str
             Path to the directory that stores the configuration file. Not required if config_file
             is a complete path.
+        config_overrides : dict
+            A dictionary of configuration file instances that can be used to override the files
+            specified in the main configuration file. Designed to allow tabular mode to edit parameters
+            in configuration files other than main.
         verbose : bool
             A variable indicating whether to print updates with simulation information while running.
         '''
 
         self.config_dir = config_dir
         self.load_general_parameters(config_file)
-        self.load_disease_parameters(self.disease_config_file)
+        self.load_disease_parameters(self.disease_config_file, config_overrides)
 
         self.init_classes()  # Have to initalize the classes after we have all of the parameters
 
@@ -152,7 +156,7 @@ class Simulation():
         self.virus_names = list(self.variant_codes.keys())
         self.track_virus_types = {virus_name: np.zeros(self.nDays, dtype=int) for virus_name in self.virus_names}
 
-    def load_disease_parameters(self, filename):
+    def load_disease_parameters(self, filename, config_overrides):
         ''' Method to load in attributes from the disease configuration file.
 
         All parameters in the file are loaded into the object, and parameter names
@@ -162,32 +166,37 @@ class Simulation():
         ----------
         filename : str
             Path to the disease configuration file.
+        config_overrides : dict
+            Dictionary containing possible override versions of the secondary configuration files.
+            Note, does not include paths to configuration files but the files themselves.
         '''
 
-        # If path is absolute, use it.
-        if Path(filename).is_absolute():
-            with open(filename, 'rb') as file:
-                self.disease_parameters = tomli.load(file)
-
-        # Assume that the configuration filename is relative to path of main config.
-        # If not set, assume relative to working directory.
-        # Last attempt try relative to cv19 project directory.
+        if "disease_paramters" in config_overrides:
+            self.disease_parameters = config_overrides['disease_parameters']
         else:
-            filepath = Path(self.config_dir, filename)
-            try:
-                with open(filepath, 'rb') as file:
+            # If path is absolute, use it.
+            if Path(filename).is_absolute():
+                with open(filename, 'rb') as file:
                     self.disease_parameters = tomli.load(file)
 
-                return
+            # Assume that the configuration filename is relative to path of main config.
+            # If not set, assume relative to working directory.
+            # Last attempt try relative to cv19 project directory.
+            else:
+                filepath = Path(self.config_dir, filename)
+                try:
+                    with open(filepath, 'rb') as file:
+                        self.disease_parameters = tomli.load(file)
 
-            except FileNotFoundError:
-                warnings.warn((f"Unable to find file: {filepath} "
-                               "assuming directory is relative to main config. "
-                               "Attempting read relative to CV19ROOT directory."))
+                except FileNotFoundError:
+                    warnings.warn((f"Unable to find file: {filepath} "
+                                   "assuming directory is relative to main config. "
+                                   "Attempting read relative to CV19ROOT directory."))
 
-                filepath = Path(CV19ROOT, filename)
-                with open(filepath, 'rb') as file:
-                    self.disease_parameters = tomli.load(file)
+                    filepath = Path(CV19ROOT, filename)
+                    with open(filepath, 'rb') as file:
+                        self.disease_parameters = tomli.load(file)
+
 
     def init_classes(self):
         ''' Method that links the policy, population, and interaction sites class objects with

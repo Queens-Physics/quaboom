@@ -11,13 +11,18 @@ from matplotlib import pyplot as plt
 from .simulation import Simulation
 
 
-def async_simulation(config_file, config_dir="", verbose=False):
+def async_simulation(config_file, config_dir="", config_overrides=None, verbose=False):
     '''Does a single run of the simulation with the supplied configuration details.
 
     Parameters
     ----------
     config_file : str
         Filename for the configuration file.
+    config_dir : str
+        Directory containing configuration files.
+    config_overrides : dict
+        Dictionary containing alternate versions of the secondard configuration files. Used to
+        iterate over parameters in tabular mode that are stored outside the main configuration file.
     verbose : bool, default False
         Whether to output information from each day of the simulation.
 
@@ -27,12 +32,14 @@ def async_simulation(config_file, config_dir="", verbose=False):
         Arrays from the simulation.
     '''
 
-    sim = Simulation(config_file, config_dir=config_dir, verbose=verbose)
+    sim = Simulation(config_file, config_dir=config_dir, config_overrides=config_overrides,
+                     verbose=verbose)
     sim.run()
     return sim.get_arrays()
 
 
-def run_async(num_runs, config_file, save_name=None, num_cores=-1, config_dir="", verbose=False):
+def run_async(num_runs, config_file, save_name=None, num_cores=-1, config_dir="", verbose=False,
+              config_override_files=None):
     '''Runs multiple simulations in parallel using the supplied configuration settings.
 
     Parameters
@@ -61,7 +68,8 @@ def run_async(num_runs, config_file, save_name=None, num_cores=-1, config_dir=""
     # Run all of the simulations
     multiprocessing.freeze_support()
     with multiprocessing.Pool(processes=num_cores) as pool:
-        results = pool.starmap(async_simulation, ((config_file, config_dir, verbose) for _ in range(num_runs)))
+        results = pool.starmap(async_simulation, ((config_file, config_dir, config_override_files, verbose)
+                                                  for _ in range(num_runs)))
 
     df = pd.DataFrame(results)
     if save_name is not None:
@@ -71,14 +79,16 @@ def run_async(num_runs, config_file, save_name=None, num_cores=-1, config_dir=""
     return df
 
 
-def _config_editor(config, param_name, value):
+def _config_editor(main_config, disease_config, param_name, value):
     '''Takes string form of a parameter's name (eg. policy_data.testing_rate)
     and changes it to the supplied value.
 
     Parameters
     ----------
-    config : dict
-        Dictionary containing the configuration settings.
+    main_config : dict
+        Dictionary containing the main configuration settings.
+    disease_config : dict
+        Dictionary containing the disease configuration settings.
     param_name : str
         String form of a parameter's name (eg. policy_data.testing_rate).
     value : object
@@ -90,19 +100,36 @@ def _config_editor(config, param_name, value):
         If param_name is not in the config dictionary.
     '''
 
-    x = config
+    m = main_config
+    d = disease_config
     param_names = param_name.split('.')
-    for i, param in enumerate(param_names):
-        if param not in x.keys():
-            raise ValueError(f"The supplied param_name {param_name} is not in the configuration file")
 
-        # Last parameter: set the value now
-        if i == len(param_names) - 1:
-            x[param] = value
+    if param_names[0] in m.keys():
+        # Get parameter nested in the main file
+        for i, param in enumerate(param_names):
+            if param in m.keys():
+                # Last parameter: set the value now
+                if i == len(param_names) - 1:
+                    m[param] = value
+                # Not the last parameter: advance in the dictionary
+                else:
+                    m = m[param]
+            else:
+                raise ValueError(f"param_name {param_name} not found nested in the main configuration file")
 
-        # Not the last parameter: advance in the dictionary
-        else:
-            x = x[param]
+    elif param_names[0] in d.keys():
+        # Get parameter nested in the disease file
+        for i, param in enumerate(param_names):
+            if param in d.keys():
+                if i == len(param_names) - 1:
+                    d[param] = value
+                else:
+                    d = d[param]
+            else:
+                raise ValueError(f"param_name {param_name} not found nested in the disease configuration file")
+
+    else:
+        raise ValueError(f"The supplied param_name {param_name} is not in any configuration file")
 
 
 def tabular_mode(base_config_file, independent, dependent, num_runs=8, num_cores=8, save_name=None, verbose=False):
@@ -179,15 +206,24 @@ def tabular_mode(base_config_file, independent, dependent, num_runs=8, num_cores
     # Running through each scenario
     for i, values in enumerate(zip(*mesh)):
 
-        # Load the TOML file
+        config_dir = Path(base_config_file).parent
+
+        # Load the main TOML file
         with open(base_config_file, 'rb') as f:
             temp_config = tomli.load(f)
-
-        config_dir = Path(base_config_file).parent
+        # Load the disease TOML file
+        disease_config_filename = Path(config_dir,
+                                       temp_config['simulation_data']['disease_config_file'])
+        with open(disease_config_filename, 'rb') as f:
+            temp_disease = tomli.load(f)
 
         # Setting the parameters from the independent variables
         for key, value in zip(indep_keys, values):
-            _config_editor(temp_config, key, value)
+            _config_editor(temp_config, temp_disease, key, value)
+
+        config_override_files = {
+            'disease_config': temp_disease
+        }
 
         # Run the simulations: returns an DataFrame
         scenario_save_name = None
@@ -196,7 +232,8 @@ def tabular_mode(base_config_file, independent, dependent, num_runs=8, num_cores
         elif isinstance(save_name, str):
             scenario_save_name = save_name + f"{i:02}"
         data = run_async(num_runs, temp_config, num_cores=num_cores,
-                         save_name=scenario_save_name, config_dir=config_dir, verbose=verbose)
+                         save_name=scenario_save_name, config_dir=config_dir, verbose=verbose,
+                         config_override_files=config_override_files)
 
         # Processing the results to get the dependent measurements, add to results
         result = [f(data) for f in dep_funcs]
