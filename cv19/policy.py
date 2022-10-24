@@ -181,13 +181,11 @@ class Policy:
             The number of people on the testing waitlist for this day in the simulation.
         '''
 
-        tests = (self.testing_rates[0] * total_quarantined
-                 + self.testing_rates[1] * new_quarantined
-                 + self.testing_rates[2] * wait_list)  # defines the number of tests going to be run
         if not hasattr(self, "testing_baseline"):
             self.testing_baseline = 0
-        elif tests < self.testing_baseline and wait_list > 0:
-            tests = self.testing_baseline
+        tests = (self.testing_rates[0] * total_quarantined
+                 + self.testing_rates[1] * new_quarantined
+                 + self.testing_rates[2] * wait_list) + self.testing_baseline  # defines the number of tests going to be run
         return int(tests)
 
     def check_students(self, day):
