@@ -63,7 +63,7 @@ that are automatically run, first install both packages:
 
 ```sh
 pip install pylint==2.14.4
-pip install flake8==4.0.1
+pip install flake8==5.0.4
 pip install editorconfig-checker==2.4.0
 ```
 
