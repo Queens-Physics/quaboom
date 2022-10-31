@@ -517,7 +517,7 @@ class InteractionSites:
         day_hours_scaler = 12
 
         if site_day_pop == 0:
-            return np.zeros(1)
+            return np.array([])
         else:
             # Generate a linaer distribution from
             number_of_interactions = np.round(np.random.triangular(left=0, mode=0, right=site_day_pop / day_hours_scaler,
