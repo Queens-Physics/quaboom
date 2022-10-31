@@ -154,7 +154,7 @@ class Simulation():
 
         # Check that the inputs are valid
         assert self.nPop >= self.num_students
-        assert self.nPop >= sum(v_id for _, v_id in self.variants.items())
+        assert self.nPop >= sum(self.variants.values())
 
     def load_disease_parameters(self, filename):
         ''' Method to load in attributes from the disease configuration file.
