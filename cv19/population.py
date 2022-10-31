@@ -37,7 +37,6 @@ class Population:
         self.set_demographic_parameters()
 
         self.nPop = sim_obj.nPop  # total population
-        self.v0 = sim_obj.v0  # initial vaccinated
 
         # Student parameter
         self.nStudents = sim_obj.num_students  # full capacity ~ 24k students
@@ -99,7 +98,25 @@ class Population:
 
         mask_type_arr = np.random.choice(a=self.mask_options, p=self.mask_weights, size=self.nPop)
         has_mask_arr = np.random.uniform(size=self.nPop) < self.prob_has_mask
+
+        self.v0 = sim_obj.v0_parameters["v0"]  # initial vaccinated
         vaccine_type_arr = np.random.choice(a=self.vaccine_options, p=self.vaccine_weights, size=self.nPop)
+        if self.v0 > self.nPop:
+            self.v0 = self.nPop  # make sure maximum initially vaccinated people <= population size
+        v0_lower = sim_obj.v0_parameters["v0_interval_start_day"]
+        v0_upper = sim_obj.v0_parameters["v0_interval_end_day"]
+        vaccination_date_arr = np.zeros(self.v0)
+        if v0_upper <= 0:
+
+            if v0_lower < v0_upper:
+                vaccination_date_arr = np.random.uniform(low=v0_lower, high=v0_upper, size=self.v0)
+            else:
+                vaccination_date_arr = np.ones(self.v0) * v0_lower
+        else:
+            if v0_lower >= 0:
+                vaccination_date_arr = np.zeros(self.v0)
+            else:
+                vaccination_date_arr = np.random.uniform(low=v0_lower, high=0, size=self.v0)
 
         # Initialize the house index and size for the loop
         houseIndex = 0
@@ -110,6 +127,13 @@ class Population:
             if houseSize == 0:
                 houseIndex += 1
                 houseSize = self.household[houseIndex]
+
+            vaccine_type = vaccine_type_arr[i]
+            individual_vaccine_info = {"vaccine_type": vaccine_type,
+                                       "vaccine_max_efficacy": self.vaccine_parameters["vaccine_max_efficacy"][vaccine_type],
+                                       "vaccine_immunity_buildup_days": self.vaccine_parameters["vaccine_immunity_buildup_days"][vaccine_type],
+                                       "long_term_vaccine_eff": self.vaccine_parameters["long_term_vaccine_eff"][vaccine_type],
+                                       "vaccine_efficacy_min_day": self.vaccine_parameters["vaccine_efficacy_min_day"][vaccine_type]}
 
             # MAKE A PERSON
             newPerson = Person(index=i,
@@ -130,8 +154,7 @@ class Population:
                                age=age_arr[i],
                                job=job_arr[i],
                                house_index=houseIndex,
-                               vaccinated=False,
-                               vaccine_type=vaccine_type_arr[i],
+                               vaccine_info=individual_vaccine_info,
                                isolation_tendencies=isolation_tend_arr[i],
                                case_severity=case_severity_arr[i],
                                mask_type=mask_type_arr[i],
@@ -176,6 +199,13 @@ class Population:
                 studHouseIndex += 1
                 studHouseSize = self.stud_houses[studHouseIndex]
 
+            vaccine_type = vaccine_type_arr[i]
+            individual_vaccine_info = {"vaccine_type": vaccine_type,
+                                       "vaccine_max_efficacy": self.vaccine_parameters["vaccine_max_efficacy"][vaccine_type],
+                                       "vaccine_immunity_buildup_days": self.vaccine_parameters["vaccine_immunity_buildup_days"][vaccine_type],
+                                       "long_term_vaccine_eff": self.vaccine_parameters["long_term_vaccine_eff"][vaccine_type],
+                                       "vaccine_efficacy_min_day": self.vaccine_parameters["vaccine_efficacy_min_day"][vaccine_type]}
+
             newStudent = Person(index=i,
                                 sim_obj=sim_obj,
                                 infected=False,
@@ -194,8 +224,7 @@ class Population:
                                 age=student_age[i - self.nPop + self.nStudents],  # adjust for index inconsistency
                                 job='Student',
                                 house_index=studHouseIndex,
-                                vaccinated=False,
-                                vaccine_type=vaccine_type_arr[i],
+                                vaccine_info=individual_vaccine_info,
                                 isolation_tendencies=isolation_tend_arr[i],
                                 case_severity=student_case_severity_arr[i - self.nPop + self.nStudents],  # adjust for index inconsistency
                                 mask_type=mask_type_arr[i],
@@ -266,8 +295,8 @@ class Population:
 
         # Vaccinate first v0 people
         v_indices = sample(range(self.nPop), self.v0)
-        for i in v_indices:
-            self.population[i].set_vaccinated(day=0)
+        for index, i in enumerate(v_indices):
+            self.population[i].immunization_history_obj.set_vaccinated(day=int(vaccination_date_arr[index]))
             self.vaccinated[i] = i
 
     def load_attributes_from_sim_obj(self, sim_obj):
@@ -302,9 +331,10 @@ class Population:
         self.mask_weights = np.array([self.mask_type[key] for key in constants.MASK_OPTIONS])
         self.mask_options = constants.MASK_OPTIONS
 
-        # format vaccine weights
+        # format vaccine parameters
         self.vaccine_weights = np.array([self.sim_obj.vaccine_type[key] for key in constants.VACCINE_OPTIONS])
         self.vaccine_options = constants.VACCINE_OPTIONS
+        self.vaccine_parameters = sim_obj.immunization_history_parameters
 
     def set_demographic_parameters(self):
         '''Method to open disease parameters from the TOML file.
@@ -892,7 +922,7 @@ class Population:
         '''
 
         non_vaccinated = np.array([index for index in range(self.nPop)
-                                   if not self.population[index].is_vaccinated()])
+                                   if not self.population[index].immunization_history_obj.is_vaccinated()])
 
         num_vacc = self.sim_obj.num_vaccinations
         num_to_vaccinate = num_vacc if len(non_vaccinated) >= num_vacc else len(non_vaccinated)
@@ -902,7 +932,7 @@ class Population:
         for index in self.to_vaccinate:
             person_to_vaccinate = self.population[index]
 
-            person_to_vaccinate.set_vaccinated(day)
+            person_to_vaccinate.immunization_history_obj.set_vaccinated(day)
             self.vaccinated[index] = index
 
     def change_mask_wearing(self):

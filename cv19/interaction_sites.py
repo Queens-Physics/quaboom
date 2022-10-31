@@ -466,7 +466,7 @@ class InteractionSites:
 
                 if person_1_infected != person_2_infected:
                     # Have an interaction between those people
-                    did_infect = self.interact(p1_obj, p2_obj)
+                    did_infect = self.interact(p1_obj, p2_obj, day)
                     if did_infect:
                         if person_1_infected:
                             new_infections[person_2_index] = True
@@ -522,7 +522,7 @@ class InteractionSites:
 
         return number_of_interactions
 
-    def interact(self, person_1, person_2):
+    def interact(self, person_1, person_2, day):
         '''Method that models the interaction between two people.
 
         Parameters
@@ -563,11 +563,11 @@ class InteractionSites:
                 if p2_mask:
                     spread_prob *= (1 - P2_OUTWARD_EFF)
 
-        p1_vaccinated1 = person_1.is_vaccinated()
-        p2_vaccinated1 = person_2.is_vaccinated()
+        p1_vaccinated1 = person_1.immunization_history_obj.is_vaccinated()
+        p2_vaccinated1 = person_2.immunization_history_obj.is_vaccinated()
 
-        p1_vaccine_eff = person_1.vaccine_type_efficiency() if p1_vaccinated1 else 0
-        p2_vaccine_eff = person_2.vaccine_type_efficiency() if p2_vaccinated1 else 0
+        p1_vaccine_eff = person_1.immunization_history_obj.vaccine_efficacy(day) if p1_vaccinated1 else 0
+        p2_vaccine_eff = person_2.immunization_history_obj.vaccine_efficacy(day) if p2_vaccinated1 else 0
 
         spread_prob *= ((1 - p1_vaccine_eff) * (1 - p2_vaccine_eff))
 
@@ -612,8 +612,8 @@ class InteractionSites:
                     virus_name = self.variant_code_map[virus_id]
 
                     infection_chance = self.base_infection_spread_prob[virus_name] * self.house_infection_spread_factor
-                    person_vaccinated = housemembers[person].is_vaccinated()
-                    person_vaccine_eff = housemembers[person].vaccine_type_efficiency() if person_vaccinated else 0
+                    person_vaccinated = housemembers[person].immunization_history_obj.is_vaccinated()
+                    person_vaccine_eff = housemembers[person].immunization_history_obj.vaccine_efficacy(day) if person_vaccinated else 0
                     infection_chance *= (1 - person_vaccine_eff)
                     caught_infection = random() < infection_chance
 
@@ -664,8 +664,8 @@ class InteractionSites:
                     virus_name = self.variant_code_map[virus_id]
 
                     infection_chance = self.base_infection_spread_prob[virus_name] * self.house_infection_spread_factor
-                    person_vaccinated = housemembers[person].is_vaccinated()
-                    person_vaccine_eff = housemembers[person].vaccine_type_efficiency() if person_vaccinated else 0
+                    person_vaccinated = housemembers[person].immunization_history_obj.is_vaccinated()
+                    person_vaccine_eff = housemembers[person].immunization_history_obj.vaccine_efficacy(day) if person_vaccinated else 0
                     infection_chance *= (1 - person_vaccine_eff)
                     caught_infection = random() < infection_chance
                     if caught_infection:

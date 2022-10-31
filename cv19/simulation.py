@@ -78,6 +78,7 @@ class Simulation():
         self.config_dir = config_dir
         self.load_general_parameters(config_file)
         self.load_disease_parameters(self.disease_config_file)
+        self.load_immunization_parameters(self.immunization_history_config_file)
 
         self.init_classes()  # Have to initalize the classes after we have all of the parameters
 
@@ -188,6 +189,43 @@ class Simulation():
                 filepath = Path(CV19ROOT, filename)
                 with open(filepath, 'rb') as file:
                     self.disease_parameters = tomli.load(file)
+
+    def load_immunization_parameters(self, config_file_name):
+        ''' Method to load in attributes from the immunization history configuration file.
+
+        All parameters in the file are loaded into the object, and parameter names
+        are taken from dictionary keys.
+
+        Parameters
+        ----------
+        filename : str
+            Path to the immunization history configuration file.
+        '''
+
+        # If path is absolute, use it.
+        if Path(config_file_name).is_absolute():
+            with open(config_file_name, 'rb') as file:
+                self.immunization_history_parameters = tomli.load(file)
+
+        # Assume that the configuration filename is relative to path of main config.
+        # If not set, assume relative to working directory.
+        # Last attempt try relative to cv19 project directory.
+        else:
+            filepath = Path(self.config_dir, config_file_name)
+            try:
+                with open(filepath, 'rb') as file:
+                    self.immunization_history_parameters = tomli.load(file)
+
+                return
+
+            except FileNotFoundError:
+                warnings.warn((f"Unable to find file: {filepath} "
+                               "assuming directory is relative to main config. "
+                               "Attempting read relative to CV19ROOT directory."))
+
+                filepath = Path(CV19ROOT, config_file_name)
+                with open(filepath, 'rb') as file:
+                    self.immunization_history_parameters = tomli.load(file)
 
     def init_classes(self):
         ''' Method that links the policy, population, and interaction sites class objects with
@@ -369,7 +407,9 @@ class Simulation():
                 visitor = Person(index=visitors_ind[i], sim_obj=self, infected=True, recovered=False, dead=False,
                                  hospitalized=False, ICU=False, quarantined=False, quarantined_day=None, infected_day=None,
                                  recovered_day=None, death_day=None, others_infected=None,
-                                 cure_days=None, recent_infections=None, vaccinated=False, age=vis_age[i],
+                                 cure_days=None, recent_infections=None,
+                                 vaccine_info={"vaccine_type": None, "vaccine_max_efficacy": None,
+                                               "vaccine_immunity_buildup_days": None, "long_term_vaccine_eff": None, "vaccine_efficacy_min_day": None}, age=vis_age[i],
                                  job="Visitor", house_index=None, isolation_tendencies=0.2,
                                  case_severity='Mild', has_mask=True, virus_type="alpha")
                 self.pop.population.append(visitor)
