@@ -171,7 +171,7 @@ class Simulation():
             Note, does not include paths to configuration files but the files themselves.
         '''
 
-        if config_override_data is not None and "disease_parameters" in config_override_data:
+        if config_override_data is not None:
             self.disease_parameters = config_override_data['disease_parameters']
         else:
             # If path is absolute, use it.
