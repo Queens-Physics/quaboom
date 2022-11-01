@@ -59,13 +59,7 @@ def run_async(num_runs, config_file, save_name=None, num_cores=-1, config_dir=""
     # Run all of the simulations
     multiprocessing.freeze_support()
     with multiprocessing.Pool(processes=num_cores) as pool:
-#         simulation_parameters = {
-#             "config_file": config_file,
-#             "config_dir": config_dir,
-#             "config_override_files": config_override_files,
-#             "verbose": verbose
-#         }
-        results = pool.starmap(async_simulation, ((config_file, config_dir, config_override_data, verbose) 
+        results = pool.starmap(async_simulation, ((config_file, config_dir, config_override_data, verbose)
                                                   for _ in range(num_runs)))
 
     df = pd.DataFrame(results)
