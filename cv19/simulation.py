@@ -61,7 +61,7 @@ class Simulation():
         A variable indicating if this object has run a simulaiton yet.
     '''
 
-    def __init__(self, config_file, config_dir="", config_overrides=None, verbose=False):
+    def __init__(self, config_file, config_dir="", config_override_data=None, verbose=False):
         ''' __init__ method docstring.
 
         Parameters
@@ -71,7 +71,7 @@ class Simulation():
         config_dir : str
             Path to the directory that stores the configuration file. Not required if config_file
             is a complete path.
-        config_overrides : dict
+        config_override_data : dict
             A dictionary of configuration file instances that can be used to override the files
             specified in the main configuration file. Designed to allow tabular mode to edit parameters
             in configuration files other than main.
@@ -81,7 +81,7 @@ class Simulation():
 
         self.config_dir = config_dir
         self.load_general_parameters(config_file)
-        self.load_disease_parameters(self.disease_config_file, config_overrides)
+        self.load_disease_parameters(self.disease_config_file, config_override_data)
 
         self.init_classes()  # Have to initalize the classes after we have all of the parameters
 
@@ -156,7 +156,7 @@ class Simulation():
         self.virus_names = list(self.variant_codes.keys())
         self.track_virus_types = {virus_name: np.zeros(self.nDays, dtype=int) for virus_name in self.virus_names}
 
-    def load_disease_parameters(self, filename, config_overrides):
+    def load_disease_parameters(self, filename, config_override_data):
         ''' Method to load in attributes from the disease configuration file.
 
         All parameters in the file are loaded into the object, and parameter names
@@ -166,13 +166,13 @@ class Simulation():
         ----------
         filename : str
             Path to the disease configuration file.
-        config_overrides : dict
+        config_override_data : dict
             Dictionary containing possible override versions of the secondary configuration files.
             Note, does not include paths to configuration files but the files themselves.
         '''
 
-        if config_overrides is not None and "disease_paramters" in config_overrides:
-            self.disease_parameters = config_overrides['disease_parameters']
+        if config_override_data is not None and "disease_parameters" in config_override_data:
+            self.disease_parameters = config_override_data['disease_parameters']
         else:
             # If path is absolute, use it.
             if Path(filename).is_absolute():
