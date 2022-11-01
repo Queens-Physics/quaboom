@@ -1,18 +1,21 @@
 class Immunization_History:
+    '''
+    A class designed to keep track of a Person's vaccination history and vaccination parameters.
+
+    Holds the parameters from immunization_history_parameters.toml corresponding to the Person's vaccine type,
+    as well as the attributes listed below.
+
+    Attributes
+    ----------
+    vaccinated: :obj:`bool`
+        A variable indicating whether or not the person is vaccinated.
+    list_of_vaccination_dates: :obj:`list` of int
+        A list of a Person's vaccination dates (corresponding to day in simulation).
+    '''
 
     def __init__(self, vaccine_type=None, vaccine_max_efficacy=None, vaccine_immunity_buildup_days=None, long_term_vaccine_eff=None, vaccine_efficacy_min_day=None):
         '''
-        A class designed to keep track of a Person's vaccination history and vaccination parameters.
-
-        Holds the parameters from immunization_history_parameters.toml corresponding to the Person's vaccine type,
-        as well as the attributes listed below.
-
-        Attributes
-        ----------
-        vaccinated: :obj:`bool`
-            A variable indicating whether or not the person is vaccinated.
-        list_of_vaccination_dates: :obj:`list` of int
-            A list of a Person's vaccination dates (corresponding to day in simulation).
+        The constructor for the Immunization History class. 
         '''
 
         self.vaccinated = False
