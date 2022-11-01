@@ -78,7 +78,7 @@ class Simulation():
         self.config_dir = config_dir
         self.load_general_parameters(config_file)
         self.load_disease_parameters(self.disease_config_file)
-        self.load_immunization_parameters(self.immunization_history_config_file)
+        self.load_immunization_parameters(self.immunization_history_config_file)  # load immunization history files
 
         self.init_classes()  # Have to initalize the classes after we have all of the parameters
 

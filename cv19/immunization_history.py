@@ -49,11 +49,12 @@ class Immunization_History:
         self.vaccinated = True
 
     def vaccine_efficacy(self, day):
-        '''Method to determines what the efficiency of the vaccine based on the type of vaccine administered.
+        '''Method to determines what the efficiency of the vaccine based on the type of vaccine administered, and other
+        immunization history parameters.
 
         Returns
         -------
-        self.sim_obj.vaccine_eff[self.vaccine_type]: :obj:`float`
+        self.current_vax_eff: :obj:`float`
         '''
 
         if self.vaccinated:
@@ -61,14 +62,14 @@ class Immunization_History:
             days_since_vaccination = day - self.list_of_vaccination_dates[-1]
             if (days_since_vaccination) == 0:
                 self.current_vax_eff = 0
-            elif (days_since_vaccination) <= self.vaccine_immunity_buildup_days:
+            elif (days_since_vaccination) <= self.vaccine_immunity_buildup_days:  # linear increase of immunity
                 self.current_vax_eff = ((self.vaccine_max_efficacy) / (self.vaccine_immunity_buildup_days)) * days_since_vaccination
-            elif (days_since_vaccination) >= self.vaccine_efficacy_min_day:
+            elif (days_since_vaccination) >= self.vaccine_efficacy_min_day:  # plateau in immunity after min_day
                 self.current_vax_eff = self.long_term_vaccine_eff
-            else:
-                self.current_vax_eff = (-(self.vaccine_max_efficacy - self.long_term_vaccine_eff) / (self.vaccine_efficacy_min_day - self.vaccine_immunity_buildup_days))
-                self.current_vax_eff *= days_since_vaccination
-                self.current_vax_eff += self.vaccine_max_efficacy
+            else:  # calculate linearly decreasing immunity
+                self.current_vax_eff = (-(self.vaccine_max_efficacy - self.long_term_vaccine_eff) / (self.vaccine_efficacy_min_day - self.vaccine_immunity_buildup_days))  # slope calculation
+                self.current_vax_eff *= days_since_vaccination  # scale by days since vaccination
+                self.current_vax_eff += self.vaccine_max_efficacy  # add initial value (which is the max efficacy)
 
             return self.current_vax_eff
 

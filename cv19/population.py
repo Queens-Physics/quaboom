@@ -103,19 +103,21 @@ class Population:
         vaccine_type_arr = np.random.choice(a=self.vaccine_options, p=self.vaccine_weights, size=self.nPop)
         if self.v0 > self.nPop:
             self.v0 = self.nPop  # make sure maximum initially vaccinated people <= population size
-        v0_lower = sim_obj.v0_parameters["v0_interval_start_day"]
-        v0_upper = sim_obj.v0_parameters["v0_interval_end_day"]
-        vaccination_date_arr = np.zeros(self.v0)
-        if v0_upper <= 0:
+        v0_lower = sim_obj.v0_parameters["v0_interval_start_day"]  # lower bound on v0 range
+        v0_upper = sim_obj.v0_parameters["v0_interval_end_day"]  # upper bound on v0 range
+        vaccination_date_arr = np.zeros(self.v0)  # initialize v0 dates array
+        if v0_lower <= 0 and v0_upper <= 0:  # v0 bounds cannot be greater than 0
 
-            if v0_lower < v0_upper:
+            if v0_lower < v0_upper:  # v0_lower should be smaller (more negative) than v0_upper
                 vaccination_date_arr = np.random.uniform(low=v0_lower, high=v0_upper, size=self.v0)
-            else:
+            if v0_lower > v0_upper:  # flip the bounds to set the range of v0
+                vaccination_date_arr = np.random.uniform(low=v0_upper, high=v0_lower, size=self.v0)
+            else:  # they are equal to each other:
                 vaccination_date_arr = np.ones(self.v0) * v0_lower
         else:
-            if v0_lower >= 0:
+            if v0_lower >= 0:  # if v0_lower is > 0, make all individuals vaccinated on day 0
                 vaccination_date_arr = np.zeros(self.v0)
-            else:
+            else:  # if only v0_upper is > 0, set 0 as upper bound and proceed
                 vaccination_date_arr = np.random.uniform(low=v0_lower, high=0, size=self.v0)
 
         # Initialize the house index and size for the loop
@@ -128,12 +130,13 @@ class Population:
                 houseIndex += 1
                 houseSize = self.household[houseIndex]
 
-            vaccine_type = vaccine_type_arr[i]
+            vaccine_type = vaccine_type_arr[i]  # vaccine type from vaccine type arr
             individual_vaccine_info = {"vaccine_type": vaccine_type,
                                        "vaccine_max_efficacy": self.vaccine_parameters["vaccine_max_efficacy"][vaccine_type],
                                        "vaccine_immunity_buildup_days": self.vaccine_parameters["vaccine_immunity_buildup_days"][vaccine_type],
                                        "long_term_vaccine_eff": self.vaccine_parameters["long_term_vaccine_eff"][vaccine_type],
                                        "vaccine_efficacy_min_day": self.vaccine_parameters["vaccine_efficacy_min_day"][vaccine_type]}
+            # set up dictionary of vaccination parameters for immunization history object
 
             # MAKE A PERSON
             newPerson = Person(index=i,
@@ -204,7 +207,7 @@ class Population:
                                        "vaccine_max_efficacy": self.vaccine_parameters["vaccine_max_efficacy"][vaccine_type],
                                        "vaccine_immunity_buildup_days": self.vaccine_parameters["vaccine_immunity_buildup_days"][vaccine_type],
                                        "long_term_vaccine_eff": self.vaccine_parameters["long_term_vaccine_eff"][vaccine_type],
-                                       "vaccine_efficacy_min_day": self.vaccine_parameters["vaccine_efficacy_min_day"][vaccine_type]}
+                                       "vaccine_efficacy_min_day": self.vaccine_parameters["vaccine_efficacy_min_day"][vaccine_type]}  # set up immunization history object parameters as dictionary
 
             newStudent = Person(index=i,
                                 sim_obj=sim_obj,
@@ -295,7 +298,7 @@ class Population:
 
         # Vaccinate first v0 people
         v_indices = sample(range(self.nPop), self.v0)
-        for index, i in enumerate(v_indices):
+        for index, i in enumerate(v_indices):  # set vaccinated date based on vaccination_date_arr
             self.population[i].immunization_history_obj.set_vaccinated(day=int(vaccination_date_arr[index]))
             self.vaccinated[i] = i
 
