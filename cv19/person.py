@@ -90,7 +90,7 @@ class Person(object):
         self.cure_days = cure_days
         self.recent_infections = recent_infections
         # create immunization history object
-        self.immunization_history_obj = Immunization_History(**vaccine_info) if vaccine_info != None else Immunization_History()
+        self.immunization_history_obj = Immunization_History(**vaccine_info) if vaccine_info is not None else Immunization_History()
         self.index = index
         self.age = age
         self.job = job
