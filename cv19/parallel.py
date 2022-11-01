@@ -210,19 +210,19 @@ def tabular_mode(base_config_file, independent, dependent, num_runs=8, num_cores
 
         # Load the main TOML file
         with open(base_config_file, 'rb') as f:
-            temp_config = tomli.load(f)
+            temp_main_config = tomli.load(f)
         # Load the disease TOML file
         disease_config_filename = Path(config_dir,
-                                       temp_config['simulation_data']['disease_config_file'])
+                                       temp_main_config['simulation_data']['disease_config_file'])
         with open(disease_config_filename, 'rb') as f:
-            temp_disease = tomli.load(f)
+            temp_disease_config = tomli.load(f)
 
         # Setting the parameters from the independent variables
         for key, value in zip(indep_keys, values):
-            _config_editor(temp_config, temp_disease, key, value)
+            _config_editor(temp_main_config, temp_disease_config, key, value)
 
-        config_override_files = {
-            'disease_config': temp_disease
+        config_override_data = {
+            'disease_config_data': temp_disease_config
         }
 
         # Run the simulations: returns an DataFrame
@@ -233,7 +233,7 @@ def tabular_mode(base_config_file, independent, dependent, num_runs=8, num_cores
             scenario_save_name = save_name + f"{i:02}"
         data = run_async(num_runs, temp_config, num_cores=num_cores,
                          save_name=scenario_save_name, config_dir=config_dir, verbose=verbose,
-                         config_override_files=config_override_files)
+                         config_override_files=config_override_data)
 
         # Processing the results to get the dependent measurements, add to results
         result = [f(data) for f in dep_funcs]
