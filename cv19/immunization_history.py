@@ -15,7 +15,7 @@ class Immunization_History:
 
     def __init__(self, vaccine_type=None, vaccine_max_efficacy=None, vaccine_immunity_buildup_days=None, long_term_vaccine_eff=None, vaccine_efficacy_min_day=None):
         '''
-        The constructor for the Immunization History class. 
+        The constructor for the Immunization History class.
         '''
 
         self.vaccinated = False
