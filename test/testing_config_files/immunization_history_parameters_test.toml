@@ -1,0 +1,19 @@
+[vaccine_max_efficacy]
+Pfizer = 0.913
+Moderna = 0.941
+AZ = 0.76
+
+[vaccine_immunity_buildup_days]
+Pfizer = 14
+Moderna = 14
+AZ = 14
+
+[vaccine_efficacy_min_day]
+Pfizer = 180
+Moderna = 180
+AZ = 180
+
+[long_term_vaccine_eff]
+Pfizer = 0.7
+Moderna = 0.7
+AZ = 0.7

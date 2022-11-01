@@ -1,6 +1,6 @@
 [simulation_data]
 disease_config_file = "disease_quarantine_1.toml"
-immunization_history_config_file = "immunization_history_parameters.toml"
+immunization_history_config_file = "immunization_history_parameters_test.toml"
 nDays = 30
 nPop = 10000
 vis_default_virus_type = "alpha"
