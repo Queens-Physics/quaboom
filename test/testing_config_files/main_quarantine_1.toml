@@ -7,7 +7,6 @@ vis_default_virus_type = "alpha"
 student_default_virus_type = "alpha"
 num_students = 2000
 max_num_res_students = 500
-v0 = 0
 N_VIS_OPTION = [0, 1, 2, 3]
 N_VIS_PROB = [0.7, 0.17, 0.08, 0.05]
 vis_age_upper = 60
@@ -15,6 +14,10 @@ vis_age_lower = 16
 inf_students_upper = 20
 inf_students_lower = 2
 num_vaccinations = 0
+    [simulation_data.v0_parameters]
+    v0 = 10000
+    v0_interval_start_day = -30
+    v0_interval_end_day = 0
 
     [simulation_data.variants]
     general = 1000
