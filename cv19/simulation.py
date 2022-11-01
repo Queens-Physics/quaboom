@@ -408,8 +408,8 @@ class Simulation():
                                  hospitalized=False, ICU=False, quarantined=False, quarantined_day=None, infected_day=None,
                                  recovered_day=None, death_day=None, others_infected=None,
                                  cure_days=None, recent_infections=None,
-                                 vaccine_info={"vaccine_type": None, "vaccine_max_efficacy": None,
-                                               "vaccine_immunity_buildup_days": None, "long_term_vaccine_eff": None, "vaccine_efficacy_min_day": None}, age=vis_age[i],
+                                 vaccine_info={"vaccine_type": "Pfizer", "vaccine_max_efficacy": 0.913,
+                                               "vaccine_immunity_buildup_days": 14, "long_term_vaccine_eff": 0.7, "vaccine_efficacy_min_day": 180}, age=vis_age[i],
                                  job="Visitor", house_index=None, isolation_tendencies=0.2,
                                  case_severity='Mild', has_mask=True, virus_type="alpha")
                 self.pop.population.append(visitor)
