@@ -172,7 +172,7 @@ class Simulation():
         '''
 
         if config_override_data is not None:
-            self.disease_parameters = config_override_data['disease_parameters']
+            self.disease_parameters = config_override_data['disease_config_data']
         else:
             # If path is absolute, use it.
             if Path(filename).is_absolute():

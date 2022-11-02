@@ -11,16 +11,28 @@ from matplotlib import pyplot as plt
 from .simulation import Simulation
 
 
-def async_simulation(*simulation_args):
-    '''Does a single run of the simulation with the supplied configuration details. See run_async for
-    details regarding args.
+def async_simulation(config_file, config_dir="", config_override_data=None, verbose=False):
+    '''Does a single run of the simulation with the supplied configuration details.
+    
+    Parameters
+    ----------
+    config_file : str
+        Filename for the configuration file.
+    config_dir : str
+        Path to the directory containing configuration files.
+    config_override_data : dict of dict
+        Dictionary containing instances of configuration files that are used to override the
+        default parameters loaded.
+    verbose : bool, default False
+        Whether to output information from each day of the simulation.
 
     Returns
     -------
     tuple
         Arrays from the simulation.
     '''
-    sim = Simulation(*simulation_args)
+    sim = Simulation(config_file=config_file, config_dir=config_dir, 
+                     config_override_data=config_override_data, verbose=verbose)
     sim.run()
     return sim.get_arrays()
 
