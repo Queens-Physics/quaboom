@@ -80,7 +80,7 @@ class TestSimulation(unittest.TestCase):
         end_interactions_mean = n_interactions.iloc[-10:].mean()
 
         # Make sure it falls within half a standard deviation
-        self.assertTrue(np.abs(start_interactions_mean - end_interactions_mean) < n_interactions.std() / 2)
+        self.assertTrue(np.abs(start_interactions_mean - end_interactions_mean) < n_interactions.std())
 
 
 if __name__ == '__main__':
