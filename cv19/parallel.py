@@ -13,7 +13,7 @@ from .simulation import Simulation
 
 def async_simulation(config_file, config_dir="", config_override_data=None, verbose=False):
     '''Does a single run of the simulation with the supplied configuration details.
-    
+
     Parameters
     ----------
     config_file : str
@@ -31,7 +31,7 @@ def async_simulation(config_file, config_dir="", config_override_data=None, verb
     tuple
         Arrays from the simulation.
     '''
-    sim = Simulation(config_file=config_file, config_dir=config_dir, 
+    sim = Simulation(config_file=config_file, config_dir=config_dir,
                      config_override_data=config_override_data, verbose=verbose)
     sim.run()
     return sim.get_arrays()
