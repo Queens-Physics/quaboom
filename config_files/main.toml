@@ -133,11 +133,11 @@ protocol_compliance_lockdown_length_threshold = 16
 protocol_compliance_lockdown_length_reduction = 0.5
 
     [person_data.mask_inward_eff]
-    Surgical = 0.4
-    Non-surgical = 0.6
+    Surgical = 0.6
+    Non-surgical = 0.4
 
     [person_data.mask_outward_eff]
-    Surgical = 0.3
+    Surgical = 0.7
     Non-surgical = 0.5
 
     [person_data.protocol_compliance_age_prob]
@@ -177,6 +177,6 @@ protocol_compliance_lockdown_length_reduction = 0.5
     ICU = 0.7
 
     [person_data.vaccine_eff]
-    Pfizer = 0.087
-    Moderna = 0.059
-    AZ = 0.24
+    Pfizer = 0.913
+    Moderna = 0.941
+    AZ = 0.76
