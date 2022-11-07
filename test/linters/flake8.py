@@ -16,7 +16,7 @@ def run_flake8():
     max_line_len = 200
 
     # Messages/warnings/errors to enable and disable.
-    messages_disable = ["W503", "E741"]
+    messages_disable = ["W503", "E741", "Q000"]
 
     # List of files or directories to run the linter on.
     # Currently assumes that the working directory is where to get the files.
