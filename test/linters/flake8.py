@@ -8,10 +8,10 @@ from cv19 import CV19ROOT
 
 
 def run_flake8():
-    '''
+    """
     Run the Flake8 test on the module and some other files in the repository.
     Automatically ran on every pull request via GitHub actions.
-    '''
+    """
     # Maximum line length.
     max_line_len = 200
 
