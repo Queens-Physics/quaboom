@@ -12,7 +12,7 @@ from .simulation import Simulation
 
 
 def async_simulation(config_file, config_dir="", verbose=False):
-    '''Does a single run of the simulation with the supplied configuration details.
+    """Does a single run of the simulation with the supplied configuration details.
 
     Parameters
     ----------
@@ -25,7 +25,7 @@ def async_simulation(config_file, config_dir="", verbose=False):
     -------
     tuple
         Arrays from the simulation.
-    '''
+    """
 
     sim = Simulation(config_file, config_dir=config_dir, verbose=verbose)
     sim.run()
@@ -33,7 +33,7 @@ def async_simulation(config_file, config_dir="", verbose=False):
 
 
 def run_async(num_runs, config_file, save_name=None, num_cores=-1, config_dir="", verbose=False):
-    '''Runs multiple simulations in parallel using the supplied configuration settings.
+    """Runs multiple simulations in parallel using the supplied configuration settings.
 
     Parameters
     ----------
@@ -53,7 +53,7 @@ def run_async(num_runs, config_file, save_name=None, num_cores=-1, config_dir=""
     -------
     pandas.DataFrame
         Containing the results of the simulation in tabular format.
-    '''
+    """
 
     if num_cores == -1:
         num_cores = multiprocessing.cpu_count()
@@ -72,7 +72,7 @@ def run_async(num_runs, config_file, save_name=None, num_cores=-1, config_dir=""
 
 
 def _config_editor(config, param_name, value):
-    '''Takes string form of a parameter's name (eg. policy_data.testing_rate)
+    """Takes string form of a parameter's name (eg. policy_data.testing_rate)
     and changes it to the supplied value.
 
     Parameters
@@ -88,7 +88,7 @@ def _config_editor(config, param_name, value):
     ------
     ValueError
         If param_name is not in the config dictionary.
-    '''
+    """
 
     x = config
     param_names = param_name.split('.')
@@ -106,7 +106,7 @@ def _config_editor(config, param_name, value):
 
 
 def tabular_mode(base_config_file, independent, dependent, num_runs=8, num_cores=8, save_name=None, verbose=False):
-    '''Automatically measures the impact of various public health measures on different metrics.
+    """Automatically measures the impact of various public health measures on different metrics.
 
     Parameters
     ----------
@@ -155,7 +155,7 @@ def tabular_mode(base_config_file, independent, dependent, num_runs=8, num_cores
     ------
     NotImplementedError
         If the number of independent variables is not 1.
-    '''
+    """
 
     if len(independent) > 1:
         raise NotImplementedError("Number of independent variables must be 1.")
@@ -228,7 +228,7 @@ def tabular_mode(base_config_file, independent, dependent, num_runs=8, num_cores
 
 
 def confidence_interval(config, parameterstoplot, num_runs=8, confidence=0.80, num_cores=-1, save_name=None, verbose=False):
-    '''Plots the results of multiple simulations with confidence bands
+    """Plots the results of multiple simulations with confidence bands
     to give a better understanding of the trend of a given scenario.
     Displays a plot of the results.
 
@@ -252,7 +252,7 @@ def confidence_interval(config, parameterstoplot, num_runs=8, confidence=0.80, n
         the results.
     verbose : bool, default False
         Whether to output information from each day of the simulation.
-    '''
+    """
 
     result = run_async(num_runs, config, num_cores=num_cores, save_name=save_name, verbose=verbose)
 
@@ -290,7 +290,7 @@ def confidence_interval(config, parameterstoplot, num_runs=8, confidence=0.80, n
 
 
 def confidence_interval_complex(*scenarios, z=2):
-    '''Draws a plot that tracks one or more metrics in the simulation. The
+    """Draws a plot that tracks one or more metrics in the simulation. The
     simulation is run many times to get a more accurate representation of
     the trends. The metric(s) is(are) drawn with confidence intervals.
 
@@ -305,12 +305,12 @@ def confidence_interval_complex(*scenarios, z=2):
         - z=3 => 99% confidence.
 
     This function draws a plot of the metrics over time.
-    '''
+    """
 
     del z
     del scenarios
 
-    code = '''
+    code = """
     fig, ax = plt.subplots()
 
     for scenario in scenarios:
@@ -340,7 +340,7 @@ def confidence_interval_complex(*scenarios, z=2):
 
     ax.legend()
     fig.show()
-    '''
+    """
 
     raise NotImplementedError(("Function not yet implemented. "
                                "Current code:\n") + code)
@@ -349,7 +349,7 @@ def confidence_interval_complex(*scenarios, z=2):
 
 
 def peak(data):
-    '''Calculates the number of people infected at the peak, averaged over the
+    """Calculates the number of people infected at the peak, averaged over the
     simulations that were run.
 
     Parameters
@@ -362,7 +362,7 @@ def peak(data):
     tuple of float
         Number of people infected at the peak, averaged over the simulations that
         were run, and uncertainty.
-    '''
+    """
 
     peak_infections = data['infected'].apply(max)
     return (peak_infections.mean(),
@@ -370,7 +370,7 @@ def peak(data):
 
 
 def peak_date(data):
-    '''Calculates the date of the peak, averaged over the simulations that were
+    """Calculates the date of the peak, averaged over the simulations that were
     run.
 
     Parameters
@@ -382,7 +382,7 @@ def peak_date(data):
     -------
     tuple of float
         Date of the peak, averaged over the simulations that were run, and uncertainty.
-    '''
+    """
 
     peak_infections_dates = data['infected'].apply(np.argmax)
     return (peak_infections_dates.mean(),
@@ -390,7 +390,7 @@ def peak_date(data):
 
 
 def hospitalizations(data):
-    '''Calculates the number of hospitalizations at the peak, averaged over the
+    """Calculates the number of hospitalizations at the peak, averaged over the
     simulations that were run.
 
     Parameters
@@ -403,7 +403,7 @@ def hospitalizations(data):
     tuple of float
         Number of hospitalizations at the peak, averaged over the simulations that
         were run, and uncertainty.
-    '''
+    """
 
     peak_hospitalizations = data['hospitalized'].apply(max)
     return (peak_hospitalizations.mean(),
@@ -411,7 +411,7 @@ def hospitalizations(data):
 
 
 def deaths(data):
-    '''The average number of total deaths over all simulations that were run.
+    """The average number of total deaths over all simulations that were run.
 
     Parameters
     ----------
@@ -422,7 +422,7 @@ def deaths(data):
     tuple of float
         Average number of total deaths over all simulations that were run
         and uncertainty.
-    '''
+    """
 
     total_deaths = data['dead'].apply(max)
     return (total_deaths.mean(),
@@ -430,7 +430,7 @@ def deaths(data):
 
 
 def peak_quarantine(data):
-    '''The number of people in quarantine at the peak, averaged over the simulations
+    """The number of people in quarantine at the peak, averaged over the simulations
     that were run.
 
     Parameters
@@ -443,7 +443,7 @@ def peak_quarantine(data):
     tuple of float
         Number of people in quarantine at the peak, averaged over the simulations
         that were run, and uncertainty.
-    '''
+    """
 
     peak_quarantined = data['quarantined'].apply(max)
     return (peak_quarantined.mean(),
@@ -451,7 +451,7 @@ def peak_quarantine(data):
 
 
 def peak_ICU(data):
-    '''The number of people in ICU at the peak, averaged over the simulations
+    """The number of people in ICU at the peak, averaged over the simulations
     that were run.
 
     Parameters
@@ -464,7 +464,7 @@ def peak_ICU(data):
     tuple of float
         Number of people in ICU at the peak, averaged over the simulations
         that were run, and uncertainty.
-    '''
+    """
 
     peak_ICUs = data['ICU'].apply(max)
     return (peak_ICUs.mean(),
@@ -472,7 +472,7 @@ def peak_ICU(data):
 
 
 def peak_deaths(data):
-    '''The number of deaths at the peak, averaged over the simulations
+    """The number of deaths at the peak, averaged over the simulations
     that were run.
 
     Parameters
@@ -485,7 +485,7 @@ def peak_deaths(data):
     tuple of float
         Number of deaths at the peak, averaged over the simulations
         that were run, and uncertainty.
-    '''
+    """
 
     peak_death = data['dead'].apply(max)
     return (peak_death.mean(),
@@ -493,7 +493,7 @@ def peak_deaths(data):
 
 
 def peak_hospitalization(data):
-    '''The number of people in the hospital at the peak, averaged over the
+    """The number of people in the hospital at the peak, averaged over the
     simulations that were run.
 
     Parameters
@@ -506,7 +506,7 @@ def peak_hospitalization(data):
     tuple of float
         Number of people in the hospital at the peak, averaged over the simulations
         that were run, and uncertainty.
-    '''
+    """
 
     peak_hospitalized = data['hospitalized'].apply(max)
     return (peak_hospitalized.mean(),
@@ -514,7 +514,7 @@ def peak_hospitalization(data):
 
 
 def time_elapsed(data):
-    '''Time elapsed for the simulation.
+    """Time elapsed for the simulation.
 
     Parameters
     ----------
@@ -525,7 +525,7 @@ def time_elapsed(data):
     -------
     tuple of float
         Average elapsed time of the simulations and uncertainty.
-    '''
+    """
 
     simulation_times = data['time_elapsed'].apply(max)
     return (simulation_times.mean(),

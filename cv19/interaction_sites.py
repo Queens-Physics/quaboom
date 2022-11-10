@@ -1,6 +1,6 @@
-'''
+"""
 This file holds the interaction sites class used in simulation.py.
-'''
+"""
 import warnings
 from random import random
 from copy import deepcopy
@@ -11,7 +11,7 @@ import numpy as np
 
 
 class InteractionSites:
-    '''A class designed to host interactions between persons within specific locations.
+    """A class designed to host interactions between persons within specific locations.
 
     There are currently 7 different locations that can host interactions between
     person objects.
@@ -48,16 +48,16 @@ class InteractionSites:
         Visited by every student each day, and hosts interactions between members
         of the same household. Infection spread at home is not defined by explicit contacts,
         but by a known spread factor.
-    '''
+    """
 
     def __init__(self, sim_obj):
-        ''' __init__ method docstring.
+        """ __init__ method docstring.
 
         Parameters
         ----------
         sim_obj : :obj:`cv19.simulation.simulation`
             The encompassing simulation obejct hosting the simulation.
-        '''
+        """
 
         # Set attributes from config file
         self.load_attributes_from_sim_obj(sim_obj)
@@ -85,7 +85,7 @@ class InteractionSites:
         self.daily_new_infections = 0
 
     def load_attributes_from_sim_obj(self, sim_obj):
-        '''Method to load in attributes from the provided simulation class object.
+        """Method to load in attributes from the provided simulation class object.
 
         Sets all objects in the "interaction_sites_data" dictionary key as self
         attributes of the InteractionSites class.
@@ -94,7 +94,7 @@ class InteractionSites:
         ----------
         sim_obj : :obj:`cv19.simulation.simulation`
             The encompassing simulation obejct hosting the simulation.
-        '''
+        """
 
         attributes = sim_obj.parameters["interaction_sites_data"].keys()
         for attr in attributes:
@@ -116,7 +116,7 @@ class InteractionSites:
         self.nDays = sim_obj.parameters["simulation_data"]["nDays"]
 
     def init_grade(self, grade_code):
-        '''Method designed to associate members of the population with interaction sites.
+        """Method designed to associate members of the population with interaction sites.
 
         This method initializes all non-student interaction sites by creating a list
         of person indices for each interaction site, for that type of interaction type.
@@ -131,7 +131,7 @@ class InteractionSites:
         grade_sites : :obj:`np.array` of :obj:`np.array` of :obj:`int`
             An array holding one array for each interaction site of this type. Each nested
             array holds the index of people that are associated with that site (can visit it).
-        '''
+        """
 
         loyalty_mean = self.grade_loyalty_means[grade_code]
         loyalty_std = self.grade_loyalty_stds[grade_code]
@@ -162,7 +162,7 @@ class InteractionSites:
         return grade_sites
 
     def init_uni(self, grade_code):
-        '''Method designed to associate members of the student population with interaction sites.
+        """Method designed to associate members of the student population with interaction sites.
 
         This method initializes all student interaction sites by creating a list
         of person indices for each interaction site, for that type of interaction type.
@@ -177,7 +177,7 @@ class InteractionSites:
         grade_sites : :obj:`np.array` of :obj:`np.array` of :obj:`int`
             An array holding one array for each interaction site of this type. Each nested
             array holds the index of people that are associated with that site (can visit it).
-        '''
+        """
 
         loyalty_mean = self.grade_loyalty_means[grade_code]
         loyalty_std = self.grade_loyalty_stds[grade_code]
@@ -206,7 +206,7 @@ class InteractionSites:
         return grade_sites
 
     def init_res(self, grade_code):
-        '''Method designed to associate students with the residence interaction site.
+        """Method designed to associate students with the residence interaction site.
 
         This method initializes the residence interaction sites by creating a list
         of person indices for each interaction site.
@@ -221,7 +221,7 @@ class InteractionSites:
         grade_sites : :obj:`np.array` of :obj:`np.array` of :obj:`int`
             An array holding one array for each interaction site of this type. Each nested
             array holds the index of people that are associated with that site (can visit it)
-        '''
+        """
 
         loyalty_mean = self.grade_loyalty_means[grade_code]
         loyalty_std = self.grade_loyalty_stds[grade_code]
@@ -250,7 +250,7 @@ class InteractionSites:
         return grade_sites
 
     def daily_reset(self):
-        '''Method used to reset the interaction sites at the end of each day.
+        """Method used to reset the interaction sites at the end of each day.
 
         This function is currently used to clean up dead agents from interaction sites,
         and to reset daily counts (such as the daily infection count).
@@ -262,13 +262,13 @@ class InteractionSites:
         Returns
         -------
         None
-        '''
+        """
 
         self.remove_dead()
         self.daily_new_infections = 0
 
     def calculate_num_sites(self, grade_code):
-        '''Method used to calculate the number of sites for an interaction site grade.
+        """Method used to calculate the number of sites for an interaction site grade.
 
         Parameters
         ----------
@@ -279,7 +279,7 @@ class InteractionSites:
         -------
         num_sites : int
             The number of sites to be used for that interaction site grade.
-        '''
+        """
 
         if grade_code in self.site_num and self.site_num[grade_code] == 0:
             # Raise a warning
@@ -290,7 +290,7 @@ class InteractionSites:
                 round(self.pop.get_population_size() / self.site_size[grade_code])
 
     def remove_dead(self):
-        '''Method to remove dead agents from interaction site arrays.
+        """Method to remove dead agents from interaction site arrays.
 
         Iterates through each type of site array, and will remove all agents that are
         dead from each array.
@@ -302,7 +302,7 @@ class InteractionSites:
         Returns
         -------
         None
-        '''
+        """
 
         # Create list of all dead agents
         dead_agents = self.pop.get_dead()
@@ -344,7 +344,7 @@ class InteractionSites:
             self.res_sites[i] = site_array[mask_alive]
 
     def will_visit_site(self, site_array, will_go_prob):
-        '''Method to determine who will visit a site on a given day.
+        """Method to determine who will visit a site on a given day.
 
         Generates a boolean list for each individual interaction site in site_array,
         indicating what people from the list will visit that site on a given day. Accounts
@@ -364,7 +364,7 @@ class InteractionSites:
         will_visit_grade : :obj:`np.array` of :obj:`np.array` of :obj:`int`
             An array holding an array for each site of this interaction site type.
             Each individual list holds the indexes of people that will visit that site for this day.
-        '''
+        """
 
         # Figure out who is going to go to this site type today.
         person_ids = np.unique(np.concatenate(site_array))
@@ -403,7 +403,7 @@ class InteractionSites:
         return will_visit_grade
 
     def site_interaction(self, will_go_array, day, personal, grade_code):
-        '''Method that hosts interactions between people for an interaction site type.
+        """Method that hosts interactions between people for an interaction site type.
 
         This method manages interactions between people going to the same interaction
         site this day. Currently, all people that visit the same site on a day have a
@@ -423,7 +423,7 @@ class InteractionSites:
             contact tracing abilities.
         grade_code : str
             Code used to index the values to create this type of site from the config file.
-        '''
+        """
 
         new_infections = np.zeros(self.pop.get_population_size(), dtype=bool)
         new_infection_type = np.zeros(self.pop.get_population_size(), dtype=int)
@@ -489,7 +489,7 @@ class InteractionSites:
         self.daily_interactions[grade_code][day] = total_interactions_count
 
     def calc_interactions(self, site_day_pop):
-        '''Method to determine how many interactions a person will have.
+        """Method to determine how many interactions a person will have.
 
         Note
         ----
@@ -512,7 +512,7 @@ class InteractionSites:
         -------
         number_of_interactions : :obj:`np.array` of :obj:`int`
             The number of interactions all people will have within this interaction site.
-        '''
+        """
 
         day_hours_scaler = 12
 
@@ -523,7 +523,7 @@ class InteractionSites:
         return number_of_interactions
 
     def interact(self, person_1, person_2):
-        '''Method that models the interaction between two people.
+        """Method that models the interaction between two people.
 
         Parameters
         ----------
@@ -536,7 +536,7 @@ class InteractionSites:
         -------
         : :obj:`bool`
             Whether or not the interaction caused the spread of the infection.
-        '''
+        """
 
         p1_infected = person_1.is_infected()
         p2_infected = person_2.is_infected()
@@ -574,7 +574,7 @@ class InteractionSites:
         return random() < spread_prob
 
     def house_interact(self, day):
-        '''Method to manage interactions between members of the same household.
+        """Method to manage interactions between members of the same household.
 
         Determines if any infection will spread among members of the same household. Different
         from interaction sites in the fact that contacts are not calculated, but assumed to happen
@@ -585,7 +585,7 @@ class InteractionSites:
         day : int
             The day value that this function is being called on in the encompassing simulation class.
             Used as input to the infect function after infections have been determined.
-        '''
+        """
 
         total_house_interactions = 0
         for house_indices in self.house_indices:
@@ -626,7 +626,7 @@ class InteractionSites:
         self.daily_interactions["HOUSE_GENERAL"][day] = total_house_interactions
 
     def student_house_interact(self, day):
-        '''Method to manage interactions between members of the same student household.
+        """Method to manage interactions between members of the same student household.
 
         Determines if any infection will spread among members of the same household. Different
         from interaction sites in the fact that contacts are not calculated, but assumed to happen
@@ -637,7 +637,7 @@ class InteractionSites:
         day : int
             The day value that this function is being called on in the encompassing simulation class.
             Used as input to the infect function after infections have been determined.
-        '''
+        """
 
         total_house_interactions = 0
         for house_indices in self.stud_house_indices:
@@ -677,7 +677,7 @@ class InteractionSites:
         self.daily_interactions["HOUSE_STUDENT"][day] = total_house_interactions
 
     def testing_site(self, tests_per_day, day):
-        '''Method to update status of symptoms and run the testing sites code.
+        """Method to update status of symptoms and run the testing sites code.
 
         Parameters
         ----------
@@ -685,71 +685,71 @@ class InteractionSites:
             The max number of available tests for this given day.
         day : int
             The day value that this function is being called on in the encompassing simulation class.
-        '''
+        """
 
         self.pop.update_uninfected_symptomatics()
         self.pop.update_infected_symptomatics(day)
         self.pop.get_tested(tests_per_day, day)
 
     def get_grade_A_sites(self):
-        '''Method to return a copy of the grade_A_sites attribute.
+        """Method to return a copy of the grade_A_sites attribute.
 
         Returns
         -------
         self.grade_A_sites.copy() : :obj:`np.array` of :obj:`list` of :obj:`np.array` of :obj:`int`
-        '''
+        """
         return deepcopy(self.grade_A_sites)
 
     def get_grade_B_sites(self):
-        '''Method to return a copy of the grade_B_sites attribute.
+        """Method to return a copy of the grade_B_sites attribute.
 
         Returns
         -------
         self.grade_B_sites.copy() : :obj:`np.array` of :obj:`list` of :obj:`np.array` of :obj:`int`
-        '''
+        """
         return deepcopy(self.grade_B_sites)
 
     def get_grade_C_sites(self):
-        '''Method to return a copy of the grade_C_sites attribute.
+        """Method to return a copy of the grade_C_sites attribute.
 
         Returns
         -------
         self.grade_C_sites.copy() : :obj:`np.array` of :obj:`list` of :obj:`np.array` of :obj:`int`
-        '''
+        """
         return deepcopy(self.grade_C_sites)
 
     def get_lect_sites(self):
-        '''Method to return a copy of the lect_sites attribute.
+        """Method to return a copy of the lect_sites attribute.
 
         Returns
         -------
         self.lect_sites.copy() : :obj:`np.array` of :obj:`list` of :obj:`np.array` of :obj:`int`
-        '''
+        """
         return deepcopy(self.lect_sites)
 
     def get_study_sites(self):
-        '''Method to return a copy of the study_sites attribute.
+        """Method to return a copy of the study_sites attribute.
 
         Returns
         -------
         self.study_sites.copy() : :obj:`np.array` of :obj:`list` of :obj:`np.array` of :obj:`int`
-        '''
+        """
         return deepcopy(self.study_sites)
 
     def get_food_sites(self):
-        '''Method to return a copy of the food_sites attribute.
+        """Method to return a copy of the food_sites attribute.
 
         Returns
         -------
         self.food_sites.copy() : :obj:`np.array` of :obj:`list` of :obj:`np.array` of :obj:`int`
-        '''
+        """
         return deepcopy(self.food_sites)
 
     def get_res_sites(self):
-        '''Method to return a copy of the res_sites attribute.
+        """Method to return a copy of the res_sites attribute.
 
         Returns
         -------
         self.res_sites.copy() : :obj:`np.array` of :obj:`list` of :obj:`np.array` of :obj:`int`
-        '''
+        """
         return deepcopy(self.res_sites)
