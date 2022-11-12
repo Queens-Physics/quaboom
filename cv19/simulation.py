@@ -15,7 +15,7 @@ from .interaction_sites import InteractionSites
 
 
 class Simulation():
-    '''
+    """
     A class designed to host the actual monte-carlo simulation and to track the results.
 
     Holds all of the attributes outlined in the simulation_data section of the
@@ -59,10 +59,10 @@ class Simulation():
         An array to track the time taken to run each day of the simulation.
     has_run : bool
         A variable indicating if this object has run a simulaiton yet.
-    '''
+    """
 
     def __init__(self, config_file, config_dir="", verbose=False):
-        ''' __init__ method docstring.
+        """ __init__ method docstring.
 
         Parameters
         ----------
@@ -73,7 +73,7 @@ class Simulation():
             is a complete path.
         verbose : bool
             A variable indicating whether to print updates with simulation information while running.
-        '''
+        """
 
         self.config_dir = config_dir
         self.load_general_parameters(config_file)
@@ -115,7 +115,7 @@ class Simulation():
         self.has_run = False  # Indicates if the sim has run yet
 
     def load_general_parameters(self, data_file):
-        ''' Method to load in attributes from the general configuration file.
+        """ Method to load in attributes from the general configuration file.
 
         Parameters are loaded from the simulation_data section of the configuration file.
         All parameter names are the same as the dictionary keys in the file.
@@ -124,7 +124,7 @@ class Simulation():
         ----------
         data_file : str
             Path to the general configuration file.
-        '''
+        """
 
         if isinstance(data_file, str):
             with open(data_file, 'rb') as file:
@@ -153,7 +153,7 @@ class Simulation():
         self.track_virus_types = {virus_name: np.zeros(self.nDays, dtype=int) for virus_name in self.virus_names}
 
     def load_disease_parameters(self, filename):
-        ''' Method to load in attributes from the disease configuration file.
+        """ Method to load in attributes from the disease configuration file.
 
         All parameters in the file are loaded into the object, and parameter names
         are taken from dictionary keys.
@@ -162,7 +162,7 @@ class Simulation():
         ----------
         filename : str
             Path to the disease configuration file.
-        '''
+        """
 
         # If path is absolute, use it.
         if Path(filename).is_absolute():
@@ -190,9 +190,9 @@ class Simulation():
                     self.disease_parameters = tomli.load(file)
 
     def init_classes(self):
-        ''' Method that links the policy, population, and interaction sites class objects with
+        """ Method that links the policy, population, and interaction sites class objects with
         the Simulation class (serves as pointer variables).
-        '''
+        """
 
         # Initalize the policy class
         self.policy = Policy(self)
@@ -204,14 +204,14 @@ class Simulation():
         self.inter_sites = InteractionSites(self)
 
     def set_code_version(self):
-        '''Method to get and set the version of the code used to run the simulation.
+        """Method to get and set the version of the code used to run the simulation.
 
         Note
         ----
         This function should really be using the --dirty flag, but only based
         on certain files. For example, local modifications to the notebook do not
         matter, whereas any modifications to the main classes could.
-        '''
+        """
 
         # By default, set the code identifier to None.
         self.code_id = None
@@ -260,7 +260,7 @@ class Simulation():
                 self.code_id += '-dirty'
 
     def run(self, fail_on_rerun=True):
-        ''' Method that runs the monte-carlo simulation.
+        """ Method that runs the monte-carlo simulation.
 
         This is the main function in the Simulation class that generates the tracking data. The
         fail_on_rerun parameter is added to make sure that data from previous runs is not overwritten
@@ -271,7 +271,7 @@ class Simulation():
         fail_on_rerun : bool
             Variable to indicate whether the code should return an error if same object is
             run multiple times.
-        '''
+        """
 
         # Check whether the simulation has already been run.
         if fail_on_rerun:
@@ -490,7 +490,7 @@ class Simulation():
         self.has_run = True
 
     def calculate_SIR_metrics(self, day):
-        '''Method to caclulate all metrics related to SIR models.
+        """Method to caclulate all metrics related to SIR models.
 
         These variables are defined in the wikipedia page and are calculated as such. No variables are
         returned, all values are set inside the function in the tracking arrays.
@@ -498,7 +498,7 @@ class Simulation():
         Wikipedia page link: https://en.wikipedia.org/wiki/Compartmental_models_in_epidemiology
 
         The following variables are calculated: gamma, beta, R0, R effective, and HIT (herd immunity threshold).
-        '''
+        """
 
         # Define variables in accordance with wikipedia page
         dR_dt = self.track_recovered[day] - self.track_recovered[day - 1]
@@ -524,7 +524,7 @@ class Simulation():
         self.track_gamma[day], self.track_beta[day] = gamma, beta
 
     def check_has_run(self, check, information="", fail=True):
-        '''Method to check whether or not the simulation has run.
+        """Method to check whether or not the simulation has run.
 
         Checks against the desired result.
 
@@ -541,7 +541,7 @@ class Simulation():
         -------
         self.has_run : bool
             Whether or not the simulation has been run.
-        '''
+        """
 
         if self.has_run == check:
             return self.has_run
@@ -567,7 +567,7 @@ class Simulation():
              plot_hospitalized=True, plot_ICU=True, plot_lockdown=True, plot_testing=True, plot_students=True, plot_R0=False,
              plot_R_eff=False, plot_HIT=False, plot_gamma=False, plot_beta=False, plot_vaccinated=True, plot_virus_types=None,
              plot_n_interactions=False, log=False):
-        ''' Method used to plot simulation results.
+        """ Method used to plot simulation results.
 
         Will return a warning or error if the simulation has not been run yet. For plotting the number of interactions,
         you must supply a list with the codes for the sites you wish to plot.
@@ -582,7 +582,7 @@ class Simulation():
             appropriate keys for those variables.
         log : bool
             Indicate whether to plot with a log scale on the y-axis.
-        '''
+        """
 
         self.check_has_run(check=True, information="Cannot make plots.", fail=True)
 
@@ -655,13 +655,13 @@ class Simulation():
         plt.xlabel("Days")
 
     def get_arrays(self):
-        ''' Method to return all of the tracking arrays after the simulation has run.
+        """ Method to return all of the tracking arrays after the simulation has run.
 
         Returns
         -------
         returnDict : dict of `np.array`
             A dictionary holding all of the tracking arrays with the raw simulation results.
-        '''
+        """
 
         self.check_has_run(check=True,
                            information="Cannot return zero-initialized arrays.",
