@@ -1,6 +1,6 @@
 [simulation_data]
 disease_config_file = "disease.toml"
-nDays = 100
+nDays = 50
 nPop = 10000
 vis_default_virus_type = "alpha"
 student_default_virus_type = "alpha"
@@ -46,8 +46,8 @@ mask_day_trigger = 0
 initial_lockdown_mandate = false
 # lockdown_on_trigger
 # lockdown_off_trigger
-lockdown_on_day_trigger = 0
-lockdown_off_day_trigger = 101
+# lockdown_on_day_trigger = 0
+# lockdown_off_day_trigger = 101
 initial_testing_mandate = false
 # testing_trigger
 testing_day_trigger = 0
