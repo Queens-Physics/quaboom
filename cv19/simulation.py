@@ -152,6 +152,10 @@ class Simulation():
         self.virus_names = list(self.variant_codes.keys())
         self.track_virus_types = {virus_name: np.zeros(self.nDays, dtype=int) for virus_name in self.virus_names}
 
+        # Check that the inputs are valid
+        assert self.nPop >= self.num_students
+        assert self.nPop >= sum(self.variants.values())
+
     def load_disease_parameters(self, filename):
         """ Method to load in attributes from the disease configuration file.
 
