@@ -2,9 +2,9 @@
 
 Queen’s University Agent-Based Outbreak Outcome Model (QUABOOM) is an agent-based, object-oriented Monte Carlo simulation framework for modeling epidemics for a range of population sizes. The parameters of the simulation are easily modifiable by the user, allowing for comparison to real-life outbreaks and public health policies. The simulation framework gives users the ability to study case severity, masking, vaccination, testing, epidemic parameters (such as herd immunity, reproductive number), multiple disease variants, and the effect of a student population on disease spread.
 
-This simulation framework was used to propose a targeted capacity restriction approach in this paper: < link to paper > 
+This simulation framework was used to propose a targeted capacity restriction approach in this paper: < link to paper >
 
-The simulation code is written in python, so it can be run through any Python interpreter. To run the simulation, clone your fork of the repository to your local machine, and follow the **Setup** instructions listed below to make sure you have all the necessary dependencies and set up the environment correctly. 
+The simulation code is written in python, so it can be run through any Python interpreter. To run the simulation, clone your fork of the repository to your local machine, and follow the **Setup** instructions listed below to make sure you have all the necessary dependencies and set up the environment correctly.
 
 ## Setup
 
