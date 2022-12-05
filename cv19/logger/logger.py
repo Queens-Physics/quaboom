@@ -75,7 +75,7 @@ class Logger(object):
         self.add_handlers(logger, [console_handler, file_handler])
         logger.propagate = False
         return logger
-    
+
     def set_debug_mode(self, debug_mode: bool):
         """
         Function to set the root level logging to be debug level to be carried forward throughout

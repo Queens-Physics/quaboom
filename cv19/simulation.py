@@ -2,8 +2,8 @@ import warnings
 import subprocess
 from timeit import default_timer as timer
 from pathlib import Path
-import tomli
 import logging
+import tomli
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -65,7 +65,7 @@ class Simulation():
         A variable indicating if this object has run a simulaiton yet.
     """
 
-    def __init__(self, config_file, config_dir="", verbose=False, logging=True):
+    def __init__(self, config_file, config_dir="", verbose=False, log=True):
         """ __init__ method docstring.
 
         Parameters
@@ -77,7 +77,7 @@ class Simulation():
             is a complete path.
         verbose : bool
             A variable indicating whether to print updates with simulation information while running.
-        logging : bool
+        log : bool
             A variable indicating whether to log errors/ warnings within the simulation.
         """
 
@@ -89,7 +89,7 @@ class Simulation():
 
         self.verbose = verbose  # Whether or not to print daily simulation information.
 
-        self.logging = logging # Whether to log info or not
+        self.log = log  # Whether to log info or not
 
         self.set_code_version()  # Set the version of the code being used to run simulation.
 
@@ -284,14 +284,13 @@ class Simulation():
             Variable to indicate whether the code should return an error if same object is
             run multiple times.
         """
-        if self.logging:
+        if self.log:
             # Starts logger for file
             log = Logger().get_logger(__name__)
             logging.root.setLevel(logging.INFO)
             logging.captureWarnings(True)
-            log.info(f"{'':-<80}")
-            log.info(f"Simulation code version (from git): {self.code_id}\n")
-
+            log.info(f" %s",'-'*80)
+            log.info(f"Simulation code version (from git): %s", self.code_id)
 
         # Check whether the simulation has already been run.
         if fail_on_rerun:
@@ -486,23 +485,23 @@ class Simulation():
                     print(f"{key}:{val[day]}", end=", ")
                 print("\n")
 
-        if self.logging:
-            time_seconds = timer() - beg_time
-            m, s = divmod(time_seconds, 60)
-            h, m = divmod(m, 60)
-            log.info(f"Time elapsed: {h:02.0f}:{m:02.0f}:{s:02.0f}")
-            log.info("Simulation summary:")
-            log.info(f"    Time elapsed: {h:02.0f}:{m:02.0f}:{s:02.0f}")
-            log.info(f"    {self.track_susceptible[-1]} never got it")
-            log.info(f"    {self.track_dead[-1]} died")
-            log.info(f"    {np.max(self.track_infected)} had it at the peak")
-            log.info(f"    {self.track_tested[day]} were tested")
-            log.info(f"    {np.max(self.track_quarantined)} were in quarantine at the peak")
-            log.info(f"    {np.max(self.track_hospitalized)} at peak hospitalizations")
-            log.info(f"    {np.max(self.track_dead[-1])} at peak deaths")
-            log.info(f"    {self.track_vaccinated[day]} people were vaccinated")
-            log.info(f"    {self.track_vaccinated[day]/self.nPop*100:.2f}% of population was vaccinated.")
+        time_seconds = timer() - beg_time
+        m, s = divmod(time_seconds, 60)
+        h, m = divmod(m, 60)
 
+        if self.log:
+
+            log.info("Simulation summary:")
+            log.info(f"    Time elapsed : %02.0f:%02.0f:%02.0f", h, m, s)
+            log.info(f"    %i never got it", self.track_susceptible[-1])
+            log.info(f"    %i died", self.track_dead[-1])
+            log.info(f"    %i had it at the peak", np.max(self.track_infected))
+            log.info(f"    %i were tested", self.track_tested[day])
+            log.info(f"    %i were in quarantine at the peak", np.max(self.track_quarantined))
+            log.info(f"    %i at peak hospitalizations", np.max(self.track_hospitalized))
+            log.info(f"    %i at peak deaths", np.max(self.track_dead[-1]))
+            log.info(f"    %i people were vaccinated", self.track_vaccinated[day])
+            log.info(f"    %0.2f percent of population was vaccinated.", self.track_vaccinated[day]/self.nPop*100)
 
         if self.verbose:
 
