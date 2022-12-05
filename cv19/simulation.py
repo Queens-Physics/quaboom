@@ -289,8 +289,8 @@ class Simulation():
             log = Logger().get_logger(__name__)
             logging.root.setLevel(logging.INFO)
             logging.captureWarnings(True)
-            log.info(f" %s",'-'*80)
-            log.info(f"Simulation code version (from git): %s", self.code_id)
+            log.info(" %s", '-' * 80)
+            log.info("Simulation code version (from git): %s", self.code_id)
 
         # Check whether the simulation has already been run.
         if fail_on_rerun:
@@ -492,16 +492,16 @@ class Simulation():
         if self.log:
 
             log.info("Simulation summary:")
-            log.info(f"    Time elapsed : %02.0f:%02.0f:%02.0f", h, m, s)
-            log.info(f"    %i never got it", self.track_susceptible[-1])
-            log.info(f"    %i died", self.track_dead[-1])
-            log.info(f"    %i had it at the peak", np.max(self.track_infected))
-            log.info(f"    %i were tested", self.track_tested[day])
-            log.info(f"    %i were in quarantine at the peak", np.max(self.track_quarantined))
-            log.info(f"    %i at peak hospitalizations", np.max(self.track_hospitalized))
-            log.info(f"    %i at peak deaths", np.max(self.track_dead[-1]))
-            log.info(f"    %i people were vaccinated", self.track_vaccinated[day])
-            log.info(f"    %0.2f percent of population was vaccinated.", self.track_vaccinated[day]/self.nPop*100)
+            log.info("    Time elapsed : %02.0f:%02.0f:%02.0f", h, m, s)
+            log.info("    %i never got it", self.track_susceptible[-1])
+            log.info("    %i died", self.track_dead[-1])
+            log.info("    %i had it at the peak", np.max(self.track_infected))
+            log.info("    %i were tested", self.track_tested[day])
+            log.info("    %i were in quarantine at the peak", np.max(self.track_quarantined))
+            log.info("    %i at peak hospitalizations", np.max(self.track_hospitalized))
+            log.info("    %i at peak deaths", np.max(self.track_dead[-1]))
+            log.info("    %i people were vaccinated", self.track_vaccinated[day])
+            log.info("    %0.2f percent of population was vaccinated.", self.track_vaccinated[day] / self.nPop * 100)
 
         if self.verbose:
 
