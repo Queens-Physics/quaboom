@@ -287,7 +287,6 @@ class Simulation():
         if self.logging:
             # Starts logger for file
             log = Logger().get_logger(__name__)
-            #log.basicConfig(filename='../notebooks/debugging.log', level=logging.INFO)
             logging.root.setLevel(logging.INFO)
             logging.captureWarnings(True)
             log.info(f"{'':-<80}")
@@ -355,29 +354,21 @@ class Simulation():
             mask_mandate = self.policy.update_mask_mandate(day=day)
             if mask_mandate != old_mask_mandate and self.verbose:
                 print(f"Day: {day}, Mask Mandate: {mask_mandate}")
-                if self.logging:
-                    log.info(f"Day: {day}, Mask Mandate: {mask_mandate}")
             old_mask_mandate = mask_mandate
 
             lockdown = self.policy.update_lockdown(day=day)
             if lockdown != old_lockdown_mandate and self.verbose:
                 print(f"Day: {day}, Lockdown: {lockdown}")
-                if self.logging:
-                    log.info(f"Day: {day}, Lockdown: {lockdown}")
             old_lockdown_mandate = lockdown
 
             testing_ON = self.policy.update_testing(day)
             if testing_ON != old_testing_mandate and self.verbose:
                 print(f"Day: {day}, Testing: {testing_ON}")
-                if self.logging:
-                    log.info(f"Day: {day}, Testing: {testing_ON}")
             old_testing_mandate = testing_ON
 
             students_go = self.policy.check_students(day=day)
             if students_go != old_student_mandate and self.verbose:
                 print(f"Day: {day}, Uni Mandate: {students_go}")
-                if self.logging:
-                    log.info(f"Day: {day}, Uni Mandate: {students_go}")
             old_student_mandate = students_go
 
             # infect random students on the day they come in
