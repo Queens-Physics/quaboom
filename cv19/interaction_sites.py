@@ -287,7 +287,7 @@ class InteractionSites:
             return 0
         else:
             return self.site_num[grade_code] if grade_code in self.site_num else \
-                round(self.pop.get_population_size() / self.site_size[grade_code])
+                max(round(self.pop.get_population_size() / self.site_size[grade_code]), 1)
 
     def remove_dead(self):
         """Method to remove dead agents from interaction site arrays.
@@ -516,9 +516,12 @@ class InteractionSites:
 
         day_hours_scaler = 12
 
-        # Generate a linaer distribution from
-        number_of_interactions = np.round(np.random.triangular(left=0, mode=0, right=site_day_pop / day_hours_scaler,
-                                                               size=site_day_pop)).astype(int)
+        if site_day_pop == 0:
+            return np.array([])
+        else:
+            # Generate a linaer distribution from
+            number_of_interactions = np.round(np.random.triangular(left=0, mode=0, right=site_day_pop / day_hours_scaler,
+                                                                   size=site_day_pop)).astype(int)
 
         return number_of_interactions
 
