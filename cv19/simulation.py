@@ -667,7 +667,7 @@ class Simulation():
                            information="Cannot return zero-initialized arrays.",
                            fail=True)
 
-        returnDict = self.tracking_df.to_dict("list")
+        returnDict = dict(self.tracking_df.to_dict("list"))
         # Unpack the virus types
         for virus_type in self.track_virus_types.keys():
             returnDict[virus_type] = self.track_virus_types[virus_type]
