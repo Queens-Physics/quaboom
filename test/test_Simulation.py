@@ -50,7 +50,7 @@ class TestSimulation(unittest.TestCase):
         Checks that no new quarantines appear without testing happening that day.
         """
 
-        raw_data = pd.DataFrame(self.quarantine_obj_1.get_arrays())
+        raw_data = pd.DataFrame(self.quarantine_obj_1.get_tracking_dataframe())
 
         # Make sure we start and end with no quarantined
         self.assertTrue(raw_data['quarantined'].iloc[-1] == 0)
@@ -70,12 +70,12 @@ class TestSimulation(unittest.TestCase):
         in this simulaiton. Also will check that the number of interactions remains roughly consistent.
         """
 
-        raw_data = pd.DataFrame(self.quarantine_obj_2.get_arrays())
+        raw_data = pd.DataFrame(self.quarantine_obj_2.get_tracking_dataframe())
 
         # Make sure there are tests and no one gets quarantined
         self.assertTrue(raw_data['new_tested'].gt(0).any() and raw_data['quarantined'].eq(0).all())
 
-        n_interactions = raw_data['total_daily_interactions_B']
+        n_interactions = raw_data['n_interactions_B']
         start_interactions_mean = n_interactions.iloc[:10].mean()
         end_interactions_mean = n_interactions.iloc[-10:].mean()
 

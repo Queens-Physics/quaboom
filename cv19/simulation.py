@@ -591,7 +591,6 @@ class Simulation():
             if kwargs.get(plotting_value, None) is None:
                 kwargs[plotting_value] = True
 
-
         # List plotting values that use plt.fill_between
         fill_plotting_values = ["masks", "testing", "lockdown"]
 
@@ -613,7 +612,7 @@ class Simulation():
             # Handle the fill_between plotting
             elif parameter in fill_plotting_values and value:
                 plt.fill_between(days, 0, 1, where=self.tracking_df[parameter], alpha=0.3,
-                             transform=ax.get_xaxis_transform(), label=f"{parameter} implemented")
+                                 transform=ax.get_xaxis_transform(), label=f"{parameter} implemented")
 
             # Handle the regular plotting
             elif value:
