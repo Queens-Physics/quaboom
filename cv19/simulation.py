@@ -562,11 +562,7 @@ class Simulation():
 
         return self.has_run
 
-    def plot(self, plot_infected=True, plot_susceptible=True, plot_dead=True, plot_recovered=True, plot_new_infected=True,
-             plot_tested=True, plot_quarantined=True, plot_new_tests=True, plot_new_quarantined=False, plot_masks=True,
-             plot_hospitalized=True, plot_ICU=True, plot_lockdown=True, plot_testing=True, plot_students=True, plot_R0=False,
-             plot_R_eff=False, plot_HIT=False, plot_gamma=False, plot_beta=False, plot_vaccinated=True, plot_virus_types=None,
-             plot_n_interactions=False, log=False):
+    def plot(self, log=False, **kwargs):
         """ Method used to plot simulation results.
 
         Will return a warning or error if the simulation has not been run yet. For plotting the number of interactions,
@@ -589,62 +585,39 @@ class Simulation():
         _, ax = plt.subplots(figsize=(10, 8), dpi=100)
         days = np.linspace(0, self.nDays, self.nDays, dtype=int)
 
-        # Plot the tracking arrays
-        if plot_infected:
-            plt.plot(days, self.tracking_df['infected'], label="infected")
-        if plot_susceptible:
-            plt.plot(days, self.tracking_df['susceptible'], label="susceptible")
-        if plot_recovered:
-            plt.plot(days, self.tracking_df['recovered'], label="recovered")
-        if plot_dead:
-            plt.plot(days, self.tracking_df['dead'], label="dead")
-        if plot_hospitalized:
-            plt.plot(days, self.tracking_df['hospitalized'], label="hospitalized")
-        if plot_ICU:
-            plt.plot(days, self.tracking_df['ICU'], label="ICU")
-        if plot_new_infected:
-            plt.plot(days, self.tracking_df['new_infected'], label="new infected")
-        if plot_quarantined:
-            plt.plot(days, self.tracking_df['quarantined'], label="quarantined")
-        if plot_tested:
-            plt.plot(days, self.tracking_df['tests'], label="total tests")
-        if plot_new_tests:
-            plt.plot(days, self.tracking_df['new_tested'], label="new tested")
-        if plot_new_quarantined:
-            plt.plot(days, self.tracking_df['new_quarantined'], label="new quarantined")
-        if plot_students:
-            plt.plot(days, self.tracking_df['inf_students'], label="infected students")
-        if plot_R0:
-            plt.plot(days, self.tracking_df['R0'], label="R0")
-        if plot_R_eff:
-            plt.plot(days, self.tracking_df['R_eff'], label="Reff")
-        if plot_HIT:
-            plt.plot(days, self.tracking_df['HIT'], label="HIT")
-        if plot_gamma:
-            plt.plot(days, self.tracking_df['gamma'], label="gamma")
-        if plot_beta:
-            plt.plot(days, self.tracking_df['beta'], label="beta")
-        if plot_virus_types is not None:
-            for key in plot_virus_types:
-                if plot_virus_types[key]:
-                    plt.plot(days, self.track_virus_types[key], label=str(key))
-        if plot_n_interactions:
-            for item in plot_n_interactions:
-                if item in self.inter_sites.daily_interactions:
-                    plt.plot(days, self.inter_sites.daily_interactions[item], label=f"Total Interactions: {item}")
-        if plot_vaccinated:
-            plt.plot(days, self.tracking_df['vaccinated'], label="vaccinated")
+        # Add the default values
+        default_plotting_values = ['susceptible', 'infected', 'recovered', 'dead']
+        for plotting_value in default_plotting_values:
+            if kwargs.get(plotting_value, None) is None:
+                kwargs[plotting_value] = True
 
-        # Indicate when certain mandates were in place
-        if plot_masks:
-            plt.fill_between(days, 0, 1, where=self.tracking_df["masks"], alpha=0.3,
-                             transform=ax.get_xaxis_transform(), label="masks required")
-        if plot_testing:
-            plt.fill_between(days, 0, 1, where=self.tracking_df["testing"], alpha=0.3,
-                             transform=ax.get_xaxis_transform(), label="testing performed")
-        if plot_lockdown:
-            plt.fill_between(days, 0, 1, where=self.tracking_df["lockdown"], alpha=0.3,
-                             transform=ax.get_xaxis_transform(), label="lockdown implemented")
+
+        # List plotting values that use plt.fill_between
+        fill_plotting_values = ["masks", "testing", "lockdown"]
+
+        # Plot the standard arrays
+        for parameter, value in kwargs.items():
+
+            # Handle nested variant plotting
+            if parameter == "virus_types":
+                for vt_key, vt_value in value.items():
+                    if vt_value:
+                        plt.plot(days, self.track_virus_types[vt_key], label=str(vt_key))
+
+            # Handle nested interaction plotting
+            elif parameter == "n_interactions":
+                for nint_key, nint_value in value.items():
+                    if nint_value:
+                        plt.plot(days, self.inter_sites.daily_interactions[nint_key], label=f"Total Interactions: {nint_key}")
+
+            # Handle the fill_between plotting
+            elif parameter in fill_plotting_values and value:
+                plt.fill_between(days, 0, 1, where=self.tracking_df[parameter], alpha=0.3,
+                             transform=ax.get_xaxis_transform(), label=f"{parameter} implemented")
+
+            # Handle the regular plotting
+            elif value:
+                plt.plot(days, self.tracking_df[parameter], label=parameter.replace("_", " "))
 
         # Final graph formatting
         plt.grid()
@@ -654,25 +627,34 @@ class Simulation():
         plt.ylabel("People")
         plt.xlabel("Days")
 
-    def get_arrays(self):
-        """ Method to return all of the tracking arrays after the simulation has run.
+    def get_tracking_dataframe(self):
+        """ Method to return all tracking arrays as a pandas DataFrame.
 
         Returns
         -------
-        returnDict : dict of `np.array`
-            A dictionary holding all of the tracking arrays with the raw simulation results.
+        self.tracking_df : `pd.DataFrame`
+            A pandas DataFrame holding all the tracking arrays from the simulation.
         """
-
         self.check_has_run(check=True,
                            information="Cannot return zero-initialized arrays.",
                            fail=True)
 
-        returnDict = dict(self.tracking_df.to_dict("list"))
-        # Unpack the virus types
-        for virus_type in self.track_virus_types.keys():
-            returnDict[virus_type] = self.track_virus_types[virus_type]
-        # Unpack the interaction site number of interactions
-        for inter_site, inter_site_arr in self.inter_sites.daily_interactions.items():
-            returnDict[f"total_daily_interactions_{inter_site}"] = inter_site_arr
+        # Unpack the virus types into the dataframe
+        for virus_type, virus_type_arr in self.track_virus_types.items():
+            self.tracking_df.loc[:, virus_type] = virus_type_arr
 
-        return returnDict
+        # Unpack the interaction site number of interactions into the dataframe
+        for inter_site, inter_site_arr in self.inter_sites.daily_interactions.items():
+            self.tracking_df.loc[:, f"n_interactions_{inter_site}"] = inter_site_arr
+
+        return self.tracking_df
+
+    def get_tracking_arrays(self):
+        """ Method to return all tracking arrays as a dictionary of lists.
+
+        Returns
+        -------
+        self.tracking_df : dict of lists
+            A dictionary of lists that contain the same content as the self.tracking_df DataFrame.
+        """
+        return self.get_tracking_dataframe().to_dict("list")
