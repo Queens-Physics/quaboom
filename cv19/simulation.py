@@ -613,7 +613,7 @@ class Simulation():
                     for vt_key, vt_value in value.items():
                         if vt_value:
                             plt.plot(days, self.tracking_df[vt_key],
-                                     label=f"Virus Type: {nint_key}")
+                                     label=f"Virus Type: {vt_key}")
 
                 # Handle nested interaction plotting
                 elif parameter == "n_interactions":
