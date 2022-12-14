@@ -449,6 +449,17 @@ class Simulation():
             print(f"    {self.tracking_df.at[day, 'vaccinated']} people were vaccinated")
             print(f"    {self.tracking_df.at[day, 'vaccinated']/self.nPop*100:.2f}% of population was vaccinated.")
 
+        # Unpack the virus types into the dataframe
+        for virus_type, virus_type_arr in self.track_virus_types.items():
+            self.tracking_df.loc[:, virus_type] = virus_type_arr
+
+        # Unpack the interaction site number of interactions into the dataframe
+        for inter_site, inter_site_arr in self.inter_sites.daily_interactions.items():
+            self.tracking_df.loc[:, f"n_interactions_{inter_site}"] = inter_site_arr
+
+        # Change the index to day
+        self.tracking_df.index.rename("day", inplace=True)
+        
         self.has_run = True
 
     def update_tracking_arrays(self, day):
@@ -596,27 +607,29 @@ class Simulation():
 
         # Plot the standard arrays
         for parameter, value in kwargs.items():
+            if value:
+                # Handle nested variant plotting
+                if parameter == "virus_types":
+                    for vt_key, vt_value in value.items():
+                        if vt_value:
+                            plt.plot(days, self.tracking_df[vt_key], 
+                                     label=f"Virus Type: {nint_key}")
 
-            # Handle nested variant plotting
-            if parameter == "virus_types":
-                for vt_key, vt_value in value.items():
-                    if vt_value:
-                        plt.plot(days, self.track_virus_types[vt_key], label=str(vt_key))
+                # Handle nested interaction plotting
+                elif parameter == "n_interactions":
+                    for nint_key, nint_value in value.items():
+                        if nint_value:
+                            plt.plot(days, self.tracking_df[f"n_interactions_{nint_key}"], 
+                                     label=f"Total Interactions: {nint_key}")
 
-            # Handle nested interaction plotting
-            elif parameter == "n_interactions":
-                for nint_key, nint_value in value.items():
-                    if nint_value:
-                        plt.plot(days, self.inter_sites.daily_interactions[nint_key], label=f"Total Interactions: {nint_key}")
+                # Handle the fill_between plotting
+                elif parameter in fill_plotting_values:
+                    plt.fill_between(days, 0, 1, where=self.tracking_df[parameter], alpha=0.3,
+                                     transform=ax.get_xaxis_transform(), label=f"{parameter} implemented")
 
-            # Handle the fill_between plotting
-            elif parameter in fill_plotting_values and value:
-                plt.fill_between(days, 0, 1, where=self.tracking_df[parameter], alpha=0.3,
-                                 transform=ax.get_xaxis_transform(), label=f"{parameter} implemented")
-
-            # Handle the regular plotting
-            elif value:
-                plt.plot(days, self.tracking_df[parameter], label=parameter.replace("_", " "))
+                # Handle the regular plotting
+                else:
+                    plt.plot(days, self.tracking_df[parameter], label=parameter.replace("_", " "))
 
         # Final graph formatting
         plt.grid()
@@ -637,15 +650,7 @@ class Simulation():
         self.check_has_run(check=True,
                            information="Cannot return zero-initialized arrays.",
                            fail=True)
-
-        # Unpack the virus types into the dataframe
-        for virus_type, virus_type_arr in self.track_virus_types.items():
-            self.tracking_df.loc[:, virus_type] = virus_type_arr
-
-        # Unpack the interaction site number of interactions into the dataframe
-        for inter_site, inter_site_arr in self.inter_sites.daily_interactions.items():
-            self.tracking_df.loc[:, f"n_interactions_{inter_site}"] = inter_site_arr
-
+        
         return self.tracking_df
 
     def get_tracking_arrays(self):
