@@ -415,12 +415,12 @@ class Simulation():
                        f"recovered: {self.tracking_df.at[day, 'recovered']}, "
                        f"susceptible: {self.tracking_df.at[day, 'susceptible']}, "
                        f"dead: {self.tracking_df.at[day, 'dead']}, "
-                       f"hospitalized: {self.tracking_df[day, 'hospitalized']}, "
-                       f"ICU: {self.tracking_df[day, 'ICU']}, "
-                       f"tested: {self.tracking_df[day, 'tested']}, "
-                       f"total quarantined: {self.tracking_df[day, 'quarantined']}, "
-                       f"infected students: {self.tracking_df[day, 'inf_students']}, "
-                       f"vaccinated: {self.tracking_df[day, 'vaccinated']}"))
+                       f"hospitalized: {self.tracking_df.at[day, 'hospitalized']}, "
+                       f"ICU: {self.tracking_df.at[day, 'ICU']}, "
+                       f"tested: {self.tracking_df.at[day, 'tested']}, "
+                       f"total quarantined: {self.tracking_df.at[day, 'quarantined']}, "
+                       f"infected students: {self.tracking_df.at[day, 'inf_students']}, "
+                       f"vaccinated: {self.tracking_df.at[day, 'vaccinated']}"))
 
                 # Print variants
                 print("Variants", end=": ")
@@ -440,7 +440,7 @@ class Simulation():
             print(f"    {self.tracking_df['infected'].max()} had it at the peak")
             print(f"    {self.tracking_df.at[day, 'tested']} were tested")
             print(f"    {self.tracking_df['quarantined'].max()} were in quarantine at the peak")
-            print(f"    {self.tracking_df['hospitalied'].max()} at peak hospitalizations")
+            print(f"    {self.tracking_df['hospitalized'].max()} at peak hospitalizations")
             print(f"    {self.tracking_df['dead'].max()} at peak deaths")
             print("    The breakdown of the variants is", end=": ")
             for key, val in self.track_virus_types.items():
