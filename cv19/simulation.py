@@ -459,7 +459,7 @@ class Simulation():
 
         # Change the index to day
         self.tracking_df.index.rename("day", inplace=True)
-        
+
         self.has_run = True
 
     def update_tracking_arrays(self, day):
@@ -612,14 +612,14 @@ class Simulation():
                 if parameter == "virus_types":
                     for vt_key, vt_value in value.items():
                         if vt_value:
-                            plt.plot(days, self.tracking_df[vt_key], 
+                            plt.plot(days, self.tracking_df[vt_key],
                                      label=f"Virus Type: {nint_key}")
 
                 # Handle nested interaction plotting
                 elif parameter == "n_interactions":
                     for nint_key, nint_value in value.items():
                         if nint_value:
-                            plt.plot(days, self.tracking_df[f"n_interactions_{nint_key}"], 
+                            plt.plot(days, self.tracking_df[f"n_interactions_{nint_key}"],
                                      label=f"Total Interactions: {nint_key}")
 
                 # Handle the fill_between plotting
@@ -650,7 +650,7 @@ class Simulation():
         self.check_has_run(check=True,
                            information="Cannot return zero-initialized arrays.",
                            fail=True)
-        
+
         return self.tracking_df
 
     def get_tracking_arrays(self):
