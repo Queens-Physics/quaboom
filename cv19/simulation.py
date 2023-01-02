@@ -420,7 +420,12 @@ class Simulation():
 
             self.tracking_df.at[day, "time"] = timer() - beg_time
 
-            log.debug("Day: %i, infected: %i, recovered: %i, susceptible: %i, dead: %i, hospitalized: %i, ICU: %i, tested: %i,total quarantined: %i, infected students: %i, vaccinated: %i", day, self.tracking_df.at[day, 'infected'], self.tracking_df.at[day, 'recovered'], self.tracking_df.at[day, 'susceptible'], self.tracking_df.at[day, 'dead'], self.tracking_df.at[day, 'hospitalized'], self.tracking_df.at[day, 'ICU'], self.tracking_df.at[day, 'tested'], self.tracking_df.at[day, 'quarantined'], self.tracking_df.at[day, 'inf_students'], self.tracking_df.at[day, 'vaccinated'])
+            log.debug("Day: %i, infected: %i, recovered: %i, susceptible: %i, dead: %i, hospitalized: %i, ICU: %i, tested: %i, total quarantined: %i, infected students: %i, vaccinated: %i",
+                      day, self.tracking_df.at[day, 'infected'], self.tracking_df.at[day, 'recovered'],
+                      self.tracking_df.at[day, 'susceptible'], self.tracking_df.at[day, 'dead'],
+                      self.tracking_df.at[day, 'hospitalized'], self.tracking_df.at[day, 'ICU'],
+                      self.tracking_df.at[day, 'tested'], self.tracking_df.at[day, 'quarantined'],
+                      self.tracking_df.at[day, 'inf_students'], self.tracking_df.at[day, 'vaccinated'])
 
         time_seconds = timer() - beg_time
         m, s = divmod(time_seconds, 60)
