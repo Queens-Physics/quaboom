@@ -47,8 +47,6 @@ class Simulation():
         config_dir : str
             Path to the directory that stores the configuration file. Not required if config_file
             is a complete path.
-        log_level : str
-            A variable indicating which level to log updates with simulation information while running.
         """
 
         self.config_dir = config_dir
