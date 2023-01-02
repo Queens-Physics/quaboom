@@ -1,4 +1,3 @@
-import warnings
 import subprocess
 from timeit import default_timer as timer
 from pathlib import Path
@@ -25,10 +24,6 @@ class Simulation():
 
     Attributes
     ----------
-    verbose : bool
-        A variable indicating whether to print updates with simulation information while running.
-    logging : bool
-        A variable indivating whether to log info/ warnings within the simulation.
     track_new_infected : :obj:`np.array` of int
         Holds the number of new infections for each day of the simulation.
     track_infected : :obj:`np.array` of int
@@ -65,7 +60,7 @@ class Simulation():
         A variable indicating if this object has run a simulaiton yet.
     """
 
-    def __init__(self, config_file, config_dir="", verbose=False, log=True):
+    def __init__(self, config_file, config_dir=""):
         """ __init__ method docstring.
 
         Parameters
@@ -75,10 +70,8 @@ class Simulation():
         config_dir : str
             Path to the directory that stores the configuration file. Not required if config_file
             is a complete path.
-        verbose : bool
-            A variable indicating whether to print updates with simulation information while running.
-        log : bool
-            A variable indicating whether to log errors/ warnings within the simulation.
+        log_level : str
+            A variable indicating which level to log updates with simulation information while running.
         """
 
         self.config_dir = config_dir
@@ -86,10 +79,6 @@ class Simulation():
         self.load_disease_parameters(self.disease_config_file)
 
         self.init_classes()  # Have to initalize the classes after we have all of the parameters
-
-        self.verbose = verbose  # Whether or not to print daily simulation information.
-
-        self.log = log  # Whether to log info or not
 
         self.set_code_version()  # Set the version of the code being used to run simulation.
 
@@ -193,7 +182,7 @@ class Simulation():
                 return
 
             except FileNotFoundError:
-                warnings.warn((f"Unable to find file: {filepath} "
+                log.warning((f"Unable to find file: {filepath} "
                                "assuming directory is relative to main config. "
                                "Attempting read relative to CV19ROOT directory."))
 
@@ -237,12 +226,12 @@ class Simulation():
             self.code_id = self.code_id.strip()
 
         except subprocess.CalledProcessError as e:
-            warnings.warn((f"Command '{' '.join(git_version_cmd)}' returned a non-zero "
+            log.warning((f"Command '{' '.join(git_version_cmd)}' returned a non-zero "
                            f"exit code: {e.returncode}."))
             print(e.output)
 
         except OSError:
-            warnings.warn("Could not set code version from git.")
+            log.warning("Could not set code version from git.")
 
         if self.code_id is not None:
             # By default, assume no local modifications.
@@ -261,12 +250,12 @@ class Simulation():
                         dirty = True
 
             except subprocess.CalledProcessError as e:
-                warnings.warn((f"Command '{' '.join(git_dirty_cmd)}' returned a non-zero "
+                log.warning((f"Command '{' '.join(git_dirty_cmd)}' returned a non-zero "
                                f"exit code: {e.returncode}."))
                 print(e.output)
 
             except OSError:
-                warnings.warn("Could not set code version from git.")
+                log.warning("Could not set code version from git.")
 
             if dirty:
                 self.code_id += '-dirty'
@@ -284,13 +273,20 @@ class Simulation():
             Variable to indicate whether the code should return an error if same object is
             run multiple times.
         """
-        if self.log:
-            # Starts logger for file
-            log = Logger().get_logger(__name__)
-            logging.root.setLevel(logging.INFO)
-            logging.captureWarnings(True)
-            log.info(" %s", '-' * 80)
-            log.info("Simulation code version (from git): %s", self.code_id)
+
+        log_level_info = {"DEBUG": logging.DEBUG,
+                          "INFO": logging.INFO,
+                          "WARNING": logging.WARNING,
+                          "ERROR": logging.ERROR}
+        log_level_config = self.parameters["logging_info"]["level"]
+        log_level = log_level_info.get(log_level_config)
+
+        # Starts logger for file
+        log = Logger().get_logger(__name__)
+        logging.root.setLevel(log_level)
+        logging.captureWarnings(True)
+        log.info(" %s", '-' * 70)
+        log.info("Starting simulation...")
 
         # Check whether the simulation has already been run.
         if fail_on_rerun:
@@ -300,8 +296,7 @@ class Simulation():
                            "fail_on_rerun argument to False.")
             self.check_has_run(check=False, information=information, fail=True)
 
-        if self.verbose:
-            print(f"Simulation code version (from git): {self.code_id}\n")
+        log.info(f"Simulation code version (from git): %s", self.code_id)
 
         # Get current time for measuring elapsed time of simulation.
         beg_time = timer()
@@ -351,23 +346,23 @@ class Simulation():
             # UPDATE POLICY
 
             mask_mandate = self.policy.update_mask_mandate(day=day)
-            if mask_mandate != old_mask_mandate and self.verbose:
-                print(f"Day: {day}, Mask Mandate: {mask_mandate}")
+            if mask_mandate != old_mask_mandate:
+                log.info("Day: %i, Mask Mandate: %i", day, mask_mandate)
             old_mask_mandate = mask_mandate
 
             lockdown = self.policy.update_lockdown(day=day)
-            if lockdown != old_lockdown_mandate and self.verbose:
-                print(f"Day: {day}, Lockdown: {lockdown}")
+            if lockdown != old_lockdown_mandate:
+                log.info("Day: %i, Lockdown: %i", day, lockdown)
             old_lockdown_mandate = lockdown
 
             testing_ON = self.policy.update_testing(day)
-            if testing_ON != old_testing_mandate and self.verbose:
-                print(f"Day: {day}, Testing: {testing_ON}")
+            if testing_ON != old_testing_mandate:
+                log.info("Day: %i, Testing: %i", day, testing_ON)
             old_testing_mandate = testing_ON
 
             students_go = self.policy.check_students(day=day)
-            if students_go != old_student_mandate and self.verbose:
-                print(f"Day: {day}, Uni Mandate: {students_go}")
+            if students_go != old_student_mandate:
+                log.info("Day: %i, Uni Mandate: %i", day, students_go)
             old_student_mandate = students_go
 
             # infect random students on the day they come in
@@ -466,61 +461,26 @@ class Simulation():
 
             self.track_time[day] = timer() - beg_time
 
-            if self.verbose:
-                print((f"Day: {day}, "
-                       f"infected: {self.track_infected[day]}, "
-                       f"recovered: {self.track_recovered[day]}, "
-                       f"susceptible: {self.track_susceptible[day]}, "
-                       f"dead: {self.track_dead[day]}, "
-                       f"hospitalized: {self.track_hospitalized[day]}, "
-                       f"ICU: {self.track_ICU[day]}, "
-                       f"tested: {self.track_tested[day]}, "
-                       f"total quarantined: {self.track_quarantined[day]}, "
-                       f"infected students: {self.track_inf_students[day]}, "
-                       f"vaccinated: {self.track_vaccinated[day]}"))
-
-                # Print variants
-                print("Variants", end=": ")
-                for key, val in self.track_virus_types.items():
-                    print(f"{key}:{val[day]}", end=", ")
-                print("\n")
+            log.debug("Day: %i, infected: %i, recovered: %i, susceptible: %i, dead: %i, hospitalized: %i, ICU: %i, tested: %i,total quarantined: %i, infected students: %i, vaccinated: %i", day, self.track_infected[day], self.track_recovered[day], self.track_susceptible[day], self.track_dead[day], self.track_hospitalized[day], self.track_ICU[day], self.track_tested[day], self.track_quarantined[day], self.track_inf_students[day], self.track_vaccinated[day])
 
         time_seconds = timer() - beg_time
         m, s = divmod(time_seconds, 60)
         h, m = divmod(m, 60)
 
-        if self.log:
-
-            log.info("Simulation summary:")
-            log.info("    Time elapsed : %02.0f:%02.0f:%02.0f", h, m, s)
-            log.info("    %i never got it", self.track_susceptible[-1])
-            log.info("    %i died", self.track_dead[-1])
-            log.info("    %i had it at the peak", np.max(self.track_infected))
-            log.info("    %i were tested", self.track_tested[day])
-            log.info("    %i were in quarantine at the peak", np.max(self.track_quarantined))
-            log.info("    %i at peak hospitalizations", np.max(self.track_hospitalized))
-            log.info("    %i at peak deaths", np.max(self.track_dead[-1]))
-            log.info("    %i people were vaccinated", self.track_vaccinated[day])
-            log.info("    %0.2f percent of population was vaccinated.", self.track_vaccinated[day] / self.nPop * 100)
-
-        if self.verbose:
-
-            print(f"{'':-<80}")
-            print("Simulation summary:")
-            print(f"    Time elapsed: {h:02.0f}:{m:02.0f}:{s:02.0f}")
-            print(f"    {self.track_susceptible[-1]} never got it")
-            print(f"    {self.track_dead[-1]} died")
-            print(f"    {np.max(self.track_infected)} had it at the peak")
-            print(f"    {self.track_tested[day]} were tested")
-            print(f"    {np.max(self.track_quarantined)} were in quarantine at the peak")
-            print(f"    {np.max(self.track_hospitalized)} at peak hospitalizations")
-            print(f"    {np.max(self.track_dead[-1])} at peak deaths")
-            print("    The breakdown of the variants is", end=": ")
-            for key, val in self.track_virus_types.items():
-                print(f"{key}-{np.max(val)}", end=", ")
-            print("")
-            print(f"    {self.track_vaccinated[day]} people were vaccinated")
-            print(f"    {self.track_vaccinated[day]/self.nPop*100:.2f}% of population was vaccinated.")
+        log.info("Simulation summary:")
+        log.info("    Time elapsed : %02.0f:%02.0f:%02.0f", h, m, s)
+        log.info("    %i never got it", self.track_susceptible[-1])
+        log.info("    %i died", self.track_dead[-1])
+        log.info("    %i had it at the peak", np.max(self.track_infected))
+        log.info("    %i were tested", self.track_tested[day])
+        log.info("    %i were in quarantine at the peak", np.max(self.track_quarantined))
+        log.info("    %i at peak hospitalizations", np.max(self.track_hospitalized))
+        log.info("    %i at peak deaths", np.max(self.track_dead[-1]))
+        log.info("The breakdown of the variants is:")
+        for key, val in self.track_virus_types.items():
+            log.info("    %s - %i", key, np.max(val))
+        log.info("    %i people were vaccinated", self.track_vaccinated[day])
+        log.info("    %0.2f percent of population was vaccinated.", self.track_vaccinated[day] / self.nPop * 100)
 
         self.has_run = True
 
@@ -593,7 +553,7 @@ class Simulation():
             if fail:
                 raise RuntimeError(message)
             else:
-                warnings.warn(message, RuntimeWarning)
+                log.warning(message, RuntimeWarning)
 
         return self.has_run
 

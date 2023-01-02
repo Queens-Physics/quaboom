@@ -41,7 +41,7 @@ class Logger(object):
             logging handler object : the console handler
         """
         file_handler = handlers.RotatingFileHandler(
-            self.log_file, maxBytes=5000, backupCount=1
+            self.log_file, backupCount=1
         )
         file_handler.setFormatter(self.formatter)
         file_handler.name = "fileHandler"
@@ -75,12 +75,3 @@ class Logger(object):
         self.add_handlers(logger, [console_handler, file_handler])
         logger.propagate = False
         return logger
-
-    def set_debug_mode(self, debug_mode: bool):
-        """
-        Function to set the root level logging to be debug level to be carried forward throughout
-        Args:
-            debug_mode (bool): debug mode initiation if true
-        """
-        if debug_mode:
-            logging.root.setLevel(logging.DEBUG)
