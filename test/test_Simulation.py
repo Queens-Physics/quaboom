@@ -26,11 +26,11 @@ class TestSimulation(unittest.TestCase):
         simulation objects used for testing.
         """
         quarantine_config_file_1 = str(Path(Path(__file__).parent, "testing_config_files/main_quarantine_1.toml").resolve())
-        self.quarantine_obj_1 = Simulation(quarantine_config_file_1, verbose=False)
+        self.quarantine_obj_1 = Simulation(quarantine_config_file_1)
         self.quarantine_obj_1.run()
 
         quarantine_config_file_2 = str(Path(Path(__file__).parent, "testing_config_files/main_quarantine_2.toml").resolve())
-        self.quarantine_obj_2 = Simulation(quarantine_config_file_2, verbose=False)
+        self.quarantine_obj_2 = Simulation(quarantine_config_file_2)
         self.quarantine_obj_2.run()
 
     def tearDown(self):
