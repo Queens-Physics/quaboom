@@ -1,3 +1,4 @@
+import warnings
 import subprocess
 from timeit import default_timer as timer
 from pathlib import Path
@@ -133,7 +134,7 @@ class Simulation():
                 return
 
             except FileNotFoundError:
-                log.warning((f"Unable to find file: {filepath} "
+                warnings.warn((f"Unable to find file: {filepath} "
                                "assuming directory is relative to main config. "
                                "Attempting read relative to CV19ROOT directory."))
 
@@ -177,12 +178,12 @@ class Simulation():
             self.code_id = self.code_id.strip()
 
         except subprocess.CalledProcessError as e:
-            log.warning((f"Command '{' '.join(git_version_cmd)}' returned a non-zero "
+            warnings.warn((f"Command '{' '.join(git_version_cmd)}' returned a non-zero "
                            f"exit code: {e.returncode}."))
             print(e.output)
 
         except OSError:
-            log.warning("Could not set code version from git.")
+            warnings.warn("Could not set code version from git.")
 
         if self.code_id is not None:
             # By default, assume no local modifications.
@@ -201,12 +202,12 @@ class Simulation():
                         dirty = True
 
             except subprocess.CalledProcessError as e:
-                log.warning((f"Command '{' '.join(git_dirty_cmd)}' returned a non-zero "
+                warnings.warn((f"Command '{' '.join(git_dirty_cmd)}' returned a non-zero "
                                f"exit code: {e.returncode}."))
                 print(e.output)
 
             except OSError:
-                log.warning("Could not set code version from git.")
+                warnings.warn("Could not set code version from git.")
 
             if dirty:
                 self.code_id += '-dirty'
@@ -283,7 +284,7 @@ class Simulation():
                            "fail_on_rerun argument to False.")
             self.check_has_run(check=False, information=information, fail=True)
 
-        log.info(f"Simulation code version (from git): %s", self.code_id)
+        log.info("Simulation code version (from git): %s", self.code_id)
 
         # Get current time for measuring elapsed time of simulation.
         beg_time = timer()
@@ -560,7 +561,7 @@ class Simulation():
             if fail:
                 raise RuntimeError(message)
             else:
-                log.warning(message, RuntimeWarning)
+                warnings.warn(message, RuntimeWarning)
 
         return self.has_run
 
