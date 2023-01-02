@@ -180,3 +180,6 @@ protocol_compliance_lockdown_length_reduction = 0.5
     Pfizer = 0.087
     Moderna = 0.059
     AZ = 0.24
+
+[logging_info]
+level = "INFO"
