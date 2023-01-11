@@ -395,7 +395,7 @@ class Population:
         visitors_ind = [x for x in range(self.nPop, self.nPop + self.current_num_vis)]
         vis_age = np.random.choice(a=self.age_options, p=self.age_weights, size=self.current_num_vis)
         vis_iso_tend = np.random.choice(a=self.isolation_options, p=self.isolation_weights, size=self.current_num_vis)
-        vis_has_mask =  np.random.uniform(size=self.current_num_vis) < self.prob_has_mask
+        vis_has_mask = np.random.uniform(size=self.current_num_vis) < self.prob_has_mask
         vis_mask_type = np.random.choice(a=self.mask_options, p=self.mask_weights, size=self.current_num_vis)
         vis_infected_day = np.random.choice(self.max_infectious[self.sim_obj.vis_default_severity], size=self.current_num_vis)
 
