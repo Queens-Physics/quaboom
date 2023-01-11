@@ -37,12 +37,14 @@ class Population:
         self.set_demographic_parameters()
 
         self.nPop = sim_obj.nPop  # total population
+        self.current_num_vis = 0  # initial number of visistors
         self.v0 = sim_obj.v0  # initial vaccinated
+        self.pop_w_vis = self.nPop + max(sim_obj.N_VIS_OPTION)  # max agents in the sim at a time
 
         # Student parameter
         self.nStudents = sim_obj.num_students  # full capacity ~ 24k students
 
-        self.population = [0] * self.nPop  # The list of all people
+        self.population = [NULL_ID] * self.pop_w_vis  # The list to hold all person objects
         self.household = [0] * self.nPop  # list of non-student houses (list that contains all lists of the people in the house)
         self.students = [0] * self.nStudents  # The list of only students
         self.stud_houses = [0] * self.nStudents  # list of student houses
@@ -84,10 +86,10 @@ class Population:
 
         # Initialize parameters of people immediately.
         # Much quick this way, utilizes numpy efficiency.
-        age_arr = np.random.choice(a=self.age_options, p=self.age_weights, size=self.nPop)
-        job_arr = np.random.choice(a=self.job_options, p=self.job_weights, size=self.nPop)
-        isolation_tend_arr = np.random.choice(a=self.isolation_options, p=self.isolation_weights, size=self.nPop)
-        case_severity_arr = np.empty(shape=self.nPop, dtype=object)
+        age_arr = np.random.choice(a=self.age_options, p=self.age_weights, size=self.pop_w_vis)
+        job_arr = np.random.choice(a=self.job_options, p=self.job_weights, size=self.pop_w_vis)
+        isolation_tend_arr = np.random.choice(a=self.isolation_options, p=self.isolation_weights, size=self.pop_w_vis)
+        case_severity_arr = np.empty(shape=self.pop_w_vis, dtype=object)
         # case severity now changes to depending on the age
 
         for i, age in enumerate(age_arr):
@@ -97,9 +99,9 @@ class Population:
             except KeyError as e:
                 raise ValueError((f"'{age}' is not a valid age range and has no associated case severity.")) from e
 
-        mask_type_arr = np.random.choice(a=self.mask_options, p=self.mask_weights, size=self.nPop)
-        has_mask_arr = np.random.uniform(size=self.nPop) < self.prob_has_mask
-        vaccine_type_arr = np.random.choice(a=self.vaccine_options, p=self.vaccine_weights, size=self.nPop)
+        mask_type_arr = np.random.choice(a=self.mask_options, p=self.mask_weights, size=self.pop_w_vis)
+        has_mask_arr = np.random.uniform(size=self.pop_w_vis) < self.prob_has_mask
+        vaccine_type_arr = np.random.choice(a=self.vaccine_options, p=self.vaccine_weights, size=self.pop_w_vis)
 
         # Initialize the house index and size for the loop
         houseIndex = 0
@@ -231,7 +233,7 @@ class Population:
             where = np.where(self.house_stud_i[housei] == -1)[0][0]
             self.house_stud_i[housei][where] = i
 
-        # Create person status arrays
+        # Create person status arrays (visitors not included here)
         # A non-negative index indicates that they are the property,
         # NULL_ID (-1) indicates that they are /not/ the property.
         self.susceptible = np.array(range(self.nPop), dtype=int)  # list of all susceptible individuals
@@ -290,6 +292,9 @@ class Population:
             setattr(self, attr, sim_obj.parameters["population_data"][attr])
 
         self.variant_codes = sim_obj.variant_codes
+        
+        # get max sickness lengths
+        self.max_infectious = sim_obj.disease_parameters["max_infectious"]
 
         # case severity from disease params
         self.severity_options = constants.SEVERITY_OPTIONS
@@ -342,7 +347,7 @@ class Population:
         self.house_options = [int(x) for x in constants.HOUSE_OPTIONS]
 
     def get_population_size(self):
-        """Method to return population size.
+        """Method to return population size. Does not include visitors. 
 
         Returns
         -------
@@ -351,13 +356,17 @@ class Population:
         return self.nPop
 
     def get_population(self):
-        """Method to retrieve a list of the population.
+        """Method to retrieve a list of the population, including visitors. Makes sure not to grab
+        empty visitor bins in the population array. 
 
         Returns
         -------
         self.has_mask: :obj:`np.array` of :obj:`int`
         """
-        return self.population
+        
+        pop_list = self.population[:self.nPop + self.current_num_vis]
+
+        return pop_list
 
     def get_student_indices(self):
         """Method to retrieve a list of the student indices.
@@ -377,15 +386,40 @@ class Population:
         """
         return self.nStudents
 
-    def remove_visitors(self, indices):
+    def add_visitors(self):
+        """Method to add visitors to the simulation.
+        """
+
+        self.current_num_vis = np.random.choice(a=self.sim_obj.N_VIS_OPTION, p=self.sim_obj.N_VIS_PROB)
+
+        visitors_ind = [x for x in range(self.nPop, self.nPop + self.current_num_vis)]
+        vis_age = np.random.choice(a=self.age_options, p=self.age_weights, size=self.current_num_vis)
+        vis_iso_tend = np.random.choice(a=self.isolation_options, p=self.isolation_weights, size=self.current_num_vis)
+        vis_has_mask =  np.random.uniform(size=self.current_num_vis) < self.prob_has_mask
+        vis_mask_type = np.random.choice(a=self.mask_options, p=self.mask_weights, size=self.current_num_vis)
+        vis_infected_day = np.random.choice(self.max_infectious[self.sim_obj.vis_default_severity], size=self.current_num_vis)
+
+        for i in range(0, self.current_num_vis):
+            visitor = Person(index=visitors_ind[i], sim_obj=self.sim_obj, infected=True, recovered=False, dead=False,
+                             hospitalized=False, ICU=False, quarantined=False, quarantined_day=None,
+                             infected_day=vis_infected_day[i], recovered_day=None, death_day=None, others_infected=None,
+                             cure_days=None, recent_infections=None, vaccinated=False, age=vis_age[i],
+                             job="Visitor", house_index=None, isolation_tendencies=vis_iso_tend[i],
+                             case_severity=self.sim_obj.vis_default_severity, has_mask=vis_has_mask[i],
+                             virus_type=self.sim_obj.vis_default_virus_type, mask_type=vis_mask_type[i])
+            
+            self.population[self.nPop + i] = visitor
+    
+    def remove_visitors(self):
         """Method to remove visitors from the simulation.
         """
-        for i in sorted(indices, reverse=True):
-            self.population.pop(i)
+        self.current_num_vis = 0
+        for i in range(self.nPop, self.pop_w_vis):
+            self.population[i] = NULL_ID
 
-        if len(self.population) != self.nPop:
+        if len(self.get_population()) != self.nPop:
             raise RuntimeError(("Population is not expected length after removing visitors "
-                               f"(expected {self.nPop}, is {len(self.population)})."))
+                               f"(expected {self.nPop}, is {len(self.get_population())})."))
 
     def get_susceptible(self):
         """Method to retrieve indicies of people suseptible.
@@ -779,7 +813,7 @@ class Population:
         """Method that causes a random sample of people to develop cold like symptoms.
         """
 
-        for person in self.population:
+        for person in self.get_population():
             person.update_uninfected_symptomatic()
 
     def update_infected_symptomatics(self, day):
@@ -912,5 +946,7 @@ class Population:
         ----------
         has_mask: bool
         """
-        for person in self.population:
+
+        for person in self.get_population():
             person.has_mask = True
+            

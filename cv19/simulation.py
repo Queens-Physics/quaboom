@@ -283,6 +283,7 @@ class Simulation():
         old_lockdown_mandate = self.policy.initial_lockdown_mandate
         old_testing_mandate = self.policy.initial_testing_mandate
         old_student_mandate = self.policy.initial_student_mandate
+
         # Loop over the number of days
         for day in range(self.nDays):
 
@@ -322,20 +323,8 @@ class Simulation():
                 student_default_virus_code = self.variant_codes[self.student_default_virus_type]
                 self.pop.infect_incoming_students(indices=indices, day=day, virus_type=student_default_virus_code)
 
-            # UPDATE VISITORS
-
-            # add a random number of visitors to the population
-            num_vis = np.random.choice(a=self.N_VIS_OPTION, p=self.N_VIS_PROB)
-            visitors_ind = [x for x in range(self.nPop, self.nPop + num_vis)]
-            vis_age = np.random.choice(a=self.pop.age_options, p=self.pop.age_weights, size=num_vis)
-            for i in range(0, num_vis):
-                visitor = Person(index=visitors_ind[i], sim_obj=self, infected=True, recovered=False, dead=False,
-                                 hospitalized=False, ICU=False, quarantined=False, quarantined_day=None, infected_day=None,
-                                 recovered_day=None, death_day=None, others_infected=None,
-                                 cure_days=None, recent_infections=None, vaccinated=False, age=vis_age[i],
-                                 job="Visitor", house_index=None, isolation_tendencies=0.2,
-                                 case_severity='Mild', has_mask=True, virus_type="alpha")
-                self.pop.population.append(visitor)
+            # ADD DAILY VISITORS
+            self.pop.add_visitors()
 
             # UPDATE INTERACTION SITES
             self.inter_sites.daily_reset()
@@ -387,8 +376,8 @@ class Simulation():
 
             # UPDATE POPULATION
 
-            # remove the guest visitors
-            self.pop.remove_visitors(visitors_ind)
+            # remove the daily visitors
+            self.pop.remove_visitors()
 
             for index in self.pop.get_infected():
                 infected_person = self.pop.get_person(index=index)
