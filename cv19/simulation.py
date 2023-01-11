@@ -9,7 +9,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 from . import CV19ROOT
-from .person import Person
 from .population import Population
 from .policy import Policy
 from .interaction_sites import InteractionSites

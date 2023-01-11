@@ -292,7 +292,7 @@ class Population:
             setattr(self, attr, sim_obj.parameters["population_data"][attr])
 
         self.variant_codes = sim_obj.variant_codes
-        
+
         # get max sickness lengths
         self.max_infectious = sim_obj.disease_parameters["max_infectious"]
 
@@ -347,7 +347,7 @@ class Population:
         self.house_options = [int(x) for x in constants.HOUSE_OPTIONS]
 
     def get_population_size(self):
-        """Method to return population size. Does not include visitors. 
+        """Method to return population size. Does not include visitors.
 
         Returns
         -------
@@ -357,13 +357,13 @@ class Population:
 
     def get_population(self):
         """Method to retrieve a list of the population, including visitors. Makes sure not to grab
-        empty visitor bins in the population array. 
+        empty visitor bins in the population array.
 
         Returns
         -------
         self.has_mask: :obj:`np.array` of :obj:`int`
         """
-        
+
         pop_list = self.population[:self.nPop + self.current_num_vis]
 
         return pop_list
@@ -407,9 +407,9 @@ class Population:
                              job="Visitor", house_index=None, isolation_tendencies=vis_iso_tend[i],
                              case_severity=self.sim_obj.vis_default_severity, has_mask=vis_has_mask[i],
                              virus_type=self.sim_obj.vis_default_virus_type, mask_type=vis_mask_type[i])
-            
+
             self.population[self.nPop + i] = visitor
-    
+
     def remove_visitors(self):
         """Method to remove visitors from the simulation.
         """
@@ -949,4 +949,3 @@ class Population:
 
         for person in self.get_population():
             person.has_mask = True
-            
