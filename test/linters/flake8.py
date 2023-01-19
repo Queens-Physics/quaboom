@@ -8,15 +8,15 @@ from cv19 import CV19ROOT
 
 
 def run_flake8():
-    '''
+    """
     Run the Flake8 test on the module and some other files in the repository.
     Automatically ran on every pull request via GitHub actions.
-    '''
+    """
     # Maximum line length.
     max_line_len = 200
 
     # Messages/warnings/errors to enable and disable.
-    messages_disable = ["W503", "E741"]
+    messages_disable = ["W503", "E741", "Q000"]
 
     # List of files or directories to run the linter on.
     # Currently assumes that the working directory is where to get the files.
