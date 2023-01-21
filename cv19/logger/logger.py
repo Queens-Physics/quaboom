@@ -15,6 +15,10 @@ class Logger(object):
     _instance = None
 
     def __new__(cls):
+        """Instantiates the logger or returns same instance.
+        Returns:
+            logging handler object : the log file
+        """
         if cls._instance is None:
             cls._instance = super().__new__(cls)
             cls.debug_mode = True
@@ -26,7 +30,7 @@ class Logger(object):
         return cls._instance
 
     def get_console_handler(self):
-        """Defines a console handler to come out on the console
+        """Defines a console handler to come out on the console.
         Returns:
             logging handler object : the console handler
         """
