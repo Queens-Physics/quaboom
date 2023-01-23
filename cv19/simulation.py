@@ -12,6 +12,7 @@ from .person import Person
 from .population import Population
 from .policy import Policy
 from .interaction_sites import InteractionSites
+from .data import constants
 
 
 class Simulation():
@@ -403,13 +404,14 @@ class Simulation():
             num_vis = np.random.choice(a=self.N_VIS_OPTION, p=self.N_VIS_PROB)
             visitors_ind = [x for x in range(self.nPop, self.nPop + num_vis)]
             vis_age = np.random.choice(a=self.pop.age_options, p=self.pop.age_weights, size=num_vis)
+            vis_vaccine_type = np.random.choice(a=constants.VACCINE_OPTIONS,p=self.vaccine_type,size=num_vis)
             for i in range(0, num_vis):
                 visitor = Person(index=visitors_ind[i], sim_obj=self, infected=True, recovered=False, dead=False,
                                  hospitalized=False, ICU=False, quarantined=False, quarantined_day=None, infected_day=None,
                                  recovered_day=None, death_day=None, others_infected=None,
                                  cure_days=None, recent_infections=None,
-                                 vaccine_info={"vaccine_type": "Pfizer", "vaccine_max_efficacy": 0.913,
-                                               "vaccine_immunity_buildup_days": 14, "long_term_vaccine_eff": 0.7, "vaccine_efficacy_min_day": 180}, age=vis_age[i],
+                                 vaccine_info={"vaccine_type": vis_vaccine_type[i], "vaccine_max_efficacy": self.immunization_history_parameters.vaccine_max_efficacy[vis_vaccine_type[i]],
+                                               "vaccine_immunity_buildup_days": self.immunization_history_parameters.vaccine_immunity_buildup_days[vis_vaccine_type[i]], "long_term_vaccine_eff": self.immunization_history_parameters.long_term_vaccine_eff[vis_vaccine_type[i]], "vaccine_efficacy_min_day": self.immunization_history_parameters.vaccine_efficacy_min_day[vis_vaccine_type[i]]}, age=vis_age[i],
                                  job="Visitor", house_index=None, isolation_tendencies=0.2,
                                  case_severity='Mild', has_mask=True, virus_type="alpha")
                 self.pop.population.append(visitor)

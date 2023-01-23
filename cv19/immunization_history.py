@@ -1,4 +1,4 @@
-class Immunization_History:
+class ImmunizationHistory:
     '''
     A class designed to keep track of a Person's vaccination history and vaccination parameters.
 
@@ -52,7 +52,7 @@ class Immunization_History:
         self.vaccinated = True
 
     def vaccine_efficacy(self, day):
-        '''Method to determines what the efficiency of the vaccine based on the type of vaccine administered, and other
+        '''Method to determine what the efficiency of the vaccine based on the type of vaccine administered, and other
         immunization history parameters.
 
         Returns
@@ -63,18 +63,18 @@ class Immunization_History:
         if self.vaccinated:
 
             days_since_vaccination = day - self.list_of_vaccination_dates[-1]
-            if (days_since_vaccination) == 0:
-                self.current_vax_eff = 0
-            elif (days_since_vaccination) <= self.vaccine_immunity_buildup_days:  # linear increase of immunity
-                self.current_vax_eff = ((self.vaccine_max_efficacy) / (self.vaccine_immunity_buildup_days)) * days_since_vaccination
-            elif (days_since_vaccination) >= self.vaccine_efficacy_min_day:  # plateau in immunity after min_day
-                self.current_vax_eff = self.long_term_vaccine_eff
-            else:  # calculate linearly decreasing immunity
-                self.current_vax_eff = (-(self.vaccine_max_efficacy - self.long_term_vaccine_eff) / (self.vaccine_efficacy_min_day - self.vaccine_immunity_buildup_days))  # slope calculation
+            if days_since_vaccination == 0:
+                self.current_vaccine_eff = 0
+            elif days_since_vaccination <= self.vaccine_immunity_buildup_days:  # linear increase of immunity
+                self.current_vaccine_eff = ((self.vaccine_max_efficacy) / (self.vaccine_immunity_buildup_days)) * days_since_vaccination
+            elif (days_since_vaccination > self.vaccine_immunity_buildup_days) and (days_since_vaccination < self.vaccine_efficacy_min_day):  # calculate linearly decreasing immunity
+                self.current_vaccine_eff = (-(self.vaccine_max_efficacy - self.long_term_vaccine_eff) / (self.vaccine_efficacy_min_day - self.vaccine_immunity_buildup_days))  # slope calculation
                 self.current_vax_eff *= days_since_vaccination  # scale by days since vaccination
-                self.current_vax_eff += self.vaccine_max_efficacy  # add initial value (which is the max efficacy)
+                self.current_vaccine_eff += self.vaccine_max_efficacy  # add initial value (which is the max efficacy)
+            else: # plateau in immunity after and including min_day
+                self.current_vaccine_eff = self.long_term_vaccine_eff
 
-            return self.current_vax_eff
+            return self.current_vaccine_eff
 
         else:
             return 0

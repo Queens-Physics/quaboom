@@ -98,27 +98,10 @@ class Population:
 
         mask_type_arr = np.random.choice(a=self.mask_options, p=self.mask_weights, size=self.nPop)
         has_mask_arr = np.random.uniform(size=self.nPop) < self.prob_has_mask
-
-        self.v0 = sim_obj.v0_parameters["v0"]  # initial vaccinated
+        
+        #Prepare vaccination date array for population initialization
         vaccine_type_arr = np.random.choice(a=self.vaccine_options, p=self.vaccine_weights, size=self.nPop)
-        if self.v0 > self.nPop:
-            self.v0 = self.nPop  # make sure maximum initially vaccinated people <= population size
-        v0_lower = sim_obj.v0_parameters["v0_interval_start_day"]  # lower bound on v0 range
-        v0_upper = sim_obj.v0_parameters["v0_interval_end_day"]  # upper bound on v0 range
-        vaccination_date_arr = np.zeros(self.v0)  # initialize v0 dates array
-        if v0_lower <= 0 and v0_upper <= 0:  # v0 bounds cannot be greater than 0
-
-            if v0_lower < v0_upper:  # v0_lower should be smaller (more negative) than v0_upper
-                vaccination_date_arr = np.random.uniform(low=v0_lower, high=v0_upper, size=self.v0)
-            if v0_lower > v0_upper:  # flip the bounds to set the range of v0
-                vaccination_date_arr = np.random.uniform(low=v0_upper, high=v0_lower, size=self.v0)
-            else:  # they are equal to each other:
-                vaccination_date_arr = np.ones(self.v0) * v0_lower
-        else:
-            if v0_lower >= 0:  # if v0_lower is > 0, make all individuals vaccinated on day 0
-                vaccination_date_arr = np.zeros(self.v0)
-            else:  # if only v0_upper is > 0, set 0 as upper bound and proceed
-                vaccination_date_arr = np.random.uniform(low=v0_lower, high=0, size=self.v0)
+        vaccination_date_arr = self.set_v0_parameters(self,sim_obj)
 
         # Initialize the house index and size for the loop
         houseIndex = 0
@@ -298,9 +281,10 @@ class Population:
 
         # Vaccinate first v0 people
         v_indices = sample(range(self.nPop), self.v0)
-        for index, i in enumerate(v_indices):  # set vaccinated date based on vaccination_date_arr
-            self.population[i].immunization_history_obj.set_vaccinated(day=int(vaccination_date_arr[index]))
-            self.vaccinated[i] = i
+        for i,v in enumerate(v_indices):
+        # set vaccinated date based on vaccination_date_arr
+            self.population[v].immunization_history_obj.set_vaccinated(day=int(vaccination_date_arr[i]))
+            self.vaccinated[v] = v
 
     def load_attributes_from_sim_obj(self, sim_obj):
         '''Method to load in attributes from the provided simulation class object.
@@ -373,6 +357,30 @@ class Population:
 
         # Cast this so they can be used as ints
         self.house_options = [int(x) for x in constants.HOUSE_OPTIONS]
+        
+    def set_v0_parameters(self,sim_obj):
+        '''Method to set up initially vaccinated population array.
+        
+        Returns
+        -------
+        vaccination_date_arr: :obj:`np.array` of :obj:`int`
+        '''
+        
+        self.v0 = sim_obj.v0_parameters["v0"]  # initial vaccinated
+        
+        v0_lower = sim_obj.v0_parameters["v0_interval_start_day"]  # lower bound on v0 range
+        v0_upper = sim_obj.v0_parameters["v0_interval_end_day"]  # upper bound on v0 range
+        vaccination_date_arr = np.zeros(self.v0)  # initialize v0 dates array
+        
+        if v0_lower <= 0 and v0_upper <= 0:  # v0 bounds cannot be greater than 0
+
+            if v0_lower < v0_upper:  # v0_lower should be smaller (more negative) than v0_upper
+                vaccination_date_arr = np.random.uniform(low=v0_lower, high=v0_upper, size=self.v0)
+                
+            else:  # they are equal to each other:
+                vaccination_date_arr = np.ones(self.v0) * v0_lower
+                
+        return vaccination_date_arr
 
     def get_population_size(self):
         '''Method to return population size.

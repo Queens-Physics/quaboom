@@ -1,7 +1,7 @@
 from random import random
 
 import numpy as np
-from .immunization_history import Immunization_History
+from .immunization_history import ImmunizationHistory
 
 
 class Person(object):
