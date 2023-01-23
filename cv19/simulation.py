@@ -5,6 +5,7 @@ from pathlib import Path
 import tomli
 
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 
 from . import CV19ROOT
@@ -25,43 +26,18 @@ class Simulation():
     ----------
     verbose : bool
         A variable indicating whether to print updates with simulation information while running.
-    track_new_infected : :obj:`np.array` of int
-        Holds the number of new infections for each day of the simulation.
-    track_infected : :obj:`np.array` of int
-        Holds the number of infected people for each day of the simulation.
-    track_susceptible : :obj:`np.array` of int
-        Holds the number of susceptible people for each day of the simulation.
-    track_recovered : :obj:`np.array` of int
-        Holds the number of recovered people for each day of the simulation.
-    track_dead : :obj:`np.array` of int
-        Holds the number of dead people for each day of the simulation.
-    track_hospitalized : :obj:`np.array` of int
-        Holds the number of hospitalized people for each day of the simulation.
-    track_quarantined : :obj:`np.array` of int
-        Holds the number of people currently in quarantine for each day of the simulation.
-    track_new_quarantined : :obj:`np.array` of int
-        Holds the number of newly quarantined people for each day of the simulation.
-    track_tested : :obj:`np.array` of int
-        Holds the total number of tested people, updated for each day of the simulation.
-    track_new_tested : :obj:`np.array` of int
-        Holds the number of people tested that day, for each day of the simulations.
-    track_testing_wait_list : :obj:`np.array` of int
-        Holds the number of people who are waiting to get tested that day, for each day of the simulations.
-    track_inf_students : :obj:`np.array` of int
-        Holds the number of infected students for each day of the simulations.
-    track_masks : :obj:`np.array` of bool
-        A binary array that tracks if masks were required for each day of the simulation.
-    track_lockdown : :obj:`np.array` of bool
-        A binary array that tracks if lockdown was implemented for each day of the simulation.
-    track_testing : :obj:`np.array` of bool
-        A binary array that tracks if testing was implemented for each day of the simulation.
-    track_time : :obj:`np.array` of float
-        An array to track the time taken to run each day of the simulation.
+    tracking_df : pd.DataFrame
+        A pandas DataFrame object that stores all the tracking arrays for a given simulation. Each
+        array is of length nDays.
+    virus_names : list of str
+        A list of identifying codes for each virus type that could be in the simulation.
+    track_virus_types : dict of np.array
+        A dictionary containing the number of agents infected with each virus type in the simulation.
     has_run : bool
         A variable indicating if this object has run a simulaiton yet.
     """
 
-    def __init__(self, config_file, config_dir="", verbose=False):
+    def __init__(self, config_file, config_dir="", config_override_data=None, verbose=False):
         """ __init__ method docstring.
 
         Parameters
@@ -71,13 +47,17 @@ class Simulation():
         config_dir : str
             Path to the directory that stores the configuration file. Not required if config_file
             is a complete path.
+        config_override_data : dict
+            A dictionary of configuration file instances that can be used to override the files
+            specified in the main configuration file. Designed to allow tabular mode to edit parameters
+            in configuration files other than main.
         verbose : bool
             A variable indicating whether to print updates with simulation information while running.
         """
 
         self.config_dir = config_dir
         self.load_general_parameters(config_file)
-        self.load_disease_parameters(self.disease_config_file)
+        self.load_disease_parameters(self.disease_config_file, config_override_data)
 
         self.init_classes()  # Have to initalize the classes after we have all of the parameters
 
@@ -85,32 +65,7 @@ class Simulation():
 
         self.set_code_version()  # Set the version of the code being used to run simulation.
 
-        # Arrays to store the values during the simulation
-        self.track_new_infected = np.zeros(self.nDays, dtype=int)  # new infections (always > 0)
-        self.track_delta_infected = np.zeros(self.nDays, dtype=int)  # change in total infections
-        self.track_infected = np.zeros(self.nDays, dtype=int)  # currently infected
-        self.track_susceptible = np.zeros(self.nDays, dtype=int)  # never been exposed
-        self.track_recovered = np.zeros(self.nDays, dtype=int)  # total recovered
-        self.track_dead = np.zeros(self.nDays, dtype=int)  # total deaths
-        self.track_hospitalized = np.zeros(self.nDays, dtype=int)  # total hospitalizations
-        self.track_ICU = np.zeros(self.nDays, dtype=int)  # total ICU
-        self.track_quarantined = np.zeros(self.nDays, dtype=int)  # population currently in quarantine
-        self.track_new_quarantined = np.zeros(self.nDays, dtype=int)  # newly quarantined that day
-        self.track_tested = np.zeros(self.nDays, dtype=int)       # total tested individuals
-        self.track_new_tested = np.zeros(self.nDays, dtype=int)   # new tested per day
-        self.track_testing_wait_list = np.zeros(self.nDays, dtype=int)  # counts the number of people waiting for tests each day
-        self.track_inf_students = np.zeros(self.nDays, dtype=int)  # total infected students
-        self.track_masks = np.zeros(self.nDays, dtype=bool)  # tracks masking mandates
-        self.track_lockdown = np.zeros(self.nDays, dtype=bool)  # tracks lockdown mandates
-        self.track_testing = np.zeros(self.nDays, dtype=bool)  # tracks testing mandates
-        self.track_time = np.zeros(self.nDays, dtype=float)  # time elapsed (in seconds) since start of simulation
-        self.track_R0 = np.zeros(self.nDays, dtype=float)  # daily R0
-        self.track_R_eff = np.zeros(self.nDays, dtype=float)  # daily effective R0
-        self.track_HIT = np.zeros(self.nDays, dtype=float)  # daily herd immunity threshold
-        self.track_vaccinated = np.zeros(self.nDays, dtype=int)  # total vaccinated
-        self.track_gamma = np.zeros(self.nDays, dtype=float)  # daily gamma value
-        self.track_beta = np.zeros(self.nDays, dtype=float)  # daily beta value
-        self.track_n_interactions = np.zeros(self.nDays, dtype=int)  # Daily number of interactions
+        self.make_tracking_df()
 
         self.has_run = False  # Indicates if the sim has run yet
 
@@ -152,11 +107,7 @@ class Simulation():
         self.virus_names = list(self.variant_codes.keys())
         self.track_virus_types = {virus_name: np.zeros(self.nDays, dtype=int) for virus_name in self.virus_names}
 
-        # Check that the inputs are valid
-        assert self.nPop >= self.num_students
-        assert self.nPop >= sum(self.variants.values())
-
-    def load_disease_parameters(self, filename):
+    def load_disease_parameters(self, filename, config_override_data):
         """ Method to load in attributes from the disease configuration file.
 
         All parameters in the file are loaded into the object, and parameter names
@@ -166,32 +117,41 @@ class Simulation():
         ----------
         filename : str
             Path to the disease configuration file.
+        config_override_data : dict
+            Dictionary containing possible override versions of the secondary configuration files.
+            Note, does not include paths to configuration files but the files themselves.
+
         """
 
-        # If path is absolute, use it.
-        if Path(filename).is_absolute():
-            with open(filename, 'rb') as file:
-                self.disease_parameters = tomli.load(file)
+        # Check that the inputs are valid
+        assert self.nPop >= self.num_students
+        assert self.nPop >= sum(self.variants.values())
 
-        # Assume that the configuration filename is relative to path of main config.
-        # If not set, assume relative to working directory.
-        # Last attempt try relative to cv19 project directory.
+        if config_override_data is not None:
+            self.disease_parameters = config_override_data['disease_config_data']
         else:
-            filepath = Path(self.config_dir, filename)
-            try:
-                with open(filepath, 'rb') as file:
+            # If path is absolute, use it.
+            if Path(filename).is_absolute():
+                with open(filename, 'rb') as file:
                     self.disease_parameters = tomli.load(file)
 
-                return
+            # Assume that the configuration filename is relative to path of main config.
+            # If not set, assume relative to working directory.
+            # Last attempt try relative to cv19 project directory.
+            else:
+                filepath = Path(self.config_dir, filename)
+                try:
+                    with open(filepath, 'rb') as file:
+                        self.disease_parameters = tomli.load(file)
 
-            except FileNotFoundError:
-                warnings.warn((f"Unable to find file: {filepath} "
-                               "assuming directory is relative to main config. "
-                               "Attempting read relative to CV19ROOT directory."))
+                except FileNotFoundError:
+                    warnings.warn((f"Unable to find file: {filepath} "
+                                   "assuming directory is relative to main config. "
+                                   "Attempting read relative to CV19ROOT directory."))
 
-                filepath = Path(CV19ROOT, filename)
-                with open(filepath, 'rb') as file:
-                    self.disease_parameters = tomli.load(file)
+                    filepath = Path(CV19ROOT, filename)
+                    with open(filepath, 'rb') as file:
+                        self.disease_parameters = tomli.load(file)
 
     def init_classes(self):
         """ Method that links the policy, population, and interaction sites class objects with
@@ -263,6 +223,42 @@ class Simulation():
             if dirty:
                 self.code_id += '-dirty'
 
+    def make_tracking_df(self):
+        """ Method to initalize the tracking dataframe for the simulation object
+        """
+
+        # Create a dictionary with tracking arrays and correct datatypes
+        tracking_dict = {
+            "new_infected": np.zeros(self.nDays, dtype=int),
+            "delta_infected": np.zeros(self.nDays, dtype=int),
+            "infected": np.zeros(self.nDays, dtype=int),
+            "susceptible": np.zeros(self.nDays, dtype=int),
+            "recovered": np.zeros(self.nDays, dtype=int),
+            "dead": np.zeros(self.nDays, dtype=int),
+            "hospitalized": np.zeros(self.nDays, dtype=int),
+            "ICU": np.zeros(self.nDays, dtype=int),
+            "quarantined": np.zeros(self.nDays, dtype=int),
+            "new_quarantined": np.zeros(self.nDays, dtype=int),
+            "tested": np.zeros(self.nDays, dtype=int),
+            "new_tested": np.zeros(self.nDays, dtype=int),
+            "testing_wait_list": np.zeros(self.nDays, dtype=int),
+            "inf_students": np.zeros(self.nDays, dtype=int),
+            "masks": np.zeros(self.nDays, dtype=bool),
+            "lockdown": np.zeros(self.nDays, dtype=bool),
+            "testing": np.zeros(self.nDays, dtype=bool),
+            "time": np.zeros(self.nDays, dtype=float),
+            "R0": np.zeros(self.nDays, dtype=float),
+            "R_eff": np.zeros(self.nDays, dtype=float),
+            "HIT": np.zeros(self.nDays, dtype=float),
+            "vaccinated": np.zeros(self.nDays, dtype=int),
+            "gamma": np.zeros(self.nDays, dtype=float),
+            "beta": np.zeros(self.nDays, dtype=float),
+            "n_interactions": np.zeros(self.nDays, dtype=int),
+        }
+
+        # Convert to a DataFrame object
+        self.tracking_df = pd.DataFrame(tracking_dict)
+
     def run(self, fail_on_rerun=True):
         """ Method that runs the monte-carlo simulation.
 
@@ -300,41 +296,13 @@ class Simulation():
         for day in range(self.nDays):
 
             # UPDATE TRACKING
-
-            # Count all the different states of people
-            self.track_infected[day] = self.pop.count_infected()
-            self.track_susceptible[day] = self.pop.count_susceptible()
-            self.track_recovered[day] = self.pop.count_recovered()
-            self.track_dead[day] = self.pop.count_dead()
-            self.track_hospitalized[day] = self.pop.count_hospitalized()
-            self.track_ICU[day] = self.pop.count_ICU()
-            self.track_tested[day] = self.pop.count_tested()
-            self.track_quarantined[day] = self.pop.count_quarantined()
-            self.track_testing_wait_list[day] = self.pop.get_testing_wait_list()
-
-            self.track_masks[day] = old_mask_mandate
-            self.track_lockdown[day] = old_lockdown_mandate
-            self.track_testing[day] = old_testing_mandate
-
-            self.track_new_quarantined[day] = self.pop.get_new_quarantined()
-            self.track_inf_students[day] = self.pop.count_infected_students()
-            daily_variant_counts = self.pop.count_virus_types()
-            for virus_name in self.virus_names:
-                self.track_virus_types[virus_name][day] = daily_variant_counts[virus_name]
-
-            self.track_vaccinated[day] = self.pop.count_vaccinated()
-
-            self.new_tests = 0
-
-            if day != 0:
-                self.track_delta_infected[day] = self.track_infected[day] - self.track_infected[day - 1]
-                self.track_new_infected[day] = self.inter_sites.daily_new_infections
-                self.track_new_tested[day] = self.track_tested[day] - self.track_tested[day - 1]
-
-                self.calculate_SIR_metrics(day)
+            self.update_tracking_arrays(day)
+            self.tracking_df.at[day, "hospitalized"] = self.pop.count_hospitalized()
+            self.tracking_df.at[day, "mask_mandate"] = old_mask_mandate
+            self.tracking_df.at[day, "lockdwn_mandate"] = old_lockdown_mandate
+            self.tracking_df.at[day, "testing_mandate"] = old_testing_mandate
 
             # UPDATE POLICY
-
             mask_mandate = self.policy.update_mask_mandate(day=day)
             if mask_mandate != old_mask_mandate and self.verbose:
                 print(f"Day: {day}, Mask Mandate: {mask_mandate}")
@@ -379,7 +347,6 @@ class Simulation():
                 self.pop.population.append(visitor)
 
             # UPDATE INTERACTION SITES
-
             self.inter_sites.daily_reset()
 
             will_visit_B = self.inter_sites.will_visit_site(self.inter_sites.get_grade_B_sites(), self.will_go_prob["B"])
@@ -416,9 +383,9 @@ class Simulation():
 
             # Manage testing sites
             if testing_ON:
-                tests_per_day = self.policy.get_num_tests(self.track_quarantined[day],
-                                                          self.track_new_quarantined[day],
-                                                          self.track_testing_wait_list[day])
+                tests_per_day = self.policy.get_num_tests(self.tracking_df.at[day, "quarantined"],
+                                                          self.tracking_df.at[day, "new_quarantined"],
+                                                          self.tracking_df.at[day, "testing_wait_list"])
                 self.inter_sites.testing_site(tests_per_day, day)
 
             # Manage Quarantine
@@ -449,20 +416,20 @@ class Simulation():
                     # Update quarintine stuff
                     infected_person.check_quarantine(day)
 
-            self.track_time[day] = timer() - beg_time
+            self.tracking_df.at[day, "time"] = timer() - beg_time
 
             if self.verbose:
                 print((f"Day: {day}, "
-                       f"infected: {self.track_infected[day]}, "
-                       f"recovered: {self.track_recovered[day]}, "
-                       f"susceptible: {self.track_susceptible[day]}, "
-                       f"dead: {self.track_dead[day]}, "
-                       f"hospitalized: {self.track_hospitalized[day]}, "
-                       f"ICU: {self.track_ICU[day]}, "
-                       f"tested: {self.track_tested[day]}, "
-                       f"total quarantined: {self.track_quarantined[day]}, "
-                       f"infected students: {self.track_inf_students[day]}, "
-                       f"vaccinated: {self.track_vaccinated[day]}"))
+                       f"infected: {self.tracking_df.at[day, 'infected']}, "
+                       f"recovered: {self.tracking_df.at[day, 'recovered']}, "
+                       f"susceptible: {self.tracking_df.at[day, 'susceptible']}, "
+                       f"dead: {self.tracking_df.at[day, 'dead']}, "
+                       f"hospitalized: {self.tracking_df.at[day, 'hospitalized']}, "
+                       f"ICU: {self.tracking_df.at[day, 'ICU']}, "
+                       f"tested: {self.tracking_df.at[day, 'tested']}, "
+                       f"total quarantined: {self.tracking_df.at[day, 'quarantined']}, "
+                       f"infected students: {self.tracking_df.at[day, 'inf_students']}, "
+                       f"vaccinated: {self.tracking_df.at[day, 'vaccinated']}"))
 
                 # Print variants
                 print("Variants", end=": ")
@@ -477,21 +444,70 @@ class Simulation():
             print(f"{'':-<80}")
             print("Simulation summary:")
             print(f"    Time elapsed: {h:02.0f}:{m:02.0f}:{s:02.0f}")
-            print(f"    {self.track_susceptible[-1]} never got it")
-            print(f"    {self.track_dead[-1]} died")
-            print(f"    {np.max(self.track_infected)} had it at the peak")
-            print(f"    {self.track_tested[day]} were tested")
-            print(f"    {np.max(self.track_quarantined)} were in quarantine at the peak")
-            print(f"    {np.max(self.track_hospitalized)} at peak hospitalizations")
-            print(f"    {np.max(self.track_dead[-1])} at peak deaths")
+            print(f"    {self.tracking_df['susceptible'].iloc[-1]} never got it")
+            print(f"    {self.tracking_df['dead'].iloc[-1]} died")
+            print(f"    {self.tracking_df['infected'].max()} had it at the peak")
+            print(f"    {self.tracking_df.at[day, 'tested']} were tested")
+            print(f"    {self.tracking_df['quarantined'].max()} were in quarantine at the peak")
+            print(f"    {self.tracking_df['hospitalized'].max()} at peak hospitalizations")
+            print(f"    {self.tracking_df['dead'].max()} at peak deaths")
             print("    The breakdown of the variants is", end=": ")
             for key, val in self.track_virus_types.items():
                 print(f"{key}-{np.max(val)}", end=", ")
             print("")
-            print(f"    {self.track_vaccinated[day]} people were vaccinated")
-            print(f"    {self.track_vaccinated[day]/self.nPop*100:.2f}% of population was vaccinated.")
+            print(f"    {self.tracking_df.at[day, 'vaccinated']} people were vaccinated")
+            print(f"    {self.tracking_df.at[day, 'vaccinated']/self.nPop*100:.2f}% of population was vaccinated.")
+
+        # Unpack the virus types into the dataframe
+        for virus_type, virus_type_arr in self.track_virus_types.items():
+            self.tracking_df.loc[:, virus_type] = virus_type_arr
+
+        # Unpack the interaction site number of interactions into the dataframe
+        for inter_site, inter_site_arr in self.inter_sites.daily_interactions.items():
+            self.tracking_df.loc[:, f"n_interactions_{inter_site}"] = inter_site_arr
+
+        # Change the index to day
+        self.tracking_df.index.rename("day", inplace=True)
 
         self.has_run = True
+
+    def update_tracking_arrays(self, day):
+        """ Function to update the tracking dataframe after each day.
+
+        Parameters
+        ----------
+        day : int
+            The integer day that the simulation is currently being updated for. Used to know what entry
+            in the dataframe to update.
+        """
+
+        # Count all the different states of people
+        self.tracking_df.at[day, "infected"] = self.pop.count_infected()
+        self.tracking_df.at[day, "recovered"] = self.pop.count_recovered()
+        self.tracking_df.at[day, "dead"] = self.pop.count_dead()
+        self.tracking_df.at[day, "hospitalized"] = self.pop.count_hospitalized()
+        self.tracking_df.at[day, "ICU"] = self.pop.count_ICU()
+        self.tracking_df.at[day, "tested"] = self.pop.count_tested()
+        self.tracking_df.at[day, "quarantined"] = self.pop.count_quarantined()
+        self.tracking_df.at[day, "testing_wait_list"] = self.pop.get_testing_wait_list()
+        self.tracking_df.at[day, "new_quarantined"] = self.pop.get_new_quarantined()
+        self.tracking_df.at[day, "infected_students"] = self.pop.count_infected_students()
+        self.tracking_df.at[day, "vaccinated"] = self.pop.count_vaccinated()
+
+        if day != 0:
+            delta_infected = self.tracking_df.at[day, "infected"] - self.tracking_df.at[day - 1, "infected"]
+            self.tracking_df.at[day, "delta_infected"] = delta_infected
+            self.tracking_df.at[day, "new_infected"] = self.inter_sites.daily_new_infections
+            new_tested = self.tracking_df.at[day, "tested"] - self.tracking_df.at[day - 1, "tested"]
+            self.tracking_df.at[day, "new_tested"] = new_tested
+
+            self.calculate_SIR_metrics(day)
+
+        daily_variant_counts = self.pop.count_virus_types()
+        for virus_name in self.virus_names:
+            self.track_virus_types[virus_name][day] = daily_variant_counts[virus_name]
+
+        self.new_tests = 0
 
     def calculate_SIR_metrics(self, day):
         """Method to caclulate all metrics related to SIR models.
@@ -505,9 +521,9 @@ class Simulation():
         """
 
         # Define variables in accordance with wikipedia page
-        dR_dt = self.track_recovered[day] - self.track_recovered[day - 1]
-        dI_dt = self.track_delta_infected[day]
-        S, I = self.track_susceptible[day], self.track_infected[day]
+        dR_dt = self.tracking_df.at[day, "recovered"] - self.tracking_df.at[day - 1, "recovered"]
+        dI_dt = self.tracking_df.at[day, "delta_infected"]
+        S, I = self.tracking_df.at[day, "susceptible"], self.tracking_df.at[day, "infected"]
         N = self.parameters["simulation_data"]["nPop"]
 
         gamma = dR_dt / I if I > 0 else 0
@@ -516,16 +532,16 @@ class Simulation():
         if day - self.R0_lag_time >= 0:
 
             # Use the old gamma (infected rate) and current beta (recovery rate)
-            lagged_gamma = self.track_gamma[day - self.R0_lag_time]
+            lagged_gamma = self.tracking_df.at[day - self.R0_lag_time, "gamma"]
             daily_R0 = beta / lagged_gamma if lagged_gamma != 0 else 0
             daily_R_eff = daily_R0 * (S / N)
             HIT = 1 - 1 / daily_R_eff if daily_R_eff != 0 else 1
 
-            self.track_R0[day] = daily_R0
-            self.track_R_eff[day] = daily_R_eff
-            self.track_HIT[day] = HIT
+            self.tracking_df.at[day, "R0"] = daily_R0
+            self.tracking_df.at[day, "R_eff"] = daily_R_eff
+            self.tracking_df.at[day, "HIT"] = HIT
 
-        self.track_gamma[day], self.track_beta[day] = gamma, beta
+        self.tracking_df.at[day, "gamma"], self.tracking_df.at[day, "beta"] = gamma, beta
 
     def check_has_run(self, check, information="", fail=True):
         """Method to check whether or not the simulation has run.
@@ -566,11 +582,7 @@ class Simulation():
 
         return self.has_run
 
-    def plot(self, plot_infected=True, plot_susceptible=True, plot_dead=True, plot_recovered=True, plot_new_infected=True,
-             plot_tested=True, plot_quarantined=True, plot_new_tests=True, plot_new_quarantined=False, plot_masks=True,
-             plot_hospitalized=True, plot_ICU=True, plot_lockdown=True, plot_testing=True, plot_students=True, plot_R0=False,
-             plot_R_eff=False, plot_HIT=False, plot_gamma=False, plot_beta=False, plot_vaccinated=True, plot_virus_types=None,
-             plot_n_interactions=False, log=False):
+    def plot(self, log=False, **kwargs):
         """ Method used to plot simulation results.
 
         Will return a warning or error if the simulation has not been run yet. For plotting the number of interactions,
@@ -593,62 +605,40 @@ class Simulation():
         _, ax = plt.subplots(figsize=(10, 8), dpi=100)
         days = np.linspace(0, self.nDays, self.nDays, dtype=int)
 
-        # Plot the tracking arrays
-        if plot_infected:
-            plt.plot(days, self.track_infected, label='infected')
-        if plot_susceptible:
-            plt.plot(days, self.track_susceptible, label='susceptible')
-        if plot_recovered:
-            plt.plot(days, self.track_recovered, label='recovered')
-        if plot_dead:
-            plt.plot(days, self.track_dead, label='dead')
-        if plot_hospitalized:
-            plt.plot(days, self.track_hospitalized, label='hospitalized')
-        if plot_ICU:
-            plt.plot(days, self.track_ICU, label='ICU')
-        if plot_new_infected:
-            plt.plot(days, self.track_new_infected, label='new infections')
-        if plot_quarantined:
-            plt.plot(days, self.track_quarantined, label='quarantined')
-        if plot_tested:
-            plt.plot(days, self.track_tested, label='total tests')
-        if plot_new_tests:
-            plt.plot(days, self.track_new_tested, label='new tests')
-        if plot_new_quarantined:
-            plt.plot(days, self.track_new_quarantined, label='new quarantined')
-        if plot_students:
-            plt.plot(days, self.track_inf_students, label="infected students")
-        if plot_R0:
-            plt.plot(days, self.track_R0, label="R0")
-        if plot_R_eff:
-            plt.plot(days, self.track_R_eff, label="Reff")
-        if plot_HIT:
-            plt.plot(days, self.track_HIT, label="HIT")
-        if plot_gamma:
-            plt.plot(days, self.track_gamma, label="gamma")
-        if plot_beta:
-            plt.plot(days, self.track_beta, label="beta")
-        if plot_virus_types is not None:
-            for key in plot_virus_types:
-                if plot_virus_types[key]:
-                    plt.plot(days, self.track_virus_types[key], label=str(key))
-        if plot_n_interactions:
-            for item in plot_n_interactions:
-                if item in self.inter_sites.daily_interactions:
-                    plt.plot(days, self.inter_sites.daily_interactions[item], label=f"Total Interactions: {item}")
-        if plot_vaccinated:
-            plt.plot(days, self.track_vaccinated, label='vaccinated')
+        # Add the default values
+        default_plotting_values = ['susceptible', 'infected', 'recovered', 'dead']
+        for plotting_value in default_plotting_values:
+            if kwargs.get(plotting_value, None) is None:
+                kwargs[plotting_value] = True
 
-        # Indicate when certain mandates were in place
-        if plot_masks:
-            plt.fill_between(days, 0, 1, where=self.track_masks, alpha=0.3,
-                             transform=ax.get_xaxis_transform(), label="masks required")
-        if plot_testing:
-            plt.fill_between(days, 0, 1, where=self.track_testing, alpha=0.3,
-                             transform=ax.get_xaxis_transform(), label="testing performed")
-        if plot_lockdown:
-            plt.fill_between(days, 0, 1, where=self.track_lockdown, alpha=0.3,
-                             transform=ax.get_xaxis_transform(), label="lockdown implemented")
+        # List plotting values that use plt.fill_between
+        fill_plotting_values = ["masks", "testing", "lockdown"]
+
+        # Plot the standard arrays
+        for parameter, value in kwargs.items():
+            if value:
+                # Handle nested variant plotting
+                if parameter == "virus_types":
+                    for vt_key, vt_value in value.items():
+                        if vt_value:
+                            plt.plot(days, self.tracking_df[vt_key],
+                                     label=f"Virus Type: {vt_key}")
+
+                # Handle nested interaction plotting
+                elif parameter == "n_interactions":
+                    for nint_key, nint_value in value.items():
+                        if nint_value:
+                            plt.plot(days, self.tracking_df[f"n_interactions_{nint_key}"],
+                                     label=f"Total Interactions: {nint_key}")
+
+                # Handle the fill_between plotting
+                elif parameter in fill_plotting_values:
+                    plt.fill_between(days, 0, 1, where=self.tracking_df[parameter], alpha=0.3,
+                                     transform=ax.get_xaxis_transform(), label=f"{parameter} implemented")
+
+                # Handle the regular plotting
+                else:
+                    plt.plot(days, self.tracking_df[parameter], label=parameter.replace("_", " "))
 
         # Final graph formatting
         plt.grid()
@@ -658,34 +648,26 @@ class Simulation():
         plt.ylabel("People")
         plt.xlabel("Days")
 
-    def get_arrays(self):
-        """ Method to return all of the tracking arrays after the simulation has run.
+    def get_tracking_dataframe(self):
+        """ Method to return all tracking arrays as a pandas DataFrame.
 
         Returns
         -------
-        returnDict : dict of `np.array`
-            A dictionary holding all of the tracking arrays with the raw simulation results.
+        self.tracking_df : `pd.DataFrame`
+            A pandas DataFrame holding all the tracking arrays from the simulation.
         """
-
         self.check_has_run(check=True,
                            information="Cannot return zero-initialized arrays.",
                            fail=True)
 
-        returnDict = {"infected": self.track_infected, "new_infected": self.track_new_infected,
-                      "recovered": self.track_recovered, "susceptible": self.track_susceptible,
-                      "dead": self.track_dead, "quarantined": self.track_quarantined,
-                      "new_quarantined": self.track_new_quarantined,
-                      "inf_students": self.track_inf_students, "total_tested": self.track_tested,
-                      "new_tested": self.track_new_tested, "hospitalized": self.track_hospitalized,
-                      "ICU": self.track_ICU, "testing_enforced": self.track_testing,
-                      "masks_enforced": self.track_masks, "lockdown_enforced": self.track_lockdown,
-                      "time_elapsed": self.track_time, "R0": self.track_R0, "Reff": self.track_R_eff, "HIT": self.track_HIT,
-                      "vaccinated": self.track_vaccinated, "gamma": self.track_gamma, "beta": self.track_beta}
-        # Unpack the virus types
-        for virus_type in self.track_virus_types.keys():
-            returnDict[virus_type] = self.track_virus_types[virus_type]
-        # Unpack the interaction site number of interactions
-        for inter_site, inter_site_arr in self.inter_sites.daily_interactions.items():
-            returnDict[f"total_daily_interactions_{inter_site}"] = inter_site_arr
+        return self.tracking_df
 
-        return returnDict
+    def get_tracking_arrays(self):
+        """ Method to return all tracking arrays as a dictionary of lists.
+
+        Returns
+        -------
+        self.tracking_df : dict of lists
+            A dictionary of lists that contain the same content as the self.tracking_df DataFrame.
+        """
+        return self.get_tracking_dataframe().to_dict("list")
