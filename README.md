@@ -47,7 +47,7 @@ sys.path.append(dotenv_values("../cv19.env")["CV19ROOT"])
 
 To modify simulation parameters, navigate to `cv19/config_files/` and open `main.toml` or `disease.toml` to edit general or disease-related parameters.
 To learn more about how the simulation works, navigate to `cv19/cv19/`, where all of the classes that are used in the simulation are stored.
-The `cv19/data/` directory holds the real-life statistics that the simulation parameters are based on. 
+The `cv19/data/` directory holds the real-life statistics that the simulation parameters are based on.
 The  `cv19/notebooks/` directory has two notebooks that show examples of how to use the simulation framework. Using ` cv19/notebooks/run_epidemic_plot.ipynb`, you can run the simulation once and see the outcome of the epidemic outbreak graphically.
 There is a second notebook in that directory, `cv19/notebooks/parallel.ipynb`, which allows you to run multiple simulations in parallel.
 These notebooks showcase only a few of the many types of analysis that can be conducted with our simulation framework.
