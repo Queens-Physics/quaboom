@@ -12,23 +12,23 @@ NULL_ID = -1
 
 
 class Population:
-    '''Creates a population of people based on the total population
+    """Creates a population of people based on the total population
      uses and age distrubution to weight the assignment of ages.
 
      Susceptible list has negative values for infected, and positive indicies for suseptible.
      Infected list has negative values for healthy, and positive indicies for infected.
      Recovered list has negative values for not recovered, and postitive indicies for
      recovered.
-     '''
+     """
 
     def __init__(self, sim_obj):
-        ''' __init__ method docstring.
+        """ __init__ method docstring.
 
         Parameters
         ----------
         sim_obj : :obj:`population class`
             The encompassing simulation object hosting the population class.
-        '''
+        """
 
         # Set attributes from sim_obj file
         self.load_attributes_from_sim_obj(sim_obj)
@@ -287,7 +287,7 @@ class Population:
             self.vaccinated[v] = v
 
     def load_attributes_from_sim_obj(self, sim_obj):
-        '''Method to load in attributes from the provided simulation class object.
+        """Method to load in attributes from the provided simulation class object.
 
         Sets all objects in the "population_data" dictionary key as self
         attributes of the population class.
@@ -296,7 +296,7 @@ class Population:
         ----------
         sim_obj : :obj:`cv19.simulation.simulation`
             The encompassing simulation object hosting the simulation.
-        '''
+        """
 
         # making sim_obj accessible
         self.sim_obj = sim_obj
@@ -324,10 +324,10 @@ class Population:
         self.vaccine_parameters = sim_obj.immunization_history_parameters
 
     def set_demographic_parameters(self):
-        '''Method to open disease parameters from the TOML file.
+        """Method to open disease parameters from the TOML file.
 
         Sets all constants in the population class as self attributes of the population class.
-        '''
+        """
 
         with open(self.demographics_file, 'rb') as toml_file:
             disease_params = tomli.load(toml_file)
@@ -383,44 +383,44 @@ class Population:
         return vaccination_date_arr
 
     def get_population_size(self):
-        '''Method to return population size.
+        """Method to return population size.
 
         Returns
         -------
         self.nPop: `int`
-        '''
+        """
         return self.nPop
 
     def get_population(self):
-        '''Method to retrieve a list of the population.
+        """Method to retrieve a list of the population.
 
         Returns
         -------
         self.has_mask: :obj:`np.array` of :obj:`int`
-        '''
+        """
         return self.population
 
     def get_student_indices(self):
-        '''Method to retrieve a list of the student indices.
+        """Method to retrieve a list of the student indices.
 
         Returns
         -------
         self.has_mask: :obj:`np.array` of :obj:`int`
-        '''
+        """
         return self.student_indices[self.student_indices != NULL_ID]
 
     def get_student_pop_size(self):
-        '''Method to retrieve the number of students.
+        """Method to retrieve the number of students.
 
         Returns
         -------
         self.nStudents: :obj:`int`
-        '''
+        """
         return self.nStudents
 
     def remove_visitors(self, indices):
-        '''Method to remove visitors from the simulation.
-        '''
+        """Method to remove visitors from the simulation.
+        """
         for i in sorted(indices, reverse=True):
             self.population.pop(i)
 
@@ -429,199 +429,199 @@ class Population:
                                f"(expected {self.nPop}, is {len(self.population)})."))
 
     def get_susceptible(self):
-        '''Method to retrieve indicies of people suseptible.
+        """Method to retrieve indicies of people suseptible.
 
         Returns
         -------
         self.suseptible[self.suseptible != NULL_ID]: :obj:`np.array` of :obj:`int`
-        '''
+        """
         return self.susceptible[self.susceptible != NULL_ID]
 
     def get_infected(self):
-        '''Method to retrieve indicies of people infected.
+        """Method to retrieve indicies of people infected.
 
         Returns
         -------
         self.infected[self.infected != NULL_ID]: :obj:`np.array` of :obj:`int`
-        '''
+        """
         return self.infected[self.infected != NULL_ID]
 
     def get_recovered(self):
-        '''Method to retrieve indicies of people recovered.
+        """Method to retrieve indicies of people recovered.
 
         Returns
         -------
         self.recovered[self.recovered != NULL_ID]: :obj:`np.array` of :obj:`int`
-        '''
+        """
         return self.recovered[self.recovered != NULL_ID]
 
     def get_dead(self):
-        '''Method to retrieve indicies of dead people.
+        """Method to retrieve indicies of dead people.
 
         Returns
         -------
         self.dead[self.dead != NULL_ID]: :obj:`np.array` of :obj:`int`
-        '''
+        """
         return self.dead[self.dead != NULL_ID]
 
     def get_hospitalized(self):
-        '''Method to retrieve indicies of the people hospitalized.
+        """Method to retrieve indicies of the people hospitalized.
 
         Returns
         -------
         self.hospitalized[self.hospitalized != NULL_ID]: :obj:`np.array` of :obj:`int`
-        '''
+        """
         return self.hospitalized[self.hospitalized != NULL_ID]
 
     def get_ICU(self):
-        '''Method to retrieve indicies of the people in the ICU.
+        """Method to retrieve indicies of the people in the ICU.
 
         Returns
         -------
         self.ICU[self.ICU != NULL_ID]: :obj:`np.array` of :obj:`int`
-        '''
+        """
         return self.ICU[self.ICU != NULL_ID]
 
     def get_quarantined(self):
-        '''Method to retrieve indicies of the people in quarantining.
+        """Method to retrieve indicies of the people in quarantining.
 
         Returns
         -------
         self.quarantined[self.quarantined != NULL_ID]: :obj:`np.array` of :obj:`int`
-        '''
+        """
         return self.quarantined[self.quarantined != NULL_ID]
 
     def get_residences(self):
-        '''Method to retrieve a list of the houses that are part of the residences.
+        """Method to retrieve a list of the houses that are part of the residences.
 
         Returns
         -------
         self.res_houses: :obj:`np.array` of :obj:`int`
-        '''
+        """
         return self.res_houses[self.res_houses != NULL_ID]
 
     def get_res_size(self):
-        '''Method to retrieve the number of students in residence.
+        """Method to retrieve the number of students in residence.
 
         Returns
         -------
         self.n_students_in_res: :obj:`int`
-        '''
+        """
         return self.n_students_in_res
 
     def count_susceptible(self):
-        '''Method to count the number of people susceptible in each bin.
+        """Method to count the number of people susceptible in each bin.
 
         Returns
         -------
         np.count_nonzero(self.suseptible != NULL_ID): :obj:`np.array` of :obj:`int`
-        '''
+        """
         return np.count_nonzero(self.susceptible != NULL_ID)
 
     def count_infected(self):
-        '''Method to count the number of people infected.
+        """Method to count the number of people infected.
 
         Returns
         -------
         np.count_nonzero(self.infetced != NULL_ID): :obj:`np.array` of :obj:`int`
-        '''
+        """
         return np.count_nonzero(self.infected != NULL_ID)
 
     def count_variant_cases(self, virus_name):
-        '''Method to count the number of people infected with a certain variant.
+        """Method to count the number of people infected with a certain variant.
 
         Returns
         -------
         np.count_nonzero(self.infetced != NULL_ID): :obj:`np.array` of :obj:`int`
-        '''
+        """
         virus_code = self.virus_codes[virus_name]
         return np.count_nonzero(self.virus_types == virus_code)
 
     def count_infected_students(self):
-        '''Method to count how many infected students there are.
+        """Method to count how many infected students there are.
 
         Returns
         -------
         np.count_nonzero(np.logical_and(self.student_indices != NULL_ID, self.infected != NULL_ID)): :obj:`int`
-        '''
+        """
         return np.count_nonzero(np.logical_and(self.student_indices != NULL_ID, self.infected != NULL_ID))
 
     def count_recovered(self):
-        '''Method to count the number of people recovered.
+        """Method to count the number of people recovered.
 
         Returns
         -------
         np.count_nonzero(self.recovered != NULL_ID): :obj:`np.array` of :obj:`int`
-        '''
+        """
         return np.count_nonzero(self.recovered != NULL_ID)
 
     def count_dead(self):
-        '''Method to count the number of people dead.
+        """Method to count the number of people dead.
 
         Returns
         -------
         np.count_nonzero(self.dead != NULL_ID): :obj:`np.array` of :obj:`int`
-        '''
+        """
         return np.count_nonzero(self.dead != NULL_ID)
 
     def count_hospitalized(self):
-        '''Method to count the number of people in the hospital.
+        """Method to count the number of people in the hospital.
 
         Returns
         -------
         np.count_nonzero(self.hospitalized != NULL_ID): :obj:`np.array` of :obj:`int`
-        '''
+        """
         return np.count_nonzero(self.hospitalized != NULL_ID)
 
     def count_ICU(self):
-        '''Method to count the number of people in the ICU.
+        """Method to count the number of people in the ICU.
 
         Returns
         -------
         np.count_nonzero(self.ICU != NULL_ID): :obj:`np.array` of :obj:`int`
-        '''
+        """
         return np.count_nonzero(self.ICU != NULL_ID)
 
     def count_quarantined(self):
-        '''Method to count the number of people quarantining.
+        """Method to count the number of people quarantining.
 
         Returns
         -------
         np.count_nonzero(self.quarantined != NULL_ID): :obj:`np.array` of :obj:`int`
-        '''
+        """
         return np.count_nonzero(self.quarantined != NULL_ID)
 
     def count_masks(self):
-        '''Method to count the number of people wearing masks.
+        """Method to count the number of people wearing masks.
 
         Returns
         -------
         np.count_nonzero(self.has_mask > 0): :obj:`np.array` of :obj:`int`
-        '''
+        """
         return np.count_nonzero(self.has_mask > 0)
 
     def count_virus_types(self):
-        '''Method to count all virus types and return them as a dictionary.
+        """Method to count all virus types and return them as a dictionary.
 
         Returns
         -------
         counts : :obj:`dict`
-        '''
+        """
         counts = {virus_type: np.count_nonzero(self.virus_types == virus_code)
                   for virus_type, virus_code in self.variant_codes.items()}
         return counts
 
     def get_person(self, index):
-        '''Method to return an individual based on their index.
+        """Method to return an individual based on their index.
 
         Returns
         -------
         np.population[index]: :obj:`int`
-        '''
+        """
         return self.population[index]
 
     def infect(self, index, day, virus_type):
-        '''Method to infect a person.
+        """Method to infect a person.
 
         Parameters
         ----------
@@ -633,7 +633,7 @@ class Population:
         Returns
         -------
         didWork: :obj:`int`
-        '''
+        """
 
         # Convert to virus code if virus type is a string
         if isinstance(virus_type, str):
@@ -652,7 +652,7 @@ class Population:
         return didWork
 
     def infect_incoming_students(self, indices, day, virus_type):
-        '''Method to infect incoming students to the simulation.
+        """Method to infect incoming students to the simulation.
 
         Parameters
         ----------
@@ -665,7 +665,7 @@ class Population:
         -------
         : :obj:`bool`
             True to infect the student.
-        '''
+        """
 
         for i in indices:
             daysAgo = np.random.randint(13)
@@ -673,7 +673,7 @@ class Population:
         return True
 
     def update_infected(self, index):
-        '''Method to update the list of the infected population at the specified index.
+        """Method to update the list of the infected population at the specified index.
 
         Parameters
         ----------
@@ -684,7 +684,7 @@ class Population:
         -------
         : :obj:`bool`
             True if the value at the index in the infected list was changed, False if it was not changed.
-        '''
+        """
 
         if self.infected[index] == index or self.susceptible[index] == NULL_ID or not self.population[index].is_infected():
             # Already infected, or cant be infected
@@ -694,7 +694,7 @@ class Population:
         return True
 
     def cure(self, index, day):
-        '''Method to cure a person.
+        """Method to cure a person.
 
         Parameters
         ----------
@@ -706,7 +706,7 @@ class Population:
         Returns
         -------
         didWork: :obj:`int`
-        '''
+        """
 
         didWork = self.population[index].check_cured(day)
         if didWork:
@@ -715,7 +715,7 @@ class Population:
         return didWork
 
     def update_cured(self, index):
-        '''Method to update the list of the already cured population.
+        """Method to update the list of the already cured population.
 
         Parameters
         ----------
@@ -726,7 +726,7 @@ class Population:
         -------
         : :obj:`bool`
             True if the value at the index in the cured list was changed, False if it was not changed.
-        '''
+        """
 
         if self.recovered[index] == index or not self.population[index].is_recovered():
             # Already recovered in pop obj or person obj is not actually recovered
@@ -739,7 +739,7 @@ class Population:
         return True
 
     def die(self, index, day):
-        '''Method to kill a person if they should be dead.
+        """Method to kill a person if they should be dead.
 
         Parameters
         ----------
@@ -751,7 +751,7 @@ class Population:
         Returns
         -------
         didWork: :obj:`bool`
-        '''
+        """
 
         didWork = self.population[index].check_dead(day)
         if didWork:
@@ -761,7 +761,7 @@ class Population:
         return didWork
 
     def update_dead(self, index):
-        '''Method to update the list of the dead population at the specified index.
+        """Method to update the list of the dead population at the specified index.
 
         Parameters
         ----------
@@ -772,7 +772,7 @@ class Population:
         -------
         : :obj:`bool`
             True if the value at the index in the dead list was changed, False if it was not changed.
-        '''
+        """
 
         if self.dead[index] == index or not self.population[index].is_dead():
             return False
@@ -785,13 +785,13 @@ class Population:
         return True
 
     def update_quarantine(self, day):
-        '''Method to release everyone who has done their quarantine. This does not add new people to the list.
+        """Method to release everyone who has done their quarantine. This does not add new people to the list.
 
         Parameters
         ----------
         day : int
             The day value that this function is being called on in the encompassing simulation class.
-        '''
+        """
 
         for i in self.get_quarantined():
             # Check their status
@@ -799,32 +799,32 @@ class Population:
                 self.quarantined[i] = NULL_ID
 
     def get_new_quarantined(self):
-        '''Method that retreves the number of new people quarantined that day.
+        """Method that retreves the number of new people quarantined that day.
 
         Returns
         -------
         self.new_quarantined_num: :obj:`int`
-        '''
+        """
         return self.new_quarantined_num
 
     def count_tested(self):
-        '''Method that retreves the total number of people tested.
+        """Method that retreves the total number of people tested.
 
         Returns
         -------
         self.test_sum: :obj:`int`
-        '''
+        """
         return self.test_sum
 
     def update_uninfected_symptomatics(self):
-        '''Method that causes a random sample of people to develop cold like symptoms.
-        '''
+        """Method that causes a random sample of people to develop cold like symptoms.
+        """
 
         for person in self.population:
             person.update_uninfected_symptomatic()
 
     def update_infected_symptomatics(self, day):
-        '''Method to add people to the testing waitlist based on their symptoms.
+        """Method to add people to the testing waitlist based on their symptoms.
 
         First iterates through the entire population to check who should be allowed to test again. Calling
         the `person.has_been_tested_recently` function updates the testing ability of that person based on the day,
@@ -837,7 +837,7 @@ class Population:
         ----------
         day: int
             The current day the simulation is on.
-        '''
+        """
 
         people_to_check = (person_id for person_id, person in enumerate(self.population[:self.nPop])
                            if person.could_be_symptomatic() and not person.has_been_tested_recently(day))
@@ -855,16 +855,16 @@ class Population:
                     self.testing.append(person_id)
 
     def get_testing_wait_list(self):
-        '''Method to return number of people waiting to be tested.
+        """Method to return number of people waiting to be tested.
 
         Returns
         -------
         len(self.testing): :obj:`int`
-        '''
+        """
         return len(self.testing)
 
     def get_tested(self, n_tests_max, day):
-        '''Method to test people in the testing waitlist.
+        """Method to test people in the testing waitlist.
 
         Parameters
         ----------
@@ -872,7 +872,7 @@ class Population:
             Paramter gives the number of tests run.
         day: int
             The day the testing is being done on.
-        '''
+        """
 
         # If less people are on the wait list than the testing capacity, test everyone.
         n_tests = min(len(self.testing), n_tests_max)
@@ -906,31 +906,31 @@ class Population:
                 person.knows_infected = False
 
     def get_vaccinated(self):
-        '''Method to retrieve indicies of people vaccinated.
+        """Method to retrieve indicies of people vaccinated.
 
         Returns
         -------
         self.vaccinated[self.vaccinated != NULL_ID]: :obj:`np.array` of :obj:`int`
-        '''
+        """
         return self.vaccinated[self.vaccinated != NULL_ID]
 
     def count_vaccinated(self):
-        '''Method to count the number of people vaccinated.
+        """Method to count the number of people vaccinated.
 
         Returns
         -------
         np.count_nonzero(self.vaccinated != NULL_ID): :obj:`np.array` of :obj:`int`
-        '''
+        """
         return np.count_nonzero(self.vaccinated != NULL_ID)
 
     def update_vaccinated(self, day):
-        '''Method to add people to the list of vaccinated people.
+        """Method to add people to the list of vaccinated people.
 
         Parameters
         ----------
         day : int
             The day the testing is being done on.
-        '''
+        """
 
         non_vaccinated = np.array([index for index in range(self.nPop)
                                    if not self.population[index].immunization_history_obj.is_vaccinated()])
@@ -947,11 +947,11 @@ class Population:
             self.vaccinated[index] = index
 
     def change_mask_wearing(self):
-        '''Method to mandate wearing a mask.
+        """Method to mandate wearing a mask.
 
         Parameters
         ----------
         has_mask: bool
-        '''
+        """
         for person in self.population:
             person.has_mask = True

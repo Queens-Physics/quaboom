@@ -59,11 +59,13 @@ We also use an [EditorConfig](https://editorconfig.org/) linter
 to enforce a consistent style across all files,
 including configuration files and READMEs.
 To check whether or not your code will pass the exact tests
-that are automatically run, first install both packages:
+that are automatically run, first install the necessary packages
+(along with an extension for Flake8):
 
 ```sh
 pip install pylint==2.14.4
-pip install flake8==4.0.1
+pip install flake8==5.0.4
+pip install flake8-quotes==3.3.1
 pip install editorconfig-checker==2.4.0
 ```
 
