@@ -63,10 +63,10 @@ that are automatically run, first install the necessary packages
 (along with an extension for Flake8):
 
 ```sh
-pip install pylint==2.14.4
+pip install pylint==2.15.10
 pip install flake8==5.0.4
-pip install flake8-quotes==3.3.1
-pip install editorconfig-checker==2.4.0
+pip install flake8-quotes==3.3.2
+pip install editorconfig-checker==2.7.1
 ```
 
 Then, run the tests:
