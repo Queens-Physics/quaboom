@@ -60,8 +60,19 @@ so that the absolute location of the repository is known.
 Once the repository has been cloned and configured,
 the `configure` script does not need to be run again.
 
-For Jupyter notebooks, one needs to add the following to the first cell
-after the `configure` script has been run:
+### After configuration
+
+When your Python environment and the repository are configured,
+you will only need to source the environment files when coming back to the code.
+Simply change into the path of the repository and run:
+
+```bash
+source env/bin/activate  # if using a virtual environment
+source env.sh  # always required
+```
+
+For Jupyter Notebooks, the following is needed in the first cell
+to source the environment after the `configure` script has been run:
 
 ```python
 import sys
