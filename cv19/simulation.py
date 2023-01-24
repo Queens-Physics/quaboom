@@ -67,6 +67,10 @@ class Simulation():
 
         self.make_tracking_df()
 
+        # Check that input parameters are valid
+        assert self.nPop >= self.num_students
+        assert self.nPop >= sum(self.variants.values())
+
         self.has_run = False  # Indicates if the sim has run yet
 
     def load_general_parameters(self, data_file):
@@ -122,10 +126,6 @@ class Simulation():
             Note, does not include paths to configuration files but the files themselves.
 
         """
-
-        # Check that the inputs are valid
-        assert self.nPop >= self.num_students
-        assert self.nPop >= sum(self.variants.values())
 
         if config_override_data is not None:
             self.disease_parameters = config_override_data['disease_config_data']
