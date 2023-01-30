@@ -10,32 +10,75 @@ To run the simulation framework, clone your fork of the repository to your local
 
 ## Setup
 
-To ensure that all dependencies are installed, run the following:
+### Python environment configuration
+
+To run the code, ensure that you have a recent version of Python 3 installed.
+The code has only been tested on Python 3.8 and 3.9.
+
+If running locally, it is recommended to create a virtual environment.
+To create a virtual environment called `env`, run the following:
+
+```bash
+python3 -m venv env
+source env/bin/activate
+python3 -m pip install --upgrade pip
+python3 -m pip install --upgrade setuptools wheel
+```
+
+Note that the name `env` is arbitrary.
+After completing this step, the virtual environment will be created,
+and you will only need to source the `activate` file each time
+you open a new terminal instance
+to switch back into it (`source env/bin/activate`).
+
+To ensure that all dependencies are installed, run the following
+(potentially in a virtual environment if you have set it up that way):
 
 ```bash
 pip install -r requirements.txt
 ```
 
 This will install the required dependencies to run the code and
-build the documentation. Note that you may (and probably should)
-need to run the above command with the `--user` flag.
+build the documentation.
 
-If developing and running code, you must set up the environment.
-To do this, run the following in the repository:
+If you want to use Jupyter Notebooks, you will also need to install
+the Jupyter Notebook and/or JupyterLab package(s)
+depending on your preference.
+Again, these can be installed in the virtual environment.
+
+### Repository configuration
+
+If running (or developing, testing, ...) the code,
+you must also modify the environment for the repository itself.
+To do this, run the following in top level directory:
 
 ```bash
 ./configure
 source ./env.sh
 ```
 
-The first line will generate the environment,
+The first line will generate the environment file,
 while the second line will source it.
-This ensures that the repository is in the `PYTHONPATH` environment variable.
-It also sets the `CV19ROOT` environment variable, which is used
-in several parts of the code so that the absolute location of
-the repository is known.
+This ensures that the repository is in the `PYTHONPATH` variable.
+It also sets the `CV19ROOT` environment variable,
+which is used in several parts of the code
+so that the absolute location of the repository is known.
+Once the repository has been cloned and configured,
+the `configure` script does not need to be run again.
 
-For Jupyter notebooks, one needs to add the following to the first cell:
+### After configuration
+
+When your Python environment and the repository are configured,
+you will only need to source the environment files when coming back to the code.
+Simply change into the path of the repository and run:
+
+```bash
+source env/bin/activate  # if using a virtual environment
+source env.sh  # always required
+```
+
+For Jupyter Notebooks, the following is needed in the first cell
+to source the environment after the `configure` script has been run:
 
 ```python
 import sys
@@ -77,10 +120,10 @@ that are automatically run, first install the necessary packages
 (along with an extension for Flake8):
 
 ```sh
-pip install pylint==2.14.4
+pip install pylint==2.15.10
 pip install flake8==5.0.4
-pip install flake8-quotes==3.3.1
-pip install editorconfig-checker==2.4.0
+pip install flake8-quotes==3.3.2
+pip install editorconfig-checker==2.7.1
 ```
 
 Then, run the tests:
