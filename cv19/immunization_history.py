@@ -2,7 +2,7 @@ class ImmunizationHistory:
     '''
     A class designed to keep track of a Person's vaccination history and vaccination parameters.
 
-    Holds the parameters from immunization_history_parameters.toml corresponding to the Person's vaccine type,
+    Holds the parameters from immunization_history.toml corresponding to the Person's vaccine type,
     as well as the attributes listed below.
 
     Attributes
@@ -69,7 +69,7 @@ class ImmunizationHistory:
                 self.current_vaccine_eff = ((self.vaccine_max_efficacy) / (self.vaccine_immunity_buildup_days)) * days_since_vaccination
             elif (days_since_vaccination > self.vaccine_immunity_buildup_days) and (days_since_vaccination < self.vaccine_efficacy_min_day):  # calculate linearly decreasing immunity
                 self.current_vaccine_eff = (-(self.vaccine_max_efficacy - self.long_term_vaccine_eff) / (self.vaccine_efficacy_min_day - self.vaccine_immunity_buildup_days))  # slope calculation
-                self.current_vax_eff *= days_since_vaccination  # scale by days since vaccination
+                self.current_vaccine_eff *= days_since_vaccination  # scale by days since vaccination
                 self.current_vaccine_eff += self.vaccine_max_efficacy  # add initial value (which is the max efficacy)
             else: # plateau in immunity after and including min_day
                 self.current_vaccine_eff = self.long_term_vaccine_eff

@@ -101,7 +101,7 @@ class Population:
         
         #Prepare vaccination date array for population initialization
         vaccine_type_arr = np.random.choice(a=self.vaccine_options, p=self.vaccine_weights, size=self.nPop)
-        vaccination_date_arr = self.set_v0_parameters(self,sim_obj)
+        vaccination_date_arr = self.set_v0_parameters(sim_obj)
 
         # Initialize the house index and size for the loop
         houseIndex = 0
@@ -377,7 +377,7 @@ class Population:
             if v0_lower < v0_upper:  # v0_lower should be smaller (more negative) than v0_upper
                 vaccination_date_arr = np.random.uniform(low=v0_lower, high=v0_upper, size=self.v0)
                 
-            else:  # they are equal to each other:
+            else:  # they are equal to each other: everyone is vaccinated on the same day
                 vaccination_date_arr = np.ones(self.v0) * v0_lower
                 
         return vaccination_date_arr

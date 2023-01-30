@@ -1,6 +1,6 @@
 [simulation_data]
 disease_config_file = "disease_quarantine_1.toml"
-immunization_history_config_file = "immunization_history_parameters_test.toml"
+immunization_history_config_file = "immunization_history_test.toml"
 nDays = 50 ## needs to be at least max infectious time (29 days) + quarantine_time (14 days)
 nPop = 10000
 vis_default_virus_type = "alpha"
