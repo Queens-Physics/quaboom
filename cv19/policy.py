@@ -1,5 +1,5 @@
 class Policy:
-    '''
+    """
     Handles all of the metrics that would be dealt with by policy, including mask mandates,
     quarantines, testing, travel/lockdowns, and whether students have entered the simulation.
 
@@ -14,16 +14,16 @@ class Policy:
         A pointer linking the policy class object to the encompassing simulation class object.
         This allows the policy class to access important simulation class functions such as
         counting functions for the tracking arrays and population size.
-    '''
+    """
 
     def __init__(self, sim_obj):
-        ''' __init__ method docstring.
+        """ __init__ method docstring.
 
         Parameters
         ----------
         sim_obj : :obj:`simulation.simulation`
             The encompassing simulation object hosting the simulation.
-        '''
+        """
 
         self.sim_obj = sim_obj
 
@@ -31,12 +31,12 @@ class Policy:
         self.load_attributes_from_sim_obj()
 
     def load_attributes_from_sim_obj(self):
-        '''Method to load in attributes from the provided simulation class object.
+        """Method to load in attributes from the provided simulation class object.
 
         Sets all objects in the "policy_data" dictionary key as self
         attributes of the policy class. No paramteres are passed, as
         the simulation class is set as an attribute.
-        '''
+        """
 
         # Loop through keys
         attributes = self.sim_obj.parameters["policy_data"].keys()
@@ -45,7 +45,7 @@ class Policy:
             setattr(self, attr, self.sim_obj.parameters["policy_data"][attr])
 
     def update_mask_mandate(self, day):
-        '''Method to update the simulation's mask mandate based on trigger parameters.
+        """Method to update the simulation's mask mandate based on trigger parameters.
 
         This funciton evaluates whether masks should be required based on different
         triggering parameters: `mask_day_trigger` and `mask_trigger`.
@@ -61,7 +61,7 @@ class Policy:
         day : int
             The day value that this function is being called on in the encompassing simulation class.
             Used to evaluate whether the simulation has passed the day trigger.
-        '''
+        """
 
         # Change the policy based on conditions
         if hasattr(self, "mask_day_trigger") and day >= self.mask_day_trigger:
@@ -76,16 +76,16 @@ class Policy:
         return mask_mandate
 
     def get_mask_mandate(self):
-        '''Method to return the current mask mandate.
+        """Method to return the current mask mandate.
 
         Returns
         -------
         self.mask_mandate : bool
-        '''
+        """
         return self.mask_mandate
 
     def update_lockdown(self, day):
-        '''Method to update the simulation's lockdown mandate based on trigger parameters.
+        """Method to update the simulation's lockdown mandate based on trigger parameters.
 
         This funciton evaluates whether lockdown should be enforced based on different
         triggering parameters: `lockdown_on_day_trigger`, 'lockdown_off_day_trigger`,
@@ -103,7 +103,7 @@ class Policy:
         day : int
             The day value that this function is being called on in the encompassing simulation class.
             Used to evaluate whether the simulation has passed the day trigger.
-        '''
+        """
 
         # Change the policy based on conditions
         if hasattr(self, "lockdown_on_day_trigger") and day >= self.lockdown_on_day_trigger:
@@ -122,16 +122,16 @@ class Policy:
         return lockdown_mandate
 
     def get_lockdown_mandate(self):
-        '''Method to return the current lockdown_mandate.
+        """Method to return the current lockdown_mandate.
 
         Returns
         -------
         self.lockdown_mandate : bool
-        '''
+        """
         return self.lockdown_mandate
 
     def update_testing(self, day):
-        '''Method to update the simulation's testing mandate based on trigger parameters.
+        """Method to update the simulation's testing mandate based on trigger parameters.
 
         This funciton evaluates whether testing should be performed based on different
         triggering parameters: `testing_day_trigger` and `testing_trigger`.
@@ -146,7 +146,7 @@ class Policy:
         day : int
             The day value that this function is being called on in the encompassing simulation class.
             Used to evaluate whether the simulation has passed the day trigger.
-        '''
+        """
 
         if hasattr(self, "testing_day_trigger") and day >= self.testing_day_trigger:
             testing = True
@@ -157,7 +157,7 @@ class Policy:
         return testing
 
     def get_num_tests(self, total_quarantined, new_quarantined, wait_list):
-        '''A method to calculate how many tests to administer for a given day.
+        """A method to calculate how many tests to administer for a given day.
 
         The number of tests on any given day is assumed to have a linear relationship with
         the number of people quarantined, the number of people who are just entering
@@ -179,7 +179,7 @@ class Policy:
             The number of new people added to quarantine in the simulation.
         wait_list : int
             The number of people on the testing waitlist for this day in the simulation.
-        '''
+        """
 
         if not hasattr(self, "testing_baseline"):
             self.testing_baseline = 0
@@ -189,7 +189,7 @@ class Policy:
         return int(tests)
 
     def check_students(self, day):
-        '''Method to update whether students are added to the simulation.
+        """Method to update whether students are added to the simulation.
 
         This funciton evaluates whether students should be added based on
         `student_day_trigger`.
@@ -202,7 +202,7 @@ class Policy:
         day : int
             The day value that this function is being called on in the encompassing simulation class.
             Used to evaluate whether the simulation has passed the day trigger.
-        '''
+        """
 
         # Change the policy based on conditions
         if hasattr(self, "student_day_trigger") and day >= self.student_day_trigger:
@@ -215,10 +215,10 @@ class Policy:
         return student_mandate
 
     def get_students_mandate(self):
-        '''Method to return the current student mandate.
+        """Method to return the current student mandate.
 
         Returns
         -------
         self.student_mandate : bool
-        '''
+        """
         return self.student_mandate
