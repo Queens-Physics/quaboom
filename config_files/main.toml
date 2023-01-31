@@ -1,7 +1,7 @@
 [simulation_data]
 disease_config_file = "disease.toml"
 immunization_history_config_file = "immunization_history.toml"
-nDays = 100
+nDays = 50
 nPop = 10000
 vis_default_virus_type = "alpha"
 student_default_virus_type = "alpha"
@@ -13,9 +13,9 @@ vis_age_upper = 60
 vis_age_lower = 16
 inf_students_upper = 2
 inf_students_lower = 0
-num_vaccinations = 0
+num_vaccinations = 100
     [simulation_data.v0_parameters]
-    v0 = 10000
+    v0 = 1000
     v0_interval_start_day = -30
     v0_interval_end_day = 0
 
