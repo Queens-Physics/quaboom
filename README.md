@@ -12,10 +12,12 @@ To run the simulation framework, clone your fork of the repository to your local
 
 ### Python environment configuration
 
-To run the code, ensure that you have a recent version of Python 3 installed.
+To run the code, ensure that you have a recent version of
+[Python 3](https://www.python.org/) installed.
 The code has only been tested on Python 3.8 and 3.9.
 
-If running locally, it is recommended to create a virtual environment.
+If running locally, it is recommended to create and use a
+[virtual environment](https://docs.python.org/tutorial/venv.html).
 To create a virtual environment called `env`, run the following:
 
 ```bash
@@ -41,7 +43,8 @@ pip install -r requirements.txt
 This will install the required dependencies to run the code and
 build the documentation.
 
-If you want to use Jupyter Notebooks, you will also need to install
+If you want to use [Jupyter Notebooks](https://jupyter.org/),
+you will also need to install
 the Jupyter Notebook and/or JupyterLab package(s)
 depending on your preference.
 Again, these can be installed in the virtual environment.
