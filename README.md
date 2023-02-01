@@ -33,11 +33,16 @@ python3 -m pip install --upgrade pip  # optionally upgrade pip
 python3 -m pip install --upgrade setuptools wheel  # optionally upgrade setuptools and wheel
 ```
 
-Note that the name `env` is arbitrary.
+Note that the name of the virtual environment, `env`, is arbitrary.
 After completing this step, the virtual environment will be created,
 and you will only need to source the `activate` file each time
 you open a new terminal instance
 to switch back into it (`source env/bin/activate`).
+To deactivate the virtual environment
+and revert back to your primary user environment,
+thereby undoing the changes to some environment variables
+(including `PATH` and `PYTHONPATH`),
+simply run `deactivate`.
 
 To ensure that all dependencies are installed, run the following
 (potentially in a virtual environment if you have set it up that way):
