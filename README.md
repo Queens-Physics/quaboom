@@ -38,11 +38,6 @@ After completing this step, the virtual environment will be created,
 and you will only need to source the `activate` file each time
 you open a new terminal instance
 to switch back into it (`source env/bin/activate`).
-To deactivate the virtual environment
-and revert back to your primary user environment,
-thereby undoing the changes to some environment variables
-(including `PATH` and `PYTHONPATH`),
-simply run `deactivate`.
 
 To ensure that all dependencies are installed, run the following
 (potentially in a virtual environment if you have set it up that way):
@@ -90,6 +85,12 @@ Simply change into the path of the repository and run:
 source env/bin/activate  # if using a virtual environment
 source env.sh  # always required
 ```
+
+To deactivate the virtual environment
+and revert back to your primary user environment,
+thereby undoing the changes to some environment variables
+(including `PATH` and `PYTHONPATH`),
+simply run `deactivate`.
 
 For Jupyter Notebooks, the following is needed in the first cell
 to source the environment after the `configure` script has been run:
