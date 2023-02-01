@@ -12,20 +12,28 @@ To run the simulation framework, clone your fork of the repository to your local
 
 ### Python environment configuration
 
-To run the code, ensure that you have a recent version of Python 3 installed.
+To run the code, ensure that you have a recent version of
+[Python 3](https://www.python.org/) installed.
 The code has only been tested on Python 3.8 and 3.9.
 
-If running locally, it is recommended to create a virtual environment.
+If running locally, it is recommended to create and use a
+[virtual environment](https://docs.python.org/tutorial/venv.html).
 To create a virtual environment called `env`, run the following:
 
 ```bash
 python3 -m venv env
 source env/bin/activate
-python3 -m pip install --upgrade pip
-python3 -m pip install --upgrade setuptools wheel
 ```
 
-Note that the name `env` is arbitrary.
+Optionally, upgrade to recent versions of pip and other packages
+(while not required, it is recommended):
+
+```bash
+python3 -m pip install --upgrade pip  # optionally upgrade pip
+python3 -m pip install --upgrade setuptools wheel  # optionally upgrade setuptools and wheel
+```
+
+Note that the name of the virtual environment, `env`, is arbitrary.
 After completing this step, the virtual environment will be created,
 and you will only need to source the `activate` file each time
 you open a new terminal instance
@@ -41,7 +49,8 @@ pip install -r requirements.txt
 This will install the required dependencies to run the code and
 build the documentation.
 
-If you want to use Jupyter Notebooks, you will also need to install
+If you want to use [Jupyter Notebooks](https://jupyter.org/),
+you will also need to install
 the Jupyter Notebook and/or JupyterLab package(s)
 depending on your preference.
 Again, these can be installed in the virtual environment.
@@ -76,6 +85,12 @@ Simply change into the path of the repository and run:
 source env/bin/activate  # if using a virtual environment
 source env.sh  # always required
 ```
+
+To deactivate the virtual environment
+and revert back to your primary user environment,
+thereby undoing the changes to some environment variables
+(including `PATH` and `PYTHONPATH`),
+simply run `deactivate`.
 
 For Jupyter Notebooks, the following is needed in the first cell
 to source the environment after the `configure` script has been run:
