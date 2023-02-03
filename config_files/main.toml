@@ -41,7 +41,7 @@ num_vaccinations = 0
     AZ = 0.05
 
 [policy_data]
-initial_mask_mandate = false
+initial_mask_mandate = true
 mask_trigger = 0.3
 mask_day_trigger = 0
 initial_lockdown_mandate = false
