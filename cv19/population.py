@@ -86,10 +86,10 @@ class Population:
 
         # Initialize parameters of people immediately.
         # Much quick this way, utilizes numpy efficiency.
-        age_arr = np.random.choice(a=self.age_options, p=self.age_weights, size=self.nPop_w_vis)
-        job_arr = np.random.choice(a=self.job_options, p=self.job_weights, size=self.nPop_w_vis)
-        isolation_tend_arr = np.random.choice(a=self.isolation_options, p=self.isolation_weights, size=self.nPop_w_vis)
-        case_severity_arr = np.empty(shape=self.nPop_w_vis, dtype=object)
+        age_arr = np.random.choice(a=self.age_options, p=self.age_weights, size=self.nPop)
+        job_arr = np.random.choice(a=self.job_options, p=self.job_weights, size=self.nPop)
+        isolation_tend_arr = np.random.choice(a=self.isolation_options, p=self.isolation_weights, size=self.nPop)
+        case_severity_arr = np.empty(shape=self.nPop, dtype=object)
         # case severity now changes to depending on the age
 
         for i, age in enumerate(age_arr):
@@ -386,8 +386,14 @@ class Population:
         """
         return self.nStudents
 
-    def add_visitors(self):
+    def add_visitors(self, day):
         """Method to add visitors to the simulation.
+
+        Parameters
+        ----------
+        day : int
+            The day value that this function is being called on in the encompassing simulation class.
+
         """
 
         self.current_num_vis = np.random.choice(a=self.sim_obj.N_VIS_OPTION, p=self.sim_obj.N_VIS_PROB)
@@ -397,16 +403,33 @@ class Population:
         vis_iso_tend = np.random.choice(a=self.isolation_options, p=self.isolation_weights, size=self.current_num_vis)
         vis_has_mask = np.random.uniform(size=self.current_num_vis) < self.prob_has_mask
         vis_mask_type = np.random.choice(a=self.mask_options, p=self.mask_weights, size=self.current_num_vis)
-        vis_infected_day = np.random.choice(self.max_infectious[self.sim_obj.vis_default_severity], size=self.current_num_vis)
+        vis_cure_days = np.random.choice(self.max_infectious[self.sim_obj.vis_default_severity], size=self.current_num_vis)
 
         for i in range(0, self.current_num_vis):
-            visitor = Person(index=visitors_ind[i], sim_obj=self.sim_obj, infected=True, recovered=False, dead=False,
-                             hospitalized=False, ICU=False, quarantined=False, quarantined_day=None,
-                             infected_day=vis_infected_day[i], recovered_day=None, death_day=None, others_infected=None,
-                             cure_days=None, recent_infections=None, vaccinated=False, age=vis_age[i],
-                             job="Visitor", house_index=None, isolation_tendencies=vis_iso_tend[i],
-                             case_severity=self.sim_obj.vis_default_severity, has_mask=vis_has_mask[i],
-                             virus_type=self.sim_obj.vis_default_virus_type, mask_type=vis_mask_type[i])
+            visitor = Person(index=visitors_ind[i], 
+                             sim_obj=self.sim_obj, 
+                             infected=True, 
+                             recovered=False, 
+                             dead=False,
+                             hospitalized=False, 
+                             ICU=False, 
+                             quarantined=False, 
+                             quarantined_day=None,
+                             infected_day=day, 
+                             recovered_day=None, 
+                             death_day=None, 
+                             others_infected=None,
+                             cure_days=vis_cure_days[i], 
+                             recent_infections=None, 
+                             vaccinated=False, 
+                             age=vis_age[i],
+                             job="Visitor", 
+                             house_index=None, 
+                             isolation_tendencies=vis_iso_tend[i],
+                             case_severity=self.sim_obj.vis_default_severity, 
+                             has_mask=vis_has_mask[i],
+                             virus_type=self.sim_obj.vis_default_virus_type, 
+                             mask_type=vis_mask_type[i])
 
             self.population[self.nPop + i] = visitor
 
