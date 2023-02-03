@@ -323,7 +323,7 @@ class Simulation():
                 self.pop.infect_incoming_students(indices=indices, day=day, virus_type=student_default_virus_code)
 
             # ADD DAILY VISITORS
-            self.pop.add_visitors()
+            self.pop.add_visitors(day)
 
             # UPDATE INTERACTION SITES
             self.inter_sites.daily_reset()
