@@ -39,12 +39,12 @@ class Population:
         self.nPop = sim_obj.nPop  # total population
         self.current_num_vis = 0  # initial number of visistors
         self.v0 = sim_obj.v0  # initial vaccinated
-        self.pop_w_vis = self.nPop + max(sim_obj.N_VIS_OPTION)  # max agents in the sim at a time
+        self.nPop_w_vis = self.nPop + max(sim_obj.N_VIS_OPTION)  # max agents in the sim at a time
 
         # Student parameter
         self.nStudents = sim_obj.num_students  # full capacity ~ 24k students
 
-        self.population = [NULL_ID] * self.pop_w_vis  # The list to hold all person objects
+        self.population = [NULL_ID] * self.nPop_w_vis  # The list to hold all person objects
         self.household = [0] * self.nPop  # list of non-student houses (list that contains all lists of the people in the house)
         self.students = [0] * self.nStudents  # The list of only students
         self.stud_houses = [0] * self.nStudents  # list of student houses
@@ -86,10 +86,10 @@ class Population:
 
         # Initialize parameters of people immediately.
         # Much quick this way, utilizes numpy efficiency.
-        age_arr = np.random.choice(a=self.age_options, p=self.age_weights, size=self.pop_w_vis)
-        job_arr = np.random.choice(a=self.job_options, p=self.job_weights, size=self.pop_w_vis)
-        isolation_tend_arr = np.random.choice(a=self.isolation_options, p=self.isolation_weights, size=self.pop_w_vis)
-        case_severity_arr = np.empty(shape=self.pop_w_vis, dtype=object)
+        age_arr = np.random.choice(a=self.age_options, p=self.age_weights, size=self.nPop_w_vis)
+        job_arr = np.random.choice(a=self.job_options, p=self.job_weights, size=self.nPop_w_vis)
+        isolation_tend_arr = np.random.choice(a=self.isolation_options, p=self.isolation_weights, size=self.nPop_w_vis)
+        case_severity_arr = np.empty(shape=self.nPop_w_vis, dtype=object)
         # case severity now changes to depending on the age
 
         for i, age in enumerate(age_arr):
@@ -99,9 +99,9 @@ class Population:
             except KeyError as e:
                 raise ValueError((f"'{age}' is not a valid age range and has no associated case severity.")) from e
 
-        mask_type_arr = np.random.choice(a=self.mask_options, p=self.mask_weights, size=self.pop_w_vis)
-        has_mask_arr = np.random.uniform(size=self.pop_w_vis) < self.prob_has_mask
-        vaccine_type_arr = np.random.choice(a=self.vaccine_options, p=self.vaccine_weights, size=self.pop_w_vis)
+        mask_type_arr = np.random.choice(a=self.mask_options, p=self.mask_weights, size=self.nPop)
+        has_mask_arr = np.random.uniform(size=self.nPop) < self.prob_has_mask
+        vaccine_type_arr = np.random.choice(a=self.vaccine_options, p=self.vaccine_weights, size=self.nPop)
 
         # Initialize the house index and size for the loop
         houseIndex = 0
@@ -413,9 +413,10 @@ class Population:
     def remove_visitors(self):
         """Method to remove visitors from the simulation.
         """
-        self.current_num_vis = 0
-        for i in range(self.nPop, self.pop_w_vis):
+
+        for i in range(self.nPop, self.nPop_w_vis):
             self.population[i] = NULL_ID
+        self.current_num_vis = 0
 
         if len(self.get_population()) != self.nPop:
             raise RuntimeError(("Population is not expected length after removing visitors "
