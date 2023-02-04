@@ -429,7 +429,8 @@ class Population:
                              case_severity=self.sim_obj.vis_default_severity,
                              has_mask=vis_has_mask[i],
                              virus_type=self.sim_obj.vis_default_virus_type,
-                             mask_type=vis_mask_type[i])
+                             mask_type=vis_mask_type[i],
+                             days_until_symptoms=0)
 
             self.population[self.nPop + i] = visitor
 
