@@ -524,7 +524,7 @@ class InteractionSites:
                                                                    size=site_day_pop)).astype(int)
 
         return number_of_interactions
-    
+
     def interact(self, person_1, person_2, day):
         """
         Method that models the interaction between two people.
@@ -567,9 +567,6 @@ class InteractionSites:
                     spread_prob *= (1 - P1_INWARD_EFF)
                 if p2_mask:
                     spread_prob *= (1 - P2_OUTWARD_EFF)
-
-        p1_vaccinated1 = person_1.immunization_history_obj.is_vaccinated()
-        p2_vaccinated1 = person_2.immunization_history_obj.is_vaccinated()
 
         p1_vaccine_eff = person_1.immunization_history_obj.vaccine_efficacy(day)
         p2_vaccine_eff = person_2.immunization_history_obj.vaccine_efficacy(day)
@@ -617,7 +614,6 @@ class InteractionSites:
                     virus_name = self.variant_code_map[virus_id]
 
                     infection_chance = self.base_infection_spread_prob[virus_name] * self.house_infection_spread_factor
-                    person_vaccinated = housemembers[person].immunization_history_obj.is_vaccinated()
                     person_vaccine_eff = housemembers[person].immunization_history_obj.vaccine_efficacy(day)
                     infection_chance *= (1 - person_vaccine_eff)
                     caught_infection = random() < infection_chance
@@ -669,7 +665,6 @@ class InteractionSites:
                     virus_name = self.variant_code_map[virus_id]
 
                     infection_chance = self.base_infection_spread_prob[virus_name] * self.house_infection_spread_factor
-                    person_vaccinated = housemembers[person].immunization_history_obj.is_vaccinated()
                     person_vaccine_eff = housemembers[person].immunization_history_obj.vaccine_efficacy(day)
                     infection_chance *= (1 - person_vaccine_eff)
                     caught_infection = random() < infection_chance

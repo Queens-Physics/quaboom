@@ -47,14 +47,15 @@ class ImmunizationHistory:
         -------
         self.vaccinated: :obj:`bool`
         """
+
         self.vaccinated_day = day
         self.list_of_vaccination_dates.append(self.vaccinated_day)
         self.vaccinated = True
 
     def vaccine_efficacy(self, day):
-        """Method to determine what the efficiency of the vaccine based on the type of vaccine administered, and other
-        immunization history parameters.
-        
+        """Method to determine what the efficiency of the vaccine based on the type of vaccine administered,
+        and other immunization history parameters.
+
         Parameters
         ----------
         day: int
