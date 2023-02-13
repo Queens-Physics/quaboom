@@ -58,12 +58,14 @@ class Simulation():
 
         self.config_dir = config_dir
         self.load_general_parameters(config_file)
-<<<<<<< HEAD
+
+
+<< << << < HEAD
         self.load_disease_parameters(self.disease_config_file)
         self.load_immunization_parameters(self.immunization_history_config_file)  # load immunization history files
-=======
+== == == =
         self.load_disease_parameters(self.disease_config_file, config_override_data)
->>>>>>> 1f6c4b90cdb6c9bea98ba08dee7c1b6d5b383210
+>>>>>> > 1f6c4b90cdb6c9bea98ba08dee7c1b6d5b383210
 
         self.init_classes()  # Have to initalize the classes after we have all of the parameters
 
@@ -160,7 +162,7 @@ class Simulation():
                         self.disease_parameters = tomli.load(file)
 
     def load_immunization_parameters(self, config_file_name):
-        ''' Method to load in attributes from the immunization history configuration file.
+        """Method to load in attributes from the immunization history configuration file.
 
         All parameters in the file are loaded into the object, and parameter names
         are taken from dictionary keys.
@@ -169,7 +171,7 @@ class Simulation():
         ----------
         filename : str
             Path to the immunization history configuration file.
-        '''
+        """
 
         # If path is absolute, use it.
         if Path(config_file_name).is_absolute():
@@ -381,7 +383,8 @@ class Simulation():
             visitors_ind = [x for x in range(self.nPop, self.nPop + num_vis)]
             vis_age = np.random.choice(a=self.pop.age_options, p=self.pop.age_weights, size=num_vis)
             vaccine_weights = np.array([self.vaccine_type[key] for key in constants.VACCINE_OPTIONS])
-            vis_vaccine_type = np.random.choice(a=constants.VACCINE_OPTIONS,p=vaccine_weights,size=num_vis)
+            vis_vaccine_type = np.random.choice(a=constants.VACCINE_OPTIONS,
+                                                p=vaccine_weights,size=num_vis)
             for i in range(0, num_vis):
                 visitor = Person(index=visitors_ind[i], sim_obj=self, infected=True, recovered=False, dead=False,
                                  hospitalized=False, ICU=False, quarantined=False, quarantined_day=None, infected_day=None,

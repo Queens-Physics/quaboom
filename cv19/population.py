@@ -98,8 +98,7 @@ class Population:
 
         mask_type_arr = np.random.choice(a=self.mask_options, p=self.mask_weights, size=self.nPop)
         has_mask_arr = np.random.uniform(size=self.nPop) < self.prob_has_mask
-        
-        #Prepare vaccination date array for population initialization
+        # Prepare vaccination date array for population initialization
         vaccine_type_arr = np.random.choice(a=self.vaccine_options, p=self.vaccine_weights, size=self.nPop)
         vaccination_date_arr = self.set_v0_parameters(sim_obj)
 
@@ -281,8 +280,8 @@ class Population:
 
         # Vaccinate first v0 people
         v_indices = sample(range(self.nPop), self.v0)
-        for i,v in enumerate(v_indices):
-        # set vaccinated date based on vaccination_date_arr
+        for i, v in enumerate(v_indices):
+            # set vaccinated date based on vaccination_date_arr
             self.population[v].immunization_history_obj.set_vaccinated(day=int(vaccination_date_arr[i]))
             self.vaccinated[v] = v
 
@@ -357,29 +356,33 @@ class Population:
 
         # Cast this so they can be used as ints
         self.house_options = [int(x) for x in constants.HOUSE_OPTIONS]
-        
-    def set_v0_parameters(self,sim_obj):
-        '''Method to set up initially vaccinated population array.
-        
+
+    def set_v0_parameters(self, sim_obj):
+        """Method to set up initially vaccinated population array.
+
+        Parameters
+        ----------
+        sim_obj : :obj:`cv19.simulation.simulation`
+            The encompassing simulation object hosting the simulation.
+
         Returns
         -------
         vaccination_date_arr: :obj:`np.array` of :obj:`int`
-        '''
-        
+        """
+
         self.v0 = sim_obj.v0_parameters["v0"]  # initial vaccinated
-        
         v0_lower = sim_obj.v0_parameters["v0_interval_start_day"]  # lower bound on v0 range
         v0_upper = sim_obj.v0_parameters["v0_interval_end_day"]  # upper bound on v0 range
         vaccination_date_arr = np.zeros(self.v0)  # initialize v0 dates array
-        
+
         if v0_lower <= 0 and v0_upper <= 0:  # v0 bounds cannot be greater than 0
 
             if v0_lower < v0_upper:  # v0_lower should be smaller (more negative) than v0_upper
                 vaccination_date_arr = np.random.uniform(low=v0_lower, high=v0_upper, size=self.v0)
-                
+
             else:  # they are equal to each other: everyone is vaccinated on the same day
                 vaccination_date_arr = np.ones(self.v0) * v0_lower
-                
+
         return vaccination_date_arr
 
     def get_population_size(self):

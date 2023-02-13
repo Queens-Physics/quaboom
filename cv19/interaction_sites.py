@@ -524,15 +524,10 @@ class InteractionSites:
                                                                    size=site_day_pop)).astype(int)
 
         return number_of_interactions
-
-<<<<<<< HEAD
+    
     def interact(self, person_1, person_2, day):
-        '''Method that models the interaction between two people.
-=======
-    def interact(self, person_1, person_2):
-        """Method that models the interaction between two people.
->>>>>>> 1f6c4b90cdb6c9bea98ba08dee7c1b6d5b383210
-
+        """
+        Method that models the interaction between two people.
         Parameters
         ----------
         person_1 : :obj:`cv19.person.Person`

@@ -89,7 +89,7 @@ class Person(object):
         self.others_infected = [] if others_infected is None else others_infected
         self.cure_days = cure_days
         self.recent_infections = recent_infections
-        self.immunization_history_obj = ImmunizationHistory(**vaccine_info) if vaccine_info is not None else Immunization_History()
+        self.immunization_history_obj = ImmunizationHistory(**vaccine_info) if vaccine_info is not None else ImmunizationHistory()
         self.index = index
         self.age = age
         self.job = job
@@ -767,48 +767,3 @@ class Person(object):
         elif self.days_in_lockdown != 0:
             self.days_in_lockdown -= 1
         return self.days_in_lockdown
-<<<<<<< HEAD
-=======
-
-    def is_vaccinated(self):
-        """Method to retrieve if a person is vaccinated. Returns True if vaccinated, False if not.
-
-        Returns
-        -------
-        self.vaccinated: :obj:`bool`
-        """
-        return self.vaccinated
-
-    def set_vaccinated(self, day):
-        """Method to set a person to be vaccinated.
-
-        Parameters
-        ----------
-        day: int
-            The day in the simulation when a person is vaccinated.
-
-        Returns
-        -------
-        self.vaccinated: :obj:`bool`
-        """
-        # Make sure person is not already vaccinated.
-        if not self.is_vaccinated():
-            self.vaccinated_day = day
-            self.vaccinated = True
-
-    def vaccine_type_efficiency(self):
-        """Method to determines what the efficiency of the vaccine based on the type of vaccine administered.
-
-        Returns
-        -------
-        self.sim_obj.vaccine_eff[self.vaccine_type]: :obj:`float`
-        """
-        if self.vaccinated:
-            try:
-                return self.sim_obj.vaccine_eff[self.vaccine_type]
-            except KeyError as e:
-                raise ValueError((f"'{self.vaccine_type}' is not a valid vaccine type "
-                                  "and has no associated efficiency.")) from e
-        else:
-            return 1
->>>>>>> 1f6c4b90cdb6c9bea98ba08dee7c1b6d5b383210
