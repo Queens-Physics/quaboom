@@ -7,6 +7,7 @@ immunization_history_config_file = "immunization_history.toml"
 nDays = 50
 nPop = 10000
 vis_default_virus_type = "alpha"
+vis_default_severity = "MILD"
 student_default_virus_type = "alpha"
 num_students = 2000
 max_num_res_students = 500
