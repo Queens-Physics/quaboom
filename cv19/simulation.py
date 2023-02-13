@@ -9,7 +9,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 from . import CV19ROOT
-from .person import Person
 from .population import Population
 from .policy import Policy
 from .interaction_sites import InteractionSites
@@ -331,6 +330,7 @@ class Simulation():
         old_lockdown_mandate = self.policy.initial_lockdown_mandate
         old_testing_mandate = self.policy.initial_testing_mandate
         old_student_mandate = self.policy.initial_student_mandate
+
         # Loop over the number of days
         for day in range(self.nDays):
 
@@ -370,6 +370,7 @@ class Simulation():
                 student_default_virus_code = self.variant_codes[self.student_default_virus_type]
                 self.pop.infect_incoming_students(indices=indices, day=day, virus_type=student_default_virus_code)
 
+
             # UPDATE VISITORS
 
             # add a random number of visitors to the population
@@ -387,6 +388,9 @@ class Simulation():
                                  job="Visitor", house_index=None, isolation_tendencies=0.2,
                                  case_severity='Mild', has_mask=True, virus_type="alpha")
                 self.pop.population.append(visitor)
+
+            # ADD DAILY VISITORS
+            self.pop.add_visitors(day)
 
             # UPDATE INTERACTION SITES
             self.inter_sites.daily_reset()
@@ -438,8 +442,8 @@ class Simulation():
 
             # UPDATE POPULATION
 
-            # remove the guest visitors
-            self.pop.remove_visitors(visitors_ind)
+            # remove the daily visitors
+            self.pop.remove_visitors()
 
             for index in self.pop.get_infected():
                 infected_person = self.pop.get_person(index=index)
