@@ -103,12 +103,12 @@ sys.path.append(dotenv_values("../cv19.env")["CV19ROOT"])
 ```
 ## Usage
 
-To modify simulation parameters, navigate to `cv19/config_files/` and open `main.toml` or `disease.toml` to edit general or disease-related parameters respectively.
-To learn more about how the simulation works, navigate to `cv19/cv19/`, where all of the classes that are used in the simulation are stored.
-The `cv19/data/` directory holds the real-life statistics that the simulation parameters are based on.
-The `cv19/notebooks/` directory has two notebooks that show examples of how to use the simulation framework. Using `cv19/notebooks/run_epidemic_plot.ipynb`, you can run the simulation once and see the outcome of an epidemic outbreak graphically.
+To modify simulation parameters, navigate to `quaboom/config_files/` and open `main.toml` or `disease.toml` to edit general or disease-related parameters respectively.
+To learn more about how the simulation works, navigate to `quaboom/cv19/`, where all of the classes that are used in the simulation are stored.
+The `quaboom/data/` directory holds the real-life statistics that the simulation parameters are based on.
+The `quaboom/notebooks/` directory has two notebooks that show examples of how to use the simulation framework. Using `quaboom/notebooks/run_epidemic_plot.ipynb`, you can run the simulation once and see the outcome of an epidemic outbreak graphically.
 This notebook also shows how to extract the raw day-by-day simulation results for further analysis.
-There is a second notebook in that directory, `cv19/notebooks/parallel.ipynb`, which allows you to run multiple simulations in parallel.
+There is a second notebook in that directory, `quaboom/notebooks/parallel.ipynb`, which allows you to run multiple simulations in parallel.
 These notebooks showcase only a few of the many types of analysis that can be conducted with our simulation framework.
 
 ## Development
