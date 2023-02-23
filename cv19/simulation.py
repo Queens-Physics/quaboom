@@ -10,7 +10,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 from . import CV19ROOT
-from .person import Person
 from .population import Population
 from .policy import Policy
 from .interaction_sites import InteractionSites
@@ -37,7 +36,7 @@ class Simulation():
         A variable indicating if this object has run a simulaiton yet.
     """
 
-    def __init__(self, config_file, config_dir=""):
+    def __init__(self, config_file, config_dir="", config_override_data=None):
         """ __init__ method docstring.
 
         Parameters
@@ -47,17 +46,25 @@ class Simulation():
         config_dir : str
             Path to the directory that stores the configuration file. Not required if config_file
             is a complete path.
+        config_override_data : dict
+            A dictionary of configuration file instances that can be used to override the files
+            specified in the main configuration file. Designed to allow tabular mode to edit parameters
+            in configuration files other than main.
         """
 
         self.config_dir = config_dir
         self.load_general_parameters(config_file)
-        self.load_disease_parameters(self.disease_config_file)
+        self.load_disease_parameters(self.disease_config_file, config_override_data)
 
         self.init_classes()  # Have to initalize the classes after we have all of the parameters
 
         self.set_code_version()  # Set the version of the code being used to run simulation.
 
         self.make_tracking_df()
+
+        # Check that input parameters are valid
+        assert self.nPop >= self.num_students
+        assert self.nPop >= sum(self.variants.values())
 
         self.has_run = False  # Indicates if the sim has run yet
 
@@ -99,11 +106,7 @@ class Simulation():
         self.virus_names = list(self.variant_codes.keys())
         self.track_virus_types = {virus_name: np.zeros(self.nDays, dtype=int) for virus_name in self.virus_names}
 
-        # Check that the inputs are valid
-        assert self.nPop >= self.num_students
-        assert self.nPop >= sum(self.variants.values())
-
-    def load_disease_parameters(self, filename):
+    def load_disease_parameters(self, filename, config_override_data):
         """ Method to load in attributes from the disease configuration file.
 
         All parameters in the file are loaded into the object, and parameter names
@@ -113,32 +116,37 @@ class Simulation():
         ----------
         filename : str
             Path to the disease configuration file.
+        config_override_data : dict
+            Dictionary containing possible override versions of the secondary configuration files.
+            Note, does not include paths to configuration files but the files themselves.
+
         """
 
-        # If path is absolute, use it.
-        if Path(filename).is_absolute():
-            with open(filename, 'rb') as file:
-                self.disease_parameters = tomli.load(file)
-
-        # Assume that the configuration filename is relative to path of main config.
-        # If not set, assume relative to working directory.
-        # Last attempt try relative to cv19 project directory.
+        if config_override_data is not None:
+            self.disease_parameters = config_override_data['disease_config_data']
         else:
-            filepath = Path(self.config_dir, filename)
-            try:
-                with open(filepath, 'rb') as file:
+            # If path is absolute, use it.
+            if Path(filename).is_absolute():
+                with open(filename, 'rb') as file:
                     self.disease_parameters = tomli.load(file)
 
-                return
+            # Assume that the configuration filename is relative to path of main config.
+            # If not set, assume relative to working directory.
+            # Last attempt try relative to cv19 project directory.
+            else:
+                filepath = Path(self.config_dir, filename)
+                try:
+                    with open(filepath, 'rb') as file:
+                        self.disease_parameters = tomli.load(file)
 
-            except FileNotFoundError:
-                warnings.warn((f"Unable to find file: {filepath} "
-                               "assuming directory is relative to main config. "
-                               "Attempting read relative to CV19ROOT directory."))
+                except FileNotFoundError:
+                    warnings.warn((f"Unable to find file: {filepath} "
+                                   "assuming directory is relative to main config. "
+                                   "Attempting read relative to CV19ROOT directory."))
 
-                filepath = Path(CV19ROOT, filename)
-                with open(filepath, 'rb') as file:
-                    self.disease_parameters = tomli.load(file)
+                    filepath = Path(CV19ROOT, filename)
+                    with open(filepath, 'rb') as file:
+                        self.disease_parameters = tomli.load(file)
 
     def init_classes(self):
         """ Method that links the policy, population, and interaction sites class objects with
@@ -292,6 +300,7 @@ class Simulation():
         old_lockdown_mandate = self.policy.initial_lockdown_mandate
         old_testing_mandate = self.policy.initial_testing_mandate
         old_student_mandate = self.policy.initial_student_mandate
+
         # Loop over the number of days
         for day in range(self.nDays):
 
@@ -331,20 +340,8 @@ class Simulation():
                 student_default_virus_code = self.variant_codes[self.student_default_virus_type]
                 self.pop.infect_incoming_students(indices=indices, day=day, virus_type=student_default_virus_code)
 
-            # UPDATE VISITORS
-
-            # add a random number of visitors to the population
-            num_vis = np.random.choice(a=self.N_VIS_OPTION, p=self.N_VIS_PROB)
-            visitors_ind = [x for x in range(self.nPop, self.nPop + num_vis)]
-            vis_age = np.random.choice(a=self.pop.age_options, p=self.pop.age_weights, size=num_vis)
-            for i in range(0, num_vis):
-                visitor = Person(index=visitors_ind[i], sim_obj=self, infected=True, recovered=False, dead=False,
-                                 hospitalized=False, ICU=False, quarantined=False, quarantined_day=None, infected_day=None,
-                                 recovered_day=None, death_day=None, others_infected=None,
-                                 cure_days=None, recent_infections=None, vaccinated=False, age=vis_age[i],
-                                 job="Visitor", house_index=None, isolation_tendencies=0.2,
-                                 case_severity='Mild', has_mask=True, virus_type="alpha")
-                self.pop.population.append(visitor)
+            # ADD DAILY VISITORS
+            self.pop.add_visitors(day)
 
             # UPDATE INTERACTION SITES
             self.inter_sites.daily_reset()
@@ -396,8 +393,8 @@ class Simulation():
 
             # UPDATE POPULATION
 
-            # remove the guest visitors
-            self.pop.remove_visitors(visitors_ind)
+            # remove the daily visitors
+            self.pop.remove_visitors()
 
             for index in self.pop.get_infected():
                 infected_person = self.pop.get_person(index=index)

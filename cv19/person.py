@@ -17,11 +17,11 @@ class Person(object):
 
     """
 
-    def __init__(self, index, sim_obj, infected=False, recovered=False, dead=False, hospitalized=False, ICU=False, quarantined=False,
-                 quarantined_day=None, infected_day=None, recovered_day=None, death_day=None, others_infected=None,
-                 cure_days=None, recent_infections=None, vaccinated=False, vaccine_type=None,
+    def __init__(self, index, sim_obj, infected=False, recovered=False, dead=False, hospitalized=False, ICU=False,
+                 quarantined=False, quarantined_day=None, infected_day=None, recovered_day=None, death_day=None,
+                 others_infected=None, cure_days=None, recent_infections=None, vaccinated=False, vaccine_type=None,
                  age=None, job=None, house_index=0, isolation_tendencies=None, case_severity=None, mask_type=None,
-                 has_mask=True, virus_type=None):
+                 has_mask=True, virus_type=None, days_until_symptoms=None):
         """Method to load in attributes from the provided simulation class object.
 
         Sets all objects in the "person_data" dictionary key as self attributes of the
@@ -100,7 +100,7 @@ class Person(object):
         self.case_severity = case_severity
         self.mask_type = mask_type
         self.show_symptoms = False
-        self.days_until_symptoms = None
+        self.days_until_symptoms = days_until_symptoms
         self.knows_infected = False
         self.will_get_symptoms = False
         self.has_mask = has_mask

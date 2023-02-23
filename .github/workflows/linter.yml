@@ -19,7 +19,7 @@ jobs:
     - name: Install dependencies
       run: |
         python3 -m pip install --upgrade pip
-        pip install editorconfig-checker==2.4.0
+        pip install editorconfig-checker==2.7.1
 
     - name: Lint other files with EditorConfig
       run: |

@@ -3,6 +3,7 @@ disease_config_file = "disease_quarantine_1.toml"
 nDays = 50 ## needs to be at least max infectious time (29 days) + quarantine_time (14 days)
 nPop = 10000
 vis_default_virus_type = "alpha"
+vis_default_severity = "MILD"
 student_default_virus_type = "alpha"
 num_students = 2000
 max_num_res_students = 500
