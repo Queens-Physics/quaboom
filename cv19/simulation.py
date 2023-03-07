@@ -2,6 +2,7 @@ import warnings
 import subprocess
 from timeit import default_timer as timer
 from pathlib import Path
+import logging
 import tomli
 
 import numpy as np
@@ -12,6 +13,7 @@ from . import CV19ROOT
 from .population import Population
 from .policy import Policy
 from .interaction_sites import InteractionSites
+from .logger import Logger
 
 
 class Simulation():
@@ -23,8 +25,6 @@ class Simulation():
 
     Attributes
     ----------
-    verbose : bool
-        A variable indicating whether to print updates with simulation information while running.
     tracking_df : pd.DataFrame
         A pandas DataFrame object that stores all the tracking arrays for a given simulation. Each
         array is of length nDays.
@@ -36,7 +36,7 @@ class Simulation():
         A variable indicating if this object has run a simulaiton yet.
     """
 
-    def __init__(self, config_file, config_dir="", config_override_data=None, verbose=False):
+    def __init__(self, config_file, config_dir="", config_override_data=None):
         """ __init__ method docstring.
 
         Parameters
@@ -50,8 +50,6 @@ class Simulation():
             A dictionary of configuration file instances that can be used to override the files
             specified in the main configuration file. Designed to allow tabular mode to edit parameters
             in configuration files other than main.
-        verbose : bool
-            A variable indicating whether to print updates with simulation information while running.
         """
 
         self.config_dir = config_dir
@@ -59,8 +57,6 @@ class Simulation():
         self.load_disease_parameters(self.disease_config_file, config_override_data)
 
         self.init_classes()  # Have to initalize the classes after we have all of the parameters
-
-        self.verbose = verbose  # Whether or not to print daily simulation information.
 
         self.set_code_version()  # Set the version of the code being used to run simulation.
 
@@ -272,6 +268,20 @@ class Simulation():
             run multiple times.
         """
 
+        log_level_info = {"DEBUG": logging.DEBUG,
+                          "INFO": logging.INFO,
+                          "WARNING": logging.WARNING,
+                          "ERROR": logging.ERROR}
+        log_level_config = self.parameters["logging_info"]["level"]
+        log_level = log_level_info.get(log_level_config)
+
+        # Starts logger for file
+        log = Logger().get_logger(__name__)
+        logging.root.setLevel(log_level)
+        logging.captureWarnings(True)
+        log.info(" %s", '-' * 70)
+        log.info("Starting simulation...")
+
         # Check whether the simulation has already been run.
         if fail_on_rerun:
             information = ("When running again, previous results will be overwritten. "
@@ -280,8 +290,7 @@ class Simulation():
                            "fail_on_rerun argument to False.")
             self.check_has_run(check=False, information=information, fail=True)
 
-        if self.verbose:
-            print(f"Simulation code version (from git): {self.code_id}\n")
+        log.info("Simulation code version (from git): %s", self.code_id)
 
         # Get current time for measuring elapsed time of simulation.
         beg_time = timer()
@@ -304,23 +313,23 @@ class Simulation():
 
             # UPDATE POLICY
             mask_mandate = self.policy.update_mask_mandate(day=day)
-            if mask_mandate != old_mask_mandate and self.verbose:
-                print(f"Day: {day}, Mask Mandate: {mask_mandate}")
+            if mask_mandate != old_mask_mandate:
+                log.info("Day: %i, Mask Mandate: %i", day, mask_mandate)
             old_mask_mandate = mask_mandate
 
             lockdown = self.policy.update_lockdown(day=day)
-            if lockdown != old_lockdown_mandate and self.verbose:
-                print(f"Day: {day}, Lockdown: {lockdown}")
+            if lockdown != old_lockdown_mandate:
+                log.info("Day: %i, Lockdown: %i", day, lockdown)
             old_lockdown_mandate = lockdown
 
             testing_ON = self.policy.update_testing(day)
-            if testing_ON != old_testing_mandate and self.verbose:
-                print(f"Day: {day}, Testing: {testing_ON}")
+            if testing_ON != old_testing_mandate:
+                log.info("Day: %i, Testing: %i", day, testing_ON)
             old_testing_mandate = testing_ON
 
             students_go = self.policy.check_students(day=day)
-            if students_go != old_student_mandate and self.verbose:
-                print(f"Day: {day}, Uni Mandate: {students_go}")
+            if students_go != old_student_mandate:
+                log.info("Day: %i, Uni Mandate: %i", day, students_go)
             old_student_mandate = students_go
 
             # infect random students on the day they come in
@@ -406,45 +415,31 @@ class Simulation():
 
             self.tracking_df.at[day, "time"] = timer() - beg_time
 
-            if self.verbose:
-                print((f"Day: {day}, "
-                       f"infected: {self.tracking_df.at[day, 'infected']}, "
-                       f"recovered: {self.tracking_df.at[day, 'recovered']}, "
-                       f"susceptible: {self.tracking_df.at[day, 'susceptible']}, "
-                       f"dead: {self.tracking_df.at[day, 'dead']}, "
-                       f"hospitalized: {self.tracking_df.at[day, 'hospitalized']}, "
-                       f"ICU: {self.tracking_df.at[day, 'ICU']}, "
-                       f"tested: {self.tracking_df.at[day, 'tested']}, "
-                       f"total quarantined: {self.tracking_df.at[day, 'quarantined']}, "
-                       f"infected students: {self.tracking_df.at[day, 'inf_students']}, "
-                       f"vaccinated: {self.tracking_df.at[day, 'vaccinated']}"))
+            log.debug("Day: %i, infected: %i, recovered: %i, susceptible: %i, dead: %i, hospitalized: %i, ICU: %i, tested: %i, total quarantined: %i, infected students: %i, vaccinated: %i",
+                      day, self.tracking_df.at[day, 'infected'], self.tracking_df.at[day, 'recovered'],
+                      self.tracking_df.at[day, 'susceptible'], self.tracking_df.at[day, 'dead'],
+                      self.tracking_df.at[day, 'hospitalized'], self.tracking_df.at[day, 'ICU'],
+                      self.tracking_df.at[day, 'tested'], self.tracking_df.at[day, 'quarantined'],
+                      self.tracking_df.at[day, 'inf_students'], self.tracking_df.at[day, 'vaccinated'])
 
-                # Print variants
-                print("Variants", end=": ")
-                for key, val in self.track_virus_types.items():
-                    print(f"{key}:{val[day]}", end=", ")
-                print("\n")
+        time_seconds = timer() - beg_time
+        m, s = divmod(time_seconds, 60)
+        h, m = divmod(m, 60)
 
-        if self.verbose:
-            time_seconds = timer() - beg_time
-            m, s = divmod(time_seconds, 60)
-            h, m = divmod(m, 60)
-            print(f"{'':-<80}")
-            print("Simulation summary:")
-            print(f"    Time elapsed: {h:02.0f}:{m:02.0f}:{s:02.0f}")
-            print(f"    {self.tracking_df['susceptible'].iloc[-1]} never got it")
-            print(f"    {self.tracking_df['dead'].iloc[-1]} died")
-            print(f"    {self.tracking_df['infected'].max()} had it at the peak")
-            print(f"    {self.tracking_df.at[day, 'tested']} were tested")
-            print(f"    {self.tracking_df['quarantined'].max()} were in quarantine at the peak")
-            print(f"    {self.tracking_df['hospitalized'].max()} at peak hospitalizations")
-            print(f"    {self.tracking_df['dead'].max()} at peak deaths")
-            print("    The breakdown of the variants is", end=": ")
-            for key, val in self.track_virus_types.items():
-                print(f"{key}-{np.max(val)}", end=", ")
-            print("")
-            print(f"    {self.tracking_df.at[day, 'vaccinated']} people were vaccinated")
-            print(f"    {self.tracking_df.at[day, 'vaccinated']/self.nPop*100:.2f}% of population was vaccinated.")
+        log.info("Simulation summary:")
+        log.info("    Time elapsed : %02.0f:%02.0f:%02.0f", h, m, s)
+        log.info("    %i never got it", self.tracking_df['susceptible'].iloc[-1])
+        log.info("    %i died", self.tracking_df['dead'].iloc[-1])
+        log.info("    %i had it at the peak", self.tracking_df['infected'].max())
+        log.info("    %i were tested", self.tracking_df.at[day, 'tested'])
+        log.info("    %i were in quarantine at the peak", self.tracking_df['quarantined'].max())
+        log.info("    %i at peak hospitalizations", self.tracking_df['hospitalized'].max())
+        log.info("    %i at peak deaths", self.tracking_df['dead'].max())
+        log.info("The breakdown of the variants is:")
+        for key, val in self.track_virus_types.items():
+            log.info("    %s - %i", key, np.max(val))
+        log.info("    %i people were vaccinated", self.tracking_df.at[day, 'vaccinated'])
+        log.info("    %0.2f percent of population was vaccinated.", self.tracking_df.at[day, 'vaccinated'] / self.nPop * 100)
 
         # Unpack the virus types into the dataframe
         for virus_type, virus_type_arr in self.track_virus_types.items():
