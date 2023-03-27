@@ -1,5 +1,6 @@
 [simulation_data]
 disease_config_file = "disease.toml"
+immunization_history_config_file = "immunization_history.toml"
 nDays = 50
 nPop = 10000
 vis_default_virus_type = "alpha"
@@ -7,14 +8,22 @@ vis_default_severity = "MILD"
 student_default_virus_type = "alpha"
 num_students = 2000
 max_num_res_students = 500
-v0 = 0
 N_VIS_OPTION = [0, 1, 2, 3]
 N_VIS_PROB = [0.7, 0.17, 0.08, 0.05]
 vis_age_upper = 60
 vis_age_lower = 16
-inf_students_upper = 20
-inf_students_lower = 2
-num_vaccinations = 0
+inf_students_upper = 2
+inf_students_lower = 0
+num_vaccinations = 100
+    [simulation_data.v0_parameters]
+    v0 = 1000
+    v0_interval_start_day = -30
+    v0_interval_end_day = 0
+
+    [simulation_data.vaccine_type]
+    Pfizer = 0.6
+    Moderna = 0.35
+    AZ = 0.05
 
     [simulation_data.variants]
     general = 10
@@ -34,11 +43,6 @@ num_vaccinations = 0
     STUDY = 0.5
     FOOD = 0.1
     RES = 1
-
-    [simulation_data.vaccine_type]
-    Pfizer = 0.6
-    Moderna = 0.35
-    AZ = 0.05
 
 [policy_data]
 initial_mask_mandate = true
